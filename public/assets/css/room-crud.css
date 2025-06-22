@@ -1,0 +1,57 @@
+/* data CRUD Styles */
+.edit-data,
+.delete-data {
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.edit-data:hover,
+.delete-data:hover {
+    transform: scale(1.1);
+}
+
+.dd3-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+.dd3-content:hover {
+    background-color: #f8f9fa;
+}
+
+.dd3-content .actions {
+    display: flex;
+    gap: 10px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.dd3-content:hover .actions {
+    opacity: 1;
+}
+
+/* Active state for selected data */
+.dd-item.active .dd3-content {
+    background-color: #e3f2fd;
+    border-left: 3px solid #007bff;
+}
+
+.dd-item.active .room-name {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* List item styling */
+.dd-item {
+    margin-bottom: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.dd-item:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

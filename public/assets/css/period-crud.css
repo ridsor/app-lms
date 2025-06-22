@@ -1,0 +1,178 @@
+/* Period CRUD Styles */
+.period-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.period-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.period-dates {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.period-status {
+    margin-top: 2px;
+}
+
+.period-status .badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.dd-item {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.dd-item:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dd-item.active {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196f3;
+}
+
+.dd3-content {
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.dd-item:hover .dd3-content {
+    border-color: #2196f3;
+}
+
+.dd-item.active .dd3-content {
+    border-color: #2196f3;
+    background-color: #f8f9ff;
+}
+
+.actions {
+    gap: 8px;
+}
+
+.actions .edit-data,
+.actions .delete-data {
+    padding: 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.actions .edit-data:hover,
+.actions .delete-data:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.1);
+}
+
+.actions a.edit-data:hover {
+    background-color: #fff3cd;
+}
+
+.actions a.delete-data:hover {
+    background-color: #f8d7da;
+}
+
+/* Form Styles */
+.form-control:focus {
+    border-color: #2196f3;
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+.form-control.is-valid {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+    display: block;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Loading States */
+.spinner_loader {
+    margin-right: 8px;
+}
+
+/* Search Styles */
+.faq-form {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dd3-content {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .period-info {
+        order: 1;
+    }
+
+    .actions {
+        order: 2;
+        justify-content: flex-end;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dd-item {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* No Data Styles */
+.no-data-detail {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.no-data-detail img {
+    max-width: 120px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.data-not-found span {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
