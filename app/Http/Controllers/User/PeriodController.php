@@ -37,8 +37,8 @@ class PeriodController extends Controller
         ]);
 
         try {
-            $validated['start_date'] = Carbon::createFromFormat('d/m/Y', $validated['start_date'])->format('Y-m-d');
-            $validated['end_date'] = Carbon::createFromFormat('d/m/Y', $validated['end_date'])->format('Y-m-d');
+            $validated['start_date'] = Carbon::createFromFormat('d/m/Y', $validated['start_date'])->translatedFormat('Y-m-d');
+            $validated['end_date'] = Carbon::createFromFormat('d/m/Y', $validated['end_date'])->translatedFormat('Y-m-d');
             $validated['status'] = true;
             $period = Period::create($validated);
 
@@ -55,7 +55,14 @@ class PeriodController extends Controller
     public function show($id)
     {
         try {
-            $period = Period::findOrFail($id);
+            $period = Period::find($id);
+            if (!$period) {
+                return $this->sendError(
+                    'Data periode tidak ditemukan.',
+                    [],
+                    404
+                );
+            }
             return $this->sendResponse('Data periode berhasil diambil.', $period);
         } catch (\Exception $e) {
             return $this->sendError(
@@ -77,12 +84,12 @@ class PeriodController extends Controller
         ]);
 
         try {
-            $validated['start_date'] = Carbon::createFromFormat('d/m/Y', $validated['start_date'])->format('Y-m-d');
-            $validated['end_date'] = Carbon::createFromFormat('d/m/Y', $validated['end_date'])->format('Y-m-d');
+            $validated['start_date'] = Carbon::createFromFormat('d/m/Y', $validated['start_date'])->translatedFormat('Y-m-d');
+            $validated['end_date'] = Carbon::createFromFormat('d/m/Y', $validated['end_date'])->translatedFormat('Y-m-d');
             $period = Period::findOrFail($id);
             $period->update($validated);
 
-            return $this->sendResponse('Periode berhasil diupdate.', $period);
+            return $this->sendResponse('Periode berhasil diedit.', $period);
         } catch (\Exception $e) {
             return $this->sendError(
                 'Silakan coba lagi.',

@@ -8,7 +8,6 @@
         <option value="even">Genap</option>
     </select>
     <div class="invalid-feedback">
-        <span class="text-danger" id="semesterError"></span>
     </div>
 </div>
 <div class="col-12">
@@ -16,7 +15,6 @@
     <input class="form-control" aria-invalid="false" type="text" id="academicYear" name="academic_year"
         placeholder="Contoh: 2024/2025">
     <div class="invalid-feedback">
-        <span class="text-danger" id="academicYearError"></span>
     </div>
 </div>
 <div>
@@ -26,14 +24,12 @@
             <input class="datepicker-here-minmax form-control digits" type="text" data-language="id" id="startDate"
                 name="start_date" placeholder="Tanggal Mulai" autocomplete="off">
             <div class="invalid-feedback">
-                <span class="text-danger" id="startDateError"></span>
             </div>
         </div>
         <div class="col-sm-6">
             <input class="datepicker-here-minmax form-control digits" type="text" data-language="id" id="endDate"
                 name="end_date" placeholder="Tanggal Selesai" autocomplete="off">
             <div class="invalid-feedback">
-                <span class="text-danger" id="endDateError"></span>
             </div>
         </div>
     </div>

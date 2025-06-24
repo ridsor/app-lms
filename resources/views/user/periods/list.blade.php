@@ -12,7 +12,8 @@
                                         {{ $item->academic_year }}</strong>
                                 </div>
                                 <div class="period-dates text-muted small">
-                                    {{ $item->start_date->format('d/m/Y') }} - {{ $item->end_date->format('d/m/Y') }}
+                                    {{ $item->start_date->translatedFormat('d/m/Y') }} -
+                                    {{ $item->end_date->translatedFormat('d/m/Y') }}
                                 </div>
                                 <div class="period-status">
                                     @if ($item->status)

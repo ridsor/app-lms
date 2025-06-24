@@ -69,8 +69,8 @@
                     <div class="card-header">
                         <h4 id="formTitle">Tambah Ruangan</h4>
                     </div>
-                    <div class="card-body animated-form">
-                        <form class="row g-3 custom-input theme-form" novalidate="novalidate" id="roomForm">
+                    <div class="card-body custom-input">
+                        <form class="row g-3 needs-validation" novalidate="novalidate" id="roomForm">
                             @csrf
                             @include('user.rooms.fields')
                         </form>
@@ -85,7 +85,7 @@
     <script src="{{ asset('assets/js/select2/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2/select2-custom.js') }}"></script>
     <script src="{{ asset('assets/js/bookmark/jquery.validate.min.js') }}"></script>
-    <script src="{{ asset('assets/js/custom-validation/validation.js') }}"></script>
+    {{-- <script src="{{ asset('assets/js/custom-validation/validation.js') }}"></script> --}}
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/room-crud.js') }}"></script>
 @endsection

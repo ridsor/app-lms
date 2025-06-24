@@ -3,60 +3,14 @@ $(document).ready(function () {
     $("#periodForm").on("submit", function (e) {
         e.preventDefault();
 
-        const periodId = $("#periodId").val();
-        const semester = $("#semester").val();
-        const academicYear = $("#academicYear").val().trim();
-        const startDate = $("#startDate").val();
-        const endDate = $("#endDate").val();
-
         // Clear previous errors
-        $(
-            "#semesterError, #academicYearError, #startDateError, #endDateError"
-        ).text("");
-        $("#semester, #academicYear, #startDate, #endDate").removeClass(
-            "is-invalid is-valid"
-        );
-
-        // Basic validation
-        let hasError = false;
-
-        if (!semester) {
-            $("#semester").addClass("is-invalid");
-            $("#semesterError").text("Semester harus dipilih.");
-            hasError = true;
-        }
-
-        if (!academicYear) {
-            $("#academicYear").addClass("is-invalid");
-            $("#academicYearError").text("Tahun akademik harus diisi.");
-            hasError = true;
-        }
-
-        if (!startDate) {
-            $("#startDate").addClass("is-invalid");
-            $("#startDateError").text("Tanggal mulai harus diisi.");
-            hasError = true;
-        }
-
-        if (!endDate) {
-            $("#endDate").addClass("is-invalid");
-            $("#endDateError").text("Tanggal selesai harus diisi.");
-            hasError = true;
-        }
-
-        if (startDate && endDate && startDate >= endDate) {
-            $("#endDate").addClass("is-invalid");
-            $("#endDateError").text(
-                "Tanggal selesai harus setelah tanggal mulai."
-            );
-            hasError = true;
-        }
-
-        if (hasError) {
-            return;
-        }
+        $("#periodForm")
+            .find("input, select, textarea")
+            .removeClass("is-invalid");
+        $("#periodForm").find(".invalid-feedback").text("");
 
         // Set method for form submission
+        const periodId = $("#periodId").val();
         const method = periodId ? "PUT" : "POST";
         $("#methodField").val(method);
 
@@ -91,20 +45,28 @@ $(document).ready(function () {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     if (errors.semester) {
+                        $("#semester")
+                            .next(".invalid-feedback")
+                            .text(errors.semester[0]);
                         $("#semester").addClass("is-invalid");
-                        $("#semesterError").text(errors.semester[0]);
                     }
                     if (errors.academic_year) {
+                        $("#academicYear")
+                            .next(".invalid-feedback")
+                            .text(errors.academic_year[0]);
                         $("#academicYear").addClass("is-invalid");
-                        $("#academicYearError").text(errors.academic_year[0]);
                     }
                     if (errors.start_date) {
+                        $("#startDate")
+                            .next(".invalid-feedback")
+                            .text(errors.start_date[0]);
                         $("#startDate").addClass("is-invalid");
-                        $("#startDateError").text(errors.start_date[0]);
                     }
                     if (errors.end_date) {
+                        $("#endDate")
+                            .next(".invalid-feedback")
+                            .text(errors.end_date[0]);
                         $("#endDate").addClass("is-invalid");
-                        $("#endDateError").text(errors.end_date[0]);
                     }
                     console.log(errors);
                 } else {
@@ -386,19 +348,13 @@ $(document).ready(function () {
     // Reset form
     function resetForm() {
         $("#periodForm")[0].reset();
-        $("#periodId").val("");
+        $("#periodForm")
+            .find("input, select, textarea")
+            .removeClass("is-invalid is-valid");
+        $("#periodForm").find(".invalid-feedback").text("");
         $("#formTitle").text("Tambah Periode");
         $("#submitBtn").text("Simpan");
         $("#cancelBtn").hide();
-        $("#methodField").val("POST");
-        $(
-            "#semesterError, #academicYearError, #startDateError, #endDateError"
-        ).text("");
-        $("#semester, #academicYear, #startDate, #endDate").removeClass(
-            "is-invalid is-valid"
-        );
-
-        // Remove active state from list
         $(".dd-item").removeClass("active");
     }
 

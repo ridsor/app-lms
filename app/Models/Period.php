@@ -49,11 +49,11 @@ class Period extends Model
         });
 
         $query->when($filters['start_date'] ?? null, function ($query, $start_date) {
-            $query->where('start_date', '>=', Carbon::createFromFormat('d/m/Y', $start_date)->format('Y-m-d'));
+            $query->where('start_date', '>=', Carbon::createFromFormat('d/m/Y', $start_date)->translatedFormat('Y-m-d'));
         });
 
         $query->when($filters['end_date'] ?? null, function ($query, $end_date) {
-            $query->where('end_date', '<=', Carbon::createFromFormat('d/m/Y', $end_date)->format('Y-m-d'));
+            $query->where('end_date', '<=', Carbon::createFromFormat('d/m/Y', $end_date)->translatedFormat('Y-m-d'));
         });
 
         $query->when($filters['semester'] ?? null, function ($query, $semester) {

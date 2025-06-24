@@ -1,7 +1,7 @@
 $(document).ready(function () {
     let searchTimer;
 
-    function loadRooms() {
+    async function loadRooms() {
         let search = $("#search").val();
         let sort = $("#sort").val();
 
@@ -14,7 +14,7 @@ $(document).ready(function () {
         //     '<div class="d-flex justify-content-center p-5"><span class="spinner-border text-primary" role="status"></span></div>'
         // );
 
-        $.ajax({
+        await $.ajax({
             url: `/ruangan?${params.toString()}`,
             method: "GET",
             success: function (response) {
@@ -44,21 +44,14 @@ $(document).ready(function () {
     $("#roomForm").on("submit", function (e) {
         e.preventDefault();
 
-        const roomId = $("#roomId").val();
-        const roomName = $("#roomName").val().trim();
-
         // Clear previous errors
-        $("#nameError").text("");
-        $("#roomName").removeClass("is-invalid is-valid");
-
-        // Basic validation
-        if (!roomName) {
-            $("#roomName").addClass("is-invalid");
-            $("#nameError").text("Nama ruangan harus diisi.");
-            return;
-        }
+        $("#roomForm")
+            .find("input, select, textarea")
+            .removeClass("is-invalid");
+        $("#roomForm").find(".invalid-feedback").text("");
 
         // Set method for form submission
+        const roomId = $("#roomId").val();
         const method = roomId ? "PUT" : "POST";
         $("#methodField").val(method);
 
@@ -93,8 +86,10 @@ $(document).ready(function () {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     if (errors.name) {
+                        $("#roomName")
+                            .next(".invalid-feedback")
+                            .text(errors.name[0]);
                         $("#roomName").addClass("is-invalid");
-                        $("#nameError").text(errors.name[0]);
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -183,9 +178,11 @@ $(document).ready(function () {
                 // Show loading state
                 const deleteBtn = $(this);
                 const originalHtml = deleteBtn.html();
-                deleteBtn.prop("disabled", true).html(
-                    '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
-                );
+                deleteBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+                    );
 
                 // Create form data for DELETE
                 const formData = new FormData();
@@ -248,15 +245,11 @@ $(document).ready(function () {
     // Reset form
     function resetForm() {
         $("#roomForm")[0].reset();
-        $("#roomId").val("");
+        $("#roomForm").find("input, select, textarea").removeClass("is-invalid is-valid");
+        $("#roomForm").find(".invalid-feedback").text("");
         $("#formTitle").text("Tambah Ruangan");
         $("#submitBtn").text("Simpan");
         $("#cancelBtn").hide();
-        $("#methodField").val("POST");
-        $("#nameError").text("");
-        $("#roomName").removeClass("is-invalid is-valid");
-
-        // Remove active state from list
         $(".dd-item").removeClass("active");
     }
 });

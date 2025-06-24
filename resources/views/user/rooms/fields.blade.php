@@ -2,10 +2,8 @@
 <input type="hidden" name="_method" id="methodField" value="POST">
 <div class="col-12">
     <label class="form-label" for="roomName">Nama<span> <span class="font-danger">*</span></span></label>
-    <input class="form-control" aria-invalid="false" type="text" id="roomName" name="name"
-        placeholder="Masukan nama ruangan">
+    <input class="form-control" id="roomName" type="text" placeholder="Masukan nama ruangan" name="name">
     <div class="invalid-feedback">
-        <span class="text-danger" id="nameError"></span>
     </div>
 </div>
 <div class="col-12">

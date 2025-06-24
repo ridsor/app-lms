@@ -25,7 +25,14 @@ class RoomController extends Controller
     public function show($id)
     {
         try {
-            $room = Room::findOrFail($id);
+            $room = Room::find($id);
+            if (!$room) {
+                return $this->sendError(
+                    'Data ruangan tidak ditemukan.',
+                    [],
+                    404
+                );
+            }
             return $this->sendResponse('Data ruangan berhasil diambil.', $room);
         } catch (\Exception $e) {
             return $this->sendError(
@@ -65,7 +72,7 @@ class RoomController extends Controller
             $room = Room::findOrFail($id);
             $room->update($validated);
 
-            return $this->sendResponse('Ruangan berhasil diupdate.', $room->refresh());
+            return $this->sendResponse('Ruangan berhasil diedit.', $room->refresh());
         } catch (\Exception $e) {
             return $this->sendError(
                 'Silakan coba lagi.',
