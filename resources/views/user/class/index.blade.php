@@ -40,18 +40,14 @@
                                         <option value="{{ $level->level }}">{{ $level->level }}</option>
                                     @endforeach
                                 </select>
-                                <div class="invalid-feedback"> Please choose a parent category.</div>
-                                <div class="valid-feedback">Looks good!</div>
                             </div>
                             <div class="col-md"><label class="form-label">Jurusan</label><select class="form-select"
                                     id="major-filter" aria-label="Select parent category">
                                     <option value="" selected>Pilih Jurusan</option>
                                     @foreach ($majors as $major)
-                                        <option value="{{ $major->major }}">{{ $major->major }}</option>
+                                        <option value="{{ $major->name }}">{{ $major->name }}</option>
                                     @endforeach
                                 </select>
-                                <div class="invalid-feedback"> Please choose a category type.</div>
-                                <div class="valid-feedback">Looks good!</div>
                             </div>
                             <div class="col  d-flex justify-content-start align-items-end"><a
                                     class="btn btn-primary f-w-500 w-100" id="filter-btn" href="#!">Submit</a></div>
@@ -97,11 +93,13 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
-                                                                for="classMajor">Jurusan</label><input
-                                                                class="form-control" id="classMajor" type="text"
-                                                                placeholder="Masukan jurusan kelas" name="major">
-                                                            <div class="invalid-feedback">
-                                                            </div>
+                                                                for="classMajor">Jurusan</label>
+                                                                <select class="form-select" id="classMajor" aria-label="Select parent category" name="major_id">
+                                                                    <option value="" selected>Pilih Jurusan</option>
+                                                                    @foreach ($majors as $major)
+                                                                        <option value="{{ $major->id }}">{{ $major->name }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
                                                                 for="classCapacity">Kapasitas</label><input
@@ -156,11 +154,13 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
-                                                                for="classMajor">Jurusan</label><input
-                                                                class="form-control" id="classMajor" type="text"
-                                                                placeholder="Masukan jurusan kelas" name="major">
-                                                            <div class="invalid-feedback">
-                                                            </div>
+                                                                for="classMajor">Jurusan</label>
+                                                                <select class="form-select" id="classMajor" aria-label="Select parent category" name="major_id">
+                                                                    <option value="" selected>Pilih Jurusan</option>
+                                                                    @foreach ($majors as $major)
+                                                                        <option value="{{ $major->id }}">{{ $major->name }}</option>
+                                                                    @endforeach
+                                                                </select>
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
                                                                 for="classCapacity">Kapasitas</label><input

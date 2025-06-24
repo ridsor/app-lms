@@ -1,3 +1,4 @@
+/* Pagination */
 .pagination-wrapper .page-item.active .page-link {
     background-color: var(--theme-default);
     border-color: var(--theme-default);

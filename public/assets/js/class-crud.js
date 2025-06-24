@@ -181,7 +181,11 @@ $(function () {
                         }
                     },
                     error: function (xhr) {
-                        alert("Terjadi kesalahan saat menghapus kelas.");
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON.message
+                        );
+                        toast.show();
                     },
                 });
             }
@@ -225,6 +229,7 @@ $(function () {
             error: function (xhr, status, error) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
+                    console.log(errors);
                     if (errors.name) {
                         $("#className")
                             .next(".invalid-feedback")
@@ -237,10 +242,10 @@ $(function () {
                             .text(errors.level[0]);
                         $("#classLevel").addClass("is-invalid");
                     }
-                    if (errors.major) {
+                    if (errors.major_id) {
                         $("#classMajor")
                             .next(".invalid-feedback")
-                            .text(errors.major[0]);
+                            .text(errors.major_id[0]);
                         $("#classMajor").addClass("is-invalid");
                     }
                     if (errors.capacity) {
@@ -324,14 +329,18 @@ $(function () {
                 if (res.success && res.data) {
                     $("#editClassForm #className").val(res.data.name);
                     $("#editClassForm #classLevel").val(res.data.level);
-                    $("#editClassForm #classMajor").val(res.data.major);
+                    $("#editClassForm #classMajor").val(res.data.major_id);
                     $("#editClassForm #classCapacity").val(res.data.capacity);
                     $("#editClassForm").attr("data-id", id);
                     $("#editClassModal").modal("show");
                 }
             },
             error: function () {
-                alert("Gagal mengambil data kelas.");
+                const toast = new bootstrap.Toast($("#toast-error"));
+                $("#toast-error #toast-text").text(
+                    xhr.responseJSON.message
+                );
+                toast.show();
             },
             complete: function () {
                 editBtn.prop("disabled", false).html(originalHtml);
@@ -390,10 +399,10 @@ $(function () {
                             .text(errors.level[0]);
                         $("#editClassForm #classLevel").addClass("is-invalid");
                     }
-                    if (errors.major) {
+                    if (errors.major_id) {
                         $("#editClassForm #classMajor")
                             .next(".invalid-feedback")
-                            .text(errors.major[0]);
+                            .text(errors.major_id[0]);
                         $("#editClassForm #classMajor").addClass("is-invalid");
                     }
                     if (errors.capacity) {

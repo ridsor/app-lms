@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Student;
 use App\Models\SchoolClass;
+use App\Models\HomeroomTeacher;
 use Illuminate\Http\Request;
-use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
-use App\Http\Requests\Class\StoreClassRequest;
-use App\Models\Major;
+use App\Http\Requests\Student\StoreStudentRequest;
+use App\Models\Teacher;
 
-class ClassController extends Controller
+class StudentController extends Controller
 {
     public function __construct()
     {
@@ -21,11 +22,10 @@ class ClassController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = SchoolClass::filter($request->all());
+            $data = Student::with(['class', 'homeroomTeacher.teacher'])->filter($request->all());
 
             return Datatables::of($data)
                 ->addColumn('id', function ($row) {
-                    // Memperbaiki kode: id checkbox harus unik, gunakan id dinamis dan name array agar bisa multiple select
                     $html = '
                         <div class="checkbox-checked">
                             <div class="form-check d-flex justify-content-center align-items-center">
@@ -47,21 +47,48 @@ class ClassController extends Controller
                     ';
                     return $html;
                 })
-                ->addColumn('Tingkat', function ($row) {
+                ->addColumn('NIS', function ($row) {
                     $html = '
-                    <p class="f-light">' . $row->level . '</p>
+                    <p class="f-light">' . $row->nis . '</p>
                     ';
                     return $html;
                 })
-                ->addColumn('Jurusan', function ($row) {
+                ->addColumn('NISN', function ($row) {
                     $html = '
-                        <span class="badge badge-light-primary">' . $row->major->name . '</span>
+                    <p class="f-light">' . $row->nisn . '</p>
                     ';
                     return $html;
                 })
-                ->addColumn('Kapasitas', function ($row) {
+                ->addColumn('Kelas', function ($row) {
                     $html = '
-                        <p class="f-light">' . $row->capacity . '</p>
+                        <span class="badge badge-light-primary">' . ($row->class ? $row->class->name : '-') . '</span>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Wali Kelas', function ($row) {
+                    $html = '
+                        <span class="badge badge-light-info">' . ($row->homeroomTeacher && $row->homeroomTeacher->teacher ? $row->homeroomTeacher->teacher->name : '-') . '</span>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Status', function ($row) {
+                    $statusColors = [
+                        'active' => 'badge-light-success',
+                        'transferred' => 'badge-light-warning',
+                        'graduated' => 'badge-light-info',
+                        'dropout' => 'badge-light-danger'
+                    ];
+                    $statusLabels = [
+                        'active' => 'Aktif',
+                        'transferred' => 'Pindah',
+                        'graduated' => 'Lulus',
+                        'dropout' => 'Keluar'
+                    ];
+                    $color = $statusColors[$row->status] ?? 'badge-light-secondary';
+                    $label = $statusLabels[$row->status] ?? $row->status;
+
+                    $html = '
+                        <span class="badge ' . $color . '">' . $label . '</span>
                     ';
                     return $html;
                 })
@@ -77,16 +104,20 @@ class ClassController extends Controller
                     </div>';
                     return $html;
                 })
-                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan',  'Kapasitas', 'Aksi'])
+                ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Kelas', 'Wali Kelas', 'Status', 'Aksi'])
                 ->make(true);
         } else {
-            $classes = SchoolClass::filter(request()->all())->paginate(10);
-            $levels = SchoolClass::select('level')->distinct()->get();
-            $majors = Major::select('id', 'name')->get();
-            return view('user.class.index', [
+            $students = Student::with(['class' => fn($query) => $query->select('id', 'name'), 'homeroomTeacher.teacher' => fn($query) => $query->select('id', 'name')])->filter(request()->all())->paginate(10);
+            $classes = SchoolClass::select('id', 'name', 'level', 'major')->get();
+            $teachers = Teacher::select('id', 'name')->get();
+            $statuses = ['active', 'transferred', 'graduated', 'dropout'];
+            $religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'];
+            return view('user.student.index', [
+                'students' => $students,
                 'classes' => $classes,
-                'levels' => $levels,
-                'majors' => $majors
+                'teachers' => $teachers,
+                'statuses' => $statuses,
+                'religions' => $religions
             ]);
         }
     }
@@ -102,31 +133,36 @@ class ClassController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreClassRequest $request)
+    public function store(StoreStudentRequest $request)
     {
         try {
-            // Buat kelas baru
-            $schoolClass = SchoolClass::create([
-                'name' => $request->validated('name'),
-                'level' => $request->validated('level'),
-                'major_id' => $request->validated('major_id'),
-                'capacity' => $request->validated('capacity')
-            ]);
+            $validated = $request->validated();
 
-            // Response sukses
+            $user = \App\Models\User::create([
+                'name' => $validated['name'],
+                'password' => bcrypt($validated['name']),
+            ]);
+            $user->assignRole('student');
+
+            $validated['user_id'] = $user->id;
+            $student = Student::create($validated);
+
             return $this->sendResponse(
-                'Kelas berhasil ditambahkan',
+                'Siswa berhasil ditambahkan',
                 [
-                    'id' => $schoolClass->id,
-                    'name' => $schoolClass->name,
-                    'level' => $schoolClass->level,
-                    'major' => $schoolClass->major->name,
-                    'capacity' => $schoolClass->capacity,
-                    'created_at' => $schoolClass->created_at->translatedFormat('d/m/Y H:i')
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'nis' => $student->nis,
+                    'nisn' => $student->nisn,
+                    'class_name' => $student->class ? $student->class->name : '-',
+                    'homeroom_teacher_name' => $student->homeroomTeacher && $student->homeroomTeacher->teacher ? $student->homeroomTeacher->teacher->name : '-',
+                    'status' => $student->status,
+                    'created_at' => $student->created_at->translatedFormat('d/m/Y H:i')
                 ],
                 201
             );
         } catch (\Exception $e) {
+            Log::error('Error creating student: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -141,17 +177,17 @@ class ClassController extends Controller
     public function show($id)
     {
         try {
-            $class = SchoolClass::find($id);
+            $student = Student::with(['class', 'homeroomTeacher.teacher'])->find($id);
 
-            if (!$class) {
+            if (!$student) {
                 return $this->sendError(
-                    'Data kelas tidak ditemukan.',
+                    'Data siswa tidak ditemukan.',
                     [],
                     404
                 );
             }
 
-            return $this->sendResponse('Data kelas ditemukan', $class);
+            return $this->sendResponse('Data siswa ditemukan', $student);
         } catch (\Exception $e) {
             return $this->sendError(
                 'Silakan coba lagi.',
@@ -172,14 +208,15 @@ class ClassController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreClassRequest $request, $id)
+    public function update(StoreStudentRequest $request, $id)
     {
         try {
-            $class = SchoolClass::findOrFail($id);
-            $class->update($request->validated());
+            $student = Student::findOrFail($id);
+            $student->update($request->validated());
 
-            return $this->sendResponse('Kelas berhasil diedit', $class);
+            return $this->sendResponse('Siswa berhasil diedit', $student);
         } catch (\Exception $e) {
+            Log::error('Error updating student: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -194,13 +231,14 @@ class ClassController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
-            $class = SchoolClass::findOrFail($id);
-            $class->delete();
+            $student = Student::findOrFail($id);
+            $student->delete();
 
             return $this->sendResponse(
-                'Kelas berhasil dihapus.',
+                'Siswa berhasil dihapus.',
             );
         } catch (\Exception $e) {
+            Log::error('Error deleting student: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -212,7 +250,6 @@ class ClassController extends Controller
     public function bulkDestroy(Request $request)
     {
         try {
-
             $ids = $request->input('ids');
 
             if (empty($ids)) {
@@ -223,13 +260,13 @@ class ClassController extends Controller
                 );
             }
 
-            SchoolClass::whereIn('id', $ids)->delete();
+            Student::whereIn('id', $ids)->delete();
 
             return $this->sendResponse(
                 'Data yang dipilih berhasil dihapus.'
             );
         } catch (\Exception $e) {
-            Log::info($e->getMessage());
+            Log::error('Error bulk deleting students: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],

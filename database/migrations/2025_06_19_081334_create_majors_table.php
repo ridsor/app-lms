@@ -4,23 +4,19 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateMajorsTable extends Migration
 {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        Schema::create('classes', function (Blueprint $table) {
+        Schema::create('majors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('major_id')->constrained('majors');
-            $table->string('name', 20);
-            $table->string('level', 20);
-            $table->integer('capacity')->default(30);
+            $table->string('name')->unique();
             $table->timestamps();
 
             $table->fullText('name');
-            $table->unique(['level', 'name', 'major_id']);
         });
     }
 
@@ -29,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('classes');
+        Schema::dropIfExists('majors');
     }
-};
+}

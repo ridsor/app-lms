@@ -83,64 +83,63 @@
 
             @include('layouts.user.footer')
         </div>
-    </div>
-    @include('components.alerts')
-    <!-- latest jquery-->
-    <script src="/assets/js/jquery.min.js"></script>
-    <!-- Bootstrap js-->
-    <script src="/assets/js/bootstrap.bundle.min.js"></script>
-    <!-- feather icon js-->
-    <script src="/assets/js/icons/feather.min.js"></script>
-    <script src="/assets/js/icons/feather-icon.js"></script>
-    <!-- scrollbar js-->
-    <script src="{{ asset('assets/js/scrollbar/simplebar.min.js') }}"></script>
-    <script src="{{ asset('assets/js/scrollbar/custom.js') }}"></script>
-    <!-- Sidebar jquery-->
-    <script src="/assets/js/config.js"></script>
-    <script src="{{ asset('assets/js/sidebar-menu.js') }}"></script>
-    <script src="{{ asset('assets/js/sidebar-pin.js') }}"></script>
-    <script src="{{ asset('assets/js/slick/slick.min.js') }}"></script>
-    <script src="{{ asset('assets/js/slick/slick.js') }}"></script>
-    <script src="{{ asset('assets/js/header-slick.js') }}"></script>
-    <!-- Status Update-->
-    @yield('scripts')
-    <!-- Plugins JS start--><!-- Plugins JS Ends--><!-- Theme js-->
-    <script src="/assets/js/script.js"></script>
-    <script src="/assets/js/script1.js"></script>
-    <script src="{{ asset('assets/js/toastr.min.js') }}"></script>
-    <script>
-        // Setup AJAX CSRF token
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
+        @include('components.alerts')
+        <!-- latest jquery-->
+        <script src="/assets/js/jquery.min.js"></script>
+        <!-- Bootstrap js-->
+        <script src="/assets/js/bootstrap.bundle.min.js"></script>
+        <!-- feather icon js-->
+        <script src="/assets/js/icons/feather.min.js"></script>
+        <script src="/assets/js/icons/feather-icon.js"></script>
+        <!-- scrollbar js-->
+        <script src="{{ asset('assets/js/scrollbar/simplebar.min.js') }}"></script>
+        <script src="{{ asset('assets/js/scrollbar/custom.js') }}"></script>
+        <!-- Sidebar jquery-->
+        <script src="/assets/js/config.js"></script>
+        <script src="{{ asset('assets/js/sidebar-menu.js') }}"></script>
+        <script src="{{ asset('assets/js/sidebar-pin.js') }}"></script>
+        <script src="{{ asset('assets/js/slick/slick.min.js') }}"></script>
+        <script src="{{ asset('assets/js/slick/slick.js') }}"></script>
+        <script src="{{ asset('assets/js/header-slick.js') }}"></script>
+        <!-- Status Update-->
+        @yield('scripts')
+        <!-- Plugins JS start--><!-- Plugins JS Ends--><!-- Theme js-->
+        <script src="/assets/js/script.js"></script>
+        <script src="/assets/js/script1.js"></script>
+        <script src="{{ asset('assets/js/toastr.min.js') }}"></script>
+        <script>
+            // Setup AJAX CSRF token
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
 
-        $(document).ready(function() {
-            $(document).on('change', '.toggle-status', function() {
+            $(document).ready(function() {
+                $(document).on('change', '.toggle-status', function() {
 
-                let status = $(this).prop('checked') ? 1 : 0;
-                let url = $(this).data('route');
-                console.log(url);
-                let clickedToggle = $(this);
-                $.ajax({
-                    type: "PUT",
-                    url: url,
-                    data: {
-                        status: status,
-                        _token: '{{ csrf_token() }}',
-                    },
-                    success: function(data) {
-                        clickedToggle.prop('checked', status);
-                        toastr.success("Status Berhasil Diperbarui");
-                    },
-                    error: function(xhr, status, error) {
-                        console.log(error)
-                    }
+                    let status = $(this).prop('checked') ? 1 : 0;
+                    let url = $(this).data('route');
+                    console.log(url);
+                    let clickedToggle = $(this);
+                    $.ajax({
+                        type: "PUT",
+                        url: url,
+                        data: {
+                            status: status,
+                            _token: '{{ csrf_token() }}',
+                        },
+                        success: function(data) {
+                            clickedToggle.prop('checked', status);
+                            toastr.success("Status Berhasil Diperbarui");
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error)
+                        }
+                    });
                 });
             });
-        });
-    </script>
+        </script>
 </body>
 
 </html>

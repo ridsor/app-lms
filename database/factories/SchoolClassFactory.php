@@ -12,9 +12,9 @@ class SchoolClassFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->unique()->bothify('Kelas ##'),
+            'name' => strtoupper($this->faker->unique()->bothify('?')),
             'level' => $this->faker->randomElement(['10', '11', '12']),
-            'major' => $this->faker->randomElement(['IPA', 'IPS', 'Bahasa']),
+            'major_id' => \App\Models\Major::inRandomOrder()->first()?->id ?? 1,
             'capacity' => $this->faker->numberBetween(20, 40)
         ];
     }

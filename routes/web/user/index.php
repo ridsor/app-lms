@@ -4,6 +4,8 @@ use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\RoomController;
 use App\Http\Controllers\User\PeriodController;
 use App\Http\Controllers\User\ClassController;
+use App\Http\Controllers\User\StudentController;
+use App\Http\Controllers\User\MajorController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group(function () {
@@ -16,4 +18,10 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
 
     Route::delete('kelas/hapus', [ClassController::class, 'bulkDestroy'])->name('user.class.bulkDestroy');
     Route::resource('/kelas', ClassController::class)->except(['create'])->names('user.class');
+
+    Route::delete('siswa/hapus', [StudentController::class, 'bulkDestroy'])->name('user.student.bulkDestroy');
+    Route::resource('/siswa', StudentController::class)->except(['create'])->names('user.student');
+
+    Route::delete('jurusan/hapus', [MajorController::class, 'bulkDestroy'])->name('user.major.bulkDestroy');
+    Route::resource('/jurusan', MajorController::class)->except(['create'])->names('user.major');
 });

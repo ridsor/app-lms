@@ -26,6 +26,7 @@ return new class extends Migration
             $table->year('admission_year');
             $table->enum('status', ['active', 'transferred', 'graduated', 'dropout'])->default('active');
             $table->timestamps();
+            $table->fullText('name');
         });
     }
 

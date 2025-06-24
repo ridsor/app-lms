@@ -12,7 +12,7 @@ class RoomFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->bothify('Ruang-##'),
+            'name' => $this->faker->unique()->bothify('Ruang-##'),
         ];
     }
 }

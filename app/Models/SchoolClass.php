@@ -17,7 +17,7 @@ class SchoolClass extends Model
     protected $fillable = [
         'name',
         'level',
-        'major',
+        'major_id',
         'capacity'
     ];
 
@@ -29,6 +29,11 @@ class SchoolClass extends Model
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class);
     }
 
     public function scopeFilter($query, array $filters)
@@ -48,7 +53,9 @@ class SchoolClass extends Model
 
         // Filter berdasarkan major
         $query->when($filters['major'] ?? false, function ($query, $major) {
-            $query->where('major', $major);
+            $query->whereHas('major', function ($query) use ($major) {
+                $query->where('name', $major);
+            });
         });
     }
 }
