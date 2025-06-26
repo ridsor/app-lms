@@ -1,4 +1,13 @@
 $(function () {
+    // filter
+    const params = getQueryParams();
+    if (params.major) {
+        $("#major-filter").val(params.major);
+    }
+    if (params.level) {
+        $("#level-filter").val(params.level);
+    }
+
     var t = $("#class-table").DataTable({
         processing: true,
         serverSide: true,

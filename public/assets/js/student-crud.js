@@ -1,4 +1,19 @@
 $(function () {
+    // filter
+    const params = getQueryParams();
+    if (params.major) {
+        $("#major-filter").val(params.major);
+    }
+    if (params.class) {
+        $("#class-filter").val(params.class);
+    }
+    if (params.level) {
+        $("#level-filter").val(params.level);
+    }
+    if (params.status) {
+        $("#status-filter").val(params.status);
+    }
+
     const t = $("#student-table").DataTable({
         processing: true,
         serverSide: true,
@@ -160,10 +175,14 @@ $(function () {
 
         // Buat query string
         const params = new URLSearchParams();
-        if ($("#major-filter").val()) params.append("major", $("#major-filter").val());
-        if ($("#class-filter").val()) params.append("class", $("#class-filter").val());
-        if ($("#level-filter").val()) params.append("level", $("#level-filter").val());
-        if ($("#status-filter").val()) params.append("status", $("#status-filter").val());
+        if ($("#major-filter").val())
+            params.append("major", $("#major-filter").val());
+        if ($("#class-filter").val())
+            params.append("class", $("#class-filter").val());
+        if ($("#level-filter").val())
+            params.append("level", $("#level-filter").val());
+        if ($("#status-filter").val())
+            params.append("status", $("#status-filter").val());
 
         // Update URL tanpa reload
         const newUrl =

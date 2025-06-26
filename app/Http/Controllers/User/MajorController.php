@@ -83,6 +83,9 @@ class MajorController extends Controller
     {
         try {
             $major = Major::findOrFail($id);
+            if ($major->classes()->count() > 0) {
+                return $this->sendError('Data ini masih digunakan.', [], 422);
+            }
             $major->delete();
             return $this->sendResponse('Jurusan berhasil dihapus.');
         } catch (\Exception $e) {
@@ -96,6 +99,12 @@ class MajorController extends Controller
             $ids = $request->input('ids');
             if (empty($ids)) {
                 return $this->sendError('Tidak ada data yang dipilih untuk dihapus.', [], 400);
+            }
+            $majors = Major::whereIn('id', $ids)->get();
+            foreach ($majors as $major) {
+                if ($major->classes()->count() > 0) {
+                    return $this->sendError('Beberapa data masih digunakan.', [], 422);
+                }
             }
             Major::whereIn('id', $ids)->delete();
             return $this->sendResponse('Data yang dipilih berhasil dihapus.');

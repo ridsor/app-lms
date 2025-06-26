@@ -89,7 +89,7 @@ class RoomController extends Controller
         try {
             $room = Room::findOrFail($id);
             if ($room->schedules()->count() > 0) {
-                return $this->sendError('Ruangan ini masih digunakan dalam jadwal pembelajaran.', [], 422);
+                return $this->sendError('Data ini masih digunakan.', [], 422);
             }
             $room->delete();
             return $this->sendResponse('Ruangan berhasil dihapus.');
@@ -108,7 +108,7 @@ class RoomController extends Controller
             $rooms = Room::whereIn('id', $ids)->get();
             foreach ($rooms as $room) {
                 if ($room->schedules()->count() > 0) {
-                    return $this->sendError('Beberapa ruangan masih digunakan dalam jadwal pembelajaran.', [], 422);
+                    return $this->sendError('Beberapa data masih digunakan.', [], 422);
                 }
             }
             Room::whereIn('id', $ids)->delete();

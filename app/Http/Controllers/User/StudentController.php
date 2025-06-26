@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Requests\Student\StoreStudentRequest;
+use App\Models\Grade;
 use App\Models\Major;
 use App\Models\Teacher;
 use App\Models\User;
@@ -176,22 +177,13 @@ class StudentController extends Controller
 
             $validated['user_id'] = $user->id;
             $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
-            $student = Student::create($validated);
+            Student::create($validated);
 
             DB::commit();
 
             return $this->sendResponse(
                 'Siswa berhasil ditambahkan',
-                [
-                    'id' => $student->id,
-                    'name' => $student->name,
-                    'nis' => $student->nis,
-                    'nisn' => $student->nisn,
-                    'class_name' => $student->class ? $student->class->name : '-',
-                    'homeroom_teacher_name' => $student->homeroomTeacher && $student->homeroomTeacher->teacher ? $student->homeroomTeacher->teacher->name : '-',
-                    'status' => $student->status,
-                    'created_at' => $student->created_at->translatedFormat('d/m/Y H:i')
-                ],
+                [],
                 201
             );
         } catch (\Exception $e) {
@@ -230,7 +222,6 @@ class StudentController extends Controller
 
             return $this->sendResponse('Data siswa ditemukan', $student);
         } catch (\Exception $e) {
-            Log::info($e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -252,7 +243,6 @@ class StudentController extends Controller
 
             return $this->sendResponse('Siswa berhasil diedit', $student);
         } catch (\Exception $e) {
-            Log::error('Error updating student: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -269,6 +259,15 @@ class StudentController extends Controller
         try {
             $student = Student::findOrFail($id);
             $student->delete();
+            // Hapus semua data yang berelasi dengan student sebelum menghapus student
+
+            if ($student->grades()->count() > 0) {
+                $student->grades()->delete();
+            }
+
+            if ($student->user) {
+                $student->user->delete();
+            }
 
             return $this->sendResponse(
                 'Siswa berhasil dihapus.',
@@ -297,6 +296,8 @@ class StudentController extends Controller
             }
 
             Student::whereIn('id', $ids)->delete();
+            Grade::whereIn('student_id', $ids)->delete();
+            User::whereIn('id', $ids)->delete();
 
             return $this->sendResponse(
                 'Data yang dipilih berhasil dihapus.'

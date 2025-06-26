@@ -1,4 +1,16 @@
 $(function () {
+    // filter
+    const params = getQueryParams();
+    if (params.semester) {
+        $("#semester-filter").val(params.semester);
+    }
+    if (params.start_date) {
+        $("#start-date-filter").val(params.start_date);
+    }
+    if (params.end_date) {
+        $("#end-date-filter").val(params.end_date);
+    }
+
     var t = $("#period-table").DataTable({
         processing: true,
         serverSide: true,
@@ -151,9 +163,12 @@ $(function () {
 
         // Buat query string
         const params = new URLSearchParams();
-        if ($("#semester-filter").val()) params.append("semester", $("#semester-filter").val());
-        if ($("#start-date-filter").val()) params.append("start_date", $("#start-date-filter").val());
-        if ($("#end-date-filter").val()) params.append("end_date", $("#end-date-filter").val());
+        if ($("#semester-filter").val())
+            params.append("semester", $("#semester-filter").val());
+        if ($("#start-date-filter").val())
+            params.append("start_date", $("#start-date-filter").val());
+        if ($("#end-date-filter").val())
+            params.append("end_date", $("#end-date-filter").val());
 
         // Update URL tanpa reload
         const newUrl =
@@ -444,7 +459,6 @@ $(function () {
         );
         updateDeleteButtonState();
     });
-    
 
     function updateDeleteButtonState(reload) {
         if (!reload) {
