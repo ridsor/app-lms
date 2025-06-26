@@ -55,7 +55,7 @@ class MajorController extends Controller
         }
     }
 
-    public function show($id)
+    public function edit($id)
     {
         try {
             $major = Major::find($id);

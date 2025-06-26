@@ -324,7 +324,7 @@ $(function () {
                 '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
             );
         $.ajax({
-            url: "/periode/" + id,
+            url: `/periode/${id}/edit`,
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
@@ -463,7 +463,7 @@ $(function () {
     function updateDeleteButtonState(reload) {
         if (!reload) {
             var selectedRows = $(
-                "#student-table tbody input[type='checkbox'].select-row:checked"
+                "#period-table tbody input[type='checkbox'].select-row:checked"
             ).length;
             $("#delete-selected").prop("disabled", selectedRows === 0);
             $("#delete-selected")

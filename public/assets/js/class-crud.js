@@ -338,7 +338,7 @@ $(function () {
     function updateDeleteButtonState(reload) {
         if (!reload) {
             var selectedRows = $(
-                "#student-table tbody input[type='checkbox'].select-row:checked"
+                "#class-table tbody input[type='checkbox'].select-row:checked"
             ).length;
             $("#delete-selected").prop("disabled", selectedRows === 0);
             $("#delete-selected")
@@ -365,7 +365,7 @@ $(function () {
             );
 
         $.ajax({
-            url: "/kelas/" + id,
+            url: `/kelas/${id}/edit`,
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {

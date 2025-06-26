@@ -191,8 +191,7 @@
                             </div>
                             <div class="row g-3 justify-content-end">
                                 <div class="col-auto" style="display: none;">
-                                    <button class="btn btn-danger mb-2" id="delete-selected" disabled>Hapus
-                                        Terpilih</button>
+                                    <button class="btn btn-danger mb-2" id="delete-selected" disabled>Hapus</button>
                                 </div>
                             </div>
                         </div>

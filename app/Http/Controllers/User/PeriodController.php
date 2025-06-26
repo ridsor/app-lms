@@ -88,12 +88,11 @@ class PeriodController extends Controller
                 'created_at' => $period->created_at->translatedFormat('d/m/Y H:i')
             ], 201);
         } catch (\Exception $e) {
-            Log::info($e->getMessage());
             return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }
 
-    public function show($id)
+    public function edit($id)
     {
         try {
             $period = Period::find($id);

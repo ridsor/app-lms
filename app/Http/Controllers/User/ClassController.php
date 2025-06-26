@@ -139,7 +139,7 @@ class ClassController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function edit($id)
     {
         try {
             $class = SchoolClass::find($id);
@@ -160,14 +160,6 @@ class ClassController extends Controller
                 500
             );
         }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**
