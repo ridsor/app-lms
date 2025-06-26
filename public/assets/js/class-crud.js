@@ -38,15 +38,14 @@ $(function () {
                 name: "capacity",
             },
             {
+                data: "Waktu",
+                name: "created_at",
+            },
+            {
                 data: "Aksi",
                 name: "Aksi",
                 orderable: false,
                 searchable: false,
-            },
-            {
-                data: "created_at",
-                name: "created_at",
-                visible: false,
             },
         ],
         language: {
@@ -55,6 +54,7 @@ $(function () {
             sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
             sInfoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
             sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
+            sEmptyTable: "Tidak ada data di tabel",
             sInfoPostFix: "",
             sSearch: "Cari:",
             sUrl: "",
@@ -85,7 +85,7 @@ $(function () {
         responsive: true,
         autoWidth: true,
         searchable: true,
-        order: [[6, "desc"]],
+        order: [[5, "desc"]],
     });
 
     // Hapus banyak
@@ -144,8 +144,8 @@ $(function () {
 
     $("#class-table").on("click", ".trash", function (e) {
         e.preventDefault();
-        var row = $(this).closest("tr");
-        var id = row.attr("id");
+        const trashBtn = $(this);
+        var id = trashBtn.attr("data-id");
         if (!id) return;
         Swal.fire({
             title: "Apakah Anda yakin?",
@@ -159,9 +159,15 @@ $(function () {
             imageUrl: "../assets/images/gif/trash.gif",
             imageWidth: 120,
             imageHeight: 120,
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                $.ajax({
+                const originalHtml = trashBtn.html();
+                trashBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+                    );
+                await $.ajax({
                     url: "/kelas/" + id,
                     method: "DELETE",
                     success: function (res) {
@@ -186,6 +192,9 @@ $(function () {
                             xhr.responseJSON.message
                         );
                         toast.show();
+                    },
+                    complete: function () {
+                        trashBtn.prop("disabled", false).html(originalHtml);
                     },
                 });
             }
@@ -337,9 +346,7 @@ $(function () {
             },
             error: function () {
                 const toast = new bootstrap.Toast($("#toast-error"));
-                $("#toast-error #toast-text").text(
-                    xhr.responseJSON.message
-                );
+                $("#toast-error #toast-text").text(xhr.responseJSON.message);
                 toast.show();
             },
             complete: function () {

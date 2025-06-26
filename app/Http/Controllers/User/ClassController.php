@@ -36,9 +36,6 @@ class ClassController extends Controller
                         ';
                     return $html;
                 })
-                ->editColumn('created_at', function ($row) {
-                    return $row->created_at;
-                })
                 ->addColumn('Nama', function ($row) {
                     $html = '
                     <div class="product-names">
@@ -55,7 +52,7 @@ class ClassController extends Controller
                 })
                 ->addColumn('Jurusan', function ($row) {
                     $html = '
-                        <span class="badge badge-light-primary">' . $row->major->name . '</span>
+                        <span class="badge badge-light-primary">' . ($row->major?->name ? $row->major->name : " - ") . '</span>
                     ';
                     return $html;
                 })
@@ -68,16 +65,19 @@ class ClassController extends Controller
                 ->addColumn('Aksi', function ($row) {
                     $html = '
                     <div class="common-align gap-2 justify-content-start">
-                        <a class="square-white edit" href="#!" data-id="' . $row->id . '">
+                        <a class="square-white edit" style="cursor: pointer" data-id="' . $row->id . '">
                             <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
                         </a>
-                        <a class="square-white trash" href="#!" data-id="' . $row->id . '">
+                        <a class="square-white trash" style="cursor: pointer" data-id="' . $row->id . '">
                             <svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg>
                         </a>
                     </div>';
                     return $html;
                 })
-                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan',  'Kapasitas', 'Aksi'])
+                ->addColumn('Waktu', function ($row) {
+                    return $row->created_at->translatedFormat('d/m/Y H:i');
+                })
+                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Kapasitas', 'Waktu', 'Aksi',])
                 ->make(true);
         } else {
             $classes = SchoolClass::filter(request()->all())->paginate(10);
@@ -120,13 +120,14 @@ class ClassController extends Controller
                     'id' => $schoolClass->id,
                     'name' => $schoolClass->name,
                     'level' => $schoolClass->level,
-                    'major' => $schoolClass->major->name,
+                    'major' => $schoolClass->major->name ?? '-',
                     'capacity' => $schoolClass->capacity,
                     'created_at' => $schoolClass->created_at->translatedFormat('d/m/Y H:i')
                 ],
                 201
             );
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -236,5 +237,15 @@ class ClassController extends Controller
                 500
             );
         }
+    }
+
+    public function getByMajor($major_id)
+    {
+        $classes = SchoolClass::where('major_id', $major_id)
+            ->select('id', 'name', 'level')
+            ->orderBy('level', 'asc')
+            ->get();
+
+        return $this->sendResponse('Data kelas ditemukan', $classes);
     }
 }

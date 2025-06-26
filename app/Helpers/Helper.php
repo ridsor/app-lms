@@ -22,6 +22,17 @@ class Helper
         };
     }
 
+    public static function getStudentStatusLabel(string $status): string
+    {
+        return match ($status) {
+            'active' => 'Aktif',
+            'transferred' => 'Pindah',
+            'graduated' => 'Lulus',
+            'dropout' => 'Keluar',
+            default => $status
+        };
+    }
+
     /**
      * Mendapatkan route login berdasarkan role
      *

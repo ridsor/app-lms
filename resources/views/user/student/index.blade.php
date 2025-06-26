@@ -7,12 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select.bootstrap5.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
-    <style>
-        /* Custom Select */
-        .custom-select-search .selected-box:after {
-            top: 6px !important;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/date-picker.css') }}">
 @endsection
 
 @section('main_content')
@@ -39,44 +34,78 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row g-3 mb-3">
-                            <div class="col-md">
-                                <label class="form-label">Kelas</label>
-                                <select class="form-select" id="class-filter" aria-label="Select class">
-                                    <option value="" selected>Pilih Kelas</option>
-                                    @foreach ($classes as $class)
-                                        <option value="{{ $class->id }}">{{ $class->name }} - {{ $class->level }} -
-                                            {{ $class->major }}</option>
+                            <div class="col-md-4 col-lg-3 col-xl">
+                                <label class="form-label" for="major-filter">Jurusan</label>
+                                <select class="form-select" id="major-filter" aria-label="Select major">
+                                    <option value="" selected>Pilih Jurusan</option>
+                                    @foreach ($majors as $major)
+                                        <option value="{{ $major->name }}">{{ $major->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md">
-                                <label class="form-label">Wali Kelas</label>
-                                <div class="select-box custom-select-search">
+                            <div class="col-md-4 col-lg-3 col-xl">
+                                <label class="form-label" for="class-filter">Kelas</label>
+                                <select class="form-select" id="class-filter" aria-label="Select class">
+                                    <option value="" selected>Pilih Kelas</option>
+                                    @foreach ($classes as $class)
+                                        <option value="{{ $class->name }}">{{ $class->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-lg-3 col-xl">
+                                <label class="form-label" for="level-filter">Tingkat</label>
+                                <select class="form-select" id="level-filter" aria-label="Select level">
+                                    <option value="" selected>Pilih Tingkat</option>
+                                    @foreach ($classLevels as $classLevel)
+                                        <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-lg-3 col-xl">
+                                <label class="form-label" for="teacher-filter">Wali Kelas</label>
+                                <div class="select-box custom-select-search w-100">
                                     <div class="options-container custom-scrollbar">
+                                        <div class="selection-option"><input class="radio" id="homeroom-teacher-filter"
+                                                type="radio" value="" name="homeroom-teacher-filter"
+                                                id="homeroom-teacher-filter-all"><label class="mb-0"
+                                                for="homeroom-teacher-filter-all">
+                                                <span
+                                                    style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">Semua</span>
+                                            </label></div>
                                         @foreach ($teachers as $teacher)
-                                            <div class="selection-option"><input class="radio" id="{{ $teacher->id }}"
-                                                    type="radio" name="category"><label class="mb-0"
-                                                    for="{{ $teacher->id }}">{{ $teacher->name }}</label></div>
+                                            <div class="selection-option">
+                                                <input class="radio" id="homeroom-teacher-filter-{{ $teacher->id }}"
+                                                    value="{{ $teacher->id }}" type="radio"
+                                                    name="homeroom-teacher-filter"
+                                                    id="homeroom-teacher-filter-{{ $teacher->id }}"><label class="mb-0"
+                                                    for="homeroom-teacher-filter-{{ $teacher->id }}">
+                                                    <span
+                                                        style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">{{ $teacher->name }}</span>
+                                                </label>
+                                            </div>
                                         @endforeach
                                     </div>
-                                    <div class="selected-box form-control" style="padding: 6px 36px 6px 12px;">Pilih Wali
-                                        Kelas</div>
+                                    <div class="selected-box form-control" style="padding: 6px 36px 6px 12px;">
+                                        <span
+                                            style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">Pilih
+                                            Wali Kelas</span>
+                                    </div>
                                     <div class="search-box">
                                         <input type="text" placeholder="Cari...">
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md">
-                                <label class="form-label">Status</label>
+                            <div class="col-md-4 col-lg-3 col-xl">
+                                <label class="form-label" for="status-filter">Status</label>
                                 <select class="form-select" id="status-filter" aria-label="Select status">
                                     <option value="" selected>Pilih Status</option>
                                     @foreach ($statuses as $status)
-                                        <option value="{{ $status }}">{{ ucfirst($status) }}</option>
+                                        <option value="{{ $status['value'] }}">{{ $status['label'] }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col d-flex justify-content-start align-items-end">
-                                <a class="btn btn-primary f-w-500 w-100" id="filter-btn" href="#!">Submit</a>
+                            <div class="col-auto d-flex justify-content-start align-items-end">
+                                <a class="btn btn-primary f-w-500 w-100" id="filter-btn">Submit</a>
                             </div>
                         </div>
                     </div>
@@ -89,8 +118,8 @@
                             <a class="btn btn-primary f-w-500 mb-2" href="#!" data-bs-toggle="modal"
                                 data-bs-target="#addStudentModal"><i class="fa fa-plus pe-2"></i>Tambah
                             </a>
-                            <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModal"
-                                aria-hidden="true">
+                            <div class="modal fade" id="addStudentModal" tabindex="-1"
+                                aria-labelledby="addStudentModal" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                     <div class="modal-content category-popup">
                                         <div class="modal-header">
@@ -103,7 +132,7 @@
                                                 <div class="p-20">
                                                     <form class="row g-3 needs-validation" novalidate=""
                                                         id="addStudentForm">
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentName">Nama<span
                                                                     class="txt-danger">*</span>
                                                             </label>
@@ -112,7 +141,7 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentNis">NIS<span
                                                                     class="txt-danger">*</span>
                                                             </label>
@@ -121,7 +150,7 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentNisn">NISN<span
                                                                     class="txt-danger">*</span>
                                                             </label>
@@ -130,44 +159,62 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
+                                                            <label class="form-label" for="studentMajor">Jurusan</label>
+                                                            <select class="form-select" id="studentMajor"
+                                                                name="major_id">
+                                                                <option value="">Pilih Jurusan</option>
+                                                                @foreach ($majors as $major)
+                                                                    <option value="{{ $major->id }}">
+                                                                        {{ $major->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentClass">Kelas</label>
                                                             <select class="form-select" id="studentClass"
                                                                 name="class_id">
                                                                 <option value="">Pilih Kelas</option>
                                                                 @foreach ($classes as $class)
                                                                     <option value="{{ $class->id }}">
-                                                                        {{ $class->name }} - {{ $class->level }} -
-                                                                        {{ $class->major }}</option>
+                                                                        {{ $class->name }} - {{ $class->level }}</option>
                                                                 @endforeach
                                                             </select>
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentHomeroomTeacher">Wali
                                                                 Kelas</label>
-                                                            <select class="form-select" id="studentHomeroomTeacher"
-                                                                name="homeroom_teacher_id">
-                                                                <option value="">Pilih Wali Kelas</option>
-                                                                @foreach ($teachers as $teacher)
-                                                                    <option value="{{ $teacher->id }}">
-                                                                        {{ $teacher->name }}</option>
-                                                                @endforeach
-                                                            </select>
+                                                            <div class="select-box custom-select-search">
+                                                                <div class="options-container custom-scrollbar">
+                                                                    @foreach ($teachers as $teacher)
+                                                                        <div class="selection-option"><input
+                                                                                class="radio" id="addStudentHomeroomTeacher-{{ $teacher->id }}"
+                                                                                type="radio"
+                                                                                value="{{ $teacher->id }}"
+                                                                                name="homeroom_teacher_id"
+                                                                                id="addStudentHomeroomTeacher-{{ $teacher->id }}"><label
+                                                                                class="mb-0" for="addStudentHomeroomTeacher-{{ $teacher->id }}">
+                                                                                <span
+                                                                                    style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">{{ $teacher->name }}</span>
+                                                                            </label></div>
+                                                                    @endforeach
+                                                                </div>
+                                                                <div class="selected-box form-control"
+                                                                    style="padding: 6px 36px 6px 12px;">
+                                                                    <span
+                                                                        style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">Pilih
+                                                                        Wali Kelas</span>
+                                                                </div>
+                                                                <div class="search-box">
+                                                                    <input type="text" placeholder="Cari...">
+                                                                </div>
+                                                            </div>
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label" for="studentDateOfBirth">Tanggal
-                                                                Lahir<span class="txt-danger">*</span>
-                                                            </label>
-                                                            <input class="form-control" id="studentDateOfBirth"
-                                                                type="date" name="date_of_birth">
-                                                            <div class="invalid-feedback">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentBirthplace">Tempat
                                                                 Lahir<span class="txt-danger">*</span>
                                                             </label>
@@ -177,20 +224,33 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
+                                                            <label class="form-label" for="studentDateOfBirth">Tanggal
+                                                                Lahir<span class="txt-danger">*</span>
+                                                            </label>
+                                                            <input class="form-control datepicker-here" autocomplete="off"
+                                                                id="studentDateOfBirth" type="text"
+                                                                name="date_of_birth" placeholder="dd/mm/yyyy"
+                                                                data-language="id">
+                                                            <div class="invalid-feedback">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentGender">Jenis
                                                                 Kelamin<span class="txt-danger">*</span>
                                                             </label>
                                                             <select class="form-select" id="studentGender"
                                                                 name="gender">
                                                                 <option value="">Pilih Jenis Kelamin</option>
-                                                                <option value="M">Laki-laki</option>
-                                                                <option value="F">Perempuan</option>
+                                                                @foreach ($genders as $gender)
+                                                                    <option value="{{ $gender['value'] }}">
+                                                                        {{ $gender['label'] }}</option>
+                                                                @endforeach
                                                             </select>
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentReligion">Agama<span
                                                                     class="txt-danger">*</span>
                                                             </label>
@@ -205,7 +265,7 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentAdmissionYear">Tahun
                                                                 Masuk<span class="txt-danger">*</span>
                                                             </label>
@@ -216,16 +276,15 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label" for="studentStatus">Status<span
-                                                                    class="txt-danger">*</span>
+                                                        <div class="col-lg-6">
+                                                            <label class="form-label" for="studentStatus">Status
                                                             </label>
                                                             <select class="form-select" id="studentStatus"
                                                                 name="status">
-                                                                <option value="active" selected>Aktif</option>
-                                                                <option value="transferred">Pindah</option>
-                                                                <option value="graduated">Lulus</option>
-                                                                <option value="dropout">Keluar</option>
+                                                                @foreach ($statuses as $status)
+                                                                    <option value="{{ $status['value'] }}">
+                                                                        {{ $status['label'] }}</option>
+                                                                @endforeach
                                                             </select>
                                                             <div class="invalid-feedback">
                                                             </div>
@@ -256,7 +315,7 @@
                                                 <div class="p-20">
                                                     <form class="row g-3 needs-validation" novalidate=""
                                                         id="editStudentForm">
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentName">Nama<span
                                                                     class="txt-danger">*</span>
                                                             </label>
@@ -265,7 +324,7 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentNis">NIS<span
                                                                     class="txt-danger">*</span>
                                                             </label>
@@ -274,7 +333,7 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentNisn">NISN<span
                                                                     class="txt-danger">*</span>
                                                             </label>
@@ -283,43 +342,62 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label" for="studentClass">Kelas</label>
+                                                        <div class="col-lg-6">
+                                                            <label class="form-label" for="studentMajor">Jurusan</label>
+                                                            <select class="form-select" id="studentMajor"
+                                                                name="major_id">
+                                                                <option value="">Pilih Jurusan</option>
+                                                                @foreach ($majors as $major)
+                                                                    <option value="{{ $major->id }}">
+                                                                        {{ $major->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-lg-6">
+                                                            <label class="form-label" for="studentClass">Kelas<span
+                                                                    class="txt-danger">*</span></label>
                                                             <select class="form-select" id="studentClass"
                                                                 name="class_id">
+                                                                <option value="">Pilih Kelas</option>
                                                                 @foreach ($classes as $class)
                                                                     <option value="{{ $class->id }}">
-                                                                        {{ $class->name }} - {{ $class->level }} -
-                                                                        {{ $class->major }}</option>
+                                                                        {{ $class->name }} - {{ $class->level }}</option>
                                                                 @endforeach
                                                             </select>
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentHomeroomTeacher">Wali
                                                                 Kelas</label>
-                                                            <select class="form-select" id="studentHomeroomTeacher"
-                                                                name="homeroom_teacher_id">
-                                                                <option value="">Pilih Wali Kelas</option>
-                                                                @foreach ($teachers as $teacher)
-                                                                    <option value="{{ $teacher->id }}">
-                                                                        {{ $teacher->name }}</option>
-                                                                @endforeach
-                                                            </select>
+                                                            <div class="select-box custom-select-search w-100">
+                                                                <div class="options-container custom-scrollbar w-100">
+                                                                    @foreach ($teachers as $teacher)
+                                                                        <div class="selection-option"><input
+                                                                                class="radio" id="editStudentHomeroomTeacher-{{ $teacher->id }}"
+                                                                                type="radio" name="homeroom_teacher_id"
+                                                                                id="editStudentHomeroomTeacher-{{ $teacher->id }}"
+                                                                                value="{{ $teacher->id }}"><label
+                                                                                class="mb-0" for="editStudentHomeroomTeacher-{{ $teacher->id }}">
+                                                                                <span
+                                                                                    style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">{{ $teacher->name }}</span>
+                                                                            </label></div>
+                                                                    @endforeach
+                                                                </div>
+                                                                <div class="selected-box form-control w-100 text-break"
+                                                                    style="padding: 6px 36px 6px 12px; max-width: 100%;">
+                                                                    <span
+                                                                        style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">Pilih
+                                                                        Wali Kelas</span>
+                                                                </div>
+                                                                <div class="search-box">
+                                                                    <input type="text" placeholder="Cari...">
+                                                                </div>
+                                                            </div>
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label" for="studentDateOfBirth">Tanggal
-                                                                Lahir<span class="txt-danger">*</span>
-                                                            </label>
-                                                            <input class="form-control" id="studentDateOfBirth"
-                                                                type="date" name="date_of_birth">
-                                                            <div class="invalid-feedback">
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentBirthplace">Tempat
                                                                 Lahir<span class="txt-danger">*</span>
                                                             </label>
@@ -329,19 +407,31 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+
+                                                        <div class="col-lg-6">
+                                                            <label class="form-label" for="studentDateOfBirth">Tanggal
+                                                                Lahir<span class="txt-danger">*</span>
+                                                            </label>
+                                                            <input class="form-control" id="studentDateOfBirth"
+                                                                type="text" name="date_of_birth">
+                                                            <div class="invalid-feedback">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentGender">Jenis
                                                                 Kelamin<span class="txt-danger">*</span>
                                                             </label>
                                                             <select class="form-select" id="studentGender"
                                                                 name="gender">
-                                                                <option value="M">Laki-laki</option>
-                                                                <option value="F">Perempuan</option>
+                                                                @foreach ($genders as $gender)
+                                                                    <option value="{{ $gender['value'] }}">
+                                                                        {{ $gender['label'] }}</option>
+                                                                @endforeach
                                                             </select>
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentReligion">Agama<span
                                                                     class="txt-danger">*</span>
                                                             </label>
@@ -355,7 +445,7 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
+                                                        <div class="col-lg-6">
                                                             <label class="form-label" for="studentAdmissionYear">Tahun
                                                                 Masuk<span class="txt-danger">*</span>
                                                             </label>
@@ -366,16 +456,15 @@
                                                             <div class="invalid-feedback">
                                                             </div>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label" for="studentStatus">Status<span
-                                                                    class="txt-danger">*</span>
+                                                        <div class="col-lg-6">
+                                                            <label class="form-label" for="studentStatus">Status
                                                             </label>
                                                             <select class="form-select" id="studentStatus"
                                                                 name="status">
-                                                                <option value="active">Aktif</option>
-                                                                <option value="transferred">Pindah</option>
-                                                                <option value="graduated">Lulus</option>
-                                                                <option value="dropout">Keluar</option>
+                                                                @foreach ($statuses as $status)
+                                                                    <option value="{{ $status['value'] }}">
+                                                                        {{ $status['label'] }}</option>
+                                                                @endforeach
                                                             </select>
                                                             <div class="invalid-feedback">
                                                             </div>
@@ -419,9 +508,11 @@
                                             <th> <span class="c-o-light f-w-600">Nama</span></th>
                                             <th> <span class="c-o-light f-w-600">NIS</span></th>
                                             <th> <span class="c-o-light f-w-600">NISN</span></th>
+                                            <th> <span class="c-o-light f-w-600">Jurusan</span></th>
                                             <th> <span class="c-o-light f-w-600">Kelas</span></th>
                                             <th> <span class="c-o-light f-w-600">Wali Kelas</span></th>
                                             <th> <span class="c-o-light f-w-600">Status</span></th>
+                                            <th> <span class="c-o-light f-w-600">Waktu</span></th>
                                             <th> <span class="c-o-light f-w-600">Aksi</span></th>
                                         </tr>
                                     </thead>
@@ -443,5 +534,11 @@
     <script src="{{ asset('assets/js/datatable/datatables/dataTables.select.js') }}"></script>
     <script src="{{ asset('assets/js/datatable/datatables/select.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
+    <script>
+        const classes = @json($classes);
+    </script>
     <script src="{{ asset('assets/js/student-crud.js') }}"></script>
+    <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.js') }}"></script>
+    <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.en.js') }}"></script>
+    <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.custom.js') }}"></script>
 @endsection

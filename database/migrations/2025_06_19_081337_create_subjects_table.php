@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('subject_name', 100);
             $table->string('category',100);
             $table->string('grade_level', 20)->default('all');
-            $table->string('major')->nullable();
+            $table->foreignId('major_id')->nullable()->constrained('majors');
             $table->text('description')->nullable();
             $table->timestamps();
         });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\SchoolClass;
@@ -10,7 +11,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Requests\Student\StoreStudentRequest;
+use App\Models\Major;
 use App\Models\Teacher;
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -22,7 +27,18 @@ class StudentController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = Student::with(['class', 'homeroomTeacher.teacher'])->filter($request->all());
+            $data = Student::query()
+                ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
+                ->leftJoin('majors', 'classes.major_id', '=', 'majors.id')
+                ->leftJoin('homeroom_teachers', 'students.homeroom_teacher_id', '=', 'homeroom_teachers.id')
+                ->leftJoin('teachers', 'homeroom_teachers.teacher_id', '=', 'teachers.id')
+                ->select([
+                    'students.*',
+                    'classes.name as class_name',
+                    'classes.level as class_level',
+                    'majors.name as major_name',
+                    'teachers.name as homeroom_teacher_name'
+                ])->filter($request->all());
 
             return Datatables::of($data)
                 ->addColumn('id', function ($row) {
@@ -59,15 +75,21 @@ class StudentController extends Controller
                     ';
                     return $html;
                 })
+                ->addColumn('Jurusan', function ($row) {
+                    $html = '
+                    <span class="badge badge-light-primary">' . ($row->major_name ? $row->major_name : '-') . '</span>
+                    ';
+                    return $html;
+                })
                 ->addColumn('Kelas', function ($row) {
                     $html = '
-                        <span class="badge badge-light-primary">' . ($row->class ? $row->class->name : '-') . '</span>
+                        <span class="badge badge-light-primary">' . ($row->class_name . '-' . $row->class_level) . '</span>
                     ';
                     return $html;
                 })
                 ->addColumn('Wali Kelas', function ($row) {
                     $html = '
-                        <span class="badge badge-light-info">' . ($row->homeroomTeacher && $row->homeroomTeacher->teacher ? $row->homeroomTeacher->teacher->name : '-') . '</span>
+                        <span class="badge badge-light-info">' . ($row->homeroom_teacher_name ? $row->homeroom_teacher_name : '-') . '</span>
                     ';
                     return $html;
                 })
@@ -78,19 +100,15 @@ class StudentController extends Controller
                         'graduated' => 'badge-light-info',
                         'dropout' => 'badge-light-danger'
                     ];
-                    $statusLabels = [
-                        'active' => 'Aktif',
-                        'transferred' => 'Pindah',
-                        'graduated' => 'Lulus',
-                        'dropout' => 'Keluar'
-                    ];
                     $color = $statusColors[$row->status] ?? 'badge-light-secondary';
-                    $label = $statusLabels[$row->status] ?? $row->status;
 
                     $html = '
-                        <span class="badge ' . $color . '">' . $label . '</span>
+                        <span class="badge ' . $color . '">' . Helper::getStudentStatusLabel($row->status) . '</span>
                     ';
                     return $html;
+                })
+                ->addColumn('Waktu', function ($row) {
+                    return $row->created_at->translatedFormat('d/m/Y H:i');
                 })
                 ->addColumn('Aksi', function ($row) {
                     $html = '
@@ -104,20 +122,27 @@ class StudentController extends Controller
                     </div>';
                     return $html;
                 })
-                ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Kelas', 'Wali Kelas', 'Status', 'Aksi'])
+                ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Jurusan', 'Kelas', 'Wali Kelas', 'Status', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
             $students = Student::with(['class' => fn($query) => $query->select('id', 'name'), 'homeroomTeacher.teacher' => fn($query) => $query->select('id', 'name')])->filter(request()->all())->paginate(10);
-            $classes = SchoolClass::select('id', 'name', 'level', 'major')->get();
+            $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('level', 'asc')->get();
+            $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
+            $majors = Major::select('id', 'name')->orderBy('name', 'asc')->get();
             $teachers = Teacher::select('id', 'name')->get();
-            $statuses = ['active', 'transferred', 'graduated', 'dropout'];
             $religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'];
+            $genders = [['label' => 'Laki-laki', 'value' => 'M'], ['label' => 'Perempuan', 'value' => 'F']];
+            $statuses = [['label' => 'Aktif', 'value' => 'active'], ['label' => 'Pindah', 'value' => 'transferred'], ['label' => 'Lulus', 'value' => 'graduated'], ['label' => 'Keluar', 'value' => 'dropout']];
+
             return view('user.student.index', [
                 'students' => $students,
                 'classes' => $classes,
+                'classLevels' => $classLevels,
+                'majors' => $majors,
                 'teachers' => $teachers,
                 'statuses' => $statuses,
-                'religions' => $religions
+                'religions' => $religions,
+                'genders' => $genders,
             ]);
         }
     }
@@ -138,14 +163,22 @@ class StudentController extends Controller
         try {
             $validated = $request->validated();
 
-            $user = \App\Models\User::create([
+            DB::beginTransaction();
+            $user = User::create([
                 'name' => $validated['name'],
                 'password' => bcrypt($validated['name']),
             ]);
             $user->assignRole('student');
+            $homeroomTeacher = HomeroomTeacher::create([
+                'teacher_id' => $validated['homeroom_teacher_id'],
+            ]);
 
             $validated['user_id'] = $user->id;
+            $validated['homeroom_teacher_id'] = $homeroomTeacher->id;
+            $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
             $student = Student::create($validated);
+
+            DB::commit();
 
             return $this->sendResponse(
                 'Siswa berhasil ditambahkan',
@@ -162,6 +195,7 @@ class StudentController extends Controller
                 201
             );
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Error creating student: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
@@ -174,10 +208,20 @@ class StudentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show($id) {}
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
     {
         try {
-            $student = Student::with(['class', 'homeroomTeacher.teacher'])->find($id);
+            $student = Student::with([
+                'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+                'class.major' => fn($query) => $query->select('id', 'name'),
+                'class.major.classes' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+                'homeroomTeacher.teacher' => fn($query) => $query->select('id', 'name')
+            ])->findOrFail($id);
 
             if (!$student) {
                 return $this->sendError(
@@ -189,6 +233,7 @@ class StudentController extends Controller
 
             return $this->sendResponse('Data siswa ditemukan', $student);
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -198,21 +243,15 @@ class StudentController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(StoreStudentRequest $request, $id)
     {
         try {
             $student = Student::findOrFail($id);
-            $student->update($request->validated());
+            $validated = $request->validated();
+            $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
+            $student->update($validated);
 
             return $this->sendResponse('Siswa berhasil diedit', $student);
         } catch (\Exception $e) {

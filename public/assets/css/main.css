@@ -46,3 +46,22 @@
         justify-content: center !important;
     }
 } */
+
+/* Custom Select */
+.custom-select-search .selected-box:after {
+    top: 6px !important;
+    right: 0 !important;
+    transform: rotateX(0deg) !important;
+}
+
+.custom-select-search *, .custom-select-search {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+body.dark-only
+    .custom-select-search
+    .options-container.active
+    ~ .search-box
+    input {
+    background-color: #fff !important;
+}

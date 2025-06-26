@@ -5,8 +5,12 @@ $(function () {
         ajax: {
             url: "/siswa",
             data: function (d) {
-                d.class_id = $("#class-filter").val();
-                d.homeroom_teacher_id = $("#homeroom-teacher-filter").val();
+                d.class = $("#class-filter").val();
+                d.homeroom_teacher = $(
+                    "input[name='homeroom-teacher-filter']:checked"
+                ).val();
+                d.major = $("#major-filter").val();
+                d.level = $("#level-filter").val();
                 d.status = $("#status-filter").val();
             },
             complete: function () {
@@ -35,16 +39,24 @@ $(function () {
                 name: "nisn",
             },
             {
+                data: "Jurusan",
+                name: "major_name",
+            },
+            {
                 data: "Kelas",
-                name: "class_id",
+                name: "class_name",
             },
             {
                 data: "Wali Kelas",
-                name: "homeroom_teacher_id",
+                name: "homeroom_teacher_name",
             },
             {
                 data: "Status",
                 name: "status",
+            },
+            {
+                data: "Waktu",
+                name: "created_at",
             },
             {
                 data: "Aksi",
@@ -64,6 +76,7 @@ $(function () {
             sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
             sInfoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
             sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
+            sEmptyTable: "Tidak ada data di tabel",
             sInfoPostFix: "",
             sSearch: "Cari:",
             sUrl: "",
@@ -73,9 +86,6 @@ $(function () {
                     0: "",
                 },
             },
-        },
-        fixedColumns: {
-            leftColumns: 2,
         },
         scrollCollapse: true,
         pageLength: 10,
@@ -225,70 +235,98 @@ $(function () {
                     const errors = xhr.responseJSON.errors;
                     console.log(errors);
                     if (errors.name) {
-                        $("#studentName")
+                        $("#addStudentForm#studentName")
                             .next(".invalid-feedback")
                             .text(errors.name[0]);
-                        $("#studentName").addClass("is-invalid");
+                        $("#addStudentForm #studentName").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.nis) {
-                        $("#studentNis")
+                        $("#addStudentForm #studentNis")
                             .next(".invalid-feedback")
                             .text(errors.nis[0]);
-                        $("#studentNis").addClass("is-invalid");
+                        $("#addStudentForm #studentNis").addClass("is-invalid");
                     }
                     if (errors.nisn) {
-                        $("#studentNisn")
+                        $("#addStudentForm #studentNisn")
                             .next(".invalid-feedback")
                             .text(errors.nisn[0]);
-                        $("#studentNisn").addClass("is-invalid");
+                        $("#addStudentForm #studentNisn").addClass(
+                            "is-invalid"
+                        );
+                    }
+                    if (errors.major_id) {
+                        $("#addStudentForm #studentMajor")
+                            .next(".invalid-feedback")
+                            .text(errors.major_id[0]);
+                        $("#addStudentForm #studentMajor").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.class_id) {
-                        $("#studentClass")
+                        $("#addStudentForm #studentClass")
                             .next(".invalid-feedback")
                             .text(errors.class_id[0]);
-                        $("#studentClass").addClass("is-invalid");
+                        $("#addStudentForm #studentClass").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.homeroom_teacher_id) {
-                        $("#studentHomeroomTeacher")
+                        $("#addStudentForm #studentHomeroomTeacher")
                             .next(".invalid-feedback")
                             .text(errors.homeroom_teacher_id[0]);
-                        $("#studentHomeroomTeacher").addClass("is-invalid");
+                        $("#addStudentForm #studentHomeroomTeacher").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.date_of_birth) {
-                        $("#studentDateOfBirth")
+                        $("#addStudentForm #studentDateOfBirth")
                             .next(".invalid-feedback")
                             .text(errors.date_of_birth[0]);
-                        $("#studentDateOfBirth").addClass("is-invalid");
+                        $("#addStudentForm #studentDateOfBirth").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.birthplace) {
-                        $("#studentBirthplace")
+                        $("#addStudentForm #studentBirthplace")
                             .next(".invalid-feedback")
                             .text(errors.birthplace[0]);
-                        $("#studentBirthplace").addClass("is-invalid");
+                        $("#addStudentForm #studentBirthplace").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.gender) {
-                        $("#studentGender")
+                        $("#addStudentForm #studentGender")
                             .next(".invalid-feedback")
                             .text(errors.gender[0]);
-                        $("#studentGender").addClass("is-invalid");
+                        $("#addStudentForm #studentGender").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.religion) {
-                        $("#studentReligion")
+                        $("#addStudentForm #studentReligion")
                             .next(".invalid-feedback")
                             .text(errors.religion[0]);
-                        $("#studentReligion").addClass("is-invalid");
+                        $("#addStudentForm #studentReligion").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.admission_year) {
-                        $("#studentAdmissionYear")
+                        $("#addStudentForm #studentAdmissionYear")
                             .next(".invalid-feedback")
                             .text(errors.admission_year[0]);
-                        $("#studentAdmissionYear").addClass("is-invalid");
+                        $("#addStudentForm #studentAdmissionYear").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.status) {
-                        $("#studentStatus")
+                        $("#addStudentForm #studentStatus")
                             .next(".invalid-feedback")
                             .text(errors.status[0]);
-                        $("#studentStatus").addClass("is-invalid");
+                        $("#addStudentForm #studentStatus").addClass(
+                            "is-invalid"
+                        );
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -359,16 +397,68 @@ $(function () {
             );
 
         $.ajax({
-            url: "/siswa/" + id,
+            url: `/siswa/${id}/edit`,
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
                     $("#editStudentForm #studentName").val(res.data.name);
                     $("#editStudentForm #studentNis").val(res.data.nis);
                     $("#editStudentForm #studentNisn").val(res.data.nisn);
-                    $("#editStudentForm #studentClass").val(res.data.class_id);
-                    $("#editStudentForm #studentHomeroomTeacher").val(
-                        res.data.homeroom_teacher_id
+
+                    var classOptions = '<option value="">Pilih Kelas</option>';
+                    if (res.data.class.major) {
+                        $("#editStudentForm #studentMajor").val(
+                            res.data.class.major.id
+                        );
+                        // class
+                        res.data.class.major.classes.forEach(function (cls) {
+                            classOptions +=
+                                "<option " +
+                                (cls.id === res.data.class_id
+                                    ? "selected"
+                                    : "") +
+                                ' value="' +
+                                cls.id +
+                                '">' +
+                                cls.name +
+                                " - " +
+                                cls.level +
+                                "</option>";
+                        });
+                    } else {
+                        classes.forEach(function (cls) {
+                            classOptions +=
+                                "<option " +
+                                (cls.id === res.data.class_id
+                                    ? "selected"
+                                    : "") +
+                                ' value="' +
+                                cls.id +
+                                '">' +
+                                cls.name +
+                                " - " +
+                                cls.level +
+                                "</option>";
+                        });
+                    }
+
+                    $("#editStudentForm #studentClass").html(classOptions);
+
+                    console.log(res.data.homeroom_teacher_id);
+                    // Set radio button untuk wali kelas berdasarkan ID
+                    $(
+                        `#editStudentForm input[name="homeroom_teacher_id"][value="${res.data.homeroom_teacher_id}"]`
+                    ).prop("checked", true);
+
+                    // Update teks yang ditampilkan di selected-box
+                    var selectedTeacherName = $(
+                        `#editStudentForm input[name="homeroom_teacher_id"][value="${res.data.homeroom_teacher_id}"]`
+                    )
+                        .next("label")
+                        .find("span")
+                        .text();
+                    $("#editStudentForm .select-box .selected-box span").text(
+                        selectedTeacherName
                     );
                     $("#editStudentForm #studentDateOfBirth").val(
                         res.data.date_of_birth
@@ -388,8 +478,10 @@ $(function () {
                     $("#editStudentModal").modal("show");
                 }
             },
-            error: function () {
-                alert("Gagal mengambil data siswa.");
+            error: function (xhr) {
+                const toast = new bootstrap.Toast($("#toast-error"));
+                $("#toast-error #toast-text").text(xhr.responseJSON.message);
+                toast.show();
             },
             complete: function () {
                 editBtn.prop("disabled", false).html(originalHtml);
@@ -402,6 +494,8 @@ $(function () {
         e.preventDefault();
         var id = $(this).attr("data-id");
         var formData = new FormData(this);
+        console.log(formData.get("homeroom_teacher_id"));
+        // return;
 
         $("#editStudentForm")
             .find("input, select, textarea")
@@ -436,6 +530,7 @@ $(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
+                    console.log(errors);
 
                     if (errors.name) {
                         $("#editStudentForm #studentName")
@@ -458,6 +553,14 @@ $(function () {
                             .next(".invalid-feedback")
                             .text(errors.nisn[0]);
                         $("#editStudentForm #studentNisn").addClass(
+                            "is-invalid"
+                        );
+                    }
+                    if (errors.major_id) {
+                        $("#editStudentForm #studentMajor")
+                            .next(".invalid-feedback")
+                            .text(errors.major_id[0]);
+                        $("#editStudentForm #studentMajor").addClass(
                             "is-invalid"
                         );
                     }
@@ -541,22 +644,20 @@ $(function () {
 });
 
 // Custom add search option
-$(document).ready(function () {
-    var $selected = $(".selected-box");
-    var $optionsContainer = $(".options-container");
-    var $searchBox = $(".search-box input");
-    var $optionsList = $(".selection-option");
+$(document).on("click", ".select-box", function () {
+    var $selected = $(this).find(".selected-box");
+    var $optionsContainer = $(this).find(".options-container");
+    var $searchBox = $optionsContainer.find(".search-box input");
+    var $optionsList = $optionsContainer.find(".selection-option");
 
-    $selected.on("click", function () {
-        $optionsContainer.toggleClass("active");
+    $optionsContainer.toggleClass("active");
 
-        $searchBox.val("");
-        filterList("");
+    $searchBox.val("");
+    filterList("");
 
-        if ($optionsContainer.hasClass("active")) {
-            $searchBox.focus();
-        }
-    });
+    if ($optionsContainer.hasClass("active")) {
+        $searchBox.focus();
+    }
 
     $optionsList.on("click", function () {
         $selected.html($(this).find("label").html());
@@ -578,5 +679,36 @@ $(document).ready(function () {
                 $(this).hide();
             }
         });
+    }
+});
+
+$(document).on("change", "#studentMajor", function () {
+    var majorId = $(this).val();
+    var formId = $(this).closest("form").attr("id");
+
+    if (majorId) {
+        if (classes.length > 0) {
+            var options = '<option value="">Pilih Kelas</option>';
+            classes
+                .filter(function (cls) {
+                    return cls.major_id == majorId;
+                })
+                .forEach(function (cls) {
+                    options +=
+                        '<option  value="' +
+                        cls.id +
+                        '">' +
+                        cls.name +
+                        " - " +
+                        cls.level +
+                        "</option>";
+                });
+
+            if (formId === "addStudentForm") {
+                $("#addStudentForm #studentClass").html(options);
+            } else if (formId === "editStudentForm") {
+                $("#editStudentForm #studentClass").html(options);
+            }
+        }
     }
 });

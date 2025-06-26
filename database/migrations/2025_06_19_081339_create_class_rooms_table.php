@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('major_id')->constrained('majors');
+            $table->foreignId('major_id')->nullable()->constrained('majors');
             $table->string('name', 20);
             $table->string('level', 20);
             $table->integer('capacity')->default(30);

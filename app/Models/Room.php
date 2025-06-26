@@ -22,28 +22,10 @@ class Room extends Model
 
     public function scopeFilter($query, array $filters)
     {
-        $query->when($filters['search'] ?? null, function ($query, $search) {
-            $query->whereFullText('name', $search);
-        });
-
-        $query->when($filters['sort'] ?? 'latest', function ($query, $sort) {
-            switch ($sort) {
-                case 'name_asc':
-                    $query->orderBy('name', 'asc');
-                    break;
-                case 'name_desc':
-                    $query->orderBy('name', 'desc');
-                    break;
-                case 'created_asc':
-                    $query->orderBy('created_at', 'asc');
-                    break;
-                case 'created_desc':
-                    $query->orderBy('created_at', 'desc');
-                    break;
-                default:
-                    $query->latest();
-                    break;
-            }
+        $query->when($filters['search']['value'] ?? false, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereFullText('name', $search);
+            });
         });
     }
 }

@@ -41,15 +41,17 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md"><label class="form-label">Jurusan</label><select class="form-select"
-                                    id="major-filter" aria-label="Select parent category">
-                                    <option value="" selected>Pilih Jurusan</option>
-                                    @foreach ($majors as $major)
-                                        <option value="{{ $major->name }}">{{ $major->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col  d-flex justify-content-start align-items-end"><a
+                            @if ($majors->count() > 0)
+                                <div class="col-md"><label class="form-label">Jurusan</label><select class="form-select"
+                                        id="major-filter" aria-label="Select parent category">
+                                        <option value="" selected>Pilih Jurusan</option>
+                                        @foreach ($majors as $major)
+                                            <option value="{{ $major->name }}">{{ $major->name }}</option>
+                                        @endforeach
+                                    </select>   
+                                </div>
+                            @endif
+                            <div class="col d-flex justify-content-start align-items-end"><a
                                     class="btn btn-primary f-w-500 w-100" id="filter-btn" href="#!">Submit</a></div>
                         </div>
                     </div>
@@ -102,7 +104,8 @@
                                                                 </select>
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
-                                                                for="classCapacity">Kapasitas</label><input
+                                                                for="classCapacity">Kapasitas<span
+                                                                class="txt-danger">*</span></label><input
                                                                 class="form-control" id="classCapacity" type="number"
                                                                 placeholder="Masukan kapasitas kelas" name="capacity">
                                                             <div class="invalid-feedback">
@@ -163,7 +166,8 @@
                                                                 </select>
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
-                                                                for="classCapacity">Kapasitas</label><input
+                                                                for="classCapacity">Kapasitas<span
+                                                                class="txt-danger">*</span></label><input
                                                                 class="form-control" id="classCapacity" type="number"
                                                                 placeholder="Masukan kapasitas kelas" name="capacity">
                                                             <div class="invalid-feedback">
@@ -209,6 +213,7 @@
                                             <th> <span class="c-o-light f-w-600">Tingkat</span></th>
                                             <th> <span class="c-o-light f-w-600">Jurusan</span></th>
                                             <th> <span class="c-o-light f-w-600">Kapasitas</span></th>
+                                            <th> <span class="c-o-light f-w-600">Waktu</span></th>
                                             <th> <span class="c-o-light f-w-600">Aksi</span></th>
                                         </tr>
                                     </thead>

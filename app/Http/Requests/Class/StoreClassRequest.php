@@ -24,7 +24,7 @@ class StoreClassRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'level' => 'required|string|max:50',
-            'major_id' => 'required|exists:majors,id',
+            'major_id' => 'nullable|exists:majors,id',
             'capacity' => 'required|integer|min:1|max:100'
         ];
     }

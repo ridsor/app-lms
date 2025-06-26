@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('periods', function (Blueprint $table) {
             $table->id();
             $table->enum('semester', ['odd', 'even']);
-        $table->string('academic_year', 15);
+            $table->string('academic_year', 15);
             $table->date('start_date');
             $table->date('end_date');
             $table->boolean('status')->default(true);

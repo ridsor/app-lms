@@ -122,6 +122,7 @@
                                                 </div>
                                             </th>
                                             <th> <span class="c-o-light f-w-600">Nama</span></th>
+                                            <th> <span class="c-o-light f-w-600">Waktu</span></th>
                                             <th> <span class="c-o-light f-w-600">Aksi</span></th>
                                         </tr>
                                     </thead>

@@ -12,12 +12,14 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::get('/beranda', [HomeController::class, 'index'])->name('user.home');
 
     Route::resource('/ruangan', RoomController::class)->except(['create'])->names('user.room');
+    Route::delete('ruangan/hapus', [RoomController::class, 'bulkDestroy'])->name('user.room.bulkDestroy');
 
     Route::resource('/periode', PeriodController::class)->except(['create'])->names('user.period');
     Route::post('/periode/active/{id}', [PeriodController::class, 'active'])->name('user.period.active');
 
     Route::delete('kelas/hapus', [ClassController::class, 'bulkDestroy'])->name('user.class.bulkDestroy');
     Route::resource('/kelas', ClassController::class)->except(['create'])->names('user.class');
+    Route::get('/kelas/by-major/{major_id}', [ClassController::class, 'getByMajor'])->name('user.class.byMajor');
 
     Route::delete('siswa/hapus', [StudentController::class, 'bulkDestroy'])->name('user.student.bulkDestroy');
     Route::resource('/siswa', StudentController::class)->except(['create'])->names('user.student');

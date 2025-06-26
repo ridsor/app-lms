@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Major;
 use App\Models\Subject;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -16,7 +17,7 @@ class SubjectFactory extends Factory
             'subject_name' => $this->faker->randomElement(['Matematika', 'Bahasa Indonesia', 'IPA']),
             'category' => $this->faker->randomElement(['Wajib', 'Pilihan']),
             'grade_level' => $this->faker->randomElement(['10', '11', '12']),
-            'major' => $this->faker->randomElement(['IPA', 'IPS', 'Bahasa']),
+            'major_id' => Major::query()->inRandomOrder()->value('id') ?? Major::factory(),
             'description' => $this->faker->sentence()
         ];
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class StoreStudentRequest extends FormRequest
 {
@@ -35,8 +36,8 @@ class StoreStudentRequest extends FormRequest
             'nis' => 'required|string|max:20|' . $uniqueNis,
             'nisn' => 'required|string|max:20|' . $uniqueNisn,
             'class_id' => 'nullable|exists:classes,id',
-            'homeroom_teacher_id' => 'nullable|exists:homeroom_teachers,id',
-            'date_of_birth' => 'required|date',
+            'homeroom_teacher_id' => 'nullable|exists:teachers,id',
+            'date_of_birth' => 'required|date_format:d/m/Y',
             'birthplace' => 'required|string|max:50',
             'gender' => 'required|in:M,F',
             'religion' => 'required|string|max:20',
