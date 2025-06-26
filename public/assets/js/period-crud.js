@@ -6,9 +6,8 @@ $(function () {
             url: "/periode",
             pages: 5,
             data: function (d) {
-                d.semester = $("#semester-filter").val();
-                d.start_date = $("#start-date-filter").val();
-                d.end_date = $("#end-date-filter").val();
+                let filterParams = getQueryParams();
+                $.extend(d, filterParams);
             },
         }),
         columns: [
@@ -149,6 +148,20 @@ $(function () {
     // Event handler untuk filter
     $("#filter-btn").click(function (e) {
         e.preventDefault();
+
+        // Buat query string
+        const params = new URLSearchParams();
+        if ($("#semester-filter").val()) params.append("semester", $("#semester-filter").val());
+        if ($("#start-date-filter").val()) params.append("start_date", $("#start-date-filter").val());
+        if ($("#end-date-filter").val()) params.append("end_date", $("#end-date-filter").val());
+
+        // Update URL tanpa reload
+        const newUrl =
+            window.location.pathname +
+            (params.toString() ? "?" + params.toString() : "");
+        window.history.replaceState({}, "", newUrl);
+
+        // Refresh datatable
         t.clearPipeline().draw();
     });
 

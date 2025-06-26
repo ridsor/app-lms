@@ -21,6 +21,7 @@ return new class extends Migration
             $table->timestamps();
             $table->index('start_date');
             $table->index('end_date');
+            $table->index('semester');
         });
     }
 

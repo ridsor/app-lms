@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('capacity')->default(30);
             $table->timestamps();
 
-            $table->fullText('name');
+            $table->index('name');
             $table->index('level');
             $table->unique(['level', 'name', 'major_id']);
         });

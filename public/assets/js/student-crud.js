@@ -6,13 +6,8 @@ $(function () {
             url: "/siswa",
             pages: 5,
             data: function (d) {
-                d.class = $("#class-filter").val();
-                d.homeroom_teacher = $(
-                    "input[name='homeroom-teacher-filter']:checked"
-                ).val();
-                d.major = $("#major-filter").val();
-                d.level = $("#level-filter").val();
-                d.status = $("#status-filter").val();
+                let filterParams = getQueryParams();
+                $.extend(d, filterParams);
             },
         }),
         columns: [
@@ -162,6 +157,21 @@ $(function () {
     // Event handler untuk filter
     $("#filter-btn").click(function (e) {
         e.preventDefault();
+
+        // Buat query string
+        const params = new URLSearchParams();
+        if ($("#major-filter").val()) params.append("major", $("#major-filter").val());
+        if ($("#class-filter").val()) params.append("class", $("#class-filter").val());
+        if ($("#level-filter").val()) params.append("level", $("#level-filter").val());
+        if ($("#status-filter").val()) params.append("status", $("#status-filter").val());
+
+        // Update URL tanpa reload
+        const newUrl =
+            window.location.pathname +
+            (params.toString() ? "?" + params.toString() : "");
+        window.history.replaceState({}, "", newUrl);
+
+        // Refresh datatable
         t.clearPipeline().draw();
     });
 

@@ -6,8 +6,8 @@ $(function () {
             url: "/kelas",
             pages: 5,
             data: function (d) {
-                d.level = $("#level-filter").val();
-                d.major = $("#major-filter").val();
+                let filterParams = getQueryParams();
+                $.extend(d, filterParams);
             },
         }),
         columns: [
@@ -144,6 +144,19 @@ $(function () {
     // Event handler untuk filter
     $("#filter-btn").click(function (e) {
         e.preventDefault();
+
+        // Buat query string
+        const params = new URLSearchParams();
+        if ($("#major-filter").val()) params.append("major", $("#major-filter").val());
+        if ($("#level-filter").val()) params.append("level", $("#level-filter").val());
+
+        // Update URL tanpa reload
+        const newUrl =
+            window.location.pathname +
+            (params.toString() ? "?" + params.toString() : "");
+        window.history.replaceState({}, "", newUrl);
+
+        // Refresh datatable
         t.clearPipeline().draw();
     });
 

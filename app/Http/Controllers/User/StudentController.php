@@ -129,7 +129,7 @@ class StudentController extends Controller
                 ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Jurusan', 'Kelas', 'Wali Kelas', 'Status', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
-            $students = Student::with(['class' => fn($query) => $query->select('id', 'name'), 'homeroomTeacher' => fn($query) => $query->select('id', 'name')])->filter(request()->all())->paginate(10);
+            $students = Student::with(['class' => fn($query) => $query->select('id', 'name'), 'homeroomTeacher' => fn($query) => $query->select('id', 'name')])->paginate(10);
             $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('level', 'asc')->get();
             $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
             $majors = Major::select('id', 'name')->orderBy('name', 'asc')->get();

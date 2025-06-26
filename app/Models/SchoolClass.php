@@ -41,9 +41,7 @@ class SchoolClass extends Model
 
         // Search global - mencari di semua kolom
         $query->when($filters['search']['value'] ?? false, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->whereFullText('name', $search);
-            });
+            $query->where('name', 'like', '%' . $search . '%');
         });
 
         // Filter berdasarkan level

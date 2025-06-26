@@ -67,10 +67,10 @@ class Student extends Model
         }
 
         if (!empty($filters['class'])) {
-            $query->whereFullText('classes.name', $filters['class']);
+            $query->where('classes.name', $filters['class']);
         }
         if (!empty($filters['major'])) {
-            $query->whereFullText('majors.name', $filters['major']);
+            $query->where('majors.name', $filters['major']);
         }
         if (!empty($filters['level'])) {
             $query->where('classes.level', $filters['level']);

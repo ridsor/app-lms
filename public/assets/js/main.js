@@ -55,3 +55,12 @@ $(document).on("click", ".selected-box", function () {
         });
     }
 });
+
+function getQueryParams() {
+    let params = {};
+    let query = new URLSearchParams(window.location.search);
+    query.forEach((value, key) => {
+        params[key] = value;
+    });
+    return params;
+}
