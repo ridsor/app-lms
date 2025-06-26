@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->fullText('name');
+            $table->index('level');
             $table->unique(['level', 'name', 'major_id']);
         });
     }

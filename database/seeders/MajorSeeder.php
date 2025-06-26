@@ -13,10 +13,14 @@ class MajorSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Major::insert([
+        $data = [
             ['name' => 'IPA'],
             ['name' => 'IPS'],
             ['name' => 'Bahasa'],
-        ]);
+        ];
+
+        foreach ($data as $item) {
+            Major::create($item);
+        }
     }
 }

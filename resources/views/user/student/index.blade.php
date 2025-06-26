@@ -8,6 +8,17 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select.bootstrap5.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/date-picker.css') }}">
+    <style>
+        #student-table td:nth-child(2) p,
+        #student-table td:nth-child(2),
+        #student-table th:nth-child(2) p,
+        #student-table th:nth-child(2) {
+            white-space: nowrap !important;
+            overflow: visible !important;
+            text-overflow: unset !important;
+            max-width: none !important;
+        }
+    </style>
 @endsection
 
 @section('main_content')
@@ -62,40 +73,6 @@
                                 </select>
                             </div>
                             <div class="col-md-4 col-lg-3 col-xl">
-                                <label class="form-label" for="teacher-filter">Wali Kelas</label>
-                                <div class="select-box custom-select-search w-100">
-                                    <div class="options-container custom-scrollbar">
-                                        <div class="selection-option"><input class="radio" id="homeroom-teacher-filter"
-                                                type="radio" value="" name="homeroom-teacher-filter"
-                                                id="homeroom-teacher-filter-all"><label class="mb-0"
-                                                for="homeroom-teacher-filter-all">
-                                                <span
-                                                    style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">Semua</span>
-                                            </label></div>
-                                        @foreach ($teachers as $teacher)
-                                            <div class="selection-option">
-                                                <input class="radio" id="homeroom-teacher-filter-{{ $teacher->id }}"
-                                                    value="{{ $teacher->id }}" type="radio"
-                                                    name="homeroom-teacher-filter"
-                                                    id="homeroom-teacher-filter-{{ $teacher->id }}"><label class="mb-0"
-                                                    for="homeroom-teacher-filter-{{ $teacher->id }}">
-                                                    <span
-                                                        style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">{{ $teacher->name }}</span>
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                    <div class="selected-box form-control" style="padding: 6px 36px 6px 12px;">
-                                        <span
-                                            style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">Pilih
-                                            Wali Kelas</span>
-                                    </div>
-                                    <div class="search-box">
-                                        <input type="text" placeholder="Cari...">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-lg-3 col-xl">
                                 <label class="form-label" for="status-filter">Status</label>
                                 <select class="form-select" id="status-filter" aria-label="Select status">
                                     <option value="" selected>Pilih Status</option>
@@ -105,7 +82,7 @@
                                 </select>
                             </div>
                             <div class="col-auto d-flex justify-content-start align-items-end">
-                                <a class="btn btn-primary f-w-500 w-100" id="filter-btn">Submit</a>
+                                <a class="btn btn-primary f-w-500 w-100" id="filter-btn">Terapkan</a>
                             </div>
                         </div>
                     </div>
@@ -115,11 +92,11 @@
                 <div class="card">
                     <div class="card-header card-no-border text-end">
                         <div class="card-header-right-icon">
-                            <a class="btn btn-primary f-w-500 mb-2" href="#!" data-bs-toggle="modal"
+                            <a class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal"
                                 data-bs-target="#addStudentModal"><i class="fa fa-plus pe-2"></i>Tambah
                             </a>
-                            <div class="modal fade" id="addStudentModal" tabindex="-1"
-                                aria-labelledby="addStudentModal" aria-hidden="true">
+                            <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModal"
+                                aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                     <div class="modal-content category-popup">
                                         <div class="modal-header">
@@ -190,12 +167,14 @@
                                                                 <div class="options-container custom-scrollbar">
                                                                     @foreach ($teachers as $teacher)
                                                                         <div class="selection-option"><input
-                                                                                class="radio" id="addStudentHomeroomTeacher-{{ $teacher->id }}"
+                                                                                class="radio"
+                                                                                id="addStudentHomeroomTeacher-{{ $teacher->id }}"
                                                                                 type="radio"
                                                                                 value="{{ $teacher->id }}"
                                                                                 name="homeroom_teacher_id"
                                                                                 id="addStudentHomeroomTeacher-{{ $teacher->id }}"><label
-                                                                                class="mb-0" for="addStudentHomeroomTeacher-{{ $teacher->id }}">
+                                                                                class="mb-0"
+                                                                                for="addStudentHomeroomTeacher-{{ $teacher->id }}">
                                                                                 <span
                                                                                     style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">{{ $teacher->name }}</span>
                                                                             </label></div>
@@ -374,11 +353,13 @@
                                                                 <div class="options-container custom-scrollbar w-100">
                                                                     @foreach ($teachers as $teacher)
                                                                         <div class="selection-option"><input
-                                                                                class="radio" id="editStudentHomeroomTeacher-{{ $teacher->id }}"
+                                                                                class="radio"
+                                                                                id="editStudentHomeroomTeacher-{{ $teacher->id }}"
                                                                                 type="radio" name="homeroom_teacher_id"
                                                                                 id="editStudentHomeroomTeacher-{{ $teacher->id }}"
                                                                                 value="{{ $teacher->id }}"><label
-                                                                                class="mb-0" for="editStudentHomeroomTeacher-{{ $teacher->id }}">
+                                                                                class="mb-0"
+                                                                                for="editStudentHomeroomTeacher-{{ $teacher->id }}">
                                                                                 <span
                                                                                     style="-webkit-line-clamp: 1;  -webkit-box-orient: vertical; display: -webkit-box; text-overflow: ellipsis; overflow: hidden">{{ $teacher->name }}</span>
                                                                             </label></div>
@@ -483,8 +464,7 @@
                             </div>
                             <div class="row g-3 justify-content-end">
                                 <div class="col-auto" style="display: none;">
-                                    <button class="btn btn-danger mb-2" id="delete-selected" disabled>Hapus
-                                        Terpilih</button>
+                                    <button class="btn btn-danger mb-2" id="delete-selected" disabled>Hapus</button>
                                 </div>
                             </div>
                         </div>
@@ -534,6 +514,7 @@
     <script src="{{ asset('assets/js/datatable/datatables/dataTables.select.js') }}"></script>
     <script src="{{ asset('assets/js/datatable/datatables/select.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
     <script>
         const classes = @json($classes);
     </script>

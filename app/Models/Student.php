@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\SchoolClass;
-use App\Models\HomeroomTeacher;
 use App\Models\Grade;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Log;
 
 class Student extends Model
 {
@@ -50,7 +48,7 @@ class Student extends Model
 
     public function homeroomTeacher(): BelongsTo
     {
-        return $this->belongsTo(HomeroomTeacher::class);
+        return $this->belongsTo(Teacher::class, 'homeroom_teacher_id');
     }
 
     public function grades(): HasMany
@@ -60,37 +58,25 @@ class Student extends Model
 
     public function scopeFilter($query, array $filters)
     {
-        // Search global - mencari di semua kolom
-        $query->when($filters['search']['value'] ?? false, function ($query, $search) {
+        // Search global - fulltext di beberapa kolom utama
+        if (!empty($filters['search']['value'])) {
+            $search = $filters['search']['value'];
             $query->where(function ($q) use ($search) {
-                $q->whereFullText('name', $search);
+                $q->whereFullText('students.name', $search);
             });
-        });
+        }
 
-        // Filter berdasarkan kelas
-        $query->when($filters['class'] ?? false, function ($query, $class) {
-            $query->whereHas('class', fn($q) => $q->whereFullText('name', $class));
-        });
-
-        // Filter berdasarkan jurusan
-        $query->when($filters['major'] ?? false, function ($query, $major) {
-            $query->whereHas('class', fn($q) => $q->whereHas('major', fn($q) => $q->whereFullText('name', $major)));
-        });
-
-        // Filter berdasarkan tingkat
-        $query->when($filters['level'] ?? false, function ($query, $level) {
-            $query->whereHas('class', fn($q) => $q->where('level', $level));
-        });
-
-        // Filter berdasarkan wali kelas
-        Log::info($filters);
-        $query->when($filters['homeroom_teacher'] ?? false, function ($query, $homeroomTeacher) {
-            $query->whereHas('homeroomTeacher', fn($q) => $q->whereHas('teacher', fn($q) => $q->where('name', $homeroomTeacher)));
-        });
-
-        // Filter berdasarkan status
-        $query->when($filters['status'] ?? false, function ($query, $status) {
-            $query->where('status', $status);
-        });
+        if (!empty($filters['class'])) {
+            $query->whereFullText('classes.name', $filters['class']);
+        }
+        if (!empty($filters['major'])) {
+            $query->whereFullText('majors.name', $filters['major']);
+        }
+        if (!empty($filters['level'])) {
+            $query->where('classes.level', $filters['level']);
+        }
+        if (!empty($filters['status'])) {
+            $query->where('students.status', $filters['status']);
+        }
     }
 }

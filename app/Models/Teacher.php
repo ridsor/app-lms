@@ -4,11 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-use App\Models\HomeroomTeacher;
 use App\Models\Schedule;
 use App\Models\AssignmentSubmission;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -32,9 +30,9 @@ class Teacher extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function homeroomTeacher(): HasOne
+    public function homeroomTeacher(): HasMany
     {
-        return $this->hasOne(HomeroomTeacher::class);
+        return $this->hasMany(Student::class, 'homeroom_teacher_id');
     }
 
     public function schedules(): HasMany

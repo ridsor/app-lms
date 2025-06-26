@@ -2,16 +2,14 @@ $(function () {
     var t = $("#class-table").DataTable({
         processing: true,
         serverSide: true,
-        ajax: {
+        ajax: $.fn.dataTable.pipeline({
             url: "/kelas",
+            pages: 5,
             data: function (d) {
                 d.level = $("#level-filter").val();
                 d.major = $("#major-filter").val();
             },
-            complete: function () {
-                updateDeleteButtonState();
-            },
-        },
+        }),
         columns: [
             {
                 data: "id",
@@ -28,18 +26,22 @@ $(function () {
             {
                 data: "Tingkat",
                 name: "level",
+                searchable: false,
             },
             {
                 data: "Jurusan",
                 name: "major",
+                searchable: false,
             },
             {
                 data: "Kapasitas",
                 name: "capacity",
+                searchable: false,
             },
             {
                 data: "Waktu",
                 name: "created_at",
+                searchable: false,
             },
             {
                 data: "Aksi",
@@ -65,17 +67,6 @@ $(function () {
                 },
             },
         },
-        // columnDefs: [
-        //     {
-        //         orderable: false,
-        //         render: $.fn.dataTable.render.select(),
-        //         targets: 0,
-        //     },
-        // ],
-        // select: {
-        //     style: "multi",
-        //     selector: "td:first-child",
-        // },
         fixedColumns: {
             leftColumns: 2,
         },
@@ -83,9 +74,13 @@ $(function () {
         pageLength: 10,
         lengthMenu: [5, 10, 50, 100],
         responsive: true,
-        autoWidth: true,
+        autoWidth: false,
         searchable: true,
         order: [[5, "desc"]],
+    });
+
+    t.on("draw", function () {
+        updateDeleteButtonState(true);
     });
 
     // Hapus banyak
@@ -112,6 +107,13 @@ $(function () {
             imageHeight: 120,
         }).then((result) => {
             if (result.isConfirmed) {
+                const deleteBtn = $("#delete-selected");
+                const originalHtml = deleteBtn.html();
+                deleteBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<div class="d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span> Loading...</div>'
+                    );
                 $.ajax({
                     url: "/kelas/hapus",
                     method: "DELETE",
@@ -119,7 +121,7 @@ $(function () {
                         ids: selectedIds,
                     },
                     success: function (res) {
-                        t.ajax.reload();
+                        t.clearPipeline().draw();
                         const toast = new bootstrap.Toast($("#toast-success"));
                         $("#toast-success #toast-text").text(res.message);
                         toast.show();
@@ -131,6 +133,9 @@ $(function () {
                         );
                         toast.show();
                     },
+                    complete: function () {
+                        deleteBtn.prop("disabled", false).html(originalHtml);
+                    },
                 });
             }
         });
@@ -139,7 +144,7 @@ $(function () {
     // Event handler untuk filter
     $("#filter-btn").click(function (e) {
         e.preventDefault();
-        t.draw();
+        t.clearPipeline().draw();
     });
 
     $("#class-table").on("click", ".trash", function (e) {
@@ -172,7 +177,7 @@ $(function () {
                     method: "DELETE",
                     success: function (res) {
                         if (res.success) {
-                            t.ajax.reload();
+                            t.clearPipeline().draw();
                             const toast = new bootstrap.Toast(
                                 $("#toast-success")
                             );
@@ -230,7 +235,7 @@ $(function () {
                     const toast = new bootstrap.Toast($("#toast-success"));
                     $("#toast-success #toast-text").text(response.message);
                     toast.show();
-                    t.draw();
+                    t.clearPipeline().draw();
                     $("#addClassModal").modal("hide");
                     $("#addClassForm")[0].reset();
                 }
@@ -308,14 +313,20 @@ $(function () {
         updateDeleteButtonState();
     });
 
-    function updateDeleteButtonState() {
-        var selectedRows = $(
-            "#class-table tbody input[type='checkbox'].select-row:checked"
-        ).length;
-        $("#delete-selected").prop("disabled", selectedRows === 0);
-        $("#delete-selected")
-            .parent()
-            .css("display", selectedRows > 0 ? "block" : "none");
+    function updateDeleteButtonState(reload) {
+        if (!reload) {
+            var selectedRows = $(
+                "#student-table tbody input[type='checkbox'].select-row:checked"
+            ).length;
+            $("#delete-selected").prop("disabled", selectedRows === 0);
+            $("#delete-selected")
+                .parent()
+                .css("display", selectedRows > 0 ? "block" : "none");
+        } else {
+            $("#select-all").prop("checked", false);
+            $("#delete-selected").prop("disabled", true);
+            $("#delete-selected").parent().css("display", "none");
+        }
     }
 
     // Event handler tombol edit
@@ -388,7 +399,7 @@ $(function () {
                     toast.show();
                     $("#editClassModal").modal("hide");
                     $("#editClassForm")[0].reset();
-                    $("#class-table").DataTable().ajax.reload();
+                    t.clearPipeline().draw();
                 }
             },
             error: function (xhr) {

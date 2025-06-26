@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Class;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreClassRequest extends FormRequest
 {
@@ -22,7 +23,13 @@ class StoreClassRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                Rule::unique('classes')->where(function ($query) {
+                    return $query->where('level', $this->level)
+                        ->where('major_id', $this->major_id);
+                }),
+            ],
             'level' => 'required|string|max:50',
             'major_id' => 'nullable|exists:majors,id',
             'capacity' => 'required|integer|min:1|max:100'
@@ -49,7 +56,8 @@ class StoreClassRequest extends FormRequest
             'capacity.required' => 'Kapasitas wajib diisi',
             'capacity.integer' => 'Kapasitas harus berupa angka',
             'capacity.min' => 'Kapasitas minimal 1',
-            'capacity.max' => 'Kapasitas maksimal 100'
+            'capacity.max' => 'Kapasitas maksimal 100',
+            'name.unique' => 'Kelas sudah ada'
         ];
     }
 

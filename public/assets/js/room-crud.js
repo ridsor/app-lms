@@ -2,12 +2,10 @@ $(function () {
     var t = $("#room-table").DataTable({
         processing: true,
         serverSide: true,
-        ajax: {
+        ajax: $.fn.dataTable.pipeline({
             url: "/ruangan",
-            complete: function () {
-                updateDeleteButtonState();
-            },
-        },
+            pages: 5,
+        }),
         columns: [
             {
                 data: "id",
@@ -24,6 +22,7 @@ $(function () {
             {
                 data: "Waktu",
                 name: "created_at",
+                searchable: false,
             },
             {
                 data: "Aksi",
@@ -56,9 +55,13 @@ $(function () {
         pageLength: 10,
         lengthMenu: [5, 10, 50, 100],
         responsive: true,
-        autoWidth: true,
+        autoWidth: false,
         searchable: true,
         order: [[2, "desc"]],
+    });
+
+    t.on("draw", function () {
+        updateDeleteButtonState(true);
     });
 
     // Hapus banyak
@@ -85,6 +88,13 @@ $(function () {
             imageHeight: 120,
         }).then((result) => {
             if (result.isConfirmed) {
+                const deleteBtn = $("#delete-selected");
+                const originalHtml = deleteBtn.html();
+                deleteBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<div class="d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span> Loading...</div>'
+                    );
                 $.ajax({
                     url: "/ruangan/hapus",
                     method: "DELETE",
@@ -92,7 +102,7 @@ $(function () {
                         ids: selectedIds,
                     },
                     success: function (res) {
-                        t.ajax.reload();
+                        t.clearPipeline().draw();
                         const toast = new bootstrap.Toast($("#toast-success"));
                         $("#toast-success #toast-text").text(res.message);
                         toast.show();
@@ -103,6 +113,9 @@ $(function () {
                             xhr.responseJSON.message
                         );
                         toast.show();
+                    },
+                    complete: function () {
+                        deleteBtn.prop("disabled", false).html(originalHtml);
                     },
                 });
             }
@@ -135,7 +148,7 @@ $(function () {
                     const toast = new bootstrap.Toast($("#toast-success"));
                     $("#toast-success #toast-text").text(response.message);
                     toast.show();
-                    t.draw();
+                    t.clearPipeline().draw();
                     $("#addRoomModal").modal("hide");
                     $("#addRoomForm")[0].reset();
                 }
@@ -225,7 +238,7 @@ $(function () {
                     toast.show();
                     $("#editRoomModal").modal("hide");
                     $("#editRoomForm")[0].reset();
-                    $("#room-table").DataTable().ajax.reload();
+                    t.clearPipeline().draw();
                 }
             },
             error: function (xhr) {
@@ -282,7 +295,7 @@ $(function () {
                     method: "DELETE",
                     success: function (res) {
                         if (res.success) {
-                            t.ajax.reload();
+                            t.clearPipeline().draw();
                             const toast = new bootstrap.Toast(
                                 $("#toast-success")
                             );
@@ -338,13 +351,19 @@ $(function () {
         updateDeleteButtonState();
     });
 
-    function updateDeleteButtonState() {
-        var selectedRows = $(
-            "#room-table tbody input[type='checkbox'].select-row:checked"
-        ).length;
-        $("#delete-selected").prop("disabled", selectedRows === 0);
-        $("#delete-selected")
-            .parent()
-            .css("display", selectedRows > 0 ? "block" : "none");
+    function updateDeleteButtonState(reload) {
+        if (!reload) {
+            var selectedRows = $(
+                "#student-table tbody input[type='checkbox'].select-row:checked"
+            ).length;
+            $("#delete-selected").prop("disabled", selectedRows === 0);
+            $("#delete-selected")
+                .parent()
+                .css("display", selectedRows > 0 ? "block" : "none");
+        } else {
+            $("#select-all").prop("checked", false);
+            $("#delete-selected").prop("disabled", true);
+            $("#delete-selected").parent().css("display", "none");
+        }
     }
 });

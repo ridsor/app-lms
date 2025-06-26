@@ -6,7 +6,6 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\SchoolClass;
-use App\Models\HomeroomTeacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
@@ -30,15 +29,20 @@ class StudentController extends Controller
             $data = Student::query()
                 ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
                 ->leftJoin('majors', 'classes.major_id', '=', 'majors.id')
-                ->leftJoin('homeroom_teachers', 'students.homeroom_teacher_id', '=', 'homeroom_teachers.id')
-                ->leftJoin('teachers', 'homeroom_teachers.teacher_id', '=', 'teachers.id')
+                ->leftJoin('teachers', 'students.homeroom_teacher_id', '=', 'teachers.id')
                 ->select([
-                    'students.*',
+                    'students.id',
+                    'students.name',
+                    'students.nis',
+                    'students.nisn',
+                    'students.status',
+                    'students.created_at',
                     'classes.name as class_name',
                     'classes.level as class_level',
                     'majors.name as major_name',
                     'teachers.name as homeroom_teacher_name'
-                ])->filter($request->all());
+                ])
+                ->filter($request->all());
 
             return Datatables::of($data)
                 ->addColumn('id', function ($row) {
@@ -113,10 +117,10 @@ class StudentController extends Controller
                 ->addColumn('Aksi', function ($row) {
                     $html = '
                     <div class="common-align gap-2 justify-content-start">
-                        <a class="square-white edit" href="#!" data-id="' . $row->id . '">
+                        <a class="square-white edit"  data-id="' . $row->id . '">
                             <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
                         </a>
-                        <a class="square-white trash" href="#!" data-id="' . $row->id . '">
+                        <a class="square-white trash"  data-id="' . $row->id . '">
                             <svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg>
                         </a>
                     </div>';
@@ -125,7 +129,7 @@ class StudentController extends Controller
                 ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Jurusan', 'Kelas', 'Wali Kelas', 'Status', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
-            $students = Student::with(['class' => fn($query) => $query->select('id', 'name'), 'homeroomTeacher.teacher' => fn($query) => $query->select('id', 'name')])->filter(request()->all())->paginate(10);
+            $students = Student::with(['class' => fn($query) => $query->select('id', 'name'), 'homeroomTeacher' => fn($query) => $query->select('id', 'name')])->filter(request()->all())->paginate(10);
             $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('level', 'asc')->get();
             $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
             $majors = Major::select('id', 'name')->orderBy('name', 'asc')->get();
@@ -169,12 +173,8 @@ class StudentController extends Controller
                 'password' => bcrypt($validated['name']),
             ]);
             $user->assignRole('student');
-            $homeroomTeacher = HomeroomTeacher::create([
-                'teacher_id' => $validated['homeroom_teacher_id'],
-            ]);
 
             $validated['user_id'] = $user->id;
-            $validated['homeroom_teacher_id'] = $homeroomTeacher->id;
             $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
             $student = Student::create($validated);
 
@@ -218,9 +218,6 @@ class StudentController extends Controller
         try {
             $student = Student::with([
                 'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
-                'class.major' => fn($query) => $query->select('id', 'name'),
-                'class.major.classes' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
-                'homeroomTeacher.teacher' => fn($query) => $query->select('id', 'name')
             ])->findOrFail($id);
 
             if (!$student) {

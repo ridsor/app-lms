@@ -2,17 +2,15 @@ $(function () {
     var t = $("#period-table").DataTable({
         processing: true,
         serverSide: true,
-        ajax: {
+        ajax: $.fn.dataTable.pipeline({
             url: "/periode",
+            pages: 5,
             data: function (d) {
                 d.semester = $("#semester-filter").val();
                 d.start_date = $("#start-date-filter").val();
                 d.end_date = $("#end-date-filter").val();
             },
-            complete: function () {
-                updateDeleteButtonState();
-            },
-        },
+        }),
         columns: [
             {
                 data: "id",
@@ -25,10 +23,12 @@ $(function () {
             {
                 data: "Semester",
                 name: "semester",
+                searchable: false,
             },
             {
                 data: "Tahun Akademik",
                 name: "academic_year",
+                searchable: false,
             },
             {
                 data: "Periode",
@@ -45,6 +45,7 @@ $(function () {
             {
                 data: "Waktu",
                 name: "created_at",
+                searchable: false,
             },
             {
                 data: "Aksi",
@@ -77,9 +78,14 @@ $(function () {
         pageLength: 10,
         lengthMenu: [5, 10, 50, 100],
         responsive: true,
-        autoWidth: true,
+        autoWidth: false,
         searchable: true,
+        searching: false,
         order: [[5, "desc"]],
+    });
+
+    t.on("draw", function () {
+        updateDeleteButtonState(true);
     });
 
     // Hapus banyak
@@ -106,6 +112,13 @@ $(function () {
             imageHeight: 120,
         }).then((result) => {
             if (result.isConfirmed) {
+                const deleteBtn = $("#delete-selected");
+                const originalHtml = deleteBtn.html();
+                deleteBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<div class="d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span> Loading...</div>'
+                    );
                 $.ajax({
                     url: "/periode/hapus",
                     method: "DELETE",
@@ -113,7 +126,7 @@ $(function () {
                         ids: selectedIds,
                     },
                     success: function (res) {
-                        t.ajax.reload();
+                        t.clearPipeline().draw();
                         const toast = new bootstrap.Toast($("#toast-success"));
                         $("#toast-success #toast-text").text(res.message);
                         toast.show();
@@ -125,6 +138,9 @@ $(function () {
                         );
                         toast.show();
                     },
+                    complete: function () {
+                        deleteBtn.prop("disabled", false).html(originalHtml);
+                    },
                 });
             }
         });
@@ -133,7 +149,7 @@ $(function () {
     // Event handler untuk filter
     $("#filter-btn").click(function (e) {
         e.preventDefault();
-        t.draw();
+        t.clearPipeline().draw();
     });
 
     // Hapus satuan
@@ -167,7 +183,7 @@ $(function () {
                     method: "DELETE",
                     success: async function (res) {
                         if (res.success) {
-                            t.ajax.reload();
+                            t.clearPipeline().draw();
                             const toast = new bootstrap.Toast(
                                 $("#toast-success")
                             );
@@ -222,7 +238,7 @@ $(function () {
                     const toast = new bootstrap.Toast($("#toast-success"));
                     $("#toast-success #toast-text").text(response.message);
                     toast.show();
-                    t.draw();
+                    t.clearPipeline().draw();
                     $("#addPeriodModal").modal("hide");
                     $("#addPeriodForm")[0].reset();
                 }
@@ -337,7 +353,7 @@ $(function () {
                     toast.show();
                     $("#editPeriodModal").modal("hide");
                     $("#editPeriodForm")[0].reset();
-                    $("#period-table").DataTable().ajax.reload();
+                    t.clearPipeline().draw();
                 }
             },
             error: function (xhr) {
@@ -415,14 +431,22 @@ $(function () {
         );
         updateDeleteButtonState();
     });
-    function updateDeleteButtonState() {
-        var selectedRows = $(
-            "#period-table tbody input[type='checkbox'].select-row:checked"
-        ).length;
-        $("#delete-selected").prop("disabled", selectedRows === 0);
-        $("#delete-selected")
-            .parent()
-            .css("display", selectedRows > 0 ? "block" : "none");
+    
+
+    function updateDeleteButtonState(reload) {
+        if (!reload) {
+            var selectedRows = $(
+                "#student-table tbody input[type='checkbox'].select-row:checked"
+            ).length;
+            $("#delete-selected").prop("disabled", selectedRows === 0);
+            $("#delete-selected")
+                .parent()
+                .css("display", selectedRows > 0 ? "block" : "none");
+        } else {
+            $("#select-all").prop("checked", false);
+            $("#delete-selected").prop("disabled", true);
+            $("#delete-selected").parent().css("display", "none");
+        }
     }
 
     // Active period
@@ -446,7 +470,7 @@ $(function () {
             imageHeight: 120,
         }).then((result) => {
             if (result.isConfirmed) {
-                const activeBtn = $(this)
+                const activeBtn = $(this);
                 activeBtn
                     .prop("disabled", true)
                     .html(
@@ -465,7 +489,7 @@ $(function () {
                                 response.message
                             );
                             toast.show();
-                            t.ajax.reload();
+                            t.clearPipeline().draw();
                         }
                     },
                     error: function (xhr, status, error) {

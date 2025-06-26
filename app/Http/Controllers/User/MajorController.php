@@ -32,7 +32,7 @@ class MajorController extends Controller
                     return $row->created_at->translatedFormat('d/m/Y H:i');
                 })
                 ->addColumn('Aksi', function ($row) {
-                    $html = '<div class="common-align gap-2 justify-content-start"><a class="square-white edit" href="#!" data-id="' . $row->id . '"><svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg></a><a class="square-white trash" href="#!" data-id="' . $row->id . '"><svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg></a></div>';
+                    $html = '<div class="common-align gap-2 justify-content-start"><a class="square-white edit"  data-id="' . $row->id . '"><svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg></a><a class="square-white trash"  data-id="' . $row->id . '"><svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg></a></div>';
                     return $html;
                 })
                 ->rawColumns(['id', 'Nama', 'Waktu', 'Aksi'])

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('nis', 20)->unique();
             $table->string('nisn', 20)->unique();
             $table->foreignId('class_id')->nullable()->constrained('classes')->onDelete('set null');
-            $table->foreignId('homeroom_teacher_id')->nullable()->constrained('homeroom_teachers')->onDelete('set null');
+            $table->foreignId('homeroom_teacher_id')->nullable()->constrained('teachers')->onDelete('set null');
             $table->date('date_of_birth');
             $table->string('birthplace', 50);
             $table->enum('gender', ['M', 'F']);
@@ -27,6 +27,7 @@ return new class extends Migration
             $table->enum('status', ['active', 'transferred', 'graduated', 'dropout'])->default('active');
             $table->timestamps();
             $table->fullText('name');
+            $table->index('status');
         });
     }
 

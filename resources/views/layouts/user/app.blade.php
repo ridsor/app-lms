@@ -42,7 +42,7 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
     <!-- App css-->
-    @vite(['public/assets/scss/style.scss'])
+    {{-- @vite(['public/assets/scss/style.scss']) --}}
     <!-- Responsive css-->
     <link rel="stylesheet" type="text/css" href="/assets/css/responsive.css" />
     <script defer src="/assets/css/color-1.js"></script>

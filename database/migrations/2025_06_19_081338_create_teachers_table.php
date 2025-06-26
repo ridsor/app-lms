@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('birthplace', 50);
             $table->string('religion', 20);
             $table->timestamps();
+
+            $table->fullText('name');
         });
     }
 

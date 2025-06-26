@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\SchoolClass;
-use App\Models\HomeroomTeacher;
+use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class StudentFactory extends Factory
@@ -20,7 +20,7 @@ class StudentFactory extends Factory
             'nis' => $this->faker->unique()->numerify('2020####'),
             'nisn' => $this->faker->unique()->numerify('0011######'),
             'class_id' => SchoolClass::factory(),
-            'homeroom_teacher_id' => HomeroomTeacher::factory(),
+            'homeroom_teacher_id' => Teacher::factory(),
             'date_of_birth' => $this->faker->date(),
             'birthplace' => $this->faker->city(),
             'gender' => $this->faker->randomElement(['M', 'F']),

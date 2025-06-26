@@ -33,6 +33,16 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="row g-3 mb-3">
+                            @if ($majors->count() > 0)
+                                <div class="col-md"><label class="form-label">Jurusan</label><select class="form-select"
+                                        id="major-filter" aria-label="Select parent category">
+                                        <option value="" selected>Pilih Jurusan</option>
+                                        @foreach ($majors as $major)
+                                            <option value="{{ $major->name }}">{{ $major->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                             <div class="col-md"><label class="form-label">Tingkat</label><select class="form-select"
                                     id="level-filter" aria-label="Select parent category">
                                     <option value="" selected>Pilih Tingkat</option>
@@ -41,18 +51,8 @@
                                     @endforeach
                                 </select>
                             </div>
-                            @if ($majors->count() > 0)
-                                <div class="col-md"><label class="form-label">Jurusan</label><select class="form-select"
-                                        id="major-filter" aria-label="Select parent category">
-                                        <option value="" selected>Pilih Jurusan</option>
-                                        @foreach ($majors as $major)
-                                            <option value="{{ $major->name }}">{{ $major->name }}</option>
-                                        @endforeach
-                                    </select>   
-                                </div>
-                            @endif
                             <div class="col d-flex justify-content-start align-items-end"><a
-                                    class="btn btn-primary f-w-500 w-100" id="filter-btn" href="#!">Submit</a></div>
+                                    class="btn btn-primary f-w-500 w-100" id="filter-btn">Terapkan</a></div>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
                 <div class="card">
                     <div class="card-header card-no-border text-end">
                         <div class="card-header-right-icon">
-                            <a class="btn btn-primary f-w-500 mb-2" href="#!" data-bs-toggle="modal"
+                            <a class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal"
                                 data-bs-target="#addClassModal"><i class="fa fa-plus pe-2"></i>Tambah
                             </a>
                             <div class="modal fade" id="addClassModal" tabindex="-1" aria-labelledby="addClassModal"
@@ -96,16 +96,18 @@
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
                                                                 for="classMajor">Jurusan</label>
-                                                                <select class="form-select" id="classMajor" aria-label="Select parent category" name="major_id">
-                                                                    <option value="" selected>Pilih Jurusan</option>
-                                                                    @foreach ($majors as $major)
-                                                                        <option value="{{ $major->id }}">{{ $major->name }}</option>
-                                                                    @endforeach
-                                                                </select>
+                                                            <select class="form-select" id="classMajor"
+                                                                aria-label="Select parent category" name="major_id">
+                                                                <option value="" selected>Pilih Jurusan</option>
+                                                                @foreach ($majors as $major)
+                                                                    <option value="{{ $major->id }}">
+                                                                        {{ $major->name }}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
                                                                 for="classCapacity">Kapasitas<span
-                                                                class="txt-danger">*</span></label><input
+                                                                    class="txt-danger">*</span></label><input
                                                                 class="form-control" id="classCapacity" type="number"
                                                                 placeholder="Masukan kapasitas kelas" name="capacity">
                                                             <div class="invalid-feedback">
@@ -158,16 +160,18 @@
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
                                                                 for="classMajor">Jurusan</label>
-                                                                <select class="form-select" id="classMajor" aria-label="Select parent category" name="major_id">
-                                                                    <option value="" selected>Pilih Jurusan</option>
-                                                                    @foreach ($majors as $major)
-                                                                        <option value="{{ $major->id }}">{{ $major->name }}</option>
-                                                                    @endforeach
-                                                                </select>
+                                                            <select class="form-select" id="classMajor"
+                                                                aria-label="Select parent category" name="major_id">
+                                                                <option value="" selected>Pilih Jurusan</option>
+                                                                @foreach ($majors as $major)
+                                                                    <option value="{{ $major->id }}">
+                                                                        {{ $major->name }}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
                                                         <div class="col-md-6"><label class="form-label"
                                                                 for="classCapacity">Kapasitas<span
-                                                                class="txt-danger">*</span></label><input
+                                                                    class="txt-danger">*</span></label><input
                                                                 class="form-control" id="classCapacity" type="number"
                                                                 placeholder="Masukan kapasitas kelas" name="capacity">
                                                             <div class="invalid-feedback">
@@ -235,5 +239,6 @@
     <script src="{{ asset('assets/js/datatable/datatables/dataTables.select.js') }}"></script>
     <script src="{{ asset('assets/js/datatable/datatables/select.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
     <script src="{{ asset('assets/js/class-crud.js') }}"></script>
 @endsection

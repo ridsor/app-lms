@@ -1,9 +1,10 @@
 $(function () {
-    var t = $("#student-table").DataTable({
+    const t = $("#student-table").DataTable({
         processing: true,
         serverSide: true,
-        ajax: {
+        ajax: $.fn.dataTable.pipeline({
             url: "/siswa",
+            pages: 5,
             data: function (d) {
                 d.class = $("#class-filter").val();
                 d.homeroom_teacher = $(
@@ -13,14 +14,11 @@ $(function () {
                 d.level = $("#level-filter").val();
                 d.status = $("#status-filter").val();
             },
-            complete: function () {
-                updateDeleteButtonState();
-            },
-        },
+        }),
         columns: [
             {
                 data: "id",
-                name: "id",
+                name: "students.id",
                 orderable: false,
                 searchable: false,
                 width: "50px",
@@ -28,46 +26,48 @@ $(function () {
             },
             {
                 data: "Nama",
-                name: "name",
+                name: "students.name",
             },
             {
                 data: "NIS",
-                name: "nis",
+                name: "students.nis",
+                searchable: false,
             },
             {
                 data: "NISN",
-                name: "nisn",
+                name: "students.nisn",
+                searchable: false,
             },
             {
                 data: "Jurusan",
-                name: "major_name",
+                name: "majors.name",
+                searchable: false,
             },
             {
                 data: "Kelas",
-                name: "class_name",
+                name: "classes.name",
+                searchable: false,
             },
             {
                 data: "Wali Kelas",
-                name: "homeroom_teacher_name",
+                name: "teachers.name",
+                searchable: false,
             },
             {
                 data: "Status",
-                name: "status",
+                name: "students.status",
+                searchable: false,
             },
             {
                 data: "Waktu",
-                name: "created_at",
+                name: "students.created_at",
+                searchable: false,
             },
             {
                 data: "Aksi",
                 name: "Aksi",
                 orderable: false,
                 searchable: false,
-            },
-            {
-                data: "created_at",
-                name: "created_at",
-                visible: false,
             },
         ],
         language: {
@@ -91,9 +91,13 @@ $(function () {
         pageLength: 10,
         lengthMenu: [5, 10, 50, 100],
         responsive: true,
-        autoWidth: true,
+        autoWidth: false,
         searchable: true,
         order: [[8, "desc"]],
+    });
+
+    t.on("draw", function () {
+        updateDeleteButtonState(true);
     });
 
     // Hapus banyak
@@ -120,6 +124,14 @@ $(function () {
             imageHeight: 120,
         }).then((result) => {
             if (result.isConfirmed) {
+                const deleteBtn = $("#delete-selected");
+                const originalHtml = deleteBtn.html();
+                deleteBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<div class="d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span> Loading...</div>'
+                    );
+
                 $.ajax({
                     url: "/siswa/hapus",
                     method: "DELETE",
@@ -127,7 +139,7 @@ $(function () {
                         ids: selectedIds,
                     },
                     success: function (res) {
-                        t.ajax.reload();
+                        t.clearPipeline().draw();
                         const toast = new bootstrap.Toast($("#toast-success"));
                         $("#toast-success #toast-text").text(res.message);
                         toast.show();
@@ -139,6 +151,9 @@ $(function () {
                         );
                         toast.show();
                     },
+                    complete: function () {
+                        deleteBtn.prop("disabled", false).html(originalHtml);
+                    },
                 });
             }
         });
@@ -147,13 +162,13 @@ $(function () {
     // Event handler untuk filter
     $("#filter-btn").click(function (e) {
         e.preventDefault();
-        t.draw();
+        t.clearPipeline().draw();
     });
 
     $("#student-table").on("click", ".trash", function (e) {
         e.preventDefault();
-        var row = $(this).closest("tr");
-        var id = row.attr("id");
+        const trashBtn = $(this);
+        var id = trashBtn.attr("data-id");
         if (!id) return;
         Swal.fire({
             title: "Apakah Anda yakin?",
@@ -169,12 +184,18 @@ $(function () {
             imageHeight: 120,
         }).then((result) => {
             if (result.isConfirmed) {
+                const originalHtml = trashBtn.html();
+                trashBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+                    );
                 $.ajax({
                     url: "/siswa/" + id,
                     method: "DELETE",
                     success: function (res) {
                         if (res.success) {
-                            t.ajax.reload();
+                            t.clearPipeline().draw();
                             const toast = new bootstrap.Toast(
                                 $("#toast-success")
                             );
@@ -190,6 +211,9 @@ $(function () {
                     },
                     error: function (xhr) {
                         alert("Terjadi kesalahan saat menghapus siswa.");
+                    },
+                    complete: function () {
+                        trashBtn.prop("disabled", false).html(originalHtml);
                     },
                 });
             }
@@ -225,7 +249,7 @@ $(function () {
                     const toast = new bootstrap.Toast($("#toast-success"));
                     $("#toast-success #toast-text").text(response.message);
                     toast.show();
-                    t.draw();
+                    t.clearPipeline().draw();
                     $("#addStudentModal").modal("hide");
                     $("#addStudentForm")[0].reset();
                 }
@@ -233,7 +257,6 @@ $(function () {
             error: function (xhr, status, error) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    console.log(errors);
                     if (errors.name) {
                         $("#addStudentForm#studentName")
                             .next(".invalid-feedback")
@@ -373,14 +396,20 @@ $(function () {
         updateDeleteButtonState();
     });
 
-    function updateDeleteButtonState() {
-        var selectedRows = $(
-            "#student-table tbody input[type='checkbox'].select-row:checked"
-        ).length;
-        $("#delete-selected").prop("disabled", selectedRows === 0);
-        $("#delete-selected")
-            .parent()
-            .css("display", selectedRows > 0 ? "block" : "none");
+    function updateDeleteButtonState(reload) {
+        if (!reload) {
+            var selectedRows = $(
+                "#student-table tbody input[type='checkbox'].select-row:checked"
+            ).length;
+            $("#delete-selected").prop("disabled", selectedRows === 0);
+            $("#delete-selected")
+                .parent()
+                .css("display", selectedRows > 0 ? "block" : "none");
+        } else {
+            $("#select-all").prop("checked", false);
+            $("#delete-selected").prop("disabled", true);
+            $("#delete-selected").parent().css("display", "none");
+        }
     }
 
     // Event handler tombol edit
@@ -405,26 +434,30 @@ $(function () {
                     $("#editStudentForm #studentNis").val(res.data.nis);
                     $("#editStudentForm #studentNisn").val(res.data.nisn);
 
-                    var classOptions = '<option value="">Pilih Kelas</option>';
-                    if (res.data.class.major) {
+                    let classOptions = '<option value="">Pilih Kelas</option>';
+                    if (res.data.class?.major_id) {
                         $("#editStudentForm #studentMajor").val(
-                            res.data.class.major.id
+                            res.data.class.major_id
                         );
                         // class
-                        res.data.class.major.classes.forEach(function (cls) {
-                            classOptions +=
-                                "<option " +
-                                (cls.id === res.data.class_id
-                                    ? "selected"
-                                    : "") +
-                                ' value="' +
-                                cls.id +
-                                '">' +
-                                cls.name +
-                                " - " +
-                                cls.level +
-                                "</option>";
-                        });
+                        classes
+                            .filter(function (cls) {
+                                return cls.major_id == res.data.class.major_id;
+                            })
+                            .forEach(function (cls) {
+                                classOptions +=
+                                    "<option " +
+                                    (cls.id === res.data.class_id
+                                        ? "selected"
+                                        : "") +
+                                    ' value="' +
+                                    cls.id +
+                                    '">' +
+                                    cls.name +
+                                    " - " +
+                                    cls.level +
+                                    "</option>";
+                            });
                     } else {
                         classes.forEach(function (cls) {
                             classOptions +=
@@ -444,22 +477,26 @@ $(function () {
 
                     $("#editStudentForm #studentClass").html(classOptions);
 
-                    console.log(res.data.homeroom_teacher_id);
-                    // Set radio button untuk wali kelas berdasarkan ID
-                    $(
-                        `#editStudentForm input[name="homeroom_teacher_id"][value="${res.data.homeroom_teacher_id}"]`
-                    ).prop("checked", true);
+                    if (res.data.homeroom_teacher_id) {
+                        $(
+                            `#editStudentForm input[name="homeroom_teacher_id"][value="${res.data.homeroom_teacher_id}"]`
+                        ).prop("checked", true);
 
-                    // Update teks yang ditampilkan di selected-box
-                    var selectedTeacherName = $(
-                        `#editStudentForm input[name="homeroom_teacher_id"][value="${res.data.homeroom_teacher_id}"]`
-                    )
-                        .next("label")
-                        .find("span")
-                        .text();
-                    $("#editStudentForm .select-box .selected-box span").text(
-                        selectedTeacherName
-                    );
+                        var selectedTeacherName = $(
+                            `#editStudentForm input[name="homeroom_teacher_id"][value="${res.data.homeroom_teacher_id}"]`
+                        )
+                            .next("label")
+                            .find("span")
+                            .text();
+                        $(
+                            "#editStudentForm .select-box .selected-box span"
+                        ).text(selectedTeacherName);
+                    } else {
+                        $(
+                            "#editStudentForm .select-box .selected-box span"
+                        ).text("Pilih Wali Kelas");
+                    }
+
                     $("#editStudentForm #studentDateOfBirth").val(
                         res.data.date_of_birth
                     );
@@ -494,8 +531,6 @@ $(function () {
         e.preventDefault();
         var id = $(this).attr("data-id");
         var formData = new FormData(this);
-        console.log(formData.get("homeroom_teacher_id"));
-        // return;
 
         $("#editStudentForm")
             .find("input, select, textarea")
@@ -524,13 +559,12 @@ $(function () {
                     toast.show();
                     $("#editStudentModal").modal("hide");
                     $("#editStudentForm")[0].reset();
-                    $("#student-table").DataTable().ajax.reload();
+                    t.clearPipeline().draw();
                 }
             },
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    console.log(errors);
 
                     if (errors.name) {
                         $("#editStudentForm #studentName")
@@ -643,52 +677,13 @@ $(function () {
     });
 });
 
-// Custom add search option
-$(document).on("click", ".select-box", function () {
-    var $selected = $(this).find(".selected-box");
-    var $optionsContainer = $(this).find(".options-container");
-    var $searchBox = $optionsContainer.find(".search-box input");
-    var $optionsList = $optionsContainer.find(".selection-option");
-
-    $optionsContainer.toggleClass("active");
-
-    $searchBox.val("");
-    filterList("");
-
-    if ($optionsContainer.hasClass("active")) {
-        $searchBox.focus();
-    }
-
-    $optionsList.on("click", function () {
-        $selected.html($(this).find("label").html());
-        $optionsContainer.removeClass("active");
-    });
-
-    $searchBox.on("keyup", function (e) {
-        filterList(e.target.value);
-    });
-
-    function filterList(searchTerm) {
-        searchTerm = searchTerm.toLowerCase();
-        $optionsList.each(function () {
-            var $label = $(this).find("label");
-            var labelText = $label.text().toLowerCase();
-            if (labelText.indexOf(searchTerm) !== -1) {
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
-    }
-});
-
 $(document).on("change", "#studentMajor", function () {
     var majorId = $(this).val();
     var formId = $(this).closest("form").attr("id");
 
     if (majorId) {
         if (classes.length > 0) {
-            var options = '<option value="">Pilih Kelas</option>';
+            let options = '<option value="">Pilih Kelas</option>';
             classes
                 .filter(function (cls) {
                     return cls.major_id == majorId;
@@ -709,6 +704,24 @@ $(document).on("change", "#studentMajor", function () {
             } else if (formId === "editStudentForm") {
                 $("#editStudentForm #studentClass").html(options);
             }
+        }
+    } else {
+        let options = '<option value="">Pilih Kelas</option>';
+        classes.forEach(function (cls) {
+            options +=
+                "<option value='" +
+                cls.id +
+                "'>" +
+                cls.name +
+                " - " +
+                cls.level +
+                "</option>";
+        });
+
+        if (formId === "addStudentForm") {
+            $("#addStudentForm #studentClass").html(options);
+        } else if (formId === "editStudentForm") {
+            $("#editStudentForm #studentClass").html(options);
         }
     }
 });

@@ -41,13 +41,13 @@
                                 </select>
                             </div>
                             <div class="col-md"><label class="form-label">Dari</label><input
-                                    class="form-control datepicker-here" autocomplete="off" id="start-date-filter" type="text"
-                                    placeholder="dd/mm/yyyy" data-language="id"></div>
+                                    class="form-control datepicker-here" autocomplete="off" id="start-date-filter"
+                                    type="text" placeholder="dd/mm/yyyy" data-language="id"></div>
                             <div class="col-md"><label class="form-label">Sampai</label><input
-                                    class="form-control datepicker-here" autocomplete="off" id="end-date-filter" type="text"
-                                    placeholder="dd/mm/yyyy" data-language="id"></div>
+                                    class="form-control datepicker-here" autocomplete="off" id="end-date-filter"
+                                    type="text" placeholder="dd/mm/yyyy" data-language="id"></div>
                             <div class="col  d-flex justify-content-start align-items-end"><a
-                                    class="btn btn-primary f-w-500 w-100" id="filter-btn" href="#!">Terapkan</a></div>
+                                    class="btn btn-primary f-w-500 w-100" id="filter-btn">Terapkan</a></div>
                         </div>
                     </div>
                 </div>
@@ -96,16 +96,18 @@
                                                         <div class="col-md-6">
                                                             <label class="form-label" for="startDate">Tanggal Mulai<span
                                                                     class="txt-danger">*</span></label>
-                                                            <input class="form-control datepicker-here-minmax" autocomplete="off" id="addStartDate"
-                                                                type="text" placeholder="dd/mm/yyyy" name="start_date"
+                                                            <input class="form-control datepicker-here-minmax"
+                                                                autocomplete="off" id="addStartDate" type="text"
+                                                                placeholder="dd/mm/yyyy" name="start_date"
                                                                 data-language="id">
                                                             <div class="invalid-feedback"></div>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label" for="endDate">Tanggal Selesai<span
                                                                     class="txt-danger">*</span></label>
-                                                            <input class="form-control datepicker-here-minmax" autocomplete="off" id="addEndDate"
-                                                                type="text" placeholder="dd/mm/yyyy" name="end_date"
+                                                            <input class="form-control datepicker-here-minmax"
+                                                                autocomplete="off" id="addEndDate" type="text"
+                                                                placeholder="dd/mm/yyyy" name="end_date"
                                                                 data-language="id">
                                                             <div class="invalid-feedback"></div>
                                                         </div>
@@ -158,16 +160,18 @@
                                                         <div class="col-md-6">
                                                             <label class="form-label" for="startDate">Tanggal Mulai<span
                                                                     class="txt-danger">*</span></label>
-                                                            <input class="form-control datepicker-here-minmax" autocomplete="off" id="editStartDate"
-                                                                type="text" placeholder="dd/mm/yyyy" name="start_date"
+                                                            <input class="form-control datepicker-here-minmax"
+                                                                autocomplete="off" id="editStartDate" type="text"
+                                                                placeholder="dd/mm/yyyy" name="start_date"
                                                                 data-language="id">
                                                             <div class="invalid-feedback"></div>
                                                         </div>
                                                         <div class="col-md-6">
                                                             <label class="form-label" for="endDate">Tanggal Selesai<span
                                                                     class="txt-danger">*</span></label>
-                                                            <input class="form-control datepicker-here-minmax" autocomplete="off" id="editEndDate"
-                                                                type="text" placeholder="dd/mm/yyyy" name="end_date"
+                                                            <input class="form-control datepicker-here-minmax"
+                                                                autocomplete="off" id="editEndDate" type="text"
+                                                                placeholder="dd/mm/yyyy" name="end_date"
                                                                 data-language="id">
                                                             <div class="invalid-feedback"></div>
                                                         </div>
@@ -231,6 +235,7 @@
     <script src="{{ asset('assets/js/datatable/datatables/dataTables.select.js') }}"></script>
     <script src="{{ asset('assets/js/datatable/datatables/select.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
     <script src="{{ asset('assets/js/period-crud.js') }}"></script>
     <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.js') }}"></script>
     <script src="{{ asset('assets/js/datepicker/date-picker/datepicker.en.js') }}"></script>

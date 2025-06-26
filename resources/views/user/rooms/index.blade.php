@@ -142,5 +142,6 @@
     <script src="{{ asset('assets/js/datatable/datatables/dataTables.select.js') }}"></script>
     <script src="{{ asset('assets/js/datatable/datatables/select.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
     <script src="{{ asset('assets/js/room-crud.js') }}"></script>
 @endsection
