@@ -188,6 +188,20 @@ class ClassController extends Controller
     {
         try {
             $class = SchoolClass::findOrFail($id);
+            if ($class->students->count() > 0) {
+                return $this->sendError(
+                    'Kelas tidak dapat dihapus karena masih memiliki siswa.',
+                    [],
+                    400
+                );
+            }
+            if ($class->schedules->count() > 0) {
+                return $this->sendError(
+                    'Kelas tidak dapat dihapus karena masih memiliki jadwal.',
+                    [],
+                    400
+                );
+            }
             $class->delete();
 
             return $this->sendResponse(
@@ -216,7 +230,24 @@ class ClassController extends Controller
                 );
             }
 
-            SchoolClass::whereIn('id', $ids)->delete();
+            $classes = SchoolClass::whereIn('id', $ids)->get();
+            foreach ($classes as $class) {
+                if ($class->students->count() > 0) {
+                    return $this->sendError(
+                        'Kelas tidak dapat dihapus karena masih memiliki siswa.',
+                        [],
+                        400
+                    );
+                }
+                if ($class->schedules->count() > 0) {
+                    return $this->sendError(
+                        'Kelas tidak dapat dihapus karena masih memiliki jadwal.',
+                        [],
+                        400
+                    );
+                }
+            }
+            $classes->delete();
 
             return $this->sendResponse(
                 'Data yang dipilih berhasil dihapus.'
@@ -229,15 +260,5 @@ class ClassController extends Controller
                 500
             );
         }
-    }
-
-    public function getByMajor($major_id)
-    {
-        $classes = SchoolClass::where('major_id', $major_id)
-            ->select('id', 'name', 'level')
-            ->orderBy('level', 'asc')
-            ->get();
-
-        return $this->sendResponse('Data kelas ditemukan', $classes);
     }
 }

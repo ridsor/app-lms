@@ -38,7 +38,7 @@ class RoomController extends Controller
                 ->make(true);
         } else {
             $rooms = Room::paginate(10);
-            return view('user.rooms.index', [
+            return view('user.room.index', [
                 'rooms' => $rooms
             ]);
         }
@@ -89,8 +89,13 @@ class RoomController extends Controller
         try {
             $room = Room::findOrFail($id);
             if ($room->schedules()->count() > 0) {
-                return $this->sendError('Data ini masih digunakan.', [], 422);
+                return $this->sendError(
+                    'Ruangan tidak dapat dihapus karena masih memiliki jadwal.',
+                    [],
+                    400
+                );
             }
+            
             $room->delete();
             return $this->sendResponse('Ruangan berhasil dihapus.');
         } catch (\Exception $e) {
@@ -108,10 +113,14 @@ class RoomController extends Controller
             $rooms = Room::whereIn('id', $ids)->get();
             foreach ($rooms as $room) {
                 if ($room->schedules()->count() > 0) {
-                    return $this->sendError('Beberapa data masih digunakan.', [], 422);
+                    return $this->sendError(
+                        'Ruangan tidak dapat dihapus karena masih memiliki jadwal.',
+                        [],
+                        400
+                    );
                 }
             }
-            Room::whereIn('id', $ids)->delete();
+            $rooms->delete();
             return $this->sendResponse('Data yang dipilih berhasil dihapus.');
         } catch (\Exception $e) {
             Log::info($e->getMessage());

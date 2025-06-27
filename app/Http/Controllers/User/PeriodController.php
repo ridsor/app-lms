@@ -38,11 +38,11 @@ class PeriodController extends Controller
                 ->addColumn('Status', function ($row) {
                     return $row->status ? '
                         <a class="period-active" style="cursor: pointer" data-id="' . $row->id . '" data-name="' . ($row->semester == 'odd' ? 'Ganjil' : 'Genap') . ' ' . $row->academic_year . '">
-                        <span class="badge bg-success">Aktif</span>
+                        <span class="badge badge-light-success">Aktif</span>
                         </a>'
                         :
                         '<a class="period-inactive" style="cursor: pointer" data-id="' . $row->id . '" data-name="' . ($row->semester == 'odd' ? 'Ganjil' : 'Genap') . ' ' . $row->academic_year . '">
-                        <span class="badge bg-secondary">Tidak Aktif</span>
+                        <span class="badge badge-light-secondary">Tidak Aktif</span>
                         </a>';
                 })
                 ->editColumn('Waktu', function ($row) {
@@ -59,7 +59,7 @@ class PeriodController extends Controller
                 ->make(true);
         } else {
             $periods = Period::filter(request()->all())->paginate(10);
-            return view('user.periods.index', [
+            return view('user.period.index', [
                 'periods' => $periods
             ]);
         }
@@ -129,7 +129,11 @@ class PeriodController extends Controller
         try {
             $period = Period::findOrFail($id);
             if ($period->schedules()->count() > 0) {
-                return $this->sendError('Data ini masih digunakan/referensi oleh entitas lain.', [], 422);
+                return $this->sendError(
+                    'Periode tidak dapat dihapus karena masih memiliki jadwal.',
+                    [],
+                    400
+                );
             }
             $period->delete();
             return $this->sendResponse('Periode berhasil dihapus.');
@@ -148,10 +152,14 @@ class PeriodController extends Controller
             $periods = Period::whereIn('id', $ids)->get();
             foreach ($periods as $period) {
                 if ($period->schedules()->count() > 0) {
-                    return $this->sendError('Beberapa periode masih digunakan dalam jadwal.', [], 422);
+                    return $this->sendError(
+                        'Periode tidak dapat dihapus karena masih memiliki jadwal.',
+                        [],
+                        400
+                    );
                 }
             }
-            Period::whereIn('id', $ids)->delete();
+            $periods->delete();
             return $this->sendResponse('Data yang dipilih berhasil dihapus.');
         } catch (\Exception $e) {
             Log::info($e->getMessage());

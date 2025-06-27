@@ -16,6 +16,16 @@ class RolePermissionSeeder extends Seeder
 
         // Buat permissions
         $permissions = [
+            'student management',
+            'edit student class',
+            'view students by homeroom',
+            'teacher management',
+            'parent management',
+            'class management',
+            'major management',
+            'room management',
+            'period management',
+            'user management',
         ];
 
         foreach ($permissions as $permission) {
@@ -72,5 +82,13 @@ class RolePermissionSeeder extends Seeder
             'password' => bcrypt('password')
         ]);
         $teacher->assignRole('teacher');
+
+        $parent = User::create([
+            'name' => 'Parent',
+            'username' => 'parent',
+            'email' => 'parent@gmail.com',
+            'password' => bcrypt('password')
+        ]);
+        $parent->assignRole('parent');
     }
 }

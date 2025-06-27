@@ -99,7 +99,7 @@ $(function () {
         },
         scrollCollapse: true,
         pageLength: 10,
-        lengthMenu: [5, 10, 50, 100],
+        lengthMenu: [10, 25, 50, 100],
         responsive: true,
         autoWidth: false,
         searchable: true,
@@ -107,7 +107,7 @@ $(function () {
     });
 
     t.on("draw", function () {
-        updateDeleteButtonState(true);
+        updateActionButtonState(true);
     });
 
     // Hapus banyak
@@ -139,7 +139,7 @@ $(function () {
                 deleteBtn
                     .prop("disabled", true)
                     .html(
-                        '<div class="d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span> Loading...</div>'
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span>'
                     );
 
                 $.ajax({
@@ -281,102 +281,105 @@ $(function () {
                     t.clearPipeline().draw();
                     $("#addStudentModal").modal("hide");
                     $("#addStudentForm")[0].reset();
+                    $("#addStudentForm .selectpicker").selectpicker("refresh");
                 }
             },
             error: function (xhr, status, error) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     if (errors.name) {
-                        $("#addStudentForm#studentName")
+                        $("#addStudentForm input[name='name']")
                             .next(".invalid-feedback")
                             .text(errors.name[0]);
-                        $("#addStudentForm #studentName").addClass(
+                        $("#addStudentForm input[name='name']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.nis) {
-                        $("#addStudentForm #studentNis")
+                        $("#addStudentForm input[name='nis']")
                             .next(".invalid-feedback")
                             .text(errors.nis[0]);
-                        $("#addStudentForm #studentNis").addClass("is-invalid");
+                        $("#addStudentForm input[name='nis']").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.nisn) {
-                        $("#addStudentForm #studentNisn")
+                        $("#addStudentForm input[name='nisn']")
                             .next(".invalid-feedback")
                             .text(errors.nisn[0]);
-                        $("#addStudentForm #studentNisn").addClass(
+                        $("#addStudentForm input[name='nisn']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.major_id) {
-                        $("#addStudentForm #studentMajor")
+                        $("#addStudentForm input[name='major_id']")
                             .next(".invalid-feedback")
                             .text(errors.major_id[0]);
-                        $("#addStudentForm #studentMajor").addClass(
+                        $("#addStudentForm input[name='major_id']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.class_id) {
-                        $("#addStudentForm #studentClass")
+                        $("#addStudentForm input[name='class_id']")
                             .next(".invalid-feedback")
                             .text(errors.class_id[0]);
-                        $("#addStudentForm #studentClass").addClass(
+                        $("#addStudentForm input[name='class_id']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.homeroom_teacher_id) {
-                        $("#addStudentForm #studentHomeroomTeacher")
+                        $("#addStudentForm select[name='homeroom_teacher_id']")
                             .next(".invalid-feedback")
                             .text(errors.homeroom_teacher_id[0]);
-                        $("#addStudentForm #studentHomeroomTeacher").addClass(
-                            "is-invalid"
-                        );
+                        $(
+                            "#addStudentForm select[name='homeroom_teacher_id']"
+                        ).addClass("is-invalid");
                     }
                     if (errors.date_of_birth) {
-                        $("#addStudentForm #studentDateOfBirth")
+                        $("#addStudentForm input[name='date_of_birth']")
                             .next(".invalid-feedback")
                             .text(errors.date_of_birth[0]);
-                        $("#addStudentForm #studentDateOfBirth").addClass(
-                            "is-invalid"
-                        );
+                        $(
+                            "#addStudentForm input[name='date_of_birth']"
+                        ).addClass("is-invalid");
                     }
                     if (errors.birthplace) {
-                        $("#addStudentForm #studentBirthplace")
+                        $("#addStudentForm input[name='birthplace']")
                             .next(".invalid-feedback")
                             .text(errors.birthplace[0]);
-                        $("#addStudentForm #studentBirthplace").addClass(
+                        $("#addStudentForm input[name='birthplace']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.gender) {
-                        $("#addStudentForm #studentGender")
+                        $("#addStudentForm select[name='gender']")
                             .next(".invalid-feedback")
                             .text(errors.gender[0]);
-                        $("#addStudentForm #studentGender").addClass(
+                        $("#addStudentForm select[name='gender']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.religion) {
-                        $("#addStudentForm #studentReligion")
+                        $("#addStudentForm select[name='religion']")
                             .next(".invalid-feedback")
                             .text(errors.religion[0]);
-                        $("#addStudentForm #studentReligion").addClass(
+                        $("#addStudentForm select[name='religion']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.admission_year) {
-                        $("#addStudentForm #studentAdmissionYear")
+                        $("#addStudentForm input[name='admission_year']")
                             .next(".invalid-feedback")
                             .text(errors.admission_year[0]);
-                        $("#addStudentForm #studentAdmissionYear").addClass(
-                            "is-invalid"
-                        );
+                        $(
+                            "#addStudentForm input[name='admission_year']"
+                        ).addClass("is-invalid");
                     }
                     if (errors.status) {
-                        $("#addStudentForm #studentStatus")
+                        $("#addStudentForm select[name='status']")
                             .next(".invalid-feedback")
                             .text(errors.status[0]);
-                        $("#addStudentForm #studentStatus").addClass(
+                        $("#addStudentForm select[name='status']").addClass(
                             "is-invalid"
                         );
                     }
@@ -398,7 +401,7 @@ $(function () {
         "change",
         'input[type="checkbox"].select-row',
         function () {
-            updateDeleteButtonState();
+            updateActionButtonState();
 
             // Hitung jumlah checkbox baris yang dicentang
             var totalCheckbox = $(
@@ -407,6 +410,8 @@ $(function () {
             var checkedCheckbox = $(
                 "#student-table tbody input[type='checkbox'].select-row:checked"
             ).length;
+            $("#delete-selected-count").text(checkedCheckbox);
+            $("#bulk-edit-selected-count").text(checkedCheckbox);
 
             // Jika semua dicentang, centang juga #select-all
             $("#select-all").prop(
@@ -422,22 +427,29 @@ $(function () {
             "checked",
             checked
         );
-        updateDeleteButtonState();
+        updateActionButtonState();
+        $("#delete-selected-count").text(
+            $("#student-table tbody input[type='checkbox'].select-row:checked")
+                .length
+        );
+        $("#bulk-edit-selected-count").text(
+            $("#student-table tbody input[type='checkbox'].select-row:checked")
+                .length
+        );
     });
 
-    function updateDeleteButtonState(reload) {
+    function updateActionButtonState(reload) {
         if (!reload) {
             var selectedRows = $(
                 "#student-table tbody input[type='checkbox'].select-row:checked"
             ).length;
-            $("#delete-selected").prop("disabled", selectedRows === 0);
-            $("#delete-selected")
-                .parent()
-                .css("display", selectedRows > 0 ? "block" : "none");
+            $("#student-action-buttons").css(
+                "display",
+                selectedRows > 0 ? "flex" : "none"
+            );
         } else {
             $("#select-all").prop("checked", false);
-            $("#delete-selected").prop("disabled", true);
-            $("#delete-selected").parent().css("display", "none");
+            $("#student-action-buttons").css("display", "none");
         }
     }
 
@@ -445,6 +457,7 @@ $(function () {
     $("#student-table").on("click", ".edit", function (e) {
         e.preventDefault();
         var id = $(this).data("id");
+        if (!id) return;
 
         const editBtn = $(this);
         const originalHtml = editBtn.html();
@@ -459,13 +472,13 @@ $(function () {
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
-                    $("#editStudentForm #studentName").val(res.data.name);
-                    $("#editStudentForm #studentNis").val(res.data.nis);
-                    $("#editStudentForm #studentNisn").val(res.data.nisn);
+                    $("#editStudentForm [name='name']").val(res.data.name);
+                    $("#editStudentForm [name='nis']").val(res.data.nis);
+                    $("#editStudentForm [name='nisn']").val(res.data.nisn);
 
                     let classOptions = '<option value="">Pilih Kelas</option>';
                     if (res.data.class?.major_id) {
-                        $("#editStudentForm #studentMajor").val(
+                        $("#editStudentForm [name='major_id']").val(
                             res.data.class.major_id
                         );
                         // class
@@ -504,42 +517,30 @@ $(function () {
                         });
                     }
 
-                    $("#editStudentForm #studentClass").html(classOptions);
+                    $("#editStudentForm [name='class_id']").html(classOptions);
 
-                    if (res.data.homeroom_teacher_id) {
-                        $(
-                            `#editStudentForm input[name="homeroom_teacher_id"][value="${res.data.homeroom_teacher_id}"]`
-                        ).prop("checked", true);
+                    $("#editStudentForm [name='homeroom_teacher_id']").val(
+                        res.data.homeroom_teacher_id
+                    );
+                    $(
+                        "#editStudentForm [name='homeroom_teacher_id']"
+                    ).selectpicker("refresh");
 
-                        var selectedTeacherName = $(
-                            `#editStudentForm input[name="homeroom_teacher_id"][value="${res.data.homeroom_teacher_id}"]`
-                        )
-                            .next("label")
-                            .find("span")
-                            .text();
-                        $(
-                            "#editStudentForm .select-box .selected-box span"
-                        ).text(selectedTeacherName);
-                    } else {
-                        $(
-                            "#editStudentForm .select-box .selected-box span"
-                        ).text("Pilih Wali Kelas");
-                    }
-
-                    $("#editStudentForm #studentDateOfBirth").val(
+                    $("#editStudentForm [name='date_of_birth']").val(
                         res.data.date_of_birth
                     );
-                    $("#editStudentForm #studentBirthplace").val(
+                    $("#editStudentForm [name='birthplace']").val(
                         res.data.birthplace
                     );
-                    $("#editStudentForm #studentGender").val(res.data.gender);
-                    $("#editStudentForm #studentReligion").val(
+                    $("#editStudentForm [name='gender']").val(res.data.gender);
+                    $("#editStudentForm [name='religion']").val(
                         res.data.religion
                     );
-                    $("#editStudentForm #studentAdmissionYear").val(
+                    $("#editStudentForm [name='admission_year']").val(
                         res.data.admission_year
                     );
-                    $("#editStudentForm #studentStatus").val(res.data.status);
+                    $("#editStudentForm [name='status']").val(res.data.status);
+
                     $("#editStudentForm").attr("data-id", id);
                     $("#editStudentModal").modal("show");
                 }
@@ -588,6 +589,7 @@ $(function () {
                     toast.show();
                     $("#editStudentModal").modal("hide");
                     $("#editStudentForm")[0].reset();
+                    $("#editStudentForm .selectpicker").selectpicker("refresh");
                     t.clearPipeline().draw();
                 }
             },
@@ -596,98 +598,98 @@ $(function () {
                     const errors = xhr.responseJSON.errors;
 
                     if (errors.name) {
-                        $("#editStudentForm #studentName")
+                        $("#editStudentForm input[name='name']")
                             .next(".invalid-feedback")
                             .text(errors.name[0]);
-                        $("#editStudentForm #studentName").addClass(
+                        $("#editStudentForm input[name='name']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.nis) {
-                        $("#editStudentForm #studentNis")
+                        $("#editStudentForm input[name='nis']")
                             .next(".invalid-feedback")
                             .text(errors.nis[0]);
-                        $("#editStudentForm #studentNis").addClass(
+                        $("#editStudentForm input[name='nis']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.nisn) {
-                        $("#editStudentForm #studentNisn")
+                        $("#editStudentForm input[name='nisn']")
                             .next(".invalid-feedback")
                             .text(errors.nisn[0]);
-                        $("#editStudentForm #studentNisn").addClass(
+                        $("#editStudentForm input[name='nisn']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.major_id) {
-                        $("#editStudentForm #studentMajor")
+                        $("#editStudentForm input[name='major_id']")
                             .next(".invalid-feedback")
                             .text(errors.major_id[0]);
-                        $("#editStudentForm #studentMajor").addClass(
+                        $("#editStudentForm input[name='major_id']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.class_id) {
-                        $("#editStudentForm #studentClass")
+                        $("#editStudentForm input[name='class_id']")
                             .next(".invalid-feedback")
                             .text(errors.class_id[0]);
-                        $("#editStudentForm #studentClass").addClass(
+                        $("#editStudentForm input[name='class_id']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.homeroom_teacher_id) {
-                        $("#editStudentForm #studentHomeroomTeacher")
+                        $("#editStudentForm select[name='homeroom_teacher_id']")
                             .next(".invalid-feedback")
                             .text(errors.homeroom_teacher_id[0]);
-                        $("#editStudentForm #studentHomeroomTeacher").addClass(
-                            "is-invalid"
-                        );
+                        $(
+                            "#editStudentForm select[name='homeroom_teacher_id']"
+                        ).addClass("is-invalid");
                     }
                     if (errors.date_of_birth) {
-                        $("#editStudentForm #studentDateOfBirth")
+                        $("#editStudentForm input[name='date_of_birth']")
                             .next(".invalid-feedback")
                             .text(errors.date_of_birth[0]);
-                        $("#editStudentForm #studentDateOfBirth").addClass(
-                            "is-invalid"
-                        );
+                        $(
+                            "#editStudentForm input[name='date_of_birth']"
+                        ).addClass("is-invalid");
                     }
                     if (errors.birthplace) {
-                        $("#editStudentForm #studentBirthplace")
+                        $("#editStudentForm input[name='birthplace']")
                             .next(".invalid-feedback")
                             .text(errors.birthplace[0]);
-                        $("#editStudentForm #studentBirthplace").addClass(
+                        $("#editStudentForm input[name='birthplace']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.gender) {
-                        $("#editStudentForm #studentGender")
+                        $("#editStudentForm select[name='gender']")
                             .next(".invalid-feedback")
                             .text(errors.gender[0]);
-                        $("#editStudentForm #studentGender").addClass(
+                        $("#editStudentForm select[name='gender']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.religion) {
-                        $("#editStudentForm #studentReligion")
+                        $("#editStudentForm select[name='religion']")
                             .next(".invalid-feedback")
                             .text(errors.religion[0]);
-                        $("#editStudentForm #studentReligion").addClass(
+                        $("#editStudentForm select[name='religion']").addClass(
                             "is-invalid"
                         );
                     }
                     if (errors.admission_year) {
-                        $("#editStudentForm #studentAdmissionYear")
+                        $("#editStudentForm input[name='admission_year']")
                             .next(".invalid-feedback")
                             .text(errors.admission_year[0]);
-                        $("#editStudentForm #studentAdmissionYear").addClass(
-                            "is-invalid"
-                        );
+                        $(
+                            "#editStudentForm input[name='admission_year']"
+                        ).addClass("is-invalid");
                     }
                     if (errors.status) {
-                        $("#editStudentForm #studentStatus")
+                        $("#editStudentForm select[name='status']")
                             .next(".invalid-feedback")
                             .text(errors.status[0]);
-                        $("#editStudentForm #studentStatus").addClass(
+                        $("#editStudentForm select[name='status']").addClass(
                             "is-invalid"
                         );
                     }
@@ -704,9 +706,223 @@ $(function () {
             },
         });
     });
+
+    // Event handler tombol view
+    $("#student-table").on("click", ".view", function (e) {
+        e.preventDefault();
+        var id = $(this).data("id");
+        if (!id) return;
+
+        const viewBtn = $(this);
+        const originalHtml = viewBtn.html();
+        viewBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+            );
+        // Reset modal
+        $("#viewStudentModal .form-control-plaintext").text("");
+        $("#viewStudentModal").modal("show");
+        // Show loading state
+        $("#viewStudentModal .modal-body")
+            .addClass("position-relative")
+            .append(
+                '<div id="viewStudentLoading" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.7);z-index:10;display:flex;align-items:center;justify-content:center;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'
+            );
+        $.ajax({
+            url: `/siswa/${id}`,
+            method: "GET",
+            success: function (res) {
+                if (res.success && res.data) {
+                    $("#viewStudentName").text(res.data.name || "-");
+                    $("#viewStudentNis").text(res.data.nis || "-");
+                    $("#viewStudentNisn").text(res.data.nisn || "-");
+                    $("#viewStudentMajor").text(
+                        res.data.class && res.data.class.major
+                            ? res.data.class.major
+                            : "-"
+                    );
+                    $("#viewStudentClass").text(
+                        res.data.class
+                            ? `${res.data.class.name} - ${res.data.class.level}`
+                            : "-"
+                    );
+                    $("#viewStudentHomeroomTeacher").text(
+                        res.data.homeroom_teacher || "-"
+                    );
+                    $("#viewStudentBirthplace").text(
+                        res.data.birthplace || "-"
+                    );
+                    $("#viewStudentDateOfBirth").text(
+                        res.data.date_of_birth || "-"
+                    );
+                    $("#viewStudentGender").text(
+                        res.data.gender === "M"
+                            ? "Laki-laki"
+                            : res.data.gender === "F"
+                            ? "Perempuan"
+                            : "-"
+                    );
+                    $("#viewStudentReligion").text(res.data.religion || "-");
+                    $("#viewStudentAdmissionYear").text(
+                        res.data.admission_year || "-"
+                    );
+                    let statusLabel = "-";
+                    switch (res.data.status) {
+                        case "active":
+                            statusLabel = "Aktif";
+                            break;
+                        case "transferred":
+                            statusLabel = "Pindah";
+                            break;
+                        case "graduated":
+                            statusLabel = "Lulus";
+                            break;
+                        case "dropout":
+                            statusLabel = "Keluar";
+                            break;
+                    }
+                    $("#viewStudentStatus").text(statusLabel);
+                    $("#viewStudentCreatedAt").text(res.data.created_at || "-");
+                }
+            },
+            error: function (xhr) {
+                $("#viewStudentModal").modal("hide");
+                const toast = new bootstrap.Toast($("#toast-error"));
+                $("#toast-error #toast-text").text(
+                    xhr.responseJSON?.message || "Gagal mengambil detail siswa"
+                );
+                toast.show();
+            },
+            complete: function () {
+                $("#viewStudentLoading").remove();
+                viewBtn.prop("disabled", false).html(originalHtml);
+            },
+        });
+    });
+
+    // Bulk Edit
+    $("#bulk-edit-selected").on("click", function () {
+        var selectedIds = [];
+        $(
+            '#student-table tbody input[type="checkbox"].select-row:checked'
+        ).each(function () {
+            selectedIds.push($(this).val());
+        });
+        if (selectedIds.length === 0) return;
+        // Reset form
+        $("#bulkEditStudentForm")[0].reset();
+        $("#bulkEditStudentForm .selectpicker").selectpicker("refresh");
+
+        $("#bulkEditStudentModal").modal("show");
+        $("#bulkEditStudentForm").data("ids", selectedIds);
+    });
+
+    $("#bulkEditStudentForm").on("submit", function (e) {
+        e.preventDefault();
+        var ids = $(this).data("ids") || [];
+
+        var data = {
+            ids: ids,
+            class_id: $("#bulkEditStudentForm select[name='class_id']").val(),
+            homeroom_teacher_id: $(
+                "#bulkEditStudentForm select[name='homeroom_teacher_id']"
+            ).val(),
+        };
+
+        var submitBtn = $("#bulkEditStudentSubmitBtn");
+        var originalText = submitBtn.text();
+        submitBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
+            );
+        $.ajax({
+            url: "/siswa/edit",
+            method: "PATCH",
+            data: JSON.stringify(data),
+            contentType: "application/json",
+            success: function (res) {
+                if (res.success) {
+                    const toast = new bootstrap.Toast($("#toast-success"));
+                    $("#toast-success #toast-text").text(res.message);
+                    toast.show();
+                    $("#bulkEditStudentModal").modal("hide");
+                    t.clearPipeline().draw();
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+
+                    if (errors.class_id) {
+                        $("#bulkEditStudentForm select[name='class_id']")
+                            .next(".invalid-feedback")
+                            .text(errors.class_id[0]);
+                        $(
+                            "#bulkEditStudentForm select[name='class_id']"
+                        ).addClass("is-invalid");
+                    }
+                    if (errors.homeroom_teacher_id) {
+                        $(
+                            "#bulkEditStudentForm select[name='homeroom_teacher_id']"
+                        ).addClass("is-invalid");
+                        $(
+                            "#bulkEditStudentForm select[name='homeroom_teacher_id']"
+                        )
+                            .next(".invalid-feedback")
+                            .text(errors.homeroom_teacher_id[0]);
+                    }
+                } else {
+                    const toast = new bootstrap.Toast($("#toast-error"));
+                    $("#toast-error #toast-text").text(
+                        xhr.responseJSON.message
+                    );
+                    toast.show();
+                }
+            },
+            complete: function () {
+                submitBtn.prop("disabled", false).html(originalText);
+            },
+        });
+    });
+
+    // Filter kelas berdasarkan jurusan pada modal bulk edit
+    $("#bulkEditMajor").on("change", function () {
+        var majorId = $(this).val();
+        let options = '<option value="">Pilih Kelas</option>';
+        if (majorId) {
+            classes
+                .filter(function (cls) {
+                    return cls.major_id == majorId;
+                })
+                .forEach(function (cls) {
+                    options +=
+                        '<option value="' +
+                        cls.id +
+                        '">' +
+                        cls.name +
+                        " - " +
+                        cls.level +
+                        "</option>";
+                });
+        } else {
+            classes.forEach(function (cls) {
+                options +=
+                    "<option value='" +
+                    cls.id +
+                    "'>" +
+                    cls.name +
+                    " - " +
+                    cls.level +
+                    "</option>";
+            });
+        }
+        $("#bulkEditClass").html(options);
+    });
 });
 
-$(document).on("change", "#studentMajor", function () {
+$(document).on("change", "select[name='major_id']", function () {
     var majorId = $(this).val();
     var formId = $(this).closest("form").attr("id");
 
@@ -729,9 +945,11 @@ $(document).on("change", "#studentMajor", function () {
                 });
 
             if (formId === "addStudentForm") {
-                $("#addStudentForm #studentClass").html(options);
+                $("#addStudentForm select[name='class_id']").html(options);
             } else if (formId === "editStudentForm") {
-                $("#editStudentForm #studentClass").html(options);
+                $("#editStudentForm select[name='class_id']").html(options);
+            } else if (formId === "bulkEditStudentForm") {
+                $("#bulkEditStudentForm select[name='class_id']").html(options);
             }
         }
     } else {
@@ -748,9 +966,11 @@ $(document).on("change", "#studentMajor", function () {
         });
 
         if (formId === "addStudentForm") {
-            $("#addStudentForm #studentClass").html(options);
+            $("#addStudentForm select[name='class_id']").html(options);
         } else if (formId === "editStudentForm") {
-            $("#editStudentForm #studentClass").html(options);
+            $("#editStudentForm select[name='class_id']").html(options);
+        } else if (formId === "bulkEditStudentForm") {
+            $("#bulkEditStudentForm select[name='class_id']").html(options);
         }
     }
 });

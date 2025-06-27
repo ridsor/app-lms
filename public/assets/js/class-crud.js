@@ -81,7 +81,7 @@ $(function () {
         },
         scrollCollapse: true,
         pageLength: 10,
-        lengthMenu: [5, 10, 50, 100],
+        lengthMenu: [10, 25, 50, 100],
         responsive: true,
         autoWidth: false,
         searchable: true,
@@ -121,7 +121,7 @@ $(function () {
                 deleteBtn
                     .prop("disabled", true)
                     .html(
-                        '<div class="d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span> Loading...</div>'
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span>'
                     );
                 $.ajax({
                     url: "/kelas/hapus",
@@ -156,8 +156,10 @@ $(function () {
 
         // Buat query string
         const params = new URLSearchParams();
-        if ($("#major-filter").val()) params.append("major", $("#major-filter").val());
-        if ($("#level-filter").val()) params.append("level", $("#level-filter").val());
+        if ($("#major-filter").val())
+            params.append("major", $("#major-filter").val());
+        if ($("#level-filter").val())
+            params.append("level", $("#level-filter").val());
 
         // Update URL tanpa reload
         const newUrl =
@@ -317,7 +319,7 @@ $(function () {
             var checkedCheckbox = $(
                 "#class-table tbody input[type='checkbox'].select-row:checked"
             ).length;
-
+            $("#delete-selected-count").text(checkedCheckbox);
             // Jika semua dicentang, centang juga #select-all
             $("#select-all").prop(
                 "checked",
@@ -331,6 +333,10 @@ $(function () {
         $('#class-table tbody input[type="checkbox"].select-row').prop(
             "checked",
             checked
+        );
+        $("#delete-selected-count").text(
+            $("#class-table tbody input[type='checkbox'].select-row:checked")
+                .length
         );
         updateDeleteButtonState();
     });

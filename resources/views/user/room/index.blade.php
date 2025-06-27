@@ -1,6 +1,6 @@
 @extends('layouts.user.app')
 
-@section('title', 'Manajemen Jurusan')
+@section('title', 'Manajemen Ruangan')
 
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
@@ -13,14 +13,14 @@
     <div class="page-title">
       <div class="row">
         <div class="col-sm-6">
-          <h3>Jurusan</h3>
+          <h3>Ruangan</h3>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ route('user.home') }}"> <svg class="stroke-icon">
                   <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
                 </svg></a></li>
-            <li class="breadcrumb-item active">Jurusan</li>
+            <li class="breadcrumb-item active">Ruangan</li>
           </ol>
         </div>
       </div>
@@ -33,29 +33,28 @@
           <div class="card-header card-no-border text-end">
             <div class="card-header-right-icon">
               <a class="btn btn-primary f-w-500 mb-2" href="#" data-bs-toggle="modal"
-                data-bs-target="#addMajorModal"><i class="fa fa-plus pe-2"></i>Tambah
+                data-bs-target="#addRoomModal"><i class="fa fa-plus pe-2"></i>Tambah
               </a>
-              <div class="modal fade" id="addMajorModal" tabindex="-1" aria-labelledby="addMajorModal"
-                aria-hidden="true">
+              <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModal" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                   <div class="modal-content category-popup">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="modaldashboard">Tambah Jurusan</h5>
+                      <h5 class="modal-title" id="modaldashboard">Tambah Ruangan</h5>
                       <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-0 custom-input">
                       <div class="text-start">
                         <div class="p-20">
-                          <form class="row g-3 needs-validation" novalidate="" id="addMajorForm">
+                          <form class="row g-3 needs-validation" novalidate="" id="addRoomForm">
                             <div class="col-md-12">
-                              <label class="form-label" for="majorName">Nama Jurusan<span
+                              <label class="form-label" for="roomName">Nama Ruangan<span
                                   class="txt-danger">*</span></label>
-                              <input class="form-control" id="majorName" type="text" placeholder="Masukan nama jurusan"
+                              <input class="form-control" id="roomName" type="text" placeholder="Masukan nama ruangan"
                                 name="name">
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-md-12 d-flex justify-content-end">
-                              <button class="btn btn-primary" type="submit" id="addMajorSubmitBtn">Tambah +</button>
+                              <button class="btn btn-primary" type="submit" id="addRoomSubmitBtn">Tambah +</button>
                             </div>
                           </form>
                         </div>
@@ -64,27 +63,27 @@
                   </div>
                 </div>
               </div>
-              <div class="modal fade" id="editMajorModal" tabindex="-1" aria-labelledby="editMajorModal"
+              <div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModal"
                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                   <div class="modal-content category-popup">
                     <div class="modal-header">
-                      <h5 class="modal-title" id="modaldashboard">Edit Jurusan</h5>
+                      <h5 class="modal-title" id="modaldashboard">Edit Ruangan</h5>
                       <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-0 custom-input">
                       <div class="text-start">
                         <div class="p-20">
-                          <form class="row g-3 needs-validation" novalidate="" id="editMajorForm">
+                          <form class="row g-3 needs-validation" novalidate="" id="editRoomForm">
                             <div class="col-md-12">
-                              <label class="form-label" for="majorName">Nama Jurusan<span
+                              <label class="form-label" for="roomName">Nama Ruangan<span
                                   class="txt-danger">*</span></label>
-                              <input class="form-control" id="majorName" type="text" placeholder="Masukan nama jurusan"
+                              <input class="form-control" id="roomName" type="text" placeholder="Masukan nama ruangan"
                                 name="name">
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-md-12 d-flex justify-content-end">
-                              <button class="btn btn-primary" type="submit" id="editMajorSubmitBtn">Simpan</button>
+                              <button class="btn btn-primary" type="submit" id="editRoomSubmitBtn">Simpan</button>
                             </div>
                           </form>
                         </div>
@@ -108,7 +107,7 @@
           <div class="card-body px-0 pt-0">
             <div class="list-product list-category">
               <div class="recent-table table-responsive custom-scrollbar">
-                <table class="table" id="major-table">
+                <table class="table" id="room-table">
                   <thead>
                     <tr>
                       <th>
@@ -142,5 +141,5 @@
   <script src="{{ asset('assets/js/datatable/datatables/select.bootstrap5.js') }}"></script>
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
-  <script src="{{ asset('assets/js/major-crud.js') }}"></script>
+  <script src="{{ asset('assets/js/room-crud.js') }}"></script>
 @endsection

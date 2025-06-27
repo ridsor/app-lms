@@ -53,7 +53,7 @@ $(function () {
         },
         scrollCollapse: true,
         pageLength: 10,
-        lengthMenu: [5, 10, 50, 100],
+        lengthMenu: [10, 25, 50, 100],
         responsive: true,
         autoWidth: false,
         searchable: true,
@@ -93,7 +93,7 @@ $(function () {
                 deleteBtn
                     .prop("disabled", true)
                     .html(
-                        '<div class="d-flex align-items-center gap-2"><span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span> Loading...</div>'
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span>'
                     );
                 $.ajax({
                     url: "/ruangan/hapus",
@@ -335,6 +335,7 @@ $(function () {
             var checkedCheckbox = $(
                 "#room-table tbody input[type='checkbox'].select-row:checked"
             ).length;
+            $("#delete-selected-count").text(checkedCheckbox);
             $("#select-all").prop(
                 "checked",
                 totalCheckbox > 0 && totalCheckbox === checkedCheckbox
@@ -347,6 +348,10 @@ $(function () {
         $('#room-table tbody input[type="checkbox"].select-row').prop(
             "checked",
             checked
+        );
+        $("#delete-selected-count").text(
+            $("#room-table tbody input[type='checkbox'].select-row:checked")
+                .length
         );
         updateDeleteButtonState();
     });

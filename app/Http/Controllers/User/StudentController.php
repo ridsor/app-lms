@@ -16,14 +16,10 @@ use App\Models\Teacher;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\Student\BulkEditStudentRequest;
 
 class StudentController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['role:vice-principal']);
-    }
-
     public function index(Request $request)
     {
         if ($request->ajax()) {
@@ -118,6 +114,11 @@ class StudentController extends Controller
                 ->addColumn('Aksi', function ($row) {
                     $html = '
                     <div class="common-align gap-2 justify-content-start">
+                        <a class="square-white view" data-id="' . $row->id . '"><svg>
+                            <use href="' . asset('assets/svg/icon-sprite.svg#fill-view') . '">
+                            </use>
+                        </svg>
+</a>
                         <a class="square-white edit"  data-id="' . $row->id . '">
                             <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
                         </a>
@@ -133,6 +134,7 @@ class StudentController extends Controller
             $students = Student::with(['class' => fn($query) => $query->select('id', 'name'), 'homeroomTeacher' => fn($query) => $query->select('id', 'name')])->paginate(10);
             $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('level', 'asc')->get();
             $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
+            $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
             $majors = Major::select('id', 'name')->orderBy('name', 'asc')->get();
             $teachers = Teacher::select('id', 'name')->get();
             $religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'];
@@ -143,6 +145,7 @@ class StudentController extends Controller
                 'students' => $students,
                 'classes' => $classes,
                 'classLevels' => $classLevels,
+                'classNames' => $classNames,
                 'majors' => $majors,
                 'teachers' => $teachers,
                 'statuses' => $statuses,
@@ -150,14 +153,6 @@ class StudentController extends Controller
                 'genders' => $genders,
             ]);
         }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -200,7 +195,60 @@ class StudentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($id) {}
+    public function show($id)
+    {
+        try {
+            $student = Student::with([
+                'class' => function ($query) {
+                    $query->select('id', 'name', 'level', 'major_id');
+                },
+                'class.major' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'homeroomTeacher' => function ($query) {
+                    $query->select('id', 'name');
+                }
+            ])->findOrFail($id);
+
+            if (!$student) {
+                return $this->sendError(
+                    'Data siswa tidak ditemukan.',
+                    [],
+                    404
+                );
+            }
+
+            // Format data untuk kebutuhan frontend/modal
+            $data = [
+                'id' => $student->id,
+                'name' => $student->name,
+                'nis' => $student->nis,
+                'nisn' => $student->nisn,
+                'class' => $student->class ? [
+                    'id' => $student->class->id,
+                    'name' => $student->class->name,
+                    'level' => $student->class->level,
+                    'major' => $student->class->major ? $student->class->major->name : null,
+                ] : null,
+                'homeroom_teacher' => $student->homeroomTeacher ? $student->homeroomTeacher->name : null,
+                'date_of_birth' => $student->date_of_birth ? $student->date_of_birth->format('d/m/Y') : null,
+                'birthplace' => $student->birthplace,
+                'gender' => $student->gender,
+                'religion' => $student->religion,
+                'admission_year' => $student->admission_year,
+                'status' => $student->status,
+                'created_at' => $student->created_at ? $student->created_at->translatedFormat('d/m/Y H:i') : null,
+            ];
+
+            return $this->sendResponse('Data siswa ditemukan', $data);
+        } catch (\Exception $e) {
+            return $this->sendError(
+                'Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -303,7 +351,42 @@ class StudentController extends Controller
                 'Data yang dipilih berhasil dihapus.'
             );
         } catch (\Exception $e) {
-            Log::error('Error bulk deleting students: ' . $e->getMessage());
+            return $this->sendError(
+                'Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+    public function bulkEdit(BulkEditStudentRequest $request)
+    {
+        try {
+            $validated = $request->validated();
+            $ids = $validated['ids'];
+            Log::info($validated);
+
+            $data = [];
+            if (!empty($validated['class_id'])) {
+                $data['class_id'] = $validated['class_id'];
+            }
+            if (!empty($validated['homeroom_teacher_id'])) {
+                $data['homeroom_teacher_id'] = $validated['homeroom_teacher_id'];
+            }
+
+            if (!empty($data)) {
+                Student::whereIn('id', $ids)->update($data);
+                return $this->sendResponse(
+                    'Data yang dipilih berhasil diedit.'
+                );
+            } else {
+                return $this->sendError(
+                    'Tidak ada data yang valid untuk diupdate.',
+                    [],
+                    400
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Error bulk editing students: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
