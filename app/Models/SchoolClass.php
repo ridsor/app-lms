@@ -18,17 +18,16 @@ class SchoolClass extends Model
         'name',
         'level',
         'major_id',
-        'capacity'
     ];
 
     public function students(): HasMany
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(Student::class, 'class_id');
     }
 
     public function schedules(): HasMany
     {
-        return $this->hasMany(Schedule::class);
+        return $this->hasMany(Schedule::class, 'class_id');
     }
 
     public function major()
@@ -51,9 +50,7 @@ class SchoolClass extends Model
 
         // Filter berdasarkan major
         $query->when($filters['major'] ?? false, function ($query, $major) {
-            $query->whereHas('major', function ($query) use ($major) {
-                $query->where('name', $major);
-            });
+            $query->where('majors.name', $major);
         });
     }
 }

@@ -96,7 +96,9 @@ $(function () {
     });
 
     t.on("draw", function () {
-        updateDeleteButtonState(true);
+            $("#select-all").prop("checked", false);
+            $("#delete-selected").prop("disabled", true);
+            $("#delete-selected").parent().css("display", "none");
     });
 
     // Hapus banyak
@@ -465,8 +467,10 @@ $(function () {
         updateDeleteButtonState();
     });
 
-    function updateDeleteButtonState(reload) {
-        if (!reload) {
+        $("#select-all").prop("checked", false);
+            $("#delete-selected").prop("disabled", true);
+            $("#delete-selected").parent().css("display", "none");
+        
             var selectedRows = $(
                 "#period-table tbody input[type='checkbox'].select-row:checked"
             ).length;
@@ -474,11 +478,6 @@ $(function () {
             $("#delete-selected")
                 .parent()
                 .css("display", selectedRows > 0 ? "block" : "none");
-        } else {
-            $("#select-all").prop("checked", false);
-            $("#delete-selected").prop("disabled", true);
-            $("#delete-selected").parent().css("display", "none");
-        }
     }
 
     // Active period

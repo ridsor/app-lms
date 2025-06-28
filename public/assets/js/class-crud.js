@@ -39,12 +39,7 @@ $(function () {
             },
             {
                 data: "Jurusan",
-                name: "major",
-                searchable: false,
-            },
-            {
-                data: "Kapasitas",
-                name: "capacity",
+                name: "majors.name",
                 searchable: false,
             },
             {
@@ -85,11 +80,13 @@ $(function () {
         responsive: true,
         autoWidth: false,
         searchable: true,
-        order: [[5, "desc"]],
+        order: [[4, "desc"]],
     });
 
     t.on("draw", function () {
-        updateDeleteButtonState(true);
+        $("#select-all").prop("checked", false);
+        $("#delete-selected").prop("disabled", true);
+        $("#delete-selected").parent().css("display", "none");
     });
 
     // Hapus banyak
@@ -286,12 +283,6 @@ $(function () {
                             .text(errors.major_id[0]);
                         $("#classMajor").addClass("is-invalid");
                     }
-                    if (errors.capacity) {
-                        $("#classCapacity")
-                            .next(".invalid-feedback")
-                            .text(errors.capacity[0]);
-                        $("#classCapacity").addClass("is-invalid");
-                    }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
                     $("#toast-error #toast-text").text(
@@ -341,20 +332,14 @@ $(function () {
         updateDeleteButtonState();
     });
 
-    function updateDeleteButtonState(reload) {
-        if (!reload) {
-            var selectedRows = $(
-                "#class-table tbody input[type='checkbox'].select-row:checked"
-            ).length;
-            $("#delete-selected").prop("disabled", selectedRows === 0);
-            $("#delete-selected")
-                .parent()
-                .css("display", selectedRows > 0 ? "block" : "none");
-        } else {
-            $("#select-all").prop("checked", false);
-            $("#delete-selected").prop("disabled", true);
-            $("#delete-selected").parent().css("display", "none");
-        }
+    function updateDeleteButtonState() {
+        var selectedRows = $(
+            "#class-table tbody input[type='checkbox'].select-row:checked"
+        ).length;
+        $("#delete-selected").prop("disabled", selectedRows === 0);
+        $("#delete-selected")
+            .parent()
+            .css("display", selectedRows > 0 ? "block" : "none");
     }
 
     // Event handler tombol edit
@@ -378,7 +363,6 @@ $(function () {
                     $("#editClassForm #className").val(res.data.name);
                     $("#editClassForm #classLevel").val(res.data.level);
                     $("#editClassForm #classMajor").val(res.data.major_id);
-                    $("#editClassForm #classCapacity").val(res.data.capacity);
                     $("#editClassForm").attr("data-id", id);
                     $("#editClassModal").modal("show");
                 }
@@ -450,14 +434,6 @@ $(function () {
                             .next(".invalid-feedback")
                             .text(errors.major_id[0]);
                         $("#editClassForm #classMajor").addClass("is-invalid");
-                    }
-                    if (errors.capacity) {
-                        $("#editClassForm #classCapacity")
-                            .next(".invalid-feedback")
-                            .text(errors.capacity[0]);
-                        $("#editClassForm #classCapacity").addClass(
-                            "is-invalid"
-                        );
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));

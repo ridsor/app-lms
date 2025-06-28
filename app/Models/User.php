@@ -63,11 +63,17 @@ class User extends Authenticatable
             if (empty($user->username)) {
                 $user->username = self::generateUsername($user->name);
             }
+            if (empty($user->password)) {
+                $user->password = bcrypt($user->username);
+            }
         });
 
         static::updating(function ($user) {
             if ($user->isDirty('name') && empty($user->username)) {
                 $user->username = self::generateUsername($user->name);
+            }
+            if ($user->isDirty('name') && empty($user->password)) {
+                $user->password = bcrypt($user->username);
             }
         });
     }

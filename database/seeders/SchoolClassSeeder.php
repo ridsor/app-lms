@@ -21,8 +21,6 @@ class SchoolClassSeeder extends Seeder
                         'name' => $name,
                         'level' => $level,
                         'major_id' => $major->id,
-                    ], [
-                        'capacity' => rand(20, 40)
                     ]);
                 }
             }

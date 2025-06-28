@@ -21,7 +21,16 @@ class ClassController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $data = SchoolClass::filter($request->all());
+            $data = SchoolClass::query()
+                ->leftJoin('majors', 'classes.major_id', '=', 'majors.id')
+                ->select([
+                    'classes.id',
+                    'classes.name',
+                    'classes.level',
+                    'majors.name as major_name',
+                    'classes.created_at'
+                ])
+                ->filter($request->all());
 
             return Datatables::of($data)
                 ->addColumn('id', function ($row) {
@@ -52,13 +61,7 @@ class ClassController extends Controller
                 })
                 ->addColumn('Jurusan', function ($row) {
                     $html = '
-                        <span class="badge badge-light-primary">' . ($row->major?->name ? $row->major->name : " - ") . '</span>
-                    ';
-                    return $html;
-                })
-                ->addColumn('Kapasitas', function ($row) {
-                    $html = '
-                        <p class="f-light">' . $row->capacity . '</p>
+                        <span class="badge badge-light-primary">' . ($row->major_name ? $row->major_name : " - ") . '</span>
                     ';
                     return $html;
                 })
@@ -77,7 +80,7 @@ class ClassController extends Controller
                 ->addColumn('Waktu', function ($row) {
                     return $row->created_at->translatedFormat('d/m/Y H:i');
                 })
-                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Kapasitas', 'Waktu', 'Aksi',])
+                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Waktu', 'Aksi',])
                 ->make(true);
         } else {
             $classes = SchoolClass::filter(request()->all())->paginate(10);
@@ -92,26 +95,14 @@ class ClassController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreClassRequest $request)
     {
         try {
             // Buat kelas baru
-            $schoolClass = SchoolClass::create([
-                'name' => $request->validated('name'),
-                'level' => $request->validated('level'),
-                'major_id' => $request->validated('major_id'),
-                'capacity' => $request->validated('capacity')
-            ]);
+            $validated = $request->validated();
+            $schoolClass = SchoolClass::create($validated);
 
             // Response sukses
             return $this->sendResponse(
@@ -121,13 +112,11 @@ class ClassController extends Controller
                     'name' => $schoolClass->name,
                     'level' => $schoolClass->level,
                     'major' => $schoolClass->major->name ?? '-',
-                    'capacity' => $schoolClass->capacity,
                     'created_at' => $schoolClass->created_at->translatedFormat('d/m/Y H:i')
                 ],
                 201
             );
         } catch (\Exception $e) {
-            Log::info($e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -247,7 +236,7 @@ class ClassController extends Controller
                     );
                 }
             }
-            $classes->delete();
+            SchoolClass::whereIn('id', $ids)->delete();
 
             return $this->sendResponse(
                 'Data yang dipilih berhasil dihapus.'

@@ -32,7 +32,6 @@ class StoreClassRequest extends FormRequest
             ],
             'level' => 'required|string|max:50',
             'major_id' => 'nullable|exists:majors,id',
-            'capacity' => 'required|integer|min:1|max:100'
         ];
     }
 
@@ -53,10 +52,6 @@ class StoreClassRequest extends FormRequest
             'level.max' => 'Tingkat maksimal 50 karakter',
             'major_id.required' => 'Jurusan wajib diisi',
             'major_id.exists' => 'Jurusan tidak ditemukan',
-            'capacity.required' => 'Kapasitas wajib diisi',
-            'capacity.integer' => 'Kapasitas harus berupa angka',
-            'capacity.min' => 'Kapasitas minimal 1',
-            'capacity.max' => 'Kapasitas maksimal 100',
             'name.unique' => 'Kelas sudah ada'
         ];
     }
@@ -72,7 +67,6 @@ class StoreClassRequest extends FormRequest
             'name' => 'nama kelas',
             'level' => 'tingkat',
             'major_id' => 'jurusan',
-            'capacity' => 'kapasitas'
         ];
     }
 }

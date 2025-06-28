@@ -30,7 +30,7 @@ class Teacher extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function homeroomTeacher(): HasMany
+    public function homeroomStudents(): HasMany
     {
         return $this->hasMany(Student::class, 'homeroom_teacher_id');
     }

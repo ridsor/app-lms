@@ -100,12 +100,6 @@
                                 @endforeach
                               </select>
                             </div>
-                            <div class="col-md-6"><label class="form-label" for="classCapacity">Kapasitas<span
-                                  class="txt-danger">*</span></label><input class="form-control" id="classCapacity"
-                                type="number" placeholder="Masukan kapasitas kelas" name="capacity">
-                              <div class="invalid-feedback">
-                              </div>
-                            </div>
 
                             <div class="col-md-12 d-flex justify-content-end">
                               <button class="btn btn-primary" type="submit" id="addClassSubmitBtn">Tambah +</button>
@@ -155,12 +149,6 @@
                                 @endforeach
                               </select>
                             </div>
-                            <div class="col-md-6"><label class="form-label" for="classCapacity">Kapasitas<span
-                                  class="txt-danger">*</span></label><input class="form-control" id="classCapacity"
-                                type="number" placeholder="Masukan kapasitas kelas" name="capacity">
-                              <div class="invalid-feedback">
-                              </div>
-                            </div>
 
                             <div class="col-md-12 d-flex justify-content-end">
                               <button class="btn btn-primary" type="submit" id="editClassSubmitBtn">Simpan</button>
@@ -202,7 +190,6 @@
                       <th> <span class="c-o-light f-w-600">Nama</span></th>
                       <th> <span class="c-o-light f-w-600">Tingkat</span></th>
                       <th> <span class="c-o-light f-w-600">Jurusan</span></th>
-                      <th> <span class="c-o-light f-w-600">Kapasitas</span></th>
                       <th> <span class="c-o-light f-w-600">Waktu</span></th>
                       <th> <span class="c-o-light f-w-600">Aksi</span></th>
                     </tr>

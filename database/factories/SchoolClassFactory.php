@@ -18,7 +18,6 @@ class SchoolClassFactory extends Factory
             'name' => $this->faker->randomElement(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']),
             'level' => $this->faker->randomElement(['10', '11', '12']),
             'major_id' => $major->id,
-            'capacity' => $this->faker->numberBetween(20, 40)
         ];
     }
 }

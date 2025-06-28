@@ -15,8 +15,10 @@ use App\Models\Major;
 use App\Models\Teacher;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Student\BulkEditStudentRequest;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class StudentController extends Controller
 {
@@ -118,7 +120,7 @@ class StudentController extends Controller
                             <use href="' . asset('assets/svg/icon-sprite.svg#fill-view') . '">
                             </use>
                         </svg>
-</a>
+                        </a>
                         <a class="square-white edit"  data-id="' . $row->id . '">
                             <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
                         </a>
@@ -132,7 +134,7 @@ class StudentController extends Controller
                 ->make(true);
         } else {
             $students = Student::with(['class' => fn($query) => $query->select('id', 'name'), 'homeroomTeacher' => fn($query) => $query->select('id', 'name')])->paginate(10);
-            $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('level', 'asc')->get();
+            $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc')->get();
             $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
             $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
             $majors = Major::select('id', 'name')->orderBy('name', 'asc')->get();
@@ -163,16 +165,19 @@ class StudentController extends Controller
         try {
             $validated = $request->validated();
 
+
+            $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
+
             DB::beginTransaction();
             $user = User::create([
                 'name' => $validated['name'],
-                'password' => bcrypt($validated['name']),
+                'username' => User::generateUsername($validated['name']),
             ]);
-            $user->assignRole('student');
-
+            $user->password = bcrypt($user->username);
+            $user->save();
             $validated['user_id'] = $user->id;
-            $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
-            Student::create($validated);
+            $student = Student::create($validated);
+            $student->user->assignRole('student');
 
             DB::commit();
 
@@ -286,7 +291,9 @@ class StudentController extends Controller
         try {
             $student = Student::findOrFail($id);
             $validated = $request->validated();
+
             $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
+
             $student->update($validated);
 
             return $this->sendResponse('Siswa berhasil diedit', $student);
@@ -302,26 +309,28 @@ class StudentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
         try {
+            DB::beginTransaction();
             $student = Student::findOrFail($id);
-            $student->delete();
-            // Hapus semua data yang berelasi dengan student sebelum menghapus student
 
+            // Hapus semua data yang berelasi dengan student sebelum menghapus student
             if ($student->grades()->count() > 0) {
                 $student->grades()->delete();
             }
-
             if ($student->user) {
                 $student->user->delete();
             }
+            $student->delete();
+
+            DB::commit();
 
             return $this->sendResponse(
                 'Siswa berhasil dihapus.',
             );
         } catch (\Exception $e) {
-            Log::error('Error deleting student: ' . $e->getMessage());
+            DB::rollBack();
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -343,14 +352,19 @@ class StudentController extends Controller
                 );
             }
 
-            Student::whereIn('id', $ids)->delete();
+            DB::beginTransaction();
+
             Grade::whereIn('student_id', $ids)->delete();
             User::whereIn('id', $ids)->delete();
+            Student::whereIn('id', $ids)->delete();
+
+            DB::commit();
 
             return $this->sendResponse(
                 'Data yang dipilih berhasil dihapus.'
             );
         } catch (\Exception $e) {
+            DB::rollBack();
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -363,7 +377,6 @@ class StudentController extends Controller
         try {
             $validated = $request->validated();
             $ids = $validated['ids'];
-            Log::info($validated);
 
             $data = [];
             if (!empty($validated['class_id'])) {
@@ -371,6 +384,9 @@ class StudentController extends Controller
             }
             if (!empty($validated['homeroom_teacher_id'])) {
                 $data['homeroom_teacher_id'] = $validated['homeroom_teacher_id'];
+            }
+            if (!empty($validated['status'])) {
+                $data['status'] = $validated['status'];
             }
 
             if (!empty($data)) {
@@ -386,12 +402,79 @@ class StudentController extends Controller
                 );
             }
         } catch (\Exception $e) {
-            Log::error('Error bulk editing students: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
                 500
             );
+        }
+    }
+
+    public function export(Request $request)
+    {
+        try {
+            // Mulai dengan query dasar
+            $query = Student::select('id', 'name', 'nis', 'nisn', 'class_id', 'user_id')->with([
+                'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+                'class.major' => fn($query) => $query->select('id', 'name'),
+                'user' => fn($query) => $query->select('id', 'username'),
+            ]);
+
+            // Terapkan filter berdasarkan parameter yang diterima
+            if ($request->filled('major')) {
+                $query->whereHas('class.major', function ($q) use ($request) {
+                    $q->where('name', $request->major);
+                });
+            }
+
+            if ($request->filled('class')) {
+                $query->whereHas('class', function ($q) use ($request) {
+                    $q->where('name', $request->class);
+                });
+            }
+
+            if ($request->filled('level')) {
+                $query->whereHas('class', function ($q) use ($request) {
+                    $q->where('level', $request->level);
+                });
+            }
+
+            // Ambil data siswa
+            $students = $query->get();
+
+            // Format data untuk export
+            $exportData = $students->map(function ($student, $index) {
+                return [
+                    'No' => $index + 1,
+                    'Nama' => $student->name,
+                    'NIS' => $student->nis,
+                    'NISN' => $student->nisn,
+                    'Jurusan' => $student->class && $student->class->major ? $student->class->major->name : '-',
+                    'Kelas' => $student->class ? $student->class->name : '-',
+                    'Tingkat' => $student->class ? $student->class->level : '-',
+                    'Username' => $student->user ? $student->user->username : '-',
+                    'Password' => $student->user ? $student->user->username : '-',
+                ];
+            });
+
+            // Generate nama file berdasarkan filter
+            $filename = 'siswa';
+            if ($request->filled('major')) {
+                $filename .= '-' . strtolower(str_replace(' ', '-', $students[0]->class->major->name));
+            }
+            if ($request->filled('class')) {
+                $filename .= '-' . strtolower(str_replace(' ', '-', $students[0]->class->name));
+            }
+            if ($request->filled('level')) {
+                $filename .= '-' . $request->level;
+            }
+            $filename .= '.xlsx';
+
+            // Export data
+            return (new FastExcel($exportData))->download($filename);
+        } catch (\Exception $e) {
+            Log::info($e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
         }
     }
 }

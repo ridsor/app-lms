@@ -10,7 +10,8 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('login', ['role' => 'vice-principal']);
+        // dd('test');
+        return view('auth.login', ['role' => 'vice-principal']);
     }
 
     public function login(LoginRequest $request)

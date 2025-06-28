@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignId('major_id')->nullable()->constrained('majors');
             $table->string('name', 20);
             $table->string('level', 20);
-            $table->integer('capacity')->default(30);
             $table->timestamps();
 
             $table->index('name');

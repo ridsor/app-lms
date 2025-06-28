@@ -32,23 +32,28 @@ class RolePermissionSeeder extends Seeder
             Permission::create(['name' => $permission]);
         }
 
-        // Buat roles dan assign permissions
-
-        // $admin = Role::create(['name' => 'admin']);
-        // $admin->givePermissionTo(Permission::all());    
-        // $admin->givePermissionTo([
-        //     'user_management',
-        //     'content_management'
-        // ]);
-
         $roleAdmin = Role::create(['name' => 'admin']);
+        $roleAdmin->givePermissionTo([
+            'user management',
+        ]);
 
         $roleVicePrincipal = Role::create(['name' => 'vice-principal']);
-        // $roleVicePrincipal->givePermissionTo([
-        //     'room-management',
-        // ]);
+        $roleVicePrincipal->givePermissionTo([
+            'room management',
+            'period management',
+            'class management',
+            'major management',
+            'teacher management',
+            'parent management',
+            'student management',
+        ]);
 
         $roleTeacher = Role::create(['name' => 'teacher']);
+        $roleTeacher->givePermissionTo([
+            'view students by homeroom',
+            'edit student class',
+        ]);
+
         $roleStudent = Role::create(['name' => 'student']);
 
         $role = User::create([

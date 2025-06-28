@@ -107,7 +107,8 @@ $(function () {
     });
 
     t.on("draw", function () {
-        updateActionButtonState(true);
+        $("#select-all").prop("checked", false);
+        $("#student-action-buttons").css("display", "none");
     });
 
     // Hapus banyak
@@ -397,165 +398,6 @@ $(function () {
         });
     });
 
-    $("#student-table tbody").on(
-        "change",
-        'input[type="checkbox"].select-row',
-        function () {
-            updateActionButtonState();
-
-            // Hitung jumlah checkbox baris yang dicentang
-            var totalCheckbox = $(
-                "#student-table tbody input[type='checkbox'].select-row"
-            ).length;
-            var checkedCheckbox = $(
-                "#student-table tbody input[type='checkbox'].select-row:checked"
-            ).length;
-            $("#delete-selected-count").text(checkedCheckbox);
-            $("#bulk-edit-selected-count").text(checkedCheckbox);
-
-            // Jika semua dicentang, centang juga #select-all
-            $("#select-all").prop(
-                "checked",
-                totalCheckbox > 0 && totalCheckbox === checkedCheckbox
-            );
-        }
-    );
-
-    $("#select-all").on("click", function () {
-        var checked = this.checked;
-        $('#student-table tbody input[type="checkbox"].select-row').prop(
-            "checked",
-            checked
-        );
-        updateActionButtonState();
-        $("#delete-selected-count").text(
-            $("#student-table tbody input[type='checkbox'].select-row:checked")
-                .length
-        );
-        $("#bulk-edit-selected-count").text(
-            $("#student-table tbody input[type='checkbox'].select-row:checked")
-                .length
-        );
-    });
-
-    function updateActionButtonState(reload) {
-        if (!reload) {
-            var selectedRows = $(
-                "#student-table tbody input[type='checkbox'].select-row:checked"
-            ).length;
-            $("#student-action-buttons").css(
-                "display",
-                selectedRows > 0 ? "flex" : "none"
-            );
-        } else {
-            $("#select-all").prop("checked", false);
-            $("#student-action-buttons").css("display", "none");
-        }
-    }
-
-    // Event handler tombol edit
-    $("#student-table").on("click", ".edit", function (e) {
-        e.preventDefault();
-        var id = $(this).data("id");
-        if (!id) return;
-
-        const editBtn = $(this);
-        const originalHtml = editBtn.html();
-        editBtn
-            .prop("disabled", true)
-            .html(
-                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
-            );
-
-        $.ajax({
-            url: `/siswa/${id}/edit`,
-            method: "GET",
-            success: function (res) {
-                if (res.success && res.data) {
-                    $("#editStudentForm [name='name']").val(res.data.name);
-                    $("#editStudentForm [name='nis']").val(res.data.nis);
-                    $("#editStudentForm [name='nisn']").val(res.data.nisn);
-
-                    let classOptions = '<option value="">Pilih Kelas</option>';
-                    if (res.data.class?.major_id) {
-                        $("#editStudentForm [name='major_id']").val(
-                            res.data.class.major_id
-                        );
-                        // class
-                        classes
-                            .filter(function (cls) {
-                                return cls.major_id == res.data.class.major_id;
-                            })
-                            .forEach(function (cls) {
-                                classOptions +=
-                                    "<option " +
-                                    (cls.id === res.data.class_id
-                                        ? "selected"
-                                        : "") +
-                                    ' value="' +
-                                    cls.id +
-                                    '">' +
-                                    cls.name +
-                                    " - " +
-                                    cls.level +
-                                    "</option>";
-                            });
-                    } else {
-                        classes.forEach(function (cls) {
-                            classOptions +=
-                                "<option " +
-                                (cls.id === res.data.class_id
-                                    ? "selected"
-                                    : "") +
-                                ' value="' +
-                                cls.id +
-                                '">' +
-                                cls.name +
-                                " - " +
-                                cls.level +
-                                "</option>";
-                        });
-                    }
-
-                    $("#editStudentForm [name='class_id']").html(classOptions);
-
-                    $("#editStudentForm [name='homeroom_teacher_id']").val(
-                        res.data.homeroom_teacher_id
-                    );
-                    $(
-                        "#editStudentForm [name='homeroom_teacher_id']"
-                    ).selectpicker("refresh");
-
-                    $("#editStudentForm [name='date_of_birth']").val(
-                        res.data.date_of_birth
-                    );
-                    $("#editStudentForm [name='birthplace']").val(
-                        res.data.birthplace
-                    );
-                    $("#editStudentForm [name='gender']").val(res.data.gender);
-                    $("#editStudentForm [name='religion']").val(
-                        res.data.religion
-                    );
-                    $("#editStudentForm [name='admission_year']").val(
-                        res.data.admission_year
-                    );
-                    $("#editStudentForm [name='status']").val(res.data.status);
-
-                    $("#editStudentForm").attr("data-id", id);
-                    $("#editStudentModal").modal("show");
-                }
-            },
-            error: function (xhr) {
-                const toast = new bootstrap.Toast($("#toast-error"));
-                $("#toast-error #toast-text").text(xhr.responseJSON.message);
-                toast.show();
-            },
-            complete: function () {
-                editBtn.prop("disabled", false).html(originalHtml);
-            },
-        });
-    });
-
     // Submit update siswa
     $("#editStudentForm").on("submit", function (e) {
         e.preventDefault();
@@ -707,6 +549,181 @@ $(function () {
         });
     });
 
+    $("#bulkEditStudentForm").on("submit", function (e) {
+        e.preventDefault();
+        var ids = $(this).data("ids") || [];
+
+        var data = {
+            ids: ids,
+            class_id: $("#bulkEditStudentForm select[name='class_id']").val(),
+            homeroom_teacher_id: $(
+                "#bulkEditStudentForm select[name='homeroom_teacher_id']"
+            ).val(),
+            status: $("#bulkEditStudentForm select[name='status']").val(),
+        };
+
+        var submitBtn = $("#bulkEditStudentSubmitBtn");
+        var originalText = submitBtn.text();
+        submitBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
+            );
+        $.ajax({
+            url: "/siswa/edit",
+            method: "PATCH",
+            data: JSON.stringify(data),
+            contentType: "application/json",
+            success: function (res) {
+                if (res.success) {
+                    const toast = new bootstrap.Toast($("#toast-success"));
+                    $("#toast-success #toast-text").text(res.message);
+                    toast.show();
+                    $("#bulkEditStudentModal").modal("hide");
+                    t.clearPipeline().draw();
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+
+                    if (errors.class_id) {
+                        $("#bulkEditStudentForm select[name='class_id']")
+                            .next(".invalid-feedback")
+                            .text(errors.class_id[0]);
+                        $(
+                            "#bulkEditStudentForm select[name='class_id']"
+                        ).addClass("is-invalid");
+                    }
+                    if (errors.homeroom_teacher_id) {
+                        $(
+                            "#bulkEditStudentForm select[name='homeroom_teacher_id']"
+                        ).addClass("is-invalid");
+                        $(
+                            "#bulkEditStudentForm select[name='homeroom_teacher_id']"
+                        )
+                            .next(".invalid-feedback")
+                            .text(errors.homeroom_teacher_id[0]);
+                    }
+                } else {
+                    const toast = new bootstrap.Toast($("#toast-error"));
+                    $("#toast-error #toast-text").text(
+                        xhr.responseJSON.message
+                    );
+                    toast.show();
+                }
+            },
+            complete: function () {
+                submitBtn.prop("disabled", false).html(originalText);
+            },
+        });
+    });
+});
+
+$(document).ready(function () {
+    // Event handler tombol edit
+    $("#student-table").on("click", ".edit", function (e) {
+        e.preventDefault();
+        var id = $(this).data("id");
+        if (!id) return;
+
+        const editBtn = $(this);
+        const originalHtml = editBtn.html();
+        editBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+            );
+
+        $.ajax({
+            url: `/siswa/${id}/edit`,
+            method: "GET",
+            success: function (res) {
+                if (res.success && res.data) {
+                    $("#editStudentForm [name='name']").val(res.data.name);
+                    $("#editStudentForm [name='nis']").val(res.data.nis);
+                    $("#editStudentForm [name='nisn']").val(res.data.nisn);
+
+                    let classOptions = '<option value="">Pilih Kelas</option>';
+                    if (res.data.class?.major_id) {
+                        $("#editStudentForm [name='major_id']").val(
+                            res.data.class.major_id
+                        );
+                        // class
+                        classes
+                            .filter(function (cls) {
+                                return cls.major_id == res.data.class.major_id;
+                            })
+                            .forEach(function (cls) {
+                                classOptions +=
+                                    "<option " +
+                                    (cls.id === res.data.class_id
+                                        ? "selected"
+                                        : "") +
+                                    ' value="' +
+                                    cls.id +
+                                    '">' +
+                                    cls.name +
+                                    " - " +
+                                    cls.level +
+                                    "</option>";
+                            });
+                    } else {
+                        classes.forEach(function (cls) {
+                            classOptions +=
+                                "<option " +
+                                (cls.id === res.data.class_id
+                                    ? "selected"
+                                    : "") +
+                                ' value="' +
+                                cls.id +
+                                '">' +
+                                cls.name +
+                                " - " +
+                                cls.level +
+                                "</option>";
+                        });
+                    }
+
+                    $("#editStudentForm [name='class_id']").html(classOptions);
+
+                    $("#editStudentForm [name='homeroom_teacher_id']").val(
+                        res.data.homeroom_teacher_id
+                    );
+                    $(
+                        "#editStudentForm [name='homeroom_teacher_id']"
+                    ).selectpicker("refresh");
+
+                    $("#editStudentForm [name='date_of_birth']").val(
+                        res.data.date_of_birth
+                    );
+                    $("#editStudentForm [name='birthplace']").val(
+                        res.data.birthplace
+                    );
+                    $("#editStudentForm [name='gender']").val(res.data.gender);
+                    $("#editStudentForm [name='religion']").val(
+                        res.data.religion
+                    );
+                    $("#editStudentForm [name='admission_year']").val(
+                        res.data.admission_year
+                    );
+                    $("#editStudentForm [name='status']").val(res.data.status);
+
+                    $("#editStudentForm").attr("data-id", id);
+                    $("#editStudentModal").modal("show");
+                }
+            },
+            error: function (xhr) {
+                const toast = new bootstrap.Toast($("#toast-error"));
+                $("#toast-error #toast-text").text(xhr.responseJSON.message);
+                toast.show();
+            },
+            complete: function () {
+                editBtn.prop("disabled", false).html(originalHtml);
+            },
+        });
+    });
+
     // Event handler tombol view
     $("#student-table").on("click", ".view", function (e) {
         e.preventDefault();
@@ -801,6 +818,101 @@ $(function () {
         });
     });
 
+    $(document).on("change", "select[name='major_id']", function () {
+        var majorId = $(this).val();
+        var formId = $(this).closest("form").attr("id");
+
+        if (majorId) {
+            if (classes.length > 0) {
+                let options = '<option value="">Pilih Kelas</option>';
+                classes
+                    .filter(function (cls) {
+                        return cls.major_id == majorId;
+                    })
+                    .forEach(function (cls) {
+                        options +=
+                            '<option  value="' +
+                            cls.id +
+                            '">' +
+                            cls.name +
+                            " - " +
+                            cls.level +
+                            "</option>";
+                    });
+
+                if (formId === "addStudentForm") {
+                    $("#addStudentForm select[name='class_id']").html(options);
+                } else if (formId === "editStudentForm") {
+                    $("#editStudentForm select[name='class_id']").html(options);
+                } else if (formId === "bulkEditStudentForm") {
+                    $("#bulkEditStudentForm select[name='class_id']").html(
+                        options
+                    );
+                } else if (formId === "export-form") {
+                    $("#export-class-filter").html(options);
+                }
+            }
+        } else {
+            let options = '<option value="">Pilih Kelas</option>';
+            classes.forEach(function (cls) {
+                options +=
+                    "<option value='" +
+                    cls.id +
+                    "'>" +
+                    cls.name +
+                    " - " +
+                    cls.level +
+                    "</option>";
+            });
+
+            if (formId === "addStudentForm") {
+                $("#addStudentForm select[name='class_id']").html(options);
+            } else if (formId === "editStudentForm") {
+                $("#editStudentForm select[name='class_id']").html(options);
+            } else if (formId === "bulkEditStudentForm") {
+                $("#bulkEditStudentForm select[name='class_id']").html(options);
+            } else if (formId === "export-form") {
+                $("#export-class-filter").html(options);
+            }
+        }
+    });
+
+    // Export siswa dengan form validation
+    $("#export-form").on("submit", function (e) {
+        e.preventDefault();
+
+        const exportBtn = $("#student-account-btn");
+        const originalHtml = exportBtn.html();
+
+        // Validasi minimal satu filter dipilih
+        const major = $("#export-form select[name='major']").val();
+        const classFilter = $("#export-form select[name='class']").val();
+        const level = $("#export-form select[name='level']").val();
+
+        if (!major && !classFilter && !level) {
+            const toast = new bootstrap.Toast($("#toast-error"));
+            $("#toast-error #toast-text").text(
+                "Pilih minimal satu filter untuk export data"
+            );
+            toast.show();
+            return;
+        }
+
+        exportBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Exporting...'
+            );
+
+        // Submit form
+        this.submit();
+
+        // Reset tombol setelah 3 detik
+        setTimeout(function () {
+            exportBtn.prop("disabled", false).html(originalHtml);
+        }, 3000);
+    });
+
     // Bulk Edit
     $("#bulk-edit-selected").on("click", function () {
         var selectedIds = [];
@@ -818,159 +930,37 @@ $(function () {
         $("#bulkEditStudentForm").data("ids", selectedIds);
     });
 
-    $("#bulkEditStudentForm").on("submit", function (e) {
-        e.preventDefault();
-        var ids = $(this).data("ids") || [];
+    $("#student-table tbody").on(
+        "change",
+        'input[type="checkbox"].select-row',
+        function () {
+            updateActionState();
+        }
+    );
 
-        var data = {
-            ids: ids,
-            class_id: $("#bulkEditStudentForm select[name='class_id']").val(),
-            homeroom_teacher_id: $(
-                "#bulkEditStudentForm select[name='homeroom_teacher_id']"
-            ).val(),
-        };
-
-        var submitBtn = $("#bulkEditStudentSubmitBtn");
-        var originalText = submitBtn.text();
-        submitBtn
-            .prop("disabled", true)
-            .html(
-                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
-            );
-        $.ajax({
-            url: "/siswa/edit",
-            method: "PATCH",
-            data: JSON.stringify(data),
-            contentType: "application/json",
-            success: function (res) {
-                if (res.success) {
-                    const toast = new bootstrap.Toast($("#toast-success"));
-                    $("#toast-success #toast-text").text(res.message);
-                    toast.show();
-                    $("#bulkEditStudentModal").modal("hide");
-                    t.clearPipeline().draw();
-                }
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
-
-                    if (errors.class_id) {
-                        $("#bulkEditStudentForm select[name='class_id']")
-                            .next(".invalid-feedback")
-                            .text(errors.class_id[0]);
-                        $(
-                            "#bulkEditStudentForm select[name='class_id']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.homeroom_teacher_id) {
-                        $(
-                            "#bulkEditStudentForm select[name='homeroom_teacher_id']"
-                        ).addClass("is-invalid");
-                        $(
-                            "#bulkEditStudentForm select[name='homeroom_teacher_id']"
-                        )
-                            .next(".invalid-feedback")
-                            .text(errors.homeroom_teacher_id[0]);
-                    }
-                } else {
-                    const toast = new bootstrap.Toast($("#toast-error"));
-                    $("#toast-error #toast-text").text(
-                        xhr.responseJSON.message
-                    );
-                    toast.show();
-                }
-            },
-            complete: function () {
-                submitBtn.prop("disabled", false).html(originalText);
-            },
-        });
+    $("#select-all").on("click", function () {
+        var checked = this.checked;
+        $('#student-table tbody input[type="checkbox"].select-row').prop(
+            "checked",
+            checked
+        );
+        updateActionState();
     });
 
-    // Filter kelas berdasarkan jurusan pada modal bulk edit
-    $("#bulkEditMajor").on("change", function () {
-        var majorId = $(this).val();
-        let options = '<option value="">Pilih Kelas</option>';
-        if (majorId) {
-            classes
-                .filter(function (cls) {
-                    return cls.major_id == majorId;
-                })
-                .forEach(function (cls) {
-                    options +=
-                        '<option value="' +
-                        cls.id +
-                        '">' +
-                        cls.name +
-                        " - " +
-                        cls.level +
-                        "</option>";
-                });
-        } else {
-            classes.forEach(function (cls) {
-                options +=
-                    "<option value='" +
-                    cls.id +
-                    "'>" +
-                    cls.name +
-                    " - " +
-                    cls.level +
-                    "</option>";
-            });
-        }
-        $("#bulkEditClass").html(options);
-    });
-});
+    function updateActionState() {
+        var selectedRows = $(
+            "#student-table tbody input[type='checkbox'].select-row:checked"
+        ).length;
+        $("#selected-count").text(selectedRows);
+        $("#student-action-buttons").css(
+            "display",
+            selectedRows > 0 ? "flex" : "none"
+        );
 
-$(document).on("change", "select[name='major_id']", function () {
-    var majorId = $(this).val();
-    var formId = $(this).closest("form").attr("id");
+        var totalCheckbox = $(
+            "#student-table tbody input[type='checkbox'].select-row"
+        ).length;
 
-    if (majorId) {
-        if (classes.length > 0) {
-            let options = '<option value="">Pilih Kelas</option>';
-            classes
-                .filter(function (cls) {
-                    return cls.major_id == majorId;
-                })
-                .forEach(function (cls) {
-                    options +=
-                        '<option  value="' +
-                        cls.id +
-                        '">' +
-                        cls.name +
-                        " - " +
-                        cls.level +
-                        "</option>";
-                });
-
-            if (formId === "addStudentForm") {
-                $("#addStudentForm select[name='class_id']").html(options);
-            } else if (formId === "editStudentForm") {
-                $("#editStudentForm select[name='class_id']").html(options);
-            } else if (formId === "bulkEditStudentForm") {
-                $("#bulkEditStudentForm select[name='class_id']").html(options);
-            }
-        }
-    } else {
-        let options = '<option value="">Pilih Kelas</option>';
-        classes.forEach(function (cls) {
-            options +=
-                "<option value='" +
-                cls.id +
-                "'>" +
-                cls.name +
-                " - " +
-                cls.level +
-                "</option>";
-        });
-
-        if (formId === "addStudentForm") {
-            $("#addStudentForm select[name='class_id']").html(options);
-        } else if (formId === "editStudentForm") {
-            $("#editStudentForm select[name='class_id']").html(options);
-        } else if (formId === "bulkEditStudentForm") {
-            $("#bulkEditStudentForm select[name='class_id']").html(options);
-        }
+        $("#select-all").prop("checked", totalCheckbox === selectedRows);
     }
 });
