@@ -6,6 +6,7 @@ use App\Http\Controllers\User\PeriodController;
 use App\Http\Controllers\User\ClassController;
 use App\Http\Controllers\User\StudentController;
 use App\Http\Controllers\User\MajorController;
+use App\Http\Controllers\User\TeacherController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group(function () {
@@ -28,4 +29,9 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
 
     Route::delete('jurusan/hapus', [MajorController::class, 'bulkDestroy'])->name('user.major.bulkDestroy');
     Route::resource('/jurusan', MajorController::class)->except(['create', 'show'])->names('user.major');
+
+    Route::delete('guru/hapus', [TeacherController::class, 'bulkDestroy'])->name('user.teacher.bulkDestroy');
+    Route::patch('guru/edit', [TeacherController::class, 'bulkEdit'])->name('user.teacher.bulkEdit');
+    Route::get('guru/akun/export', [TeacherController::class, 'exportAccount'])->name('user.teacher.account.export');
+    Route::resource('/guru', TeacherController::class)->except(['create'])->names('user.teacher');
 });

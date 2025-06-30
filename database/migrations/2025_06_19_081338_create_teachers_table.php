@@ -15,12 +15,14 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade');
             $table->string('name', 100);
-            $table->string('nip', 20)->unique();
-            $table->string('specialization', 100);
-            $table->string('education_level', 50);
+            $table->string('nip', 100)->unique();
+            $table->string('specialization');
+            $table->string('education_level');
+            $table->enum('gender', ['M', 'F']);
             $table->date('date_of_birth');
             $table->string('birthplace', 50);
-            $table->string('religion', 20);
+            $table->string('religion', 50);
+
             $table->timestamps();
 
             $table->fullText('name');

@@ -1,6 +1,6 @@
 @extends('layouts.user.app')
 
-@section('title', 'Manajemen Siswa')
+@section('title', 'Siswa')
 
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
@@ -53,7 +53,8 @@
                 @if ($majors->count() > 0)
                   <div class="col-md">
                     <label class="form-label" for="export-student-account-major-filter">Jurusan</label>
-                    <select class="form-select" id="export-student-account-major-filter" name="major" aria-label="Select major">
+                    <select class="form-select" id="export-student-account-major-filter" name="major"
+                      aria-label="Select major">
                       <option value="" selected>Pilih Jurusan</option>
                       @foreach ($majors as $major)
                         <option value="{{ $major->name }}">{{ $major->name }}</option>
@@ -63,7 +64,8 @@
                 @endif
                 <div class="col-md">
                   <label class="form-label" for="export-student-account-class-filter">Kelas</label>
-                  <select class="form-select" id="export-student-account-class-filter" name="class" aria-label="Select class">
+                  <select class="form-select" id="export-student-account-class-filter" name="class"
+                    aria-label="Select class">
                     <option value="" selected>Pilih Kelas</option>
                     @foreach ($classNames as $class)
                       <option value="{{ $class->name }}">{{ $class->name }}</option>
@@ -72,7 +74,8 @@
                 </div>
                 <div class="col-md">
                   <label class="form-label" for="export-student-account-level-filter">Tingkat</label>
-                  <select class="form-select" id="export-student-account-level-filter" name="level" aria-label="Select level">
+                  <select class="form-select" id="export-student-account-level-filter" name="level"
+                    aria-label="Select level">
                     <option value="" selected>Pilih Tingkat</option>
                     @foreach ($classLevels as $classLevel)
                       <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
@@ -97,12 +100,14 @@
             </div>
           </div>
           <div class="card-body pt-0">
-            <form id="export-parent-account-form" method="GET" action="{{ route('user.student.parent.account.export') }}">
+            <form id="export-parent-account-form" method="GET"
+              action="{{ route('user.student.parent.account.export') }}">
               <div class="row g-3">
                 @if ($majors->count() > 0)
                   <div class="col-md">
                     <label class="form-label" for="export-parent-account-major-filter">Jurusan</label>
-                    <select class="form-select" id="export-parent-account-major-filter" name="major" aria-label="Select major">
+                    <select class="form-select" id="export-parent-account-major-filter" name="major"
+                      aria-label="Select major">
                       <option value="" selected>Pilih Jurusan</option>
                       @foreach ($majors as $major)
                         <option value="{{ $major->name }}">{{ $major->name }}</option>
@@ -112,7 +117,8 @@
                 @endif
                 <div class="col-md">
                   <label class="form-label" for="export-parent-account-class-filter">Kelas</label>
-                  <select class="form-select" id="export-parent-account-class-filter" name="class" aria-label="Select class">
+                  <select class="form-select" id="export-parent-account-class-filter" name="class"
+                    aria-label="Select class">
                     <option value="" selected>Pilih Kelas</option>
                     @foreach ($classNames as $class)
                       <option value="{{ $class->name }}">{{ $class->name }}</option>
@@ -121,7 +127,8 @@
                 </div>
                 <div class="col-md">
                   <label class="form-label" for="export-parent-account-level-filter">Tingkat</label>
-                  <select class="form-select" id="export-parent-account-level-filter" name="level" aria-label="Select level">
+                  <select class="form-select" id="export-parent-account-level-filter" name="level"
+                    aria-label="Select level">
                     <option value="" selected>Pilih Tingkat</option>
                     @foreach ($classLevels as $classLevel)
                       <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
@@ -149,15 +156,15 @@
           <div class="card-body pt-0">
             <div class="row g-3">
               @if ($majors->count() > 0)
-              <div class="col-md-3 col-xl">
-                <label class="form-label" for="major-filter">Jurusan</label>
-                <select class="form-select" id="major-filter" aria-label="Select major">
-                  <option value="" selected>Pilih Jurusan</option>
-                  @foreach ($majors as $major)
-                    <option value="{{ $major->name }}">{{ $major->name }}</option>
-                  @endforeach
-                </select>
-              </div>
+                <div class="col-md-3 col-xl">
+                  <label class="form-label" for="major-filter">Jurusan</label>
+                  <select class="form-select" id="major-filter" aria-label="Select major">
+                    <option value="" selected>Pilih Jurusan</option>
+                    @foreach ($majors as $major)
+                      <option value="{{ $major->name }}">{{ $major->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
               @endif
               <div class="col-md-3 col-xl">
                 <label class="form-label" for="class-filter">Kelas</label>
@@ -238,16 +245,16 @@
                               </div>
                             </div>
                             @if ($majors->count() > 0)
-                            <div class="col-lg-6">
-                              <label class="form-label" for="studentMajor">Jurusan</label>
-                              <select class="form-select" id="studentMajor" name="major_id">
-                                <option value="">Pilih Jurusan</option>
-                                @foreach ($majors as $major)
-                                  <option value="{{ $major->id }}">
-                                    {{ $major->name }}</option>
-                                @endforeach
-                              </select>
-                            </div>
+                              <div class="col-lg-6">
+                                <label class="form-label" for="studentMajor">Jurusan</label>
+                                <select class="form-select" id="studentMajor" name="major_id">
+                                  <option value="">Pilih Jurusan</option>
+                                  @foreach ($majors as $major)
+                                    <option value="{{ $major->id }}">
+                                      {{ $major->name }}</option>
+                                  @endforeach
+                                </select>
+                              </div>
                             @endif
                             <div class="col-lg-6">
                               <label class="form-label" for="studentClass">Kelas</label>
@@ -376,16 +383,16 @@
                               </div>
                             </div>
                             @if ($majors->count() > 0)
-                            <div class="col-lg-6">
-                              <label class="form-label" for="editStudentMajor">Jurusan</label>
-                              <select class="form-select" id="editStudentMajor" name="major_id">
-                                <option value="">Pilih Jurusan</option>
-                                @foreach ($majors as $major)
-                                  <option value="{{ $major->id }}">
-                                    {{ $major->name }}</option>
-                                @endforeach
-                              </select>
-                            </div>
+                              <div class="col-lg-6">
+                                <label class="form-label" for="editStudentMajor">Jurusan</label>
+                                <select class="form-select" id="editStudentMajor" name="major_id">
+                                  <option value="">Pilih Jurusan</option>
+                                  @foreach ($majors as $major)
+                                    <option value="{{ $major->id }}">
+                                      {{ $major->name }}</option>
+                                  @endforeach
+                                </select>
+                              </div>
                             @endif
                             <div class="col-lg-6">
                               <label class="form-label" for="editStudentClass">Kelas<span
@@ -527,11 +534,11 @@
                               </div>
                             </div>
                             @if ($majors->count() > 0)
-                            <div class="col-lg-6">
-                              <label class="form-label">Jurusan</label>
-                              <div class="form-control-plaintext" id="viewStudentMajor">
+                              <div class="col-lg-6">
+                                <label class="form-label">Jurusan</label>
+                                <div class="form-control-plaintext" id="viewStudentMajor">
+                                </div>
                               </div>
-                            </div>
                             @endif
                             <div class="col-lg-6">
                               <label class="form-label">Kelas</label>

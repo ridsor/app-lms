@@ -49,10 +49,6 @@ class RolePermissionSeeder extends Seeder
 
         // Role Teacher - Limited student access (only homeroom students)
         $roleTeacher = Role::create(['name' => 'teacher']);
-        $roleTeacher->givePermissionTo([
-            'student.edit.homeroomteacher',
-            'student.view.homeroomteacher',
-        ]);
 
         // Role Parent - No student management access
         $roleParent = Role::create(['name' => 'parent']);

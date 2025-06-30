@@ -1,6 +1,6 @@
 @extends('layouts.user.app')
 
-@section('title', 'Manajemen Periode')
+@section('title', 'Periode')
 
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">

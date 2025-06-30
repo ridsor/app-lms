@@ -39,7 +39,7 @@
                             <use href="{{ asset('assets/svg/icon-sprite.svg#fill-home') }}"></use>
                           </svg><span class="lan-3">Beranda </span></a>
                       </li>
-                      @can('student.view.hometeacher')
+                      @can('student.view.homeroomteacher')
                         <li class="sidebar-list">
                           <i class="fa-solid fa-thumbtack"></i>
                           <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.student.index') }}"><svg
@@ -47,7 +47,7 @@
                               <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-user') }}"></use>
                             </svg><svg class="fill-icon">
                               <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
-                            </svg><span>Siswa</span></a>
+                            </svg><span>Wali Kelas</span></a>
                         </li>
                       @endcan
                       @can('student.*')
@@ -97,7 +97,16 @@
                               <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
                             </svg><span>Siswa</span></a>
                         </li>
-                      @endrole
+                        <li class="sidebar-list">
+                          <i class="fa-solid fa-thumbtack"></i>
+                          <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.teacher.index') }}"><svg
+                              class="stroke-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-user') }}"></use>
+                            </svg><svg class="fill-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
+                            </svg><span>Guru</span></a>
+                        </li>
+                      @endcan
                     </ul>
                   </div>
                 </nav>

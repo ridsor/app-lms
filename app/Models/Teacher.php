@@ -20,9 +20,14 @@ class Teacher extends Model
         'nip',
         'specialization',
         'education_level',
+        'gender',
         'date_of_birth',
         'birthplace',
         'religion'
+    ];
+
+    protected $casts = [
+        'date_of_birth' => 'date:d/m/Y',
     ];
 
     public function user(): BelongsTo
@@ -43,5 +48,15 @@ class Teacher extends Model
     public function assignmentSubmissions(): HasMany
     {
         return $this->hasMany(AssignmentSubmission::class, 'graded_by');
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['search']['value'])) {
+            $search = $filters['search']['value'];
+            $query->where(function ($q) use ($search) {
+                $q->whereFullText('teachers.name', $search);
+            });
+        }
     }
 }

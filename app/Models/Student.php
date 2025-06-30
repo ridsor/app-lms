@@ -86,7 +86,6 @@ class Student extends Model
     public function scopeFilterByPermission(Builder $query, User $user): Builder
     {
         // Wakasek dan Admin dapat melihat semua siswa
-        Log::info($user->can('student.*'));
         if ($user->can('student.*')) {
             return $query;
         }

@@ -1,6 +1,6 @@
 @extends('layouts.user.app')
 
-@section('title', 'Manajemen Kelas')
+@section('title', 'Kelas')
 
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">

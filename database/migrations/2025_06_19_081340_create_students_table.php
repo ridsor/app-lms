@@ -16,13 +16,13 @@ return new class extends Migration
             $table->foreignId('user_id')->unique()->constrained('users')->onDelete('cascade');
             $table->foreignId('parent_id')->unique()->constrained('users')->onDelete('cascade');
             $table->string('name', 100);
-            $table->string('nis', 20)->unique();
-            $table->string('nisn', 20)->unique();
+            $table->string('nis', 100)->unique();
+            $table->string('nisn', 100)->unique();
             $table->foreignId('class_id')->nullable()->constrained('classes')->onDelete('set null');
             $table->date('date_of_birth');
             $table->string('birthplace', 50);
             $table->enum('gender', ['M', 'F']);
-            $table->string('religion', 20);
+            $table->string('religion', 50);
             $table->year('admission_year');
             $table->enum('status', ['active', 'transferred', 'graduated', 'dropout'])->default('active');
             $table->timestamps();

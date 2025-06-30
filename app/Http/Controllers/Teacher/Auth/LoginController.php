@@ -10,7 +10,7 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('login', ['role' => 'teacher']);
+        return view('auth.login', ['role' => 'teacher']);
     }
 
     public function login(LoginRequest $request)

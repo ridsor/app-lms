@@ -41,8 +41,8 @@ class StudentController extends Controller
                     'classes.level as class_level',
                     'majors.name as major_name',
                 ])
-                ->filterByPermission($request->user())
-                ->filter($request->all());
+                ->filter($request->all())
+                ->filterByPermission($request->user());
 
             return Datatables::of($data)
                 ->addColumn('id', function ($row) {

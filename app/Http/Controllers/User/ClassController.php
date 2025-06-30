@@ -113,20 +113,28 @@ class ClassController extends Controller
                 return abort(403);
             }
 
-            // Buat kelas baru
             $validated = $request->validated();
-            $schoolClass = SchoolClass::create($validated);
 
-            // Response sukses
+            $class = SchoolClass::create($validated);
+
+            if ($request->filled('homeroom_teacher_id')) {
+                if ($class->homeroomTeacher->user && !$class->homeroomTeacher->user->hasPermissionTo('student.view.homeroomteacher') && !$class->homeroomTeacher->user->hasPermissionTo('student.edit.homeroomteacher')) {
+                    $class->homeroomTeacher->user->givePermissionTo([
+                        'student.view.homeroomteacher',
+                        'student.edit.homeroomteacher'
+                    ]);
+                }
+            }
+
             return $this->sendResponse(
                 'Kelas berhasil ditambahkan',
                 [
-                    'id' => $schoolClass->id,
-                    'name' => $schoolClass->name,
-                    'level' => $schoolClass->level,
-                    'major' => $schoolClass->major->name ?? '-',
-                    'homeroom_teacher' => $schoolClass->homeroomTeacher->name ?? '-',
-                    'created_at' => $schoolClass->created_at->translatedFormat('d/m/Y H:i')
+                    'id' => $class->id,
+                    'name' => $class->name,
+                    'level' => $class->level,
+                    'major' => $class->major->name ?? '-',
+                    'homeroom_teacher' => $class->homeroomTeacher->name ?? '-',
+                    'created_at' => $class->created_at->translatedFormat('d/m/Y H:i')
                 ],
                 201
             );
@@ -182,6 +190,20 @@ class ClassController extends Controller
             $class = SchoolClass::findOrFail($id);
             $class->update($request->validated());
 
+            if ($request->filled('homeroom_teacher_id')) {
+                if ($class->homeroomTeacher->user && !$class->homeroomTeacher->user->hasPermissionTo('student.view.homeroomteacher') && !$class->homeroomTeacher->user->hasPermissionTo('student.edit.homeroomteacher')) {
+                    $class->homeroomTeacher->user->givePermissionTo([
+                        'student.view.homeroomteacher',
+                        'student.edit.homeroomteacher'
+                    ]);
+                }
+            } else {
+                if ($class->homeroomTeacher->user && $class->homeroomTeacher->user->hasPermissionTo('student.view.homeroomteacher') && $class->homeroomTeacher->user->hasPermissionTo('student.edit.homeroomteacher')) {
+                    $class->homeroomTeacher->user->revokePermissionTo('student.view.homeroomteacher');
+                    $class->homeroomTeacher->user->revokePermissionTo('student.edit.homeroomteacher');
+                }
+            }
+
             return $this->sendResponse('Kelas berhasil diedit', $class);
         } catch (\Exception $e) {
             return $this->sendError(
@@ -201,7 +223,7 @@ class ClassController extends Controller
             if (!$request->user()->can('class.*')) {
                 return abort(403);
             }
-    
+
             $class = SchoolClass::findOrFail($id);
             if ($class->students->count() > 0) {
                 return $this->sendError(
@@ -237,7 +259,7 @@ class ClassController extends Controller
             if (!$request->user()->can('class.*')) {
                 return abort(403);
             }
-    
+
             $ids = $request->input('ids');
 
             if (empty($ids)) {
