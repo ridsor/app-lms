@@ -6,21 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\SchoolClass;
 use App\Models\Grade;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 
 class Student extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'nis',
-        'nisn',
         'class_id',
         'user_id',
         'homeroom_teacher_id',
+        'parent_id',
+        'name',
+        'nis',
+        'nisn',
         'date_of_birth',
         'birthplace',
         'gender',
@@ -38,17 +41,17 @@ class Student extends Model
 
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'parent_id');
     }
 
     public function class(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
-    }
-
-    public function homeroomTeacher(): BelongsTo
-    {
-        return $this->belongsTo(Teacher::class, 'homeroom_teacher_id');
     }
 
     public function grades(): HasMany
@@ -78,5 +81,23 @@ class Student extends Model
         if (!empty($filters['status'])) {
             $query->where('students.status', $filters['status']);
         }
+    }
+
+    public function scopeFilterByPermission(Builder $query, User $user): Builder
+    {
+        // Wakasek dan Admin dapat melihat semua siswa
+        Log::info($user->can('student.*'));
+        if ($user->can('student.*')) {
+            return $query;
+        }
+
+
+        // Teacher hanya dapat melihat siswa yang diwalinya
+        if ($user->can('student.view.homeroomteacher') && $user->teacher) {
+            return $query->where('homeroom_teacher_id', $user->teacher->id);
+        }
+
+        // Return empty query jika tidak punya permission
+        return $query->where('id', 0);
     }
 }

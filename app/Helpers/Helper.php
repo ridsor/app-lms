@@ -13,7 +13,7 @@ class Helper
     public static function getRoleLabel(string $role): string
     {
         return match ($role) {
-            'vice-principal' => 'Wakil Kepala Sekolah Bidang Kurikulum',
+            'vice-principal' => 'Wakil Kepala Sekolah',
             'admin' => 'Admin',
             'teacher' => 'Guru',
             'student' => 'Siswa',

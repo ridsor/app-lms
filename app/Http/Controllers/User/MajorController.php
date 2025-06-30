@@ -11,13 +11,12 @@ use App\Http\Requests\Major\StoreMajorRequest;
 
 class MajorController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['role:vice-principal']);
-    }
-
     public function index(Request $request)
     {
+        if (!$request->user()->can('major.*')) {
+            return abort(403);
+        }
+
         if ($request->ajax()) {
             $data = Major::filter(request()->all());
             return DataTables::of($data)
@@ -48,6 +47,10 @@ class MajorController extends Controller
     public function store(StoreMajorRequest $request)
     {
         try {
+            if (!$request->user()->can('major.*')) {
+                return abort(403);
+            }
+
             $major = Major::create($request->validated());
             return $this->sendResponse('Jurusan berhasil ditambahkan', $major, 201);
         } catch (\Exception $e) {
@@ -58,6 +61,10 @@ class MajorController extends Controller
     public function edit($id)
     {
         try {
+            if (!$request->user()->can('major.*')) {
+                return abort(403);
+            }
+
             $major = Major::find($id);
             if (!$major) {
                 return $this->sendError('Data jurusan tidak ditemukan.', [], 404);
@@ -71,6 +78,10 @@ class MajorController extends Controller
     public function update(StoreMajorRequest $request, $id)
     {
         try {
+            if (!$request->user()->can('major.*')) {
+                return abort(403);
+            }
+
             $major = Major::findOrFail($id);
             $major->update($request->validated());
             return $this->sendResponse('Jurusan berhasil diedit', $major);
@@ -82,6 +93,10 @@ class MajorController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
+            if (!$request->user()->can('major.*')) {
+                return abort(403);
+            }
+
             $major = Major::findOrFail($id);
             if ($major->classes()->count() > 0) {
                 return $this->sendError(
@@ -101,6 +116,10 @@ class MajorController extends Controller
     public function bulkDestroy(Request $request)
     {
         try {
+            if (!$request->user()->can('major.*')) {
+                return abort(403);
+            }
+
             $ids = $request->input('ids');
             if (empty($ids)) {
                 return $this->sendError('Tidak ada data yang dipilih untuk dihapus.', [], 400);

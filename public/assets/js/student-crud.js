@@ -59,11 +59,6 @@ $(function () {
                 searchable: false,
             },
             {
-                data: "Wali Kelas",
-                name: "teachers.name",
-                searchable: false,
-            },
-            {
                 data: "Status",
                 name: "students.status",
                 searchable: false,
@@ -103,7 +98,7 @@ $(function () {
         responsive: true,
         autoWidth: false,
         searchable: true,
-        order: [[8, "desc"]],
+        order: [[7, "desc"]],
     });
 
     t.on("draw", function () {
@@ -282,7 +277,6 @@ $(function () {
                     t.clearPipeline().draw();
                     $("#addStudentModal").modal("hide");
                     $("#addStudentForm")[0].reset();
-                    $("#addStudentForm .selectpicker").selectpicker("refresh");
                 }
             },
             error: function (xhr, status, error) {
@@ -327,14 +321,6 @@ $(function () {
                         $("#addStudentForm input[name='class_id']").addClass(
                             "is-invalid"
                         );
-                    }
-                    if (errors.homeroom_teacher_id) {
-                        $("#addStudentForm select[name='homeroom_teacher_id']")
-                            .next(".invalid-feedback")
-                            .text(errors.homeroom_teacher_id[0]);
-                        $(
-                            "#addStudentForm select[name='homeroom_teacher_id']"
-                        ).addClass("is-invalid");
                     }
                     if (errors.date_of_birth) {
                         $("#addStudentForm input[name='date_of_birth']")
@@ -431,7 +417,6 @@ $(function () {
                     toast.show();
                     $("#editStudentModal").modal("hide");
                     $("#editStudentForm")[0].reset();
-                    $("#editStudentForm .selectpicker").selectpicker("refresh");
                     t.clearPipeline().draw();
                 }
             },
@@ -478,14 +463,6 @@ $(function () {
                         $("#editStudentForm input[name='class_id']").addClass(
                             "is-invalid"
                         );
-                    }
-                    if (errors.homeroom_teacher_id) {
-                        $("#editStudentForm select[name='homeroom_teacher_id']")
-                            .next(".invalid-feedback")
-                            .text(errors.homeroom_teacher_id[0]);
-                        $(
-                            "#editStudentForm select[name='homeroom_teacher_id']"
-                        ).addClass("is-invalid");
                     }
                     if (errors.date_of_birth) {
                         $("#editStudentForm input[name='date_of_birth']")
@@ -556,9 +533,6 @@ $(function () {
         var data = {
             ids: ids,
             class_id: $("#bulkEditStudentForm select[name='class_id']").val(),
-            homeroom_teacher_id: $(
-                "#bulkEditStudentForm select[name='homeroom_teacher_id']"
-            ).val(),
             status: $("#bulkEditStudentForm select[name='status']").val(),
         };
 
@@ -594,16 +568,6 @@ $(function () {
                         $(
                             "#bulkEditStudentForm select[name='class_id']"
                         ).addClass("is-invalid");
-                    }
-                    if (errors.homeroom_teacher_id) {
-                        $(
-                            "#bulkEditStudentForm select[name='homeroom_teacher_id']"
-                        ).addClass("is-invalid");
-                        $(
-                            "#bulkEditStudentForm select[name='homeroom_teacher_id']"
-                        )
-                            .next(".invalid-feedback")
-                            .text(errors.homeroom_teacher_id[0]);
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -687,13 +651,6 @@ $(document).ready(function () {
 
                     $("#editStudentForm [name='class_id']").html(classOptions);
 
-                    $("#editStudentForm [name='homeroom_teacher_id']").val(
-                        res.data.homeroom_teacher_id
-                    );
-                    $(
-                        "#editStudentForm [name='homeroom_teacher_id']"
-                    ).selectpicker("refresh");
-
                     $("#editStudentForm [name='date_of_birth']").val(
                         res.data.date_of_birth
                     );
@@ -763,9 +720,6 @@ $(document).ready(function () {
                         res.data.class
                             ? `${res.data.class.name} - ${res.data.class.level}`
                             : "-"
-                    );
-                    $("#viewStudentHomeroomTeacher").text(
-                        res.data.homeroom_teacher || "-"
                     );
                     $("#viewStudentBirthplace").text(
                         res.data.birthplace || "-"
@@ -877,17 +831,53 @@ $(document).ready(function () {
         }
     });
 
-    // Export siswa dengan form validation
-    $("#export-form").on("submit", function (e) {
+    // Export akun siswa
+    $("#export-student-account-form").on("submit", function (e) {
         e.preventDefault();
 
-        const exportBtn = $("#student-account-btn");
+        const exportBtn = $("#export-student-account-btn");
         const originalHtml = exportBtn.html();
 
         // Validasi minimal satu filter dipilih
-        const major = $("#export-form select[name='major']").val();
-        const classFilter = $("#export-form select[name='class']").val();
-        const level = $("#export-form select[name='level']").val();
+        const major = $("#export-student-account-form select[name='major']").val();
+        const classFilter = $("#export-student-account-form select[name='class']").val();
+        const level = $("#export-student-account-form select[name='level']").val();
+
+        if (!major && !classFilter && !level) {
+            const toast = new bootstrap.Toast($("#toast-error"));
+            $("#toast-error #toast-text").text(
+                "Pilih minimal satu filter untuk export data"
+            );
+            toast.show();
+            return;
+        }
+
+        exportBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Exporting...'
+            );
+
+        // Submit form
+        this.submit();
+
+        // Reset tombol setelah 3 detik
+        setTimeout(function () {
+            exportBtn.prop("disabled", false).html(originalHtml);
+        }, 3000);
+    });
+
+    // Export akun orang tua siswa
+    $("#export-parent-account-form").on("submit", function (e) {
+        e.preventDefault();
+
+        const exportBtn = $("#export-parent-account-btn");
+        const originalHtml = exportBtn.html();
+
+        // Validasi minimal satu filter dipilih
+        const major = $("#export-parent-account-form select[name='major']").val();
+        const classFilter = $("#export-parent-account-form select[name='class']").val();
+        const level = $("#export-parent-account-form select[name='level']").val();
 
         if (!major && !classFilter && !level) {
             const toast = new bootstrap.Toast($("#toast-error"));
@@ -924,7 +914,6 @@ $(document).ready(function () {
         if (selectedIds.length === 0) return;
         // Reset form
         $("#bulkEditStudentForm")[0].reset();
-        $("#bulkEditStudentForm .selectpicker").selectpicker("refresh");
 
         $("#bulkEditStudentModal").modal("show");
         $("#bulkEditStudentForm").data("ids", selectedIds);

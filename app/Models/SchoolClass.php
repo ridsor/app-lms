@@ -18,6 +18,7 @@ class SchoolClass extends Model
         'name',
         'level',
         'major_id',
+        'homeroom_teacher_id',
     ];
 
     public function students(): HasMany
@@ -33,6 +34,11 @@ class SchoolClass extends Model
     public function major()
     {
         return $this->belongsTo(Major::class);
+    }
+
+    public function homeroomTeacher()
+    {
+        return $this->belongsTo(Teacher::class, 'homeroom_teacher_id');
     }
 
     public function scopeFilter($query, array $filters)

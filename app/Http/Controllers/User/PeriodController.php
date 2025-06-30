@@ -11,13 +11,12 @@ use Carbon\Carbon;
 
 class PeriodController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['role:vice-principal']);
-    }
-
     public function index(Request $request)
     {
+        if (!$request->user()->can('period.*')) {
+            return abort(403);
+        }
+
         if ($request->ajax()) {
             $data = Period::filter($request->all());
 
@@ -67,6 +66,7 @@ class PeriodController extends Controller
 
     public function store(Request $request)
     {
+
         $validated = $request->validate([
             'semester' => 'required|in:odd,even',
             'academic_year' => 'required|string|max:15',
@@ -74,6 +74,10 @@ class PeriodController extends Controller
             'end_date' => 'required|date_format:d/m/Y|after:start_date',
         ]);
         try {
+            if (!$request->user()->can('period.*')) {
+                return abort(403);
+            }
+
             $validated['start_date'] = Carbon::createFromFormat('d/m/Y', $validated['start_date'])->translatedFormat('Y-m-d');
             $validated['end_date'] = Carbon::createFromFormat('d/m/Y', $validated['end_date'])->translatedFormat('Y-m-d');
             $validated['status'] = true;
@@ -92,9 +96,13 @@ class PeriodController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         try {
+            if (!$request->user()->can('period.*')) {
+                return abort(403);
+            }
+
             $period = Period::find($id);
             if (!$period) {
                 return $this->sendError('Data periode tidak ditemukan.', [], 404);
@@ -114,6 +122,10 @@ class PeriodController extends Controller
             'end_date' => 'required|date_format:d/m/Y|after:start_date',
         ]);
         try {
+            if (!$request->user()->can('period.*')) {
+                return abort(403);
+            }
+
             $validated['start_date'] = Carbon::createFromFormat('d/m/Y', $validated['start_date'])->translatedFormat('Y-m-d');
             $validated['end_date'] = Carbon::createFromFormat('d/m/Y', $validated['end_date'])->translatedFormat('Y-m-d');
             $period = Period::findOrFail($id);
@@ -127,6 +139,10 @@ class PeriodController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
+            if (!$request->user()->can('period.*')) {
+                return abort(403);
+            }
+
             $period = Period::findOrFail($id);
             if ($period->schedules()->count() > 0) {
                 return $this->sendError(
@@ -145,6 +161,10 @@ class PeriodController extends Controller
     public function bulkDestroy(Request $request)
     {
         try {
+            if (!$request->user()->can('period.*')) {
+                return abort(403);
+            }
+
             $ids = $request->input('ids');
             if (empty($ids)) {
                 return $this->sendError('Tidak ada data yang dipilih untuk dihapus.', [], 400);
@@ -167,13 +187,18 @@ class PeriodController extends Controller
         }
     }
 
-    public function active($id)
+    public function active(Request $request, $id)
     {
         try {
+            if (!$request->user()->can('period.*')) {
+                return abort(403);
+            }
+
             $period = Period::findOrFail($id);
             $period->update(['status' => true]);
             return $this->sendResponse('Periode berhasil diaktifkan.', $period);
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }

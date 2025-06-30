@@ -7,6 +7,8 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select.bootstrap5.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select/bootstrap-select.min.css') }}">
+
 @endsection
 
 @section('main_content')
@@ -90,17 +92,31 @@
                               <div class="invalid-feedback">
                               </div>
                             </div>
-                            <div class="col-md-6"><label class="form-label" for="classMajor">Jurusan</label>
-                              <select class="form-select" id="classMajor" aria-label="Select parent category"
-                                name="major_id">
-                                <option value="" selected>Pilih Jurusan</option>
-                                @foreach ($majors as $major)
-                                  <option value="{{ $major->id }}">
-                                    {{ $major->name }}</option>
+                            @if ($majors->count() > 0)
+                              <div class="col-md-6"><label class="form-label" for="classMajor">Jurusan</label>
+                                <select class="form-select" id="classMajor" aria-label="Select parent category"
+                                  name="major_id">
+                                  <option value="" selected>Pilih Jurusan</option>
+                                  @foreach ($majors as $major)
+                                    <option value="{{ $major->id }}">
+                                      {{ $major->name }}</option>
+                                  @endforeach
+                                </select>
+                              </div>
+                            @endif
+                            <div class="col-lg-6">
+                              <label class="form-label" for="editStudentHomeroomTeacher">Wali
+                                Kelas</label>
+                              <select class="selectpicker search-picker" data-live-search="true"
+                                id="editStudentHomeroomTeacher" name="homeroom_teacher_id">
+                                <option value="">Pilih Wali Kelas</option>
+                                @foreach ($teachers as $teacher)
+                                  <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
                                 @endforeach
                               </select>
+                              <div class="invalid-feedback">
+                              </div>
                             </div>
-
                             <div class="col-md-12 d-flex justify-content-end">
                               <button class="btn btn-primary" type="submit" id="addClassSubmitBtn">Tambah +</button>
                             </div>
@@ -125,7 +141,7 @@
                       <div class="text-start">
                         <div class="p-20">
                           <form class="row g-3 needs-validation" novalidate="" id="editClassForm">
-                            <div class="col-md-6">
+                            <div class="col-lg-6">
                               <label class="form-label" for="className">Nama<span class="txt-danger">*</span>
                               </label>
                               <input class="form-control" id="className" type="text"
@@ -133,23 +149,37 @@
                               <div class="invalid-feedback">
                               </div>
                             </div>
-                            <div class="col-md-6"><label class="form-label" for="classLevel">Tingkat<span
+                            <div class="col-lg-6"><label class="form-label" for="classLevel">Tingkat<span
                                   class="txt-danger">*</span></label><input class="form-control" id="classLevel"
                                 type="text" placeholder="Masukan tingkat kelas" name="level">
                               <div class="invalid-feedback">
                               </div>
                             </div>
-                            <div class="col-md-6"><label class="form-label" for="classMajor">Jurusan</label>
-                              <select class="form-select" id="classMajor" aria-label="Select parent category"
-                                name="major_id">
-                                <option value="" selected>Pilih Jurusan</option>
-                                @foreach ($majors as $major)
-                                  <option value="{{ $major->id }}">
-                                    {{ $major->name }}</option>
+                            @if ($majors->count() > 0)
+                              <div class="col-lg-6"><label class="form-label" for="classMajor">Jurusan</label>
+                                <select class="form-select" id="classMajor" aria-label="Select parent category"
+                                  name="major_id">
+                                  <option value="" selected>Pilih Jurusan</option>
+                                  @foreach ($majors as $major)
+                                    <option value="{{ $major->id }}">
+                                      {{ $major->name }}</option>
+                                  @endforeach
+                                </select>
+                              </div>
+                            @endif
+                            <div class="col-lg-6">
+                              <label class="form-label" for="editStudentHomeroomTeacher">Wali
+                                Kelas</label>
+                              <select class="selectpicker search-picker" data-live-search="true"
+                                id="editStudentHomeroomTeacher" name="homeroom_teacher_id">
+                                <option value="">Pilih Wali Kelas</option>
+                                @foreach ($teachers as $teacher)
+                                  <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
                                 @endforeach
                               </select>
+                              <div class="invalid-feedback">
+                              </div>
                             </div>
-
                             <div class="col-md-12 d-flex justify-content-end">
                               <button class="btn btn-primary" type="submit" id="editClassSubmitBtn">Simpan</button>
                             </div>
@@ -190,6 +220,7 @@
                       <th> <span class="c-o-light f-w-600">Nama</span></th>
                       <th> <span class="c-o-light f-w-600">Tingkat</span></th>
                       <th> <span class="c-o-light f-w-600">Jurusan</span></th>
+                      <th> <span class="c-o-light f-w-600">Wali Kelas</span></th>
                       <th> <span class="c-o-light f-w-600">Waktu</span></th>
                       <th> <span class="c-o-light f-w-600">Aksi</span></th>
                     </tr>
@@ -214,4 +245,5 @@
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
   <script src="{{ asset('assets/js/class-crud.js') }}"></script>
+  <script src="{{ asset('assets/js/select/bootstrap-select.min.js') }}"></script>
 @endsection

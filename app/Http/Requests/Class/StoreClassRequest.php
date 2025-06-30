@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Class;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class StoreClassRequest extends FormRequest
@@ -22,16 +23,19 @@ class StoreClassRequest extends FormRequest
      */
     public function rules(): array
     {
+        $classId = $this->route('kela');
+
         return [
             'name' => [
                 'required',
                 Rule::unique('classes')->where(function ($query) {
-                    return $query->where('level', $this->level)
-                        ->where('major_id', $this->major_id);
-                }),
+                    return $query->where('level', $this->input('level'))
+                        ->where('major_id', $this->input('major_id'));
+                })->ignore($classId),
             ],
             'level' => 'required|string|max:50',
             'major_id' => 'nullable|exists:majors,id',
+            'homeroom_teacher_id' => 'nullable|exists:teachers,id',
         ];
     }
 
@@ -50,8 +54,8 @@ class StoreClassRequest extends FormRequest
             'level.required' => 'Tingkat wajib diisi',
             'level.string' => 'Tingkat harus berupa teks',
             'level.max' => 'Tingkat maksimal 50 karakter',
-            'major_id.required' => 'Jurusan wajib diisi',
             'major_id.exists' => 'Jurusan tidak ditemukan',
+            'homeroom_teacher_id.exists' => 'Guru tidak ditemukan',
             'name.unique' => 'Kelas sudah ada'
         ];
     }

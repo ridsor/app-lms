@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -16,7 +15,7 @@ use App\Models\Student;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, CanResetPassword, SoftDeletes, HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, CanResetPassword, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -30,7 +29,6 @@ class User extends Authenticatable
         'password',
         'email_verified_at'
     ];
-    protected $dates = ['deleted_at'];
 
     /**
      * The attributes that should be hidden for serialization.

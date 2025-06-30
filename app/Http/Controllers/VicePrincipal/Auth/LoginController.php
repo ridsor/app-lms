@@ -10,7 +10,6 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        // dd('test');
         return view('auth.login', ['role' => 'vice-principal']);
     }
 

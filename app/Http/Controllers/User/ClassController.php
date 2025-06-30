@@ -10,31 +10,32 @@ use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Requests\Class\StoreClassRequest;
 use App\Models\Major;
+use App\Models\Teacher;
 
 class ClassController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['role:vice-principal']);
-    }
-
     public function index(Request $request)
     {
+        if (!$request->user()->can('class.*')) {
+            return abort(403);
+        }
+
         if ($request->ajax()) {
             $data = SchoolClass::query()
                 ->leftJoin('majors', 'classes.major_id', '=', 'majors.id')
+                ->leftJoin('teachers', 'classes.homeroom_teacher_id', '=', 'teachers.id')
                 ->select([
                     'classes.id',
                     'classes.name',
                     'classes.level',
                     'majors.name as major_name',
+                    'teachers.name as homeroom_teacher_name',
                     'classes.created_at'
                 ])
                 ->filter($request->all());
 
             return Datatables::of($data)
                 ->addColumn('id', function ($row) {
-                    // Memperbaiki kode: id checkbox harus unik, gunakan id dinamis dan name array agar bisa multiple select
                     $html = '
                         <div class="checkbox-checked">
                             <div class="form-check d-flex justify-content-center align-items-center">
@@ -65,6 +66,12 @@ class ClassController extends Controller
                     ';
                     return $html;
                 })
+                ->addColumn('Wali Kelas', function ($row) {
+                    $html = '
+                        <span class="badge badge-light-info">' . ($row->homeroom_teacher_name ? $row->homeroom_teacher_name : '-') . '</span>
+                    ';
+                    return $html;
+                })
                 ->addColumn('Aksi', function ($row) {
                     $html = '
                     <div class="common-align gap-2 justify-content-start">
@@ -80,16 +87,18 @@ class ClassController extends Controller
                 ->addColumn('Waktu', function ($row) {
                     return $row->created_at->translatedFormat('d/m/Y H:i');
                 })
-                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Waktu', 'Aksi',])
+                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Wali Kelas', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
             $classes = SchoolClass::filter(request()->all())->paginate(10);
             $levels = SchoolClass::select('level')->distinct()->get();
             $majors = Major::select('id', 'name')->get();
+            $teachers = Teacher::select('id', 'name')->get();
             return view('user.class.index', [
                 'classes' => $classes,
                 'levels' => $levels,
-                'majors' => $majors
+                'majors' => $majors,
+                'teachers' => $teachers
             ]);
         }
     }
@@ -100,6 +109,10 @@ class ClassController extends Controller
     public function store(StoreClassRequest $request)
     {
         try {
+            if (!$request->user()->can('class.*')) {
+                return abort(403);
+            }
+
             // Buat kelas baru
             $validated = $request->validated();
             $schoolClass = SchoolClass::create($validated);
@@ -112,6 +125,7 @@ class ClassController extends Controller
                     'name' => $schoolClass->name,
                     'level' => $schoolClass->level,
                     'major' => $schoolClass->major->name ?? '-',
+                    'homeroom_teacher' => $schoolClass->homeroomTeacher->name ?? '-',
                     'created_at' => $schoolClass->created_at->translatedFormat('d/m/Y H:i')
                 ],
                 201
@@ -128,9 +142,13 @@ class ClassController extends Controller
     /**
      * Display the specified resource.
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         try {
+            if (!$request->user()->can('class.*')) {
+                return abort(403);
+            }
+
             $class = SchoolClass::find($id);
 
             if (!$class) {
@@ -157,6 +175,10 @@ class ClassController extends Controller
     public function update(StoreClassRequest $request, $id)
     {
         try {
+            if (!$request->user()->can('class.*')) {
+                return abort(403);
+            }
+
             $class = SchoolClass::findOrFail($id);
             $class->update($request->validated());
 
@@ -176,6 +198,10 @@ class ClassController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
+            if (!$request->user()->can('class.*')) {
+                return abort(403);
+            }
+    
             $class = SchoolClass::findOrFail($id);
             if ($class->students->count() > 0) {
                 return $this->sendError(
@@ -208,7 +234,10 @@ class ClassController extends Controller
     public function bulkDestroy(Request $request)
     {
         try {
-
+            if (!$request->user()->can('class.*')) {
+                return abort(403);
+            }
+    
             $ids = $request->input('ids');
 
             if (empty($ids)) {

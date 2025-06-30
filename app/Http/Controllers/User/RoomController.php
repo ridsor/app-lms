@@ -10,13 +10,12 @@ use Yajra\DataTables\Facades\DataTables;
 
 class RoomController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['role:vice-principal']);
-    }
-
     public function index(Request $request)
     {
+        if (!$request->user()->can('room.*')) {
+            return abort(403);
+        }
+
         if ($request->ajax()) {
             $data = Room::filter(request()->all());
             return DataTables::of($data)
@@ -37,10 +36,7 @@ class RoomController extends Controller
                 ->rawColumns(['id', 'Nama', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
-            $rooms = Room::paginate(10);
-            return view('user.room.index', [
-                'rooms' => $rooms
-            ]);
+            return view('user.room.index');
         }
     }
 
@@ -50,6 +46,9 @@ class RoomController extends Controller
             'name' => 'required|string|max:255|unique:rooms,name',
         ]);
         try {
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
             $room = Room::create($validated);
             return $this->sendResponse('Ruangan berhasil ditambahkan.', $room);
         } catch (\Exception $e) {
@@ -57,9 +56,12 @@ class RoomController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         try {
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
             $room = Room::find($id);
             if (!$room) {
                 return $this->sendError('Data ruangan tidak ditemukan.', [], 404);
@@ -76,6 +78,10 @@ class RoomController extends Controller
             'name' => 'required|string|max:255|unique:rooms,name,' . $id,
         ]);
         try {
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
+
             $room = Room::findOrFail($id);
             $room->update($validated);
             return $this->sendResponse('Ruangan berhasil diedit.', $room->refresh());
@@ -84,9 +90,13 @@ class RoomController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
+
             $room = Room::findOrFail($id);
             if ($room->schedules()->count() > 0) {
                 return $this->sendError(
@@ -95,7 +105,7 @@ class RoomController extends Controller
                     400
                 );
             }
-            
+
             $room->delete();
             return $this->sendResponse('Ruangan berhasil dihapus.');
         } catch (\Exception $e) {
@@ -106,6 +116,10 @@ class RoomController extends Controller
     public function bulkDestroy(Request $request)
     {
         try {
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
+
             $ids = $request->input('ids');
             if (empty($ids)) {
                 return $this->sendError('Tidak ada data yang dipilih untuk dihapus.', [], 400);

@@ -43,6 +43,11 @@ $(function () {
                 searchable: false,
             },
             {
+                data: "Wali Kelas",
+                name: "teachers.name",
+                searchable: false,
+            },
+            {
                 data: "Waktu",
                 name: "created_at",
                 searchable: false,
@@ -80,7 +85,7 @@ $(function () {
         responsive: true,
         autoWidth: false,
         searchable: true,
-        order: [[4, "desc"]],
+        order: [[5, "desc"]],
     });
 
     t.on("draw", function () {
@@ -266,22 +271,36 @@ $(function () {
                     const errors = xhr.responseJSON.errors;
                     console.log(errors);
                     if (errors.name) {
-                        $("#className")
+                        $("#addClassForm [name='name']")
                             .next(".invalid-feedback")
                             .text(errors.name[0]);
-                        $("#className").addClass("is-invalid");
+                        $("#addClassForm [name='name']").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.level) {
-                        $("#classLevel")
+                        $("#addClassForm [name='level']")
                             .next(".invalid-feedback")
                             .text(errors.level[0]);
-                        $("#classLevel").addClass("is-invalid");
+                        $("#addClassForm [name='level']").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.major_id) {
-                        $("#classMajor")
+                        $("#addClassForm [name='major_id']")
                             .next(".invalid-feedback")
                             .text(errors.major_id[0]);
-                        $("#classMajor").addClass("is-invalid");
+                        $("#addClassForm [name='major_id']").addClass(
+                            "is-invalid"
+                        );
+                    }
+                    if (errors.homeroom_teacher_id) {
+                        $("#addClassForm [name='homeroom_teacher_id']")
+                            .next(".invalid-feedback")
+                            .text(errors.homeroom_teacher_id[0]);
+                        $(
+                            "#addClassForm [name='homeroom_teacher_id']"
+                        ).addClass("is-invalid");
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -360,9 +379,17 @@ $(function () {
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
-                    $("#editClassForm #className").val(res.data.name);
-                    $("#editClassForm #classLevel").val(res.data.level);
-                    $("#editClassForm #classMajor").val(res.data.major_id);
+                    $("#editClassForm [name='name']").val(res.data.name);
+                    $("#editClassForm [name='level']").val(res.data.level);
+                    $("#editClassForm [name='major_id']").val(
+                        res.data.major_id
+                    );
+                    $("#editClassForm [name='homeroom_teacher_id']").val(
+                        res.data.homeroom_teacher_id
+                    );
+                    $(
+                        "#editClassForm [name='homeroom_teacher_id']"
+                    ).selectpicker("refresh");
                     $("#editClassForm").attr("data-id", id);
                     $("#editClassModal").modal("show");
                 }
@@ -418,22 +445,36 @@ $(function () {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     if (errors.name) {
-                        $("#editClassForm #className")
+                        $("#editClassForm [name='name']")
                             .next(".invalid-feedback")
                             .text(errors.name[0]);
-                        $("#editClassForm #className").addClass("is-invalid");
+                        $("#editClassForm [name='name']").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.level) {
-                        $("#editClassForm #classLevel")
+                        $("#editClassForm [name='level']")
                             .next(".invalid-feedback")
                             .text(errors.level[0]);
-                        $("#editClassForm #classLevel").addClass("is-invalid");
+                        $("#editClassForm [name='level']").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.major_id) {
-                        $("#editClassForm #classMajor")
+                        $("#editClassForm [name='major_id']")
                             .next(".invalid-feedback")
                             .text(errors.major_id[0]);
-                        $("#editClassForm #classMajor").addClass("is-invalid");
+                        $("#editClassForm [name='major_id']").addClass(
+                            "is-invalid"
+                        );
+                    }
+                    if (errors.homeroom_teacher_id) {
+                        $("#editClassForm [name='homeroom_teacher_id']")
+                            .next(".invalid-feedback")
+                            .text(errors.homeroom_teacher_id[0]);
+                        $(
+                            "#editClassForm [name='homeroom_teacher_id']"
+                        ).addClass("is-invalid");
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));

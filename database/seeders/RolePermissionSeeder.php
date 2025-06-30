@@ -14,46 +14,50 @@ class RolePermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Buat permissions
+        // Buat permissions untuk student management
         $permissions = [
-            'student management',
-            'edit student class',
-            'view students by homeroom',
-            'teacher management',
-            'parent management',
-            'class management',
-            'major management',
-            'room management',
-            'period management',
-            'user management',
+            'student.*',
+            'student.edit.homeroomteacher',
+            'student.view.homeroomteacher',
+            'teacher.*',
+            'parent.*',
+            'class.*',
+            'major.*',
+            'room.*',
+            'period.*',
+            'user.*',
         ];
 
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
         }
 
+        // Role Admin - Full access
         $roleAdmin = Role::create(['name' => 'admin']);
-        $roleAdmin->givePermissionTo([
-            'user management',
-        ]);
+        $roleAdmin->givePermissionTo(Permission::all());
 
+        // Role Vice Principal (Wakasek) - Full student management
         $roleVicePrincipal = Role::create(['name' => 'vice-principal']);
         $roleVicePrincipal->givePermissionTo([
-            'room management',
-            'period management',
-            'class management',
-            'major management',
-            'teacher management',
-            'parent management',
-            'student management',
+            'room.*',
+            'period.*',
+            'class.*',
+            'major.*',
+            'teacher.*',
+            'student.*',
         ]);
 
+        // Role Teacher - Limited student access (only homeroom students)
         $roleTeacher = Role::create(['name' => 'teacher']);
         $roleTeacher->givePermissionTo([
-            'view students by homeroom',
-            'edit student class',
+            'student.edit.homeroomteacher',
+            'student.view.homeroomteacher',
         ]);
 
+        // Role Parent - No student management access
+        $roleParent = Role::create(['name' => 'parent']);
+
+        // Role Student - No student management access
         $roleStudent = Role::create(['name' => 'student']);
 
         $role = User::create([

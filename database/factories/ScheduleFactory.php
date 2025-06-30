@@ -17,7 +17,7 @@ class ScheduleFactory extends Factory
     public function definition()
     {
         return [
-            'class_id' => SchoolClass::factory(),
+            'class_id' => SchoolClass::inRandomOrder()->first()?->id,
             'subject_id' => Subject::factory(),
             'teacher_id' => Teacher::factory(),
             'room_id' => Room::factory(),

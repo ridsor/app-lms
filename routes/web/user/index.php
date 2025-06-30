@@ -22,7 +22,8 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
 
     Route::delete('siswa/hapus', [StudentController::class, 'bulkDestroy'])->name('user.student.bulkDestroy');
     Route::patch('siswa/edit', [StudentController::class, 'bulkEdit'])->name('user.student.bulkEdit');
-    Route::get('siswa/akun/export', [StudentController::class, 'export'])->name('user.student.export');
+    Route::get('siswa/akun/export', [StudentController::class, 'exportStudentAccount'])->name('user.student.account.export');
+    Route::get('siswa/orang-tua/akun/export', [StudentController::class, 'exportParentAccount'])->name('user.student.parent.account.export');
     Route::resource('/siswa', StudentController::class)->except(['create'])->except(['create'])->names('user.student');
 
     Route::delete('jurusan/hapus', [MajorController::class, 'bulkDestroy'])->name('user.major.bulkDestroy');
