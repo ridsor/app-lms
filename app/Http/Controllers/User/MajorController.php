@@ -37,10 +37,7 @@ class MajorController extends Controller
                 ->rawColumns(['id', 'Nama', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
-            $majors = Major::paginate(10);
-            return view('user.major.index', [
-                'majors' => $majors
-            ]);
+            return view('user.major.index');
         }
     }
 

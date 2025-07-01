@@ -129,9 +129,13 @@ class StudentController extends Controller
                     if ($request->user()->can('student.edit.homeroomteacher')) {
                         $html .= '
                         <div class="common-align gap-2 justify-content-start">
-                            <a class="square-white edit"  data-id="' . $row->id . '">
-                                <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
-                            </a>
+                        <a class="square-white view" data-id="' . $row->id . '"><svg>
+                            <use href="' . asset('assets/svg/icon-sprite.svg#fill-view') . '">
+                            </use>
+                        </svg>
+                        <a class="square-white edit"  data-id="' . $row->id . '">
+                            <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
+                        </a>
                         </div>
                         ';
                     }
@@ -140,13 +144,20 @@ class StudentController extends Controller
                 ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Jurusan', 'Kelas', 'Status', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
-            $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc')->get();
+            $classes = SchoolClass::select('id', 'name', 'level', 'major_id');
             $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
             $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
             $majors = Major::select('id', 'name')->orderBy('name', 'asc')->get();
             $religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'];
             $genders = [['label' => 'Laki-laki', 'value' => 'M'], ['label' => 'Perempuan', 'value' => 'F']];
             $statuses = [['label' => 'Aktif', 'value' => 'active'], ['label' => 'Pindah', 'value' => 'transferred'], ['label' => 'Lulus', 'value' => 'graduated'], ['label' => 'Keluar', 'value' => 'dropout']];
+
+            if ($request->user()->can('student.view.homeroomteacher')) {
+                $homeroomTeacherClass = SchoolClass::with('major')->select('id', 'name', 'level', 'major_id')->where('homeroom_teacher_id', $request->user()->teacher->id)->first();
+                $classes->where('major_id', $homeroomTeacherClass->major_id);
+            }
+
+            $classes = $classes->orderBy('name', 'asc')->get();
 
             return view('user.student.index', [
                 'classes' => $classes,
@@ -156,6 +167,7 @@ class StudentController extends Controller
                 'statuses' => $statuses,
                 'religions' => $religions,
                 'genders' => $genders,
+                'homeroomTeacherClass' => $homeroomTeacherClass ?? null,
             ]);
         }
     }
@@ -214,7 +226,7 @@ class StudentController extends Controller
         try {
             $student = Student::with([
                 'class' => function ($query) {
-                    $query->select('id', 'name', 'level', 'major_id');
+                    $query->select('id', 'name', 'level', 'major_id', 'homeroom_teacher_id');
                 },
                 'class.major' => function ($query) {
                     $query->select('id', 'name');
@@ -271,7 +283,7 @@ class StudentController extends Controller
     {
         try {
             $student = Student::with([
-                'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+                'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id', 'homeroom_teacher_id'),
             ])->findOrFail($id);
 
             if (!$request->user()->can('update', $student)) {

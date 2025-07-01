@@ -31,11 +31,11 @@
                     id="username" placeholder="Masukkan username" autofocus />
                   @error('username')
                     <span class="invalid-feedback" role="alert">
-                      <strong>{{ $message }}</strong>
+                      {{ $message }}
                     </span>
                   @enderror
                 </div>
-                <div class="form-group needs-validation">
+                <div class="form-group">
                   <label class="col-form-label" for="password">Password</label>
                   <div class="form-input">
                     <div class="position-relative @error('password') is-invalid @enderror">
@@ -45,7 +45,7 @@
                     </div>
                     @error('password')
                       <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
+                        {{ $message }}
                       </span>
                     @enderror
                   </div>

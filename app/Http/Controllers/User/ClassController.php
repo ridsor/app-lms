@@ -90,12 +90,10 @@ class ClassController extends Controller
                 ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Wali Kelas', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
-            $classes = SchoolClass::filter(request()->all())->paginate(10);
             $levels = SchoolClass::select('level')->distinct()->get();
             $majors = Major::select('id', 'name')->get();
             $teachers = Teacher::select('id', 'name')->get();
             return view('user.class.index', [
-                'classes' => $classes,
                 'levels' => $levels,
                 'majors' => $majors,
                 'teachers' => $teachers
@@ -115,15 +113,25 @@ class ClassController extends Controller
 
             $validated = $request->validated();
 
-            $class = SchoolClass::create($validated);
-
             if ($request->filled('homeroom_teacher_id')) {
-                if ($class->homeroomTeacher->user && !$class->homeroomTeacher->user->hasPermissionTo('student.view.homeroomteacher') && !$class->homeroomTeacher->user->hasPermissionTo('student.edit.homeroomteacher')) {
-                    $class->homeroomTeacher->user->givePermissionTo([
-                        'student.view.homeroomteacher',
-                        'student.edit.homeroomteacher'
+                $class = SchoolClass::where('homeroom_teacher_id', $validated['homeroom_teacher_id'])->first();
+                if ($class) {
+                    $class->update([
+                        'homeroom_teacher_id' => null
                     ]);
                 }
+            }
+
+            $class = SchoolClass::create($validated);
+
+            $homeroomTeacher = $class->homeroomTeacher;
+            $user = $homeroomTeacher ? $homeroomTeacher->user : null;
+
+            if ($user && !$user->hasPermissionTo('student.view.homeroomteacher') && !$user->hasPermissionTo('student.edit.homeroomteacher')) {
+                $user->givePermissionTo([
+                    'student.view.homeroomteacher',
+                    'student.edit.homeroomteacher'
+                ]);
             }
 
             return $this->sendResponse(
@@ -188,24 +196,39 @@ class ClassController extends Controller
             }
 
             $class = SchoolClass::findOrFail($id);
-            $class->update($request->validated());
+
+            $validated = $request->validated();
 
             if ($request->filled('homeroom_teacher_id')) {
-                if ($class->homeroomTeacher->user && !$class->homeroomTeacher->user->hasPermissionTo('student.view.homeroomteacher') && !$class->homeroomTeacher->user->hasPermissionTo('student.edit.homeroomteacher')) {
-                    $class->homeroomTeacher->user->givePermissionTo([
+                $classExisting = SchoolClass::where('homeroom_teacher_id', $validated['homeroom_teacher_id'])->first();
+                if ($classExisting && $classExisting->id !== $id) {
+                    $classExisting->update([
+                        'homeroom_teacher_id' => null
+                    ]);
+                }
+            }
+
+            $class->update($validated);
+
+            $homeroomTeacher = $class->homeroomTeacher;
+            $user = $homeroomTeacher ? $homeroomTeacher->user : null;
+            if ($homeroomTeacher) {
+                if ($user && !$user->hasPermissionTo('student.view.homeroomteacher') && !$user->hasPermissionTo('student.edit.homeroomteacher')) {
+                    $user->givePermissionTo([
                         'student.view.homeroomteacher',
                         'student.edit.homeroomteacher'
                     ]);
                 }
             } else {
-                if ($class->homeroomTeacher->user && $class->homeroomTeacher->user->hasPermissionTo('student.view.homeroomteacher') && $class->homeroomTeacher->user->hasPermissionTo('student.edit.homeroomteacher')) {
-                    $class->homeroomTeacher->user->revokePermissionTo('student.view.homeroomteacher');
-                    $class->homeroomTeacher->user->revokePermissionTo('student.edit.homeroomteacher');
+                if ($user && $user->hasPermissionTo('student.view.homeroomteacher') && $user->hasPermissionTo('student.edit.homeroomteacher')) {
+                    $user->revokePermissionTo('student.view.homeroomteacher');
+                    $user->revokePermissionTo('student.edit.homeroomteacher');
                 }
             }
 
             return $this->sendResponse('Kelas berhasil diedit', $class);
         } catch (\Exception $e) {
+            Log::error($e);
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],

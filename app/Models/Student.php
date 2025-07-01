@@ -93,7 +93,7 @@ class Student extends Model
 
         // Teacher hanya dapat melihat siswa yang diwalinya
         if ($user->can('student.view.homeroomteacher') && $user->teacher) {
-            return $query->where('homeroom_teacher_id', $user->teacher->id);
+            return $query->where('classes.homeroom_teacher_id', $user->teacher->id);
         }
 
         // Return empty query jika tidak punya permission

@@ -57,10 +57,7 @@ class PeriodController extends Controller
                 ->rawColumns(['id', 'Semester', 'Tahun Akademik', 'Periode', 'Status', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
-            $periods = Period::filter(request()->all())->paginate(10);
-            return view('user.period.index', [
-                'periods' => $periods
-            ]);
+            return view('user.period.index');
         }
     }
 

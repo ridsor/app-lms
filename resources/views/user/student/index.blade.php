@@ -50,38 +50,76 @@
           <div class="card-body pt-0">
             <form id="export-student-account-form" method="GET" action="{{ route('user.student.account.export') }}">
               <div class="row g-3">
-                @if ($majors->count() > 0)
+                @can('student.*')
+                  @if ($majors->count() > 0)
+                    <div class="col-md">
+                      <label class="form-label" for="export-student-account-major-filter">Jurusan</label>
+                      <select class="form-select" id="export-student-account-major-filter" name="major"
+                        aria-label="Select major">
+                        <option value="" selected>Pilih Jurusan</option>
+                        @foreach ($majors as $major)
+                          <option value="{{ $major->name }}">{{ $major->name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  @endif
+                @endcan
+                @can('student.view.homeroomteacher')
+                  @if ($majors->count() > 0)
+                    <div class="col-md">
+                      <label class="form-label" for="export-student-account-major-filter">Jurusan</label>
+                      <select class="form-select"disabled id="export-student-account-major-filter" name="major"
+                        aria-label="Select major">
+                        <option value="{{ $homeroomTeacherClass->major->name }}" selected>
+                          {{ $homeroomTeacherClass->major->name }}</option>
+                      </select>
+                    </div>
+                  @endif
+                @endcan
+                @can('student.*')
                   <div class="col-md">
-                    <label class="form-label" for="export-student-account-major-filter">Jurusan</label>
-                    <select class="form-select" id="export-student-account-major-filter" name="major"
-                      aria-label="Select major">
-                      <option value="" selected>Pilih Jurusan</option>
-                      @foreach ($majors as $major)
-                        <option value="{{ $major->name }}">{{ $major->name }}</option>
+                    <label class="form-label" for="export-student-account-class-filter">Kelas</label>
+                    <select class="form-select" id="export-student-account-class-filter" name="class"
+                      aria-label="Select class">
+                      <option value="" selected>Pilih Kelas</option>
+                      @foreach ($classNames as $class)
+                        <option value="{{ $class->name }}">{{ $class->name }}</option>
                       @endforeach
                     </select>
                   </div>
-                @endif
-                <div class="col-md">
-                  <label class="form-label" for="export-student-account-class-filter">Kelas</label>
-                  <select class="form-select" id="export-student-account-class-filter" name="class"
-                    aria-label="Select class">
-                    <option value="" selected>Pilih Kelas</option>
-                    @foreach ($classNames as $class)
-                      <option value="{{ $class->name }}">{{ $class->name }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                <div class="col-md">
-                  <label class="form-label" for="export-student-account-level-filter">Tingkat</label>
-                  <select class="form-select" id="export-student-account-level-filter" name="level"
-                    aria-label="Select level">
-                    <option value="" selected>Pilih Tingkat</option>
-                    @foreach ($classLevels as $classLevel)
-                      <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
-                    @endforeach
-                  </select>
-                </div>
+                @endcan
+                @can('student.view.homeroomteacher')
+                  <div class="col-md">
+                    <label class="form-label" for="export-student-account-class-filter">Kelas</label>
+                    <select class="form-select" disabled id="export-student-account-class-filter" name="class"
+                      aria-label="Select class">
+                      <option value="{{ $homeroomTeacherClass->name }}" selected>{{ $homeroomTeacherClass->name }}
+                      </option>
+                    </select>
+                  </div>
+                @endcan
+                @can('student.*')
+                  <div class="col-md">
+                    <label class="form-label" for="export-student-account-level-filter">Tingkat</label>
+                    <select class="form-select" id="export-student-account-level-filter" name="level"
+                      aria-label="Select level">
+                      <option value="" selected>Pilih Tingkat</option>
+                      @foreach ($classLevels as $classLevel)
+                        <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                @endcan
+                @can('student.view.homeroomteacher')
+                  <div class="col-md">
+                    <label class="form-label" for="export-student-account-level-filter">Tingkat</label>
+                    <select class="form-select" disabled id="export-student-account-level-filter" name="level"
+                      aria-label="Select level">
+                      <option value="{{ $homeroomTeacherClass->level }}" selected>{{ $homeroomTeacherClass->level }}
+                      </option>
+                    </select>
+                  </div>
+                @endcan
                 <div class="col-auto d-flex justify-content-start align-items-end">
                   <button type="submit" class="btn btn-success f-w-500 w-100" id="export-student-account-btn">
                     <i class="fa-solid fa-file-excel"></i> Export
@@ -103,38 +141,76 @@
             <form id="export-parent-account-form" method="GET"
               action="{{ route('user.student.parent.account.export') }}">
               <div class="row g-3">
-                @if ($majors->count() > 0)
+                @can('student.*')
+                  @if ($majors->count() > 0)
+                    <div class="col-md">
+                      <label class="form-label" for="export-parent-account-major-filter">Jurusan</label>
+                      <select class="form-select" id="export-parent-account-major-filter" name="major"
+                        aria-label="Select major">
+                        <option value="" selected>Pilih Jurusan</option>
+                        @foreach ($majors as $major)
+                          <option value="{{ $major->name }}">{{ $major->name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  @endif
+                @endcan
+                @can('student.view.homeroomteacher')
+                  @if ($majors->count() > 0)
+                    <div class="col-md">
+                      <label class="form-label" for="export-parent-account-major-filter">Jurusan</label>
+                      <select class="form-select" disabled id="export-parent-account-major-filter" name="major"
+                        aria-label="Select major">
+                        <option value="{{ $homeroomTeacherClass->major->name }}" selected>
+                          {{ $homeroomTeacherClass->major->name }}</option>
+                      </select>
+                    </div>
+                  @endif
+                @endcan
+                @can('student.*')
                   <div class="col-md">
-                    <label class="form-label" for="export-parent-account-major-filter">Jurusan</label>
-                    <select class="form-select" id="export-parent-account-major-filter" name="major"
-                      aria-label="Select major">
-                      <option value="" selected>Pilih Jurusan</option>
-                      @foreach ($majors as $major)
-                        <option value="{{ $major->name }}">{{ $major->name }}</option>
+                    <label class="form-label" for="export-parent-account-class-filter">Kelas</label>
+                    <select class="form-select" id="export-parent-account-class-filter" name="class"
+                      aria-label="Select class">
+                      <option value="" selected>Pilih Kelas</option>
+                      @foreach ($classNames as $class)
+                        <option value="{{ $class->name }}">{{ $class->name }}</option>
                       @endforeach
                     </select>
                   </div>
-                @endif
-                <div class="col-md">
-                  <label class="form-label" for="export-parent-account-class-filter">Kelas</label>
-                  <select class="form-select" id="export-parent-account-class-filter" name="class"
-                    aria-label="Select class">
-                    <option value="" selected>Pilih Kelas</option>
-                    @foreach ($classNames as $class)
-                      <option value="{{ $class->name }}">{{ $class->name }}</option>
-                    @endforeach
-                  </select>
-                </div>
-                <div class="col-md">
-                  <label class="form-label" for="export-parent-account-level-filter">Tingkat</label>
-                  <select class="form-select" id="export-parent-account-level-filter" name="level"
-                    aria-label="Select level">
-                    <option value="" selected>Pilih Tingkat</option>
-                    @foreach ($classLevels as $classLevel)
-                      <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
-                    @endforeach
-                  </select>
-                </div>
+                @endcan
+                @can('student.view.homeroomteacher')
+                  <div class="col-md">
+                    <label class="form-label" for="export-parent-account-class-filter">Kelas</label>
+                    <select class="form-select" disabled id="export-parent-account-class-filter" name="class"
+                      aria-label="Select class">
+                      <option value="{{ $homeroomTeacherClass->name }}" selected>{{ $homeroomTeacherClass->name }}
+                      </option>
+                    </select>
+                  </div>
+                @endcan
+                @can('student.*')
+                  <div class="col-md">
+                    <label class="form-label" for="export-parent-account-level-filter">Tingkat</label>
+                    <select class="form-select" id="export-parent-account-level-filter" name="level"
+                      aria-label="Select level">
+                      <option value="" selected>Pilih Tingkat</option>
+                      @foreach ($classLevels as $classLevel)
+                        <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                @endcan
+                @can('student.view.homeroomteacher')
+                  <div class="col-md">
+                    <label class="form-label" for="export-parent-account-level-filter">Tingkat</label>
+                    <select class="form-select" disabled id="export-parent-account-level-filter" name="level"
+                      aria-label="Select level">
+                      <option value="{{ $homeroomTeacherClass->level }}" selected>{{ $homeroomTeacherClass->level }}
+                      </option>
+                    </select>
+                  </div>
+                @endcan
                 <div class="col-auto d-flex justify-content-start align-items-end">
                   <button type="submit" class="btn btn-success f-w-500 w-100" id="export-parent-account-btn">
                     <i class="fa-solid fa-file-excel"></i> Export
@@ -155,35 +231,69 @@
           </div>
           <div class="card-body pt-0">
             <div class="row g-3">
-              @if ($majors->count() > 0)
+              @can('student.*')
+                @if ($majors->count() > 0)
+                  <div class="col-md-3 col-xl">
+                    <label class="form-label" for="major-filter">Jurusan</label>
+                    <select class="form-select" id="major-filter" aria-label="Select major">
+                      <option value="" selected>Pilih Jurusan</option>
+                      @foreach ($majors as $major)
+                        <option value="{{ $major->name }}">{{ $major->name }}</option>
+                      @endforeach
+                    </select>
+                  </div>
+                @endif
+              @endcan
+              @can('student.view.homeroomteacher')
+                @if ($majors->count() > 0)
+                  <div class="col-md-3 col-xl">
+                    <label class="form-label" for="major-filter">Jurusan</label>
+                    <select class="form-select" disabled id="major-filter" aria-label="Select major">
+                      <option value="{{ $homeroomTeacherClass->major->name }}" selected>
+                        {{ $homeroomTeacherClass->major->name }}</option>
+                    </select>
+                  </div>
+                @endif
+              @endcan
+              @can('student.*')
                 <div class="col-md-3 col-xl">
-                  <label class="form-label" for="major-filter">Jurusan</label>
-                  <select class="form-select" id="major-filter" aria-label="Select major">
-                    <option value="" selected>Pilih Jurusan</option>
-                    @foreach ($majors as $major)
-                      <option value="{{ $major->name }}">{{ $major->name }}</option>
+                  <label class="form-label" for="class-filter">Kelas</label>
+                  <select class="form-select" id="class-filter" aria-label="Select class">
+                    <option value="" selected>Pilih Kelas</option>
+                    @foreach ($classNames as $class)
+                      <option value="{{ $class->name }}">{{ $class->name }}</option>
                     @endforeach
                   </select>
                 </div>
-              @endif
-              <div class="col-md-3 col-xl">
-                <label class="form-label" for="class-filter">Kelas</label>
-                <select class="form-select" id="class-filter" aria-label="Select class">
-                  <option value="" selected>Pilih Kelas</option>
-                  @foreach ($classNames as $class)
-                    <option value="{{ $class->name }}">{{ $class->name }}</option>
-                  @endforeach
-                </select>
-              </div>
-              <div class="col-md-3 col-xl">
-                <label class="form-label" for="level-filter">Tingkat</label>
-                <select class="form-select" id="level-filter" aria-label="Select level">
-                  <option value="" selected>Pilih Tingkat</option>
-                  @foreach ($classLevels as $classLevel)
-                    <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
-                  @endforeach
-                </select>
-              </div>
+              @endcan
+              @can('student.view.homeroomteacher')
+                <div class="col-md-3 col-xl">
+                  <label class="form-label" for="class-filter">Kelas</label>
+                  <select class="form-select" disabled id="class-filter" aria-label="Select class">
+                    <option value="{{ $homeroomTeacherClass->name }}" selected>{{ $homeroomTeacherClass->name }}</option>
+                  </select>
+                </div>
+              @endcan
+              @can('student.*')
+                <div class="col-md-3 col-xl">
+                  <label class="form-label" for="level-filter">Tingkat</label>
+                  <select class="form-select" id="level-filter" aria-label="Select level">
+                    <option value="" selected>Pilih Tingkat</option>
+                    @foreach ($classLevels as $classLevel)
+                      <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
+                    @endforeach
+                  </select>
+                </div>
+              @endcan
+              @can('student.view.homeroomteacher')
+                <div class="col-md-3 col-xl">
+                  <label class="form-label" for="level-filter">Tingkat</label>
+                  <select class="form-select" disabled id="level-filter" aria-label="Select level">
+                    <option value="{{ $homeroomTeacherClass->level }}" selected>{{ $homeroomTeacherClass->level }}
+                    </option>
+                  </select>
+                </div>
+              @endcan
               <div class="col-md-3 col-xl">
                 <label class="form-label" for="status-filter">Status</label>
                 <select class="form-select" id="status-filter" aria-label="Select status">
@@ -205,9 +315,9 @@
         <div class="card">
           <div class="card-header card-no-border text-end">
             <div class="card-header-right-icon">
-              <a class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal" data-bs-target="#addStudentModal"><i
-                  class="fa fa-plus pe-2"></i>Tambah
-              </a>
+              <button class="btn btn-primary f-w-500 mb-2" @cannot('student.*') disabled @endcannot
+                data-bs-toggle="modal" data-bs-target="#addStudentModal"><i class="fa fa-plus pe-2"></i>Tambah
+              </button>
               <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModal"
                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -385,7 +495,8 @@
                             @if ($majors->count() > 0)
                               <div class="col-lg-6">
                                 <label class="form-label" for="editStudentMajor">Jurusan</label>
-                                <select class="form-select" id="editStudentMajor" name="major_id">
+                                <select class="form-select" id="editStudentMajor" name="major_id"
+                                  @cannot('student.*') disabled @endcannot>
                                   <option value="">Pilih Jurusan</option>
                                   @foreach ($majors as $major)
                                     <option value="{{ $major->id }}">
@@ -491,13 +602,15 @@
                     <span class="me-1 text-dark" id="selected-count">0</span> dipilih
                   </span>
                 </div>
-                <div class="col-auto">
-                  <a id="delete-selected"
-                    class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-danger px-2 py-2"
-                    style="cursor: pointer;">
-                    <i class="fa-solid fa-trash-can txt-danger"></i>
-                  </a>
-                </div>
+                @can('student.*')
+                  <div class="col-auto">
+                    <a id="delete-selected"
+                      class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-danger px-2 py-2"
+                      style="cursor: pointer;">
+                      <i class="fa-solid fa-trash-can txt-danger"></i>
+                    </a>
+                  </div>
+                @endcan
                 <div class="col-auto">
                   <a id="bulk-edit-selected"
                     class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-primary px-2 py-2"
@@ -615,12 +728,15 @@
                                 @endforeach
                               </select>
                             </div>
+
                             <div class="col-12">
                               <label class="form-label" for="bulkEditStudentMajor">Jurusan</label>
-                              <select class="form-select" id="bulkEditStudentMajor" name="major_id">
+                              <select class="form-select" id="bulkEditStudentMajor" name="major_id"
+                                @cannot('student.*') disabled @endcannot>
                                 <option value="">Pilih Jurusan</option>
                                 @foreach ($majors as $major)
-                                  <option value="{{ $major->id }}">{{ $major->name }}</option>
+                                  <option value="{{ $major->id }}" @if ($major->id == $homeroomTeacherClass?->major_id) selected @endif>
+                                    {{ $major->name }}</option>
                                 @endforeach
                               </select>
                             </div>

@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Log;
 
 class StudentPolicy
 {
@@ -39,7 +40,7 @@ class StudentPolicy
 
     // Teacher hanya dapat melihat siswa yang diwalinya
     if ($user->can('student.view.homeroomteacher')) {
-      return $user->teacher && $student->homeroom_teacher_id && $user->teacher->id === $student->homeroom_teacher_id;
+      return $user->teacher && $student->class->homeroom_teacher_id && $user->teacher->id === $student->class->homeroom_teacher_id;
     }
 
     return false;
@@ -64,8 +65,10 @@ class StudentPolicy
     }
 
     // Teacher hanya dapat mengedit kelas siswa yang diwalinya
+    Log::info($student->class->homeroom_teacher_id);
+    Log::info($user->teacher->id);
     if ($user->can('student.edit.homeroomteacher')) {
-      return $user->teacher && $student->homeroom_teacher_id && $user->teacher->id === $student->homeroom_teacher_id;
+      return $user->teacher && $student->class->homeroom_teacher_id && $user->teacher->id === $student->class->homeroom_teacher_id;
     }
 
     return false;

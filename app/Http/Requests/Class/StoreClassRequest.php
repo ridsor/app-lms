@@ -71,6 +71,7 @@ class StoreClassRequest extends FormRequest
             'name' => 'nama kelas',
             'level' => 'tingkat',
             'major_id' => 'jurusan',
+            'homeroom_teacher_id' => 'guru wali kelas',
         ];
     }
 }

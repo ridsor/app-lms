@@ -274,9 +274,7 @@ $(function () {
                         $("#addClassForm [name='name']")
                             .next(".invalid-feedback")
                             .text(errors.name[0]);
-                        $("#addClassForm [name='name']").addClass(
-                            "is-invalid"
-                        );
+                        $("#addClassForm [name='name']").addClass("is-invalid");
                     }
                     if (errors.level) {
                         $("#addClassForm [name='level']")
@@ -296,11 +294,12 @@ $(function () {
                     }
                     if (errors.homeroom_teacher_id) {
                         $("#addClassForm [name='homeroom_teacher_id']")
+                            .parent()
                             .next(".invalid-feedback")
                             .text(errors.homeroom_teacher_id[0]);
-                        $(
-                            "#addClassForm [name='homeroom_teacher_id']"
-                        ).addClass("is-invalid");
+                        $("#addClassForm [name='homeroom_teacher_id']")
+                            .parent()
+                            .addClass("is-invalid");
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -470,11 +469,12 @@ $(function () {
                     }
                     if (errors.homeroom_teacher_id) {
                         $("#editClassForm [name='homeroom_teacher_id']")
+                            .parent()
                             .next(".invalid-feedback")
                             .text(errors.homeroom_teacher_id[0]);
-                        $(
-                            "#editClassForm [name='homeroom_teacher_id']"
-                        ).addClass("is-invalid");
+                        $("#editClassForm [name='homeroom_teacher_id']")
+                            .parent()
+                            .addClass("is-invalid");
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
