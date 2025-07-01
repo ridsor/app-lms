@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Mews\Purifier\Casts\CleanHtml;
 
 class Curriculum extends Model
 {
@@ -11,6 +12,10 @@ class Curriculum extends Model
 
     protected $fillable = ['name', 'description', 'status'];
     protected $table = 'curriculums';
+
+    protected $casts = [
+        'description' => CleanHtml::class . ':strip_nl,strip_nbsp',
+    ];
 
     public function subjects()
     {

@@ -239,6 +239,7 @@ $(function () {
         if (descriptionText === "" || descriptionText === "\n") {
             descriptionHTML = "";
         }
+        console.log(descriptionHTML);
         $("#addCurriculumForm [name='description']").val(descriptionHTML);
 
         $("#addCurriculumForm")
@@ -266,6 +267,7 @@ $(function () {
                     toast.show();
                     t.clearPipeline().draw();
                     $("#addCurriculumModal").modal("hide");
+                    addQuill.root.innerHTML = "";
                     $("#addCurriculumForm")[0].reset();
                 }
             },
@@ -322,6 +324,7 @@ $(function () {
                     $("#editCurriculumForm #editCurriculumId").val(res.data.id);
                     $("#editCurriculumForm #editName").val(res.data.name);
                     editQuill.root.innerHTML = res.data.description || "";
+                    console.log(res.data.description);
                     $("#editCurriculumModal").modal("show");
                 }
             },
@@ -373,6 +376,7 @@ $(function () {
                     $("#toast-success #toast-text").text(response.message);
                     toast.show();
                     $("#editCurriculumModal").modal("hide");
+                    editQuill.root.innerHTML = "";
                     $("#editCurriculumForm")[0].reset();
                     t.clearPipeline().draw();
                 }

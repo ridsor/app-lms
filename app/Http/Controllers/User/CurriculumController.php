@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Requests\Curriculum\CurriculumRequest;
-use Purifier;
 
 class CurriculumController extends Controller
 {
@@ -30,7 +29,7 @@ class CurriculumController extends Controller
           return $row->name;
         })
         ->addColumn('Deskripsi', function ($row) {
-          return $row->description ? $row->description : '-';
+          return $row->description ? '<div class="ql-editor p-0 m-0">' . $row->description . '</div>' : '-';
         })
         ->addColumn('Jumlah Mata Pelajaran', function ($row) {
           return $row->subjects_count;
@@ -71,7 +70,6 @@ class CurriculumController extends Controller
         return abort(403);
       }
       $validated = $request->validated();
-      $validated['description'] = Purifier::clean($validated['description']);
       $validated['status'] = true;
       $curriculum = Curriculum::create($validated);
       return $this->sendResponse('Kurikulum berhasil ditambahkan', [
@@ -109,7 +107,6 @@ class CurriculumController extends Controller
         return abort(403);
       }
       $validated = $request->validated();
-      $validated['description'] = Purifier::clean($validated['description']);
       $curriculum = Curriculum::findOrFail($id);
       $curriculum->update($validated);
       return $this->sendResponse('Kurikulum berhasil diedit', $curriculum);
@@ -124,10 +121,16 @@ class CurriculumController extends Controller
       if (!$request->user()->can('curriculum.*')) {
         return abort(403);
       }
-      $curriculum = Curriculum::findOrFail($id);
+      $curriculum = Curriculum::with('subjects.schedules')->findOrFail($id);
+
+      if ($curriculum->subjects->count() > 0) {
+        return $this->sendError('Kurikulum tidak dapat dihapus karena masih terdapat mata pelajaran yang terkait.', [], 400);
+      }
+
       $curriculum->delete();
       return $this->sendResponse('Kurikulum berhasil dihapus.');
     } catch (\Exception $e) {
+      Log::info($e->getMessage());
       return $this->sendError('Silakan coba lagi.', [], 500);
     }
   }
@@ -143,7 +146,12 @@ class CurriculumController extends Controller
         return $this->sendError('Tidak ada data yang dipilih untuk dihapus.', [], 400);
       }
       $curriculums = Curriculum::whereIn('id', $ids)->get();
-      $curriculums->each->delete();
+      foreach ($curriculums as $curriculum) {
+        if ($curriculum->subjects->count() > 0) {
+          return $this->sendError('Kurikulum tidak dapat dihapus karena masih terdapat mata pelajaran yang terkait.', [], 400);
+        }
+        $curriculum->delete();
+      }
       return $this->sendResponse('Data yang dipilih berhasil dihapus.');
     } catch (\Exception $e) {
       Log::info($e->getMessage());
