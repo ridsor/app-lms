@@ -7,6 +7,8 @@ use App\Http\Controllers\User\ClassController;
 use App\Http\Controllers\User\StudentController;
 use App\Http\Controllers\User\MajorController;
 use App\Http\Controllers\User\TeacherController;
+use App\Http\Controllers\User\CurriculumController;
+use App\Http\Controllers\User\SubjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group(function () {
@@ -34,4 +36,12 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::patch('guru/edit', [TeacherController::class, 'bulkEdit'])->name('user.teacher.bulkEdit');
     Route::get('guru/akun/export', [TeacherController::class, 'exportAccount'])->name('user.teacher.account.export');
     Route::resource('/guru', TeacherController::class)->except(['create'])->names('user.teacher');
+
+    Route::post('/kurikulum/active/{id}', [CurriculumController::class, 'active'])->name('user.curriculum.active');
+    Route::delete('/kurikulum/hapus', [CurriculumController::class, 'bulkDestroy'])->name('user.curriculum.bulk-destroy');
+    Route::resource('/kurikulum', CurriculumController::class)->except(['create', 'show'])->names('user.curriculum');
+
+    Route::resource('/kurikulum/{curriculum_id}/mata-pelajaran', SubjectController::class)
+        ->except(['create', 'show'])
+        ->names('user.subject');
 });

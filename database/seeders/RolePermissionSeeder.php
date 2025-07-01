@@ -25,6 +25,8 @@ class RolePermissionSeeder extends Seeder
             'major.*',
             'room.*',
             'period.*',
+            'curriculum.*',
+            'subject.*',
             'user.*',
         ];
 
@@ -45,6 +47,8 @@ class RolePermissionSeeder extends Seeder
             'major.*',
             'teacher.*',
             'student.*',
+            'curriculum.*',
+            'subject.*',
         ]);
 
         // Role Teacher - Limited student access (only homeroom students)

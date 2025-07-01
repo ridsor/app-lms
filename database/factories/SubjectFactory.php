@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Curriculum;
 use App\Models\Major;
 use App\Models\Subject;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -13,6 +14,7 @@ class SubjectFactory extends Factory
     public function definition()
     {
         return [
+            'curriculum_id' => Curriculum::query()->inRandomOrder()->value('id'),
             'subject_code' => $this->faker->unique()->bothify('SBJ-###'),
             'subject_name' => $this->faker->randomElement(['Matematika', 'Bahasa Indonesia', 'IPA']),
             'category' => $this->faker->randomElement(['Wajib', 'Pilihan']),

@@ -12,16 +12,22 @@ class Subject extends Model
     use HasFactory;
 
     protected $fillable = [
+        'curriculum_id',
         'subject_code',
         'subject_name',
         'category',
         'grade_level',
-        'major',
+        'major_id',
         'description'
     ];
 
     public function schedules(): HasMany
     {
         return $this->hasMany(Schedule::class);
+    }
+
+    public function curriculum()
+    {
+        return $this->belongsTo(Curriculum::class);
     }
 }

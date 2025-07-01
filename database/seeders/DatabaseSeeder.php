@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RolePermissionSeeder::class,
+            PeriodSeeder::class,
+            CurriculumSeeder::class,
             MajorSeeder::class,
             TeacherSeeder::class,
             SubjectSeeder::class,
@@ -24,7 +26,6 @@ class DatabaseSeeder extends Seeder
             ScheduleSeeder::class,
             RoomSeeder::class,
             MaterialSeeder::class,
-            PeriodSeeder::class,
         ]);
     }
 }
