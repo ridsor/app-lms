@@ -235,6 +235,20 @@
                   </div>
                 </div>
               </div>
+              <div class="row g-3 justify-content-end align-items-center" id="teacher-action-buttons">
+                <div class="col-auto">
+                  <span>
+                    <span class="me-1 text-dark" id="selected-count">0</span> dipilih
+                  </span>
+                </div>
+                  <div class="col-auto">
+                    <a id="delete-selected"
+                      class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-danger px-2 py-2"
+                      style="cursor: pointer;">
+                      <i class="fa-solid fa-trash-can txt-danger"></i>
+                    </a>
+                  </div>
+              </div>
             </div>
           </div>
           <div class="card-body px-0 pt-0">

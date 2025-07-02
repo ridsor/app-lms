@@ -17,6 +17,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::delete('ruangan/hapus', [RoomController::class, 'bulkDestroy'])->name('user.room.bulkDestroy');
     Route::resource('/ruangan', RoomController::class)->except(['create', 'show'])->names('user.room');
 
+    Route::delete('periode/hapus', [PeriodController::class, 'bulkDestroy'])->name('user.period.bulkDestroy');
     Route::post('/periode/active/{id}', [PeriodController::class, 'active'])->name('user.period.active');
     Route::resource('/periode', PeriodController::class)->except(['create', 'show'])->names('user.period');
 
@@ -41,6 +42,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::delete('/kurikulum/hapus', [CurriculumController::class, 'bulkDestroy'])->name('user.curriculum.bulk-destroy');
     Route::resource('/kurikulum', CurriculumController::class)->except(['create', 'show'])->names('user.curriculum');
 
+    Route::delete('kurikulum/{curriculum_id}/mata-pelajaran/hapus', [SubjectController::class, 'bulkDestroy'])->name('user.subject.bulkDestroy');
     Route::resource('/kurikulum/{curriculum_id}/mata-pelajaran', SubjectController::class)
         ->except(['create', 'show'])
         ->names('user.subject');

@@ -178,12 +178,13 @@ class TeacherController extends Controller
         return $this->sendError('Tidak ada data yang dipilih untuk dihapus.', [], 400);
       }
       DB::beginTransaction();
-      Teacher::whereIn('id', $ids)->get()->each(function ($teacher) {
+      $teachers = Teacher::whereIn('id', $ids)->get();
+      foreach ($teachers as $teacher) {
         if ($teacher->user) {
           $teacher->user->delete();
         }
         $teacher->delete();
-      });
+      }
       DB::commit();
       return $this->sendResponse('Data yang dipilih berhasil dihapus.');
     } catch (\Exception $e) {

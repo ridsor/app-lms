@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->enum('meeting_method', ['online', 'offline', 'hybrid']);
             $table->enum('type', ['Learning', 'Midterm', 'Final']);
-            $table->enum('status', ['not_started', 'started', 'ended'])->default('not_started');
+            $table->dateTime('started_at')->nullable();
             $table->timestamps();
         });
     }

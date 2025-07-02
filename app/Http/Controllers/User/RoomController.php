@@ -133,8 +133,8 @@ class RoomController extends Controller
                         400
                     );
                 }
+                $room->delete();
             }
-            $rooms->delete();
             return $this->sendResponse('Data yang dipilih berhasil dihapus.');
         } catch (\Exception $e) {
             Log::info($e->getMessage());

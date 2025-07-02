@@ -59,6 +59,22 @@ class Student extends Model
         return $this->hasMany(Grade::class);
     }
 
+    public function exam_results(): HasMany
+    {
+        return $this->hasMany(ExamResult::class);
+    }
+
+    public function assignment_submissions(): HasMany
+    {
+        return $this->hasMany(AssignmentSubmission::class);
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+    
+
     public function scopeFilter($query, array $filters)
     {
         // Search global - fulltext di beberapa kolom utama

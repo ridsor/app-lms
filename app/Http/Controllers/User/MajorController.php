@@ -130,8 +130,8 @@ class MajorController extends Controller
                         400
                     );
                 }
+                $major->delete();
             }
-            $majors->delete();
             return $this->sendResponse('Data yang dipilih berhasil dihapus.');
         } catch (\Exception $e) {
             Log::info($e->getMessage());

@@ -20,7 +20,6 @@ class MeetingFactory extends Factory
             'description' => $this->faker->paragraph(),
             'meeting_method' => $this->faker->randomElement(['online', 'offline', 'hybrid']),
             'type' => $this->faker->randomElement(['Learning', 'Midterm', 'Final']),
-            'status' => $this->faker->randomElement(['not_started', 'started', 'ended']),
         ];
     }
 }

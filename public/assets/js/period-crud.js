@@ -469,7 +469,7 @@ $(function () {
 
     function updateDeleteButtonState() {
         var selectedRows = $(
-            "#room-table tbody input[type='checkbox'].select-row:checked"
+            "#period-table tbody input[type='checkbox'].select-row:checked"
         ).length;
         $("#delete-selected").prop("disabled", selectedRows === 0);
         $("#delete-selected")

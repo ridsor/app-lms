@@ -103,7 +103,7 @@ $(function () {
 
     t.on("draw", function () {
         $("#select-all").prop("checked", false);
-        $("#student-action-buttons").css("display", "none");
+        $("#subject-action-buttons").css("display", "none");
     });
 
     // Hapus banyak

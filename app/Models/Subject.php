@@ -13,12 +13,7 @@ class Subject extends Model
 
     protected $fillable = [
         'curriculum_id',
-        'subject_code',
-        'subject_name',
-        'category',
-        'grade_level',
-        'major_id',
-        'description'
+        'name',
     ];
 
     public function schedules(): HasMany
@@ -29,5 +24,15 @@ class Subject extends Model
     public function curriculum()
     {
         return $this->belongsTo(Curriculum::class);
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['search']['value'])) {
+            $search = $filters['search']['value'];
+            $query->where(function ($q) use ($search) {
+                $q->whereFullText('name', $search);
+            });
+        }
     }
 }

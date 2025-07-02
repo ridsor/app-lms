@@ -14,13 +14,10 @@ return new class extends Migration
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
             $table->foreignId('curriculum_id')->constrained('curriculums')->onDelete('cascade');
-            $table->string('subject_code', 10)->unique();
-            $table->string('subject_name', 100);
-            $table->string('category', 100);
-            $table->string('grade_level', 20)->default('all');
-            $table->foreignId('major_id')->nullable()->constrained('majors');
-            $table->text('description')->nullable();
+            $table->string('code', 10)->unique();
+            $table->string('name', 100)->unique();
             $table->timestamps();
+            $table->fullText('name');
         });
     }
 

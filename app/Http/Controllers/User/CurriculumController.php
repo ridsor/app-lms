@@ -165,9 +165,6 @@ class CurriculumController extends Controller
       if (!$request->user()->can('curriculum.*')) {
         return abort(403);
       }
-      // Nonaktifkan semua
-      Curriculum::where('status', true)->update(['status' => false]);
-      // Aktifkan yang dipilih
       $curriculum = Curriculum::findOrFail($id);
       $curriculum->update(['status' => true]);
       return $this->sendResponse('Kurikulum berhasil diaktifkan.', $curriculum);

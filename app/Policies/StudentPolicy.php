@@ -64,9 +64,6 @@ class StudentPolicy
       return true;
     }
 
-    // Teacher hanya dapat mengedit kelas siswa yang diwalinya
-    Log::info($student->class->homeroom_teacher_id);
-    Log::info($user->teacher->id);
     if ($user->can('student.edit.homeroomteacher')) {
       return $user->teacher && $student->class->homeroom_teacher_id && $user->teacher->id === $student->class->homeroom_teacher_id;
     }

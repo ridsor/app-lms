@@ -309,8 +309,8 @@ class ClassController extends Controller
                         400
                     );
                 }
+                $class->delete();
             }
-            SchoolClass::whereIn('id', $ids)->delete();
 
             return $this->sendResponse(
                 'Data yang dipilih berhasil dihapus.'

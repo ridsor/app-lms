@@ -175,8 +175,8 @@ class PeriodController extends Controller
                         400
                     );
                 }
+                $period->delete();
             }
-            $periods->delete();
             return $this->sendResponse('Data yang dipilih berhasil dihapus.');
         } catch (\Exception $e) {
             Log::info($e->getMessage());

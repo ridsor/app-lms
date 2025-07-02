@@ -24,7 +24,7 @@ class Meeting extends Model
         'description',
         'meeting_method',
         'type',
-        'status'
+        'started_at'
     ];
 
     public function schedule(): BelongsTo

@@ -86,6 +86,22 @@ class User extends Authenticatable
         return $this->hasOne(Student::class);
     }
 
+    public function form_replies()
+    {
+        return $this->hasMany(ForumReply::class);
+    }
+
+    public function discussion_forums()
+    {
+        return $this->hasMany(DiscussionForum::class);
+    }
+
+    public function attendance_statuses()
+    {
+        return $this->hasMany(AttendanceStatus::class);
+    }
+
+
     /**
      * Generate unique username dari nama, format: slug_nama_4karakteracak
      * Contoh: ryan_syukur_b3s4

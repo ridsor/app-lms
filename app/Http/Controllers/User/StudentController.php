@@ -362,6 +362,9 @@ class StudentController extends Controller
             if ($student->user) {
                 $student->user->delete();
             }
+            if ($student->parent) {
+                $student->parent->delete();
+            }
             $student->delete();
 
             DB::commit();
@@ -399,8 +402,12 @@ class StudentController extends Controller
             DB::beginTransaction();
 
             Student::whereIn('id', $ids)->get()->each(function ($student) use ($request) {
-                $student->user->delete();
-                $student->parent->delete();
+                if ($student->user) {
+                    $student->user->delete();
+                }
+                if ($student->parent) {
+                    $student->parent->delete();
+                }
                 $student->delete();
             });
 

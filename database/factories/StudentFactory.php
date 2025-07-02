@@ -20,7 +20,7 @@ class StudentFactory extends Factory
             'name' => $this->faker->name(),
             'nis' => $this->faker->unique()->numerify('2020#####'),
             'nisn' => $this->faker->unique()->numerify('0011#######'),
-            'class_id' => SchoolClass::inRandomOrder()->first()?->id,
+            'class_id' => SchoolClass::query()->inRandomOrder()->value('id'),
             'date_of_birth' => $this->faker->date(),
             'birthplace' => $this->faker->city(),
             'gender' => $this->faker->randomElement(['M', 'F']),
