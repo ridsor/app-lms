@@ -48,11 +48,6 @@ $(function () {
                 searchable: false,
             },
             {
-                data: "Waktu",
-                name: "created_at",
-                searchable: false,
-            },
-            {
                 data: "Aksi",
                 name: "Aksi",
                 orderable: false,
@@ -85,7 +80,7 @@ $(function () {
         responsive: true,
         autoWidth: false,
         searchable: true,
-        order: [[5, "desc"]],
+        order: [],
     });
 
     t.on("draw", function () {
@@ -264,6 +259,7 @@ $(function () {
                     t.clearPipeline().draw();
                     $("#addClassModal").modal("hide");
                     $("#addClassForm")[0].reset();
+                    $("#addClassForm .selectpicker").selectpicker("refresh");
                 }
             },
             error: function (xhr, status, error) {
@@ -437,6 +433,7 @@ $(function () {
                     toast.show();
                     $("#editClassModal").modal("hide");
                     $("#editClassForm")[0].reset();
+                    $("#editClassForm .selectpicker").selectpicker("refresh");
                     t.clearPipeline().draw();
                 }
             },

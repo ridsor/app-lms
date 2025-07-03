@@ -9,6 +9,7 @@ use App\Http\Controllers\User\MajorController;
 use App\Http\Controllers\User\TeacherController;
 use App\Http\Controllers\User\CurriculumController;
 use App\Http\Controllers\User\SubjectController;
+use App\Http\Controllers\User\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group(function () {
@@ -46,4 +47,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::resource('/kurikulum/{curriculum_id}/mata-pelajaran', SubjectController::class)
         ->except(['create', 'show'])
         ->names('user.subject');
+
+    Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
+    Route::resource('/jadwal', ScheduleController::class)->except(['create'])->names('user.schedule');
 });

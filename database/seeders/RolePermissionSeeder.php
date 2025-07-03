@@ -28,6 +28,7 @@ class RolePermissionSeeder extends Seeder
             'curriculum.*',
             'subject.*',
             'user.*',
+            'schedule.*',
         ];
 
         foreach ($permissions as $permission) {
@@ -49,6 +50,7 @@ class RolePermissionSeeder extends Seeder
             'student.*',
             'curriculum.*',
             'subject.*',
+            'schedule.*',
         ]);
 
         // Role Teacher - Limited student access (only homeroom students)

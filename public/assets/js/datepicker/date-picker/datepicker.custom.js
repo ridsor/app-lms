@@ -19,7 +19,7 @@
     var disabledDays = [0, 6];
 
     $("#disabled-days").datepicker({
-        language: "en",
+        language: "",
         onRenderCell: function (date, cellType) {
             if (cellType == "day") {
                 var day = date.getDay(),

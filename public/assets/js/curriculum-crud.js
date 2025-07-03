@@ -516,4 +516,61 @@ $(function () {
             }
         });
     });
+    $(document).on("click", ".curriculum-active", function (e) {
+        e.preventDefault();
+        const curriculumId = $(this).data("id");
+        const curriculumName = $(this).data("name");
+
+        Swal.fire({
+            title: "Apakah anda yakin menjadikan kurikulum ini tidak aktif?",
+            text: `Kurikulum: ${curriculumName}`,
+            showDenyButton: true,
+            showCancelButton: false,
+            denyButtonText: `Batal`,
+            confirmButtonText: "Tidak Aktifkan",
+            confirmButtonColor: "#16C7F9",
+            cancelButtonColor: "#FC4438",
+            confirmButtonText: "Tidak Aktifkan",
+            imageUrl: "../assets/images/gif/dashboard-8/successful.gif",
+            imageWidth: 120,
+            imageHeight: 120,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const activeBtn = $(this);
+                activeBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+                    );
+
+                $.ajax({
+                    url: `/kurikulum/active/${curriculumId}`,
+                    method: "POST",
+                    success: async function (response) {
+                        if (response.success) {
+                            const toast = new bootstrap.Toast(
+                                $("#toast-success")
+                            );
+                            $("#toast-success #toast-text").text(
+                                response.message
+                            );
+                            toast.show();
+                            t.clearPipeline().draw();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON.message
+                        );
+                        toast.show();
+                    },
+                    complete: function () {
+                        activeBtn.prop("disabled", false);
+                    },
+                });
+            } else if (result.isDenied) {
+            }
+        });
+    });
 });

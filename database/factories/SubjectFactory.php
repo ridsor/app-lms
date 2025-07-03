@@ -14,7 +14,7 @@ class SubjectFactory extends Factory
     public function definition()
     {
         return [
-            'curriculum_id' => Curriculum::query()->inRandomOrder()->value('id'),
+            'curriculum_id' => Curriculum::first()->id,
             'name' => $this->faker->unique()->word,
         ];
     }

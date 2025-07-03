@@ -318,6 +318,29 @@
               <button class="btn btn-primary f-w-500 mb-2" @cannot('student.*') disabled @endcannot
                 data-bs-toggle="modal" data-bs-target="#addStudentModal"><i class="fa fa-plus pe-2"></i>Tambah
               </button>
+              <div class="row g-3 justify-content-end align-items-center" id="student-action-buttons">
+                <div class="col-auto">
+                  <span>
+                    <span class="me-1 text-dark" id="selected-count">0</span> dipilih
+                  </span>
+                </div>
+                @can('student.*')
+                  <div class="col-auto">
+                    <a id="delete-selected"
+                      class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-danger px-2 py-2"
+                      style="cursor: pointer;">
+                      <i class="fa-solid fa-trash-can txt-danger"></i>
+                    </a>
+                  </div>
+                @endcan
+                <div class="col-auto">
+                  <a id="bulk-edit-selected"
+                    class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-primary px-2 py-2"
+                    style="cursor: pointer;">
+                    <i class="fa-solid fa-pen-to-square txt-primary"></i>
+                  </a>
+                </div>
+              </div>
               <div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModal"
                 aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -594,29 +617,6 @@
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div class="row g-3 justify-content-end align-items-center" id="student-action-buttons">
-                <div class="col-auto">
-                  <span>
-                    <span class="me-1 text-dark" id="selected-count">0</span> dipilih
-                  </span>
-                </div>
-                @can('student.*')
-                  <div class="col-auto">
-                    <a id="delete-selected"
-                      class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-danger px-2 py-2"
-                      style="cursor: pointer;">
-                      <i class="fa-solid fa-trash-can txt-danger"></i>
-                    </a>
-                  </div>
-                @endcan
-                <div class="col-auto">
-                  <a id="bulk-edit-selected"
-                    class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-primary px-2 py-2"
-                    style="cursor: pointer;">
-                    <i class="fa-solid fa-pen-to-square txt-primary"></i>
-                  </a>
                 </div>
               </div>
               <!-- Modal View Student -->

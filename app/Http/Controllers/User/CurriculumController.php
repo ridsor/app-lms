@@ -166,7 +166,11 @@ class CurriculumController extends Controller
         return abort(403);
       }
       $curriculum = Curriculum::findOrFail($id);
-      $curriculum->update(['status' => true]);
+      if ($curriculum->status) {
+        $curriculum->update(['status' => false]);
+      } else {
+        $curriculum->update(['status' => true]);
+      }
       return $this->sendResponse('Kurikulum berhasil diaktifkan.', $curriculum);
     } catch (\Exception $e) {
       Log::info($e->getMessage());

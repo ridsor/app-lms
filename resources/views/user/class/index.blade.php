@@ -5,7 +5,6 @@
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
-  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select.bootstrap5.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select/bootstrap-select.min.css') }}">
 
@@ -221,7 +220,6 @@
                       <th> <span class="c-o-light f-w-600">Tingkat</span></th>
                       <th> <span class="c-o-light f-w-600">Jurusan</span></th>
                       <th> <span class="c-o-light f-w-600">Wali Kelas</span></th>
-                      <th> <span class="c-o-light f-w-600">Waktu</span></th>
                       <th> <span class="c-o-light f-w-600">Aksi</span></th>
                     </tr>
                   </thead>
@@ -241,7 +239,6 @@
   <script src="{{ asset('assets/js/datatable/datatables/jquery.dataTables.min.js') }}"></script>
   <script src="{{ asset('assets/js/datatable/datatables/dataTables.js') }}"></script>
   <script src="{{ asset('assets/js/datatable/datatables/dataTables.select.js') }}"></script>
-  <script src="{{ asset('assets/js/datatable/datatables/select.bootstrap5.js') }}"></script>
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
   <script src="{{ asset('assets/js/class-crud.js') }}"></script>

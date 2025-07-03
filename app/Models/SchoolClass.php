@@ -51,6 +51,24 @@ class SchoolClass extends Model
 
         // Filter berdasarkan level
         $query->when($filters['level'] ?? false, function ($query, $level) {
+            $query->where('classes.level', $level);
+        });
+
+        // Filter berdasarkan major
+        $query->when($filters['major'] ?? false, function ($query, $major) {
+            $query->where('majors.name', $major);
+        });
+    }
+
+    public function scopeFilterSchedule($query, $class)
+    {
+        // Filter berdasarkan Class
+        $query->when($filters['level'] ?? false, function ($query, $level) {
+            $query->where('classes.name', $level);
+        });
+
+        // Filter berdasarkan level
+        $query->when($filters['level'] ?? false, function ($query, $level) {
             $query->where('level', $level);
         });
 

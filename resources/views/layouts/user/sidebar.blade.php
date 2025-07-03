@@ -79,16 +79,16 @@
                             </svg><svg class="fill-icon">
                               <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
                             </svg><span>Jurusan</span></a>
-                          </li>
-                          <li class="sidebar-list">
-                            <i class="fa-solid fa-thumbtack"></i>
+                        </li>
+                        <li class="sidebar-list">
+                          <i class="fa-solid fa-thumbtack"></i>
                           <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.class.index') }}"><svg
                               class="stroke-icon">
                               <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-user') }}"></use>
                             </svg><svg class="fill-icon">
                               <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
                             </svg><span>Kelas</span></a>
-                          </li>
+                        </li>
                         <li class="sidebar-list">
                           <i class="fa-solid fa-thumbtack"></i>
                           <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.student.index') }}"><svg
@@ -101,11 +101,11 @@
                         <li class="sidebar-list">
                           <i class="fa-solid fa-thumbtack"></i>
                           <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.teacher.index') }}"><svg
-                            class="stroke-icon">
-                            <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-user') }}"></use>
-                          </svg><svg class="fill-icon">
-                            <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
-                          </svg><span>Guru</span></a>
+                              class="stroke-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-user') }}"></use>
+                            </svg><svg class="fill-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
+                            </svg><span>Guru</span></a>
                         </li>
                         <li class="sidebar-list">
                           <i class="fa-solid fa-thumbtack"></i>
@@ -116,10 +116,20 @@
                               <use href="{{ asset('assets/svg/icon-sprite.svg#fill-board') }}"></use>
                             </svg><span class="lan-3">Ruangan </span></a>
                         </li>
-                        @endcan
-                      </ul>
-                    </div>
-                  </nav>
+                        <li class="sidebar-list">
+                          <i class="fa-solid fa-thumbtack"></i>
+                          <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.schedule.index') }}"><svg
+                              class="stroke-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
+                              </use>
+                            </svg><svg class="fill-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
+                            </svg><span class="lan-3">Jadwal </span></a>
+                        </li>
+                      @endcan
+                    </ul>
+                  </div>
+                </nav>
               </div>
             </div>
             <!-- Page Sidebar Ends-->

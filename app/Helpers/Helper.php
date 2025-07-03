@@ -50,4 +50,18 @@ class Helper
             default => 'student'
         };
     }
+
+    public static function getDayName(string $day): string
+    {
+        return match ($day) {
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu',
+            default => $day
+        };
+    }
 }

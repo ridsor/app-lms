@@ -11,6 +11,7 @@ use App\Models\Period;
 use App\Models\Meeting;
 use App\Models\Grade;
 use App\Models\Attendance;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,10 +26,10 @@ class Schedule extends Model
         'teacher_id',
         'room_id',
         'period_id',
-        'hari',
-        'metode_pertemuan',
-        'jam_mulai',
-        'jam_selesai'
+        'day',
+        'meeting_method',
+        'start_time',
+        'end_time'
     ];
 
     public function class(): BelongsTo
@@ -69,5 +70,15 @@ class Schedule extends Model
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
+    }
+
+    public function getStartTimeAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i');
+    }
+
+    public function getEndTimeAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i');
     }
 }

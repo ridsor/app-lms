@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Requests\Student\StoreStudentRequest;
 use App\Models\Major;
-use App\Models\Teacher;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -55,9 +54,6 @@ class StudentController extends Controller
                         </div>
                         ';
                     return $html;
-                })
-                ->editColumn('created_at', function ($row) {
-                    return $row->created_at;
                 })
                 ->addColumn('Nama', function ($row) {
                     $html = '
@@ -112,16 +108,16 @@ class StudentController extends Controller
                     $html = '';
                     if ($request->user()->can('student.*')) {
                         $html .= '
-                        <div class="common-align gap-2 justify-content-start">
+                        <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
                             <a class="square-white view" data-id="' . $row->id . '"><svg>
                                 <use href="' . asset('assets/svg/icon-sprite.svg#fill-view') . '">
                                 </use>
                             </svg>
                             </a>
-                            <a class="square-white edit"  data-id="' . $row->id . '">
+                            <a class="square-white edit"  data-id="' . $row->id . '" style="cursor: pointer;">
                                 <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
                             </a>
-                            <a class="square-white trash"  data-id="' . $row->id . '">
+                            <a class="square-white trash"  data-id="' . $row->id . '" style="cursor: pointer;">
                                 <svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg>
                             </a>
                         </div>';

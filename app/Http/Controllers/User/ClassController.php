@@ -30,7 +30,6 @@ class ClassController extends Controller
                     'classes.level',
                     'majors.name as major_name',
                     'teachers.name as homeroom_teacher_name',
-                    'classes.created_at'
                 ])
                 ->filter($request->all());
 
@@ -84,10 +83,7 @@ class ClassController extends Controller
                     </div>';
                     return $html;
                 })
-                ->addColumn('Waktu', function ($row) {
-                    return $row->created_at->translatedFormat('d/m/Y H:i');
-                })
-                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Wali Kelas', 'Waktu', 'Aksi'])
+                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Wali Kelas', 'Aksi'])
                 ->make(true);
         } else {
             $levels = SchoolClass::select('level')->distinct()->get();
