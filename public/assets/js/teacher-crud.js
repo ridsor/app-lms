@@ -25,11 +25,6 @@ $(function () {
                 name: "specialization",
                 searchable: false,
             },
-            {
-                data: "Pendidikan",
-                name: "education_level",
-                searchable: false,
-            },
             { data: "Waktu", name: "created_at", searchable: false },
             { data: "Aksi", name: "Aksi", orderable: false, searchable: false },
         ],
@@ -47,6 +42,7 @@ $(function () {
         },
         scrollCollapse: true,
         pageLength: 10,
+        searchDelay: 300,
         lengthMenu: [10, 25, 50, 100],
         responsive: true,
         autoWidth: false,
@@ -77,7 +73,7 @@ $(function () {
             denyButtonText: `Batal`,
             confirmButtonColor: "#FC4438",
             cancelButtonColor: "#16C7F9",
-            imageUrl: "../assets/images/gif/trash.gif",
+            imageUrl: "/assets/images/gif/trash.gif",
             imageWidth: 120,
             imageHeight: 120,
         }).then((result) => {
@@ -148,70 +144,10 @@ $(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    if (errors.name) {
-                        $("#addTeacherForm [name='name']")
-                            .next(".invalid-feedback")
-                            .text(errors.name[0]);
-                        $("#addTeacherForm [name='name']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.nip) {
-                        $("#addTeacherForm [name='nip']")
-                            .next(".invalid-feedback")
-                            .text(errors.nip[0]);
-                        $("#addTeacherForm [name='nip']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.specialization) {
-                        $("#addTeacherForm [name='specialization']")
-                            .next(".invalid-feedback")
-                            .text(errors.specialization[0]);
-                        $(
-                            "#addTeacherForm [name='specialization']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.education_level) {
-                        $("#addTeacherForm [name='education_level']")
-                            .next(".invalid-feedback")
-                            .text(errors.education_level[0]);
-                        $(
-                            "#addTeacherForm [name='education_level']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.date_of_birth) {
-                        $("#addTeacherForm [name='date_of_birth']")
-                            .next(".invalid-feedback")
-                            .text(errors.date_of_birth[0]);
-                        $(
-                            "#addTeacherForm [name='date_of_birth']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.birthplace) {
-                        $("#addTeacherForm [name='birthplace']")
-                            .next(".invalid-feedback")
-                            .text(errors.birthplace[0]);
-                        $("#addTeacherForm [name='birthplace']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.religion) {
-                        $("#addTeacherForm [name='religion']")
-                            .next(".invalid-feedback")
-                            .text(errors.religion[0]);
-                        $("#addTeacherForm [name='religion']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.gender) {
-                        $("#addTeacherForm [name='gender']")
-                            .next(".invalid-feedback")
-                            .text(errors.gender[0]);
-                        $("#addTeacherForm [name='gender']").addClass(
-                            "is-invalid"
-                        );
-                    }
+                    $("#addTeacherForm [name='" + key + "']")
+                        .addClass("is-invalid")
+                        .next(".invalid-feedback")
+                        .text(errors[key][0]);
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
                     $("#toast-error #toast-text").text(
@@ -248,9 +184,6 @@ $(function () {
                     $("#editTeacherForm [name='nip']").val(res.data.nip);
                     $("#editTeacherForm [name='specialization']").val(
                         res.data.specialization
-                    );
-                    $("#editTeacherForm [name='education_level']").val(
-                        res.data.education_level
                     );
                     $("#editTeacherForm [name='date_of_birth']").val(
                         res.data.date_of_birth
@@ -313,70 +246,10 @@ $(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    if (errors.name) {
-                        $("#editTeacherForm [name='name']")
-                            .next(".invalid-feedback")
-                            .text(errors.name[0]);
-                        $("#editTeacherForm [name='name']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.nip) {
-                        $("#editTeacherForm [name='nip']")
-                            .next(".invalid-feedback")
-                            .text(errors.nip[0]);
-                        $("#editTeacherForm [name='nip']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.specialization) {
-                        $("#editTeacherForm [name='specialization']")
-                            .next(".invalid-feedback")
-                            .text(errors.specialization[0]);
-                        $(
-                            "#editTeacherForm [name='specialization']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.education_level) {
-                        $("#editTeacherForm [name='education_level']")
-                            .next(".invalid-feedback")
-                            .text(errors.education_level[0]);
-                        $(
-                            "#editTeacherForm [name='education_level']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.date_of_birth) {
-                        $("#editTeacherForm [name='date_of_birth']")
-                            .next(".invalid-feedback")
-                            .text(errors.date_of_birth[0]);
-                        $(
-                            "#editTeacherForm [name='date_of_birth']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.birthplace) {
-                        $("#editTeacherForm [name='birthplace']")
-                            .next(".invalid-feedback")
-                            .text(errors.birthplace[0]);
-                        $("#editTeacherForm [name='birthplace']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.religion) {
-                        $("#editTeacherForm [name='religion']")
-                            .next(".invalid-feedback")
-                            .text(errors.religion[0]);
-                        $("#editTeacherForm [name='religion']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.gender) {
-                        $("#editTeacherForm [name='gender']")
-                            .next(".invalid-feedback")
-                            .text(errors.gender[0]);
-                        $("#editTeacherForm [name='gender']").addClass(
-                            "is-invalid"
-                        );
-                    }
+                    $("#editTeacherForm [name='" + key + "']")
+                        .addClass("is-invalid")
+                        .next(".invalid-feedback")
+                        .text(errors[key][0]);
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
                     $("#toast-error #toast-text").text(
@@ -404,50 +277,6 @@ $(function () {
         $("#bulkEditTeacherForm")[0].reset();
         $("#bulkEditTeacherModal").modal("show");
         $("#bulkEditTeacherForm").data("ids", selectedIds);
-    });
-
-    $("#bulkEditTeacherForm").on("submit", function (e) {
-        e.preventDefault();
-        var ids = $(this).data("ids") || [];
-        var data = {
-            ids: ids,
-            specialization: $(
-                "#bulkEditTeacherForm input[name='specialization']"
-            ).val(),
-            education_level: $(
-                "#bulkEditTeacherForm select[name='education_level']"
-            ).val(),
-        };
-        var submitBtn = $("#bulkEditTeacherSubmitBtn");
-        var originalText = submitBtn.text();
-        submitBtn
-            .prop("disabled", true)
-            .html(
-                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
-            );
-        $.ajax({
-            url: "/guru/edit",
-            method: "PATCH",
-            data: JSON.stringify(data),
-            contentType: "application/json",
-            success: function (res) {
-                if (res.success) {
-                    const toast = new bootstrap.Toast($("#toast-success"));
-                    $("#toast-success #toast-text").text(res.message);
-                    toast.show();
-                    $("#bulkEditTeacherModal").modal("hide");
-                    t.clearPipeline().draw();
-                }
-            },
-            error: function (xhr) {
-                const toast = new bootstrap.Toast($("#toast-error"));
-                $("#toast-error #toast-text").text(xhr.responseJSON.message);
-                toast.show();
-            },
-            complete: function () {
-                submitBtn.prop("disabled", false).html(originalText);
-            },
-        });
     });
 
     // Select all
@@ -512,9 +341,6 @@ $(function () {
                     $("#viewTeacherNip").text(res.data.nip || "-");
                     $("#viewTeacherSpecialization").text(
                         res.data.specialization || "-"
-                    );
-                    $("#viewTeacherEducationLevel").text(
-                        res.data.education_level || "-"
                     );
                     $("#viewTeacherBirthplace").text(
                         res.data.birthplace || "-"

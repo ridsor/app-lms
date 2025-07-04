@@ -95,6 +95,7 @@ $(function () {
         scrollCollapse: true,
         pageLength: 10,
         lengthMenu: [10, 25, 50, 100],
+        searchDelay: 300,
         responsive: true,
         autoWidth: false,
         searchable: true,
@@ -125,7 +126,7 @@ $(function () {
             denyButtonText: `Batal`,
             confirmButtonColor: "#FC4438",
             cancelButtonColor: "#16C7F9",
-            imageUrl: "../assets/images/gif/trash.gif",
+            imageUrl: "/assets/images/gif/trash.gif",
             imageWidth: 120,
             imageHeight: 120,
         }).then((result) => {
@@ -204,7 +205,7 @@ $(function () {
             denyButtonText: `Batal`,
             confirmButtonColor: "#FC4438",
             cancelButtonColor: "#16C7F9",
-            imageUrl: "../assets/images/gif/trash.gif",
+            imageUrl: "/assets/images/gif/trash.gif",
             imageWidth: 120,
             imageHeight: 120,
         }).then((result) => {
@@ -235,7 +236,11 @@ $(function () {
                         }
                     },
                     error: function (xhr) {
-                        alert("Terjadi kesalahan saat menghapus siswa.");
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON.message
+                        );
+                        toast.show();
                     },
                     complete: function () {
                         trashBtn.prop("disabled", false).html(originalHtml);
@@ -839,9 +844,15 @@ $(document).ready(function () {
         const originalHtml = exportBtn.html();
 
         // Validasi minimal satu filter dipilih
-        const major = $("#export-student-account-form select[name='major']").val();
-        const classFilter = $("#export-student-account-form select[name='class']").val();
-        const level = $("#export-student-account-form select[name='level']").val();
+        const major = $(
+            "#export-student-account-form select[name='major']"
+        ).val();
+        const classFilter = $(
+            "#export-student-account-form select[name='class']"
+        ).val();
+        const level = $(
+            "#export-student-account-form select[name='level']"
+        ).val();
 
         if (!major && !classFilter && !level) {
             const toast = new bootstrap.Toast($("#toast-error"));
@@ -875,9 +886,15 @@ $(document).ready(function () {
         const originalHtml = exportBtn.html();
 
         // Validasi minimal satu filter dipilih
-        const major = $("#export-parent-account-form select[name='major']").val();
-        const classFilter = $("#export-parent-account-form select[name='class']").val();
-        const level = $("#export-parent-account-form select[name='level']").val();
+        const major = $(
+            "#export-parent-account-form select[name='major']"
+        ).val();
+        const classFilter = $(
+            "#export-parent-account-form select[name='class']"
+        ).val();
+        const level = $(
+            "#export-parent-account-form select[name='level']"
+        ).val();
 
         if (!major && !classFilter && !level) {
             const toast = new bootstrap.Toast($("#toast-error"));

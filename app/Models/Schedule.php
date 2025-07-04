@@ -11,10 +11,12 @@ use App\Models\Period;
 use App\Models\Meeting;
 use App\Models\Grade;
 use App\Models\Attendance;
+use App\Helpers\Helper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 
 class Schedule extends Model
 {
@@ -80,5 +82,25 @@ class Schedule extends Model
     public function getEndTimeAttribute($value)
     {
         return Carbon::parse($value)->format('H:i');
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['search']['value'])) {
+            $search = $filters['search']['value'];
+            $query->where(function ($q) use ($search) {
+                $q->whereFullText('subjects.name', $search);
+            });
+        }
+
+        $query->when($filters['guru'] ?? false, function ($query, $guru) {
+            $query->whereFullText('teachers.name', $guru);
+        });
+        $query->when($filters['ruangan'] ?? false, function ($query, $ruangan) {
+            $query->where('rooms.name', 'like', '%' . $ruangan . '%');
+        });
+        $query->when($filters['hari'] ?? false, function ($query, $hari) {
+            $query->where('day', Helper::getDayValue($hari));
+        });
     }
 }

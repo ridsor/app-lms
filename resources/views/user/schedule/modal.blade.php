@@ -12,11 +12,27 @@
             <form class="row g-3 needs-validation" novalidate="" id="addScheduleForm">
               <input type="hidden" name="class_id" value="{{ $class->id }}">
               <div class="col-lg-6">
-                <label class="form-label" for="scheduleSubject">Mata Pelajaran<span class="txt-danger">*</span></label>
-                <select class="selectpicker search-picker" data-live-search="true" id="scheduleSubject"
+                <label class="form-label" for="addScheduleCurriculum">Kurikulum</label>
+                <select class="form-select" @if (!($activeCurriculum->count() > 0)) disabled @endif id="addScheduleCurriculum"
+                  name="curriculum_id">
+                  @if ($activeCurriculum->count() > 0)
+                    @foreach ($activeCurriculum as $curriculum)
+                      <option value="{{ $curriculum->id }}">{{ $curriculum->name }}</option>
+                    @endforeach
+                  @else
+                    <option value="">Tidak ada kurikulum aktif</option>
+                  @endif
+                </select>
+                <div class="invalid-feedback">
+                </div>
+              </div>
+              <div class="col-lg-6">
+                <label class="form-label" for="addScheduleSubject">Mata Pelajaran<span
+                    class="txt-danger">*</span></label>
+                <select class="selectpicker search-picker" data-live-search="true" id="addScheduleSubject"
                   name="subject_id">
                   <option value="">Pilih Mata Pelajaran</option>
-                  @foreach ($subjects as $subject)
+                  @foreach ($activeCurriculum[0]->subjects ?? [] as $subject)
                     <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                   @endforeach
                 </select>
@@ -29,7 +45,7 @@
                   name="teacher_id">
                   <option value="">Pilih Guru</option>
                   @foreach ($teachers as $teacher)
-                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                    <option value="{{ $teacher->id }}">{{ $teacher->name }} - {{ $teacher->specialization }}</option>
                   @endforeach
                 </select>
                 <div class="invalid-feedback"></div>
@@ -46,7 +62,7 @@
               </div>
               <div class="col-lg-6">
                 <label class="form-label" for="scheduleDay">Hari<span class="txt-danger">*</span></label>
-                <select class="form-select" id="scheduleDay" name="day" required>
+                <select class="form-select" id="scheduleDay" name="day">
                   <option value="">Pilih Hari</option>
                   @foreach ($days as $day)
                     <option value="{{ $day['value'] }}">{{ $day['label'] }}</option>
@@ -63,7 +79,7 @@
               <div class="col-lg-3">
                 <label class="form-label" for="scheduleEnd">Jam Selesai<span class="txt-danger">*</span></label>
                 <input class="form-control flatpickr-input twenty-four-hour" value="00:00" id="scheduleEnd"
-                  name="end_time" type="time" required autocomplete="off">
+                  name="end_time" type="time" autocomplete="off">
                 <div class="invalid-feedback"></div>
               </div>
               <div class="col-lg-6">
@@ -86,7 +102,8 @@
   </div>
 </div>
 {{-- Edit --}}
-<div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModal" aria-hidden="true">
+<div class="modal fade" id="editScheduleModal" tabindex="-1" aria-labelledby="editScheduleModal"
+  aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content category-popup">
       <div class="modal-header">
@@ -99,14 +116,24 @@
             <form class="row g-3 needs-validation" novalidate="" id="editScheduleForm">
               <input type="hidden" name="class_id" value="{{ $class->id }}">
               <div class="col-lg-6">
+                <label class="form-label" for="editScheduleCurriculum">Kurikulum<span
+                    class="txt-danger">*</span></label>
+                <select class="selectpicker search-picker" data-live-search="true" id="editScheduleCurriculum"
+                  name="curriculum_id">
+                  <option value="">Pilih Kurikulum</option>
+                  @foreach ($activeCurriculum as $curriculum)
+                    <option value="{{ $curriculum->id }}">{{ $curriculum->name }}</option>
+                  @endforeach
+                </select>
+                <div class="invalid-feedback">
+                </div>
+              </div>
+              <div class="col-lg-6">
                 <label class="form-label" for="editScheduleSubject">Mata Pelajaran<span
                     class="txt-danger">*</span></label>
-                <select class="selectpicker search-picker" data-live-search="true" id="editScheduleSubject"
+                <select disabled class="selectpicker search-picker" data-live-search="true" id="editScheduleSubject"
                   name="subject_id">
                   <option value="">Pilih Mata Pelajaran</option>
-                  @foreach ($subjects as $subject)
-                    <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                  @endforeach
                 </select>
                 <div class="invalid-feedback">
                 </div>
@@ -118,7 +145,9 @@
                   name="teacher_id">
                   <option value="">Pilih Guru</option>
                   @foreach ($teachers as $teacher)
-                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                    <option value="{{ $teacher->id }}">
+                      {{ $teacher->name }}{{ $teacher->specialization ? ' - ' . $teacher->specialization : '' }}
+                    </option>
                   @endforeach
                 </select>
                 <div class="invalid-feedback"></div>
@@ -136,7 +165,7 @@
               </div>
               <div class="col-lg-6">
                 <label class="form-label" for="editScheduleDay">Hari<span class="txt-danger">*</span></label>
-                <select class="form-select" id="editScheduleDay" name="day" required>
+                <select class="form-select" id="editScheduleDay" name="day">
                   <option value="">Pilih Hari</option>
                   @foreach ($days as $day)
                     <option value="{{ $day['value'] }}">{{ $day['label'] }}</option>
@@ -153,7 +182,7 @@
               <div class="col-lg-3">
                 <label class="form-label" for="editScheduleEnd">Jam Selesai<span class="txt-danger">*</span></label>
                 <input class="form-control flatpickr-input twenty-four-hour" value="00:00" id="editScheduleEnd"
-                  name="end_time" type="time" required autocomplete="off">
+                  name="end_time" type="time" autocomplete="off">
                 <div class="invalid-feedback"></div>
               </div>
               <div class="col-lg-6">

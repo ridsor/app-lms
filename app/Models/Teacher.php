@@ -19,7 +19,6 @@ class Teacher extends Model
         'name',
         'nip',
         'specialization',
-        'education_level',
         'gender',
         'date_of_birth',
         'birthplace',

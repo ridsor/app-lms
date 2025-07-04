@@ -48,6 +48,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
         ->except(['create', 'show'])
         ->names('user.subject');
 
+    Route::delete('jadwal/hapus', [ScheduleController::class, 'bulkDestroy'])->name('user.schedule.bulkDestroy');
     Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
     Route::resource('/jadwal', ScheduleController::class)->except(['create'])->names('user.schedule');
 });

@@ -6,6 +6,7 @@ $(function () {
     columns = columns.concat([
         { data: "Kelas", name: "classes.name" },
         { data: "Tingkat", name: "classes.level" },
+        { data: "Jumlah Jadwal", name: "schedules_count" },
         { data: "Aksi", name: "Aksi", orderable: false, searchable: false },
     ]);
 
@@ -60,6 +61,7 @@ $(function () {
         autoWidth: false,
         searchable: false,
         searching: false,
+        searchDelay: 300,
         order: [],
     });
 

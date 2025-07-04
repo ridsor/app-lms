@@ -31,7 +31,7 @@ class Subject extends Model
         if (!empty($filters['search']['value'])) {
             $search = $filters['search']['value'];
             $query->where(function ($q) use ($search) {
-                $q->whereFullText('name', $search);
+                $q->where('name', 'like', '%' . $search . '%');
             });
         }
     }

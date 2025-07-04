@@ -64,4 +64,18 @@ class Helper
             default => $day
         };
     }
+
+    public static function getDayValue(string $day): string
+    {
+        return match ($day) {
+            'Senin' => 'Monday',
+            'Selasa' => 'Tuesday',
+            'Rabu' => 'Wednesday',
+            'Kamis' => 'Thursday',
+            'Jumat' => 'Friday',
+            'Sabtu' => 'Saturday',
+            'Minggu' => 'Sunday',
+            default => $day
+        };
+    }
 }

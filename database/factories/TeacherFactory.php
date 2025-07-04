@@ -17,7 +17,6 @@ class TeacherFactory extends Factory
             'name' => $this->faker->name(),
             'nip' => $this->faker->unique()->numerify('1980#######'),
             'specialization' => $this->faker->randomElement(['Matematika', 'Bahasa Indonesia', 'IPA']),
-            'education_level' => $this->faker->randomElement(['S1', 'S2', 'S3']),
             'gender' => $this->faker->randomElement(['M', 'F']),
             'date_of_birth' => $this->faker->date(),
             'birthplace' => $this->faker->city(),

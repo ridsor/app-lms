@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Schedule\ScheduleRequest;
 use App\Models\Curriculum;
 use App\Models\Major;
+use App\Models\Meeting;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
@@ -47,14 +48,14 @@ class ScheduleController extends Controller
           'classes.level',
         ]);
       }
-      $data->filterSchedule($request->all());
+      $data->filterSchedule($request->all())->withCount('schedules');
 
       $dataTable = DataTables::of($data);
 
       if ($majorsExist) {
         $dataTable = $dataTable->addColumn('Jurusan', function ($row) {
           $html = '
-              <span class="badge badge-light-primary">' . ($row->major_name) . '</span>
+          <span class="badge badge-light-primary">' . ($row->major_name) . '</span>
           ';
           return $html;
         });
@@ -73,13 +74,19 @@ class ScheduleController extends Controller
           ';
           return $html;
         })
+        ->addColumn('Jumlah Jadwal', function ($row) {
+          $html = '
+              <span class="badge badge-light-primary">' . ($row->schedules_count ?? 0) . '</span>
+          ';
+          return $html;
+        })
         ->addColumn('Aksi', function ($row) {
           $url = route('user.schedule.byclass', $row->id);
           return '<a href="' . $url . '" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Lihat Jadwal</a>';
         });
 
       // Tentukan kolom mana saja yang perlu di-raw
-      $rawColumns = ['Kelas', 'Tingkat', 'Aksi'];
+      $rawColumns = ['Kelas', 'Tingkat', 'Jumlah Jadwal', 'Aksi'];
       if ($majorsExist) {
         $rawColumns[] = 'Jurusan';
       }
@@ -107,12 +114,13 @@ class ScheduleController extends Controller
       return abort(403);
     }
 
-    $class = SchoolClass::with(['major' => fn($query) => $query->select('id', 'name')])->findOrFail($classId);
+    $class = SchoolClass::with(['major' => fn($query) => $query->select('id', 'name')])->find($classId);
 
     $activePeriod = Period::where('status', true)->first();
     if (!$activePeriod) {
       abort(404, 'Tidak ada periode aktif.');
     }
+    Log::info('here');
 
     if ($request->ajax()) {
       $data = Schedule::query()
@@ -128,10 +136,11 @@ class ScheduleController extends Controller
           'schedules.start_time',
           'schedules.end_time',
         ])
+        ->filter($request->all())
         ->where('class_id', $classId)
         ->where('period_id', $activePeriod->id)
-        ->orderBy('day')
-        ->orderBy('start_time')
+        ->orderBy('day', 'asc')
+        ->orderBy('start_time', 'asc')
         ->get();
 
       return Datatables::of($data)
@@ -198,15 +207,8 @@ class ScheduleController extends Controller
         ->rawColumns(['id', 'Mata Pelajaran', 'Guru', 'Ruangan', 'Hari', 'Jam', 'Aksi'])
         ->make(true);
     } else {
-      $schedules = Schedule::with(['subject', 'teacher', 'room'])
-        ->where('class_id', $classId)
-        ->where('period_id', $activePeriod->id)
-        ->orderBy('day')
-        ->orderBy('start_time')
-        ->get();
-      $activeCurriculum = Curriculum::select('id')->where('status', true)->first();
-      $subjects = Subject::select('id', 'name', 'curriculum_id')->where('curriculum_id', $activeCurriculum->id)->orderBy('name', 'asc')->get();
-      $teachers = Teacher::select('id', 'name')->orderBy('name', 'asc')->get();
+      $activeCurriculum = Curriculum::with(['subjects' => fn($query) => $query->select('id', 'name', 'curriculum_id')])->select('id', 'name')->where('status', true)->get();
+      $teachers = Teacher::select('id', 'name', 'specialization')->orderBy('name', 'asc')->get();
       $rooms = Room::select('id', 'name')->orderBy('name', 'asc')->get();
       $hasMajors = Major::count() > 0;
       $meetingMethods = [['value' => 'Offline', 'label' => 'Luring'], ['value' => 'Online', 'label' => 'Daring'], ['value' => 'Hybrid', 'label' => 'Hybrid']];
@@ -214,13 +216,11 @@ class ScheduleController extends Controller
 
       return view('user.schedule.by-class', [
         'class' => $class,
-        'schedules' => $schedules,
-        'subjects' => $subjects,
         'teachers' => $teachers,
         'rooms' => $rooms,
-        'activePeriod' => $activePeriod,
         'hasMajors' => $hasMajors,
         'meetingMethods' => $meetingMethods,
+        'activeCurriculum' => $activeCurriculum,
         'days' => $days
       ]);
     }
@@ -278,10 +278,10 @@ class ScheduleController extends Controller
         return $this->sendError('Tidak ada periode aktif.', [], 400);
       }
 
-      $scheduleExist = Schedule::where('class_id', $request->input('class_id'))
-        ->where('day', $request->input('day'))
+      $scheduleExist = Schedule::where('class_id', $formRequest->input('class_id'))
+        ->where('day', $formRequest->input('day'))
         ->where('period_id', $activePeriod->id)
-        ->whereBetween('start_time', [$request->input('start_time'), $request->input('end_time')])
+        ->whereBetween('start_time', [$formRequest->input('start_time'), $formRequest->input('end_time')])
         ->exists();
 
       if ($scheduleExist) {
@@ -291,16 +291,34 @@ class ScheduleController extends Controller
       $validated = $formRequest->validated();
       $validated['period_id'] = $activePeriod->id;
       $schedule = Schedule::create($validated);
+
+      // meetings
+      for ($tanggal = $schedule->period->start_date; $tanggal <= $schedule->period->end_date; $tanggal->addDay()) {
+        if ($tanggal->format('l') == $schedule->day) {
+          // $isLibur = HariLibur::where('tanggal', $tanggal->format('Y-m-d'))->exists();
+          $isWeekend = $tanggal->isWeekend(); // true jika Sabtu/Minggu
+
+          if (!$isWeekend) {
+            $schedule->meetings()->create([
+              'date' => $tanggal->format('Y-m-d'),
+              'meeting_method' => $schedule->meeting_method,
+              'type' => 'Learning',
+            ]);
+          }
+        }
+      }
+
       return $this->sendResponse('Jadwal berhasil ditambahkan', $schedule, 201);
     } catch (\Exception $e) {
+      Log::error($e);
       return $this->sendError('Silakan coba lagi.', [], 500);
     }
   }
 
-  public function update(Request $request, ScheduleRequest $formRequest, $id)
+  public function update(ScheduleRequest $formRequest, $id)
   {
     try {
-      if (!$request->user()->can('schedule.*')) {
+      if (!$formRequest->user()->can('schedule.*')) {
         return abort(403);
       }
 
@@ -310,10 +328,10 @@ class ScheduleController extends Controller
       }
 
       $scheduleExist = Schedule::where('id', '!=', $id)
-        ->where('class_id', $request->input('class_id'))
-        ->where('day', $request->input('day'))
+        ->where('class_id', $formRequest->input('class_id'))
+        ->where('day', $formRequest->input('day'))
         ->where('period_id', $activePeriod->id)
-        ->whereBetween('start_time', [$request->input('start_time'), $request->input('end_time')])
+        ->whereBetween('start_time', [$formRequest->input('start_time'), $formRequest->input('end_time')])
         ->exists();
 
       if ($scheduleExist) {
@@ -332,14 +350,34 @@ class ScheduleController extends Controller
 
   public function destroy(Request $request, $id)
   {
-    $schedule = Schedule::findOrFail($id);
-    if (!$request->user()->can('delete', $schedule)) {
-      return abort(403);
-    }
     try {
+      if (!$request->user()->can('schedule.*')) {
+        return abort(403);
+      }
+      $schedule = Schedule::findOrFail($id);
       $schedule->delete();
       return $this->sendResponse('Jadwal berhasil dihapus.');
     } catch (\Exception $e) {
+      Log::error($e);
+      return $this->sendError('Silakan coba lagi.', [], 500);
+    }
+  }
+
+  public function bulkDestroy(Request $request)
+  {
+    try {
+      if (!$request->user()->can('schedule.*')) {
+        return abort(403);
+      }
+
+      $ids = $request->input('ids');
+      $schedules = Schedule::whereIn('id', $ids)->get();
+      foreach ($schedules as $schedule) {
+        $schedule->delete();
+      }
+      return $this->sendResponse('Jadwal berhasil dihapus.');
+    } catch (\Exception $e) {
+      Log::error($e);
       return $this->sendError('Silakan coba lagi.', [], 500);
     }
   }

@@ -24,7 +24,7 @@ class Room extends Model
     {
         $query->when($filters['search']['value'] ?? false, function ($query, $search) {
             $query->where(function ($q) use ($search) {
-                $q->whereFullText('name', $search);
+                $q->where('name', 'like', '%' . $search . '%');
             });
         });
     }

@@ -76,6 +76,7 @@ $(function () {
         },
         scrollCollapse: true,
         pageLength: 10,
+        searchDelay: 300,
         lengthMenu: [10, 25, 50, 100],
         responsive: true,
         autoWidth: false,
@@ -108,7 +109,7 @@ $(function () {
             denyButtonText: `Batal`,
             confirmButtonColor: "#FC4438",
             cancelButtonColor: "#16C7F9",
-            imageUrl: "../assets/images/gif/trash.gif",
+            imageUrl: "/assets/images/gif/trash.gif",
             imageWidth: 120,
             imageHeight: 120,
         }).then((result) => {
@@ -182,7 +183,7 @@ $(function () {
             denyButtonText: `Batal`,
             confirmButtonColor: "#FC4438",
             cancelButtonColor: "#16C7F9",
-            imageUrl: "../assets/images/gif/trash.gif",
+            imageUrl: "/assets/images/gif/trash.gif",
             imageWidth: 120,
             imageHeight: 120,
         }).then(async (result) => {

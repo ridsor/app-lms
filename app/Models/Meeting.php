@@ -18,7 +18,6 @@ class Meeting extends Model
 
     protected $fillable = [
         'schedule_id',
-        'meeting_number',
         'date',
         'title',
         'description',

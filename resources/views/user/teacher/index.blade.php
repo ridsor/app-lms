@@ -98,12 +98,6 @@
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="teacherEducationLevel">Pendidikan</label>
-                              <input class="form-control" id="teacherEducationLevel" type="text"
-                                placeholder="Masukan pendidikan" name="education_level">
-                              <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-6">
                               <label class="form-label" for="teacherBirthplace">Tempat Lahir<span
                                   class="txt-danger">*</span></label>
                               <input class="form-control" id="teacherBirthplace" type="text"
@@ -180,12 +174,6 @@
                               <label class="form-label" for="editTeacherSpecialization">Spesialisasi</label>
                               <input class="form-control" id="editTeacherSpecialization" type="text"
                                 placeholder="Masukan spesialisasi" name="specialization">
-                              <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-6">
-                              <label class="form-label" for="editTeacherEducationLevel">Pendidikan</label>
-                              <input class="form-control" id="editTeacherEducationLevel" type="text"
-                                placeholder="Masukan pendidikan" name="education_level">
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
@@ -268,7 +256,6 @@
                       <th> <span class="c-o-light f-w-600">Nama</span></th>
                       <th> <span class="c-o-light f-w-600">NIP</span></th>
                       <th> <span class="c-o-light f-w-600">Spesialisasi</span></th>
-                      <th> <span class="c-o-light f-w-600">Pendidikan</span></th>
                       <th> <span class="c-o-light f-w-600">Waktu</span></th>
                       <th> <span class="c-o-light f-w-600">Aksi</span></th>
                     </tr>
@@ -308,10 +295,6 @@
                 <div class="col-lg-6">
                   <label class="form-label">Spesialisasi</label>
                   <div class="form-control-plaintext" id="viewTeacherSpecialization"></div>
-                </div>
-                <div class="col-lg-6">
-                  <label class="form-label">Pendidikan</label>
-                  <div class="form-control-plaintext" id="viewTeacherEducationLevel"></div>
                 </div>
                 <div class="col-lg-6">
                   <label class="form-label">Tempat Lahir</label>

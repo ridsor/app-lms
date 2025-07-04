@@ -22,7 +22,7 @@ class TeacherController extends Controller
 
     if ($request->ajax()) {
       $data = Teacher::query()
-        ->select(['id', 'name', 'nip', 'specialization', 'education_level', 'created_at'])
+        ->select(['id', 'name', 'nip', 'specialization', 'created_at'])
         ->filter($request->all());
 
       return DataTables::of($data)
@@ -32,7 +32,6 @@ class TeacherController extends Controller
         ->addColumn('Nama', fn($row) => '<div class="product-names"><p>' . $row->name . '</p></div>')
         ->addColumn('NIP', fn($row) => '<p class="f-light">' . $row->nip . '</p>')
         ->addColumn('Spesialisasi', fn($row) => '<span class="badge badge-light-primary">' . ($row->specialization ?: '-') . '</span>')
-        ->addColumn('Pendidikan', fn($row) => '<span class="badge badge-light-primary">' . ($row->education_level ?: '-') . '</span>')
         ->addColumn('Waktu', fn($row) => $row->created_at ? $row->created_at->translatedFormat('d/m/Y H:i') : '-')
         ->addColumn('Aksi', function ($row) {
           $html = '
@@ -51,7 +50,7 @@ class TeacherController extends Controller
                   </div>';
           return $html;
         })
-        ->rawColumns(['id', 'Nama', 'NIP', 'Spesialisasi', 'Pendidikan', 'Waktu', 'Aksi'])
+        ->rawColumns(['id', 'Nama', 'NIP', 'Spesialisasi', 'Waktu', 'Aksi'])
         ->make(true);
     } else {
       $genders = [
@@ -100,7 +99,6 @@ class TeacherController extends Controller
         'name' => $teacher->name,
         'nip' => $teacher->nip,
         'specialization' => $teacher->specialization,
-        'education_level' => $teacher->education_level,
         'date_of_birth' => $teacher->date_of_birth ? \Carbon\Carbon::parse($teacher->date_of_birth)->format('d/m/Y') : null,
         'birthplace' => $teacher->birthplace,
         'gender' => $teacher->gender,
@@ -200,7 +198,7 @@ class TeacherController extends Controller
       if (!$request->user()->can('viewAny', Teacher::class)) {
         return abort(403);
       }
-      $query = Teacher::query()->select('id', 'name', 'nip', 'specialization', 'education_level', 'date_of_birth', 'birthplace', 'religion', 'user_id');
+      $query = Teacher::query()->select('id', 'name', 'nip', 'specialization', 'date_of_birth', 'birthplace', 'religion', 'user_id');
       $teachers = $query->get();
       $exportData = $teachers->map(function ($teacher, $index) {
         return [
@@ -208,7 +206,6 @@ class TeacherController extends Controller
           'Nama' => $teacher->name,
           'NIP' => $teacher->nip,
           'Spesialisasi' => $teacher->specialization,
-          'Pendidikan' => $teacher->education_level,
           'Username' => $teacher->user ? $teacher->user->username : '-',
           'Password' => $teacher->user ? $teacher->user->username : '-',
         ];

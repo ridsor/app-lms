@@ -25,7 +25,6 @@ class DatabaseSeeder extends Seeder
             StudentSeeder::class,
             ScheduleSeeder::class,
             RoomSeeder::class,
-            MaterialSeeder::class,
         ]);
     }
 }

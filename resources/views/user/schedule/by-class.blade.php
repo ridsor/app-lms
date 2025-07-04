@@ -42,9 +42,66 @@
       <div class="row">
         <div class="col-12">
           <div class="card">
+            <div class="card-header card-no-border">
+              <div class="header-top">
+                <h5>Filter</h5>
+              </div>
+            </div>
+            <div class="card-body pt-0">
+              <div class="row g-3">
+                <div class="col-md-4 col-xl">
+                  <label class="form-label" for="teacher-filter">Guru</label>
+                  <select class="selectpicker search-picker filter" data-live-search="true" id="teacher-filter">
+                    <option value="">Pilih Guru</option>
+                    @foreach ($teachers as $teacher)
+                      <option value="{{ $teacher->name }}">{{ $teacher->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="col-md-4 col-xl">
+                  <label class="form-label" for="room-filter">Ruangan</label>
+                  <select class="selectpicker search-picker filter" data-live-search="true" id="room-filter">
+                    <option value="">Pilih Ruangan</option>
+                    @foreach ($rooms as $room)
+                      <option value="{{ $room->name }}">{{ $room->name }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="col-md-4 col-xl">
+                  <label class="form-label" for="day-filter">Hari</label>
+                  <select class="form-select" id="day-filter">
+                    <option value="">Pilih Hari</option>
+                    @foreach ($days as $day)
+                      <option value="{{ $day['label'] }}">{{ $day['label'] }}</option>
+                    @endforeach
+                  </select>
+                </div>
+                <div class="col-auto d-flex justify-content-start align-items-end">
+                  <a class="btn btn-primary f-w-500 w-100" id="filter-btn">Terapkan</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12">
+          <div class="card">
             <div class="card-header card-no-border text-end">
               <button class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal" data-bs-target="#addScheduleModal"><i
                   class="fa fa-plus pe-2"></i>Tambah Jadwal</button>
+              <div class="row g-3 justify-content-end align-items-center" id="schedule-by-class-action-buttons">
+                <div class="col-auto">
+                  <span>
+                    <span class="me-1 text-dark" id="selected-count">0</span> dipilih
+                  </span>
+                </div>
+                <div class="col-auto">
+                  <a id="delete-selected"
+                    class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-danger px-2 py-2"
+                    style="cursor: pointer;">
+                    <i class="fa-solid fa-trash-can txt-danger"></i>
+                  </a>
+                </div>
+              </div>
               @include('user.schedule.modal')
             </div>
             <div class="card-body px-0 pt-0">
@@ -90,6 +147,7 @@
   <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
   <script>
     const classId = @json(request()->route('classId'));
+    const curriculums = @json($activeCurriculum);
   </script>
   <script src="{{ asset('assets/js/schedule-by-class-crud.js') }}"></script>
   <script src="{{ asset('assets/js/select/bootstrap-select.min.js') }}"></script>

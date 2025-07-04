@@ -31,8 +31,13 @@ class CurriculumController extends Controller
         ->addColumn('Deskripsi', function ($row) {
           return $row->description ? '<div class="ql-editor p-0 m-0">' . $row->description . '</div>' : '-';
         })
-        ->addColumn('Jumlah Mata Pelajaran', function ($row) {
-          return $row->subjects_count;
+        ->addColumn('Mata Pelajaran', function ($row) {
+          $html = '
+          <a class="square-white view" style="cursor: pointer" href="' . route('user.subject.index', ['curriculum_id' => $row->id]) . '">
+                <span class="badge badge-light-primary">Mata Pelajaran (' . $row->subjects_count . ')</span
+          </a>
+          ';
+          return $html;
         })
         ->addColumn('Status', function ($row) {
           return $row->status ?
@@ -45,18 +50,12 @@ class CurriculumController extends Controller
         })
         ->addColumn('Aksi', function ($row) {
           $html = '<div class="common-align gap-2 justify-content-start">'
-            . '<a class="square-white view" style="cursor: pointer" href="' . route('user.subject.index', ['curriculum_id' => $row->id]) . '">
-                <svg>
-                    <use href="' . asset('assets/svg/icon-sprite.svg#fill-view') . '">
-                    </use>
-                </svg>
-              </a>'
             . '<a class="square-white edit" style="cursor: pointer" data-id="' . $row->id . '"><svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg></a>'
             . '<a class="square-white trash" style="cursor: pointer" data-id="' . $row->id . '"><svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg></a>'
             . '</div>';
           return $html;
         })
-        ->rawColumns(['id', 'Nama', 'Deskripsi', 'Jumlah Mata Pelajaran', 'Status', 'Waktu', 'Aksi'])
+        ->rawColumns(['id', 'Nama', 'Deskripsi', 'Mata Pelajaran', 'Status', 'Waktu', 'Aksi'])
         ->make(true);
     } else {
       return view('user.curriculum.index');

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->time('end_time');
             $table->timestamps();
             $table->unique(['class_id', 'day', 'start_time', 'end_time', 'period_id']);
+            $table->index('day');
         });
     }
 
