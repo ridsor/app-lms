@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('major_id')->nullable()->constrained('majors');
-            $table->foreignId('homeroom_teacher_id')->nullable()->unique()->constrained('teachers')->onDelete('set null');
             $table->string('name', 20);
             $table->string('level', 20);
             $table->timestamps();

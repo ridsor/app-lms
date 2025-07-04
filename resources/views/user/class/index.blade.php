@@ -6,7 +6,6 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
-  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select/bootstrap-select.min.css') }}">
 
 @endsection
 
@@ -87,7 +86,7 @@
                             </div>
                             <div class="col-md-6"><label class="form-label" for="classLevel">Tingkat<span
                                   class="txt-danger">*</span></label><input class="form-control" id="classLevel"
-                                type="text" placeholder="Masukan tingkat kelas" name="level">
+                                type="number" placeholder="Masukan tingkat kelas" name="level">
                               <div class="invalid-feedback">
                               </div>
                             </div>
@@ -103,19 +102,6 @@
                                 </select>
                               </div>
                             @endif
-                            <div class="col-lg-6">
-                              <label class="form-label" for="editStudentHomeroomTeacher">Wali
-                                Kelas</label>
-                              <select class="selectpicker search-picker" data-live-search="true"
-                                id="editStudentHomeroomTeacher" name="homeroom_teacher_id">
-                                <option value="">Pilih Wali Kelas</option>
-                                @foreach ($teachers as $teacher)
-                                  <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
-                                @endforeach
-                              </select>
-                              <div class="invalid-feedback">
-                              </div>
-                            </div>
                             <div class="col-md-12 d-flex justify-content-end">
                               <button class="btn btn-primary" type="submit" id="addClassSubmitBtn">Tambah +</button>
                             </div>
@@ -150,7 +136,7 @@
                             </div>
                             <div class="col-lg-6"><label class="form-label" for="classLevel">Tingkat<span
                                   class="txt-danger">*</span></label><input class="form-control" id="classLevel"
-                                type="text" placeholder="Masukan tingkat kelas" name="level">
+                                type="number" placeholder="Masukan tingkat kelas" name="level">
                               <div class="invalid-feedback">
                               </div>
                             </div>
@@ -166,19 +152,6 @@
                                 </select>
                               </div>
                             @endif
-                            <div class="col-lg-6">
-                              <label class="form-label" for="editStudentHomeroomTeacher">Wali
-                                Kelas</label>
-                              <select class="selectpicker search-picker" data-live-search="true"
-                                id="editStudentHomeroomTeacher" name="homeroom_teacher_id">
-                                <option value="">Pilih Wali Kelas</option>
-                                @foreach ($teachers as $teacher)
-                                  <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
-                                @endforeach
-                              </select>
-                              <div class="invalid-feedback">
-                              </div>
-                            </div>
                             <div class="col-md-12 d-flex justify-content-end">
                               <button class="btn btn-primary" type="submit" id="editClassSubmitBtn">Simpan</button>
                             </div>
@@ -219,7 +192,6 @@
                       <th> <span class="c-o-light f-w-600">Nama</span></th>
                       <th> <span class="c-o-light f-w-600">Tingkat</span></th>
                       <th> <span class="c-o-light f-w-600">Jurusan</span></th>
-                      <th> <span class="c-o-light f-w-600">Wali Kelas</span></th>
                       <th> <span class="c-o-light f-w-600">Aksi</span></th>
                     </tr>
                   </thead>
@@ -242,5 +214,4 @@
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
   <script src="{{ asset('assets/js/class-crud.js') }}"></script>
-  <script src="{{ asset('assets/js/select/bootstrap-select.min.js') }}"></script>
 @endsection

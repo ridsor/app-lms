@@ -13,6 +13,10 @@ $(function () {
     if (params.status) {
         $("#status-filter").val(params.status);
     }
+    if (params.homeroom_teacher) {
+        $("#teacher-filter").val(params.homeroom_teacher);
+    }
+    $(".filter").selectpicker("refresh");
 
     const t = $("#student-table").DataTable({
         processing: true,
@@ -41,12 +45,10 @@ $(function () {
             {
                 data: "NIS",
                 name: "students.nis",
-                searchable: false,
             },
             {
                 data: "NISN",
                 name: "students.nisn",
-                searchable: false,
             },
             {
                 data: "Jurusan",
@@ -56,6 +58,11 @@ $(function () {
             {
                 data: "Kelas",
                 name: "classes.name",
+                searchable: false,
+            },
+            {
+                data: "Wali Kelas",
+                name: "homeroom_teacher_name",
                 searchable: false,
             },
             {
@@ -99,7 +106,7 @@ $(function () {
         responsive: true,
         autoWidth: false,
         searchable: true,
-        order: [[7, "desc"]],
+        order: [[8, "desc"]],
     });
 
     t.on("draw", function () {
@@ -178,6 +185,8 @@ $(function () {
             params.append("class", $("#class-filter").val());
         if ($("#level-filter").val())
             params.append("level", $("#level-filter").val());
+        if ($("#teacher-filter").val())
+            params.append("homeroom_teacher", $("#teacher-filter").val());
         if ($("#status-filter").val())
             params.append("status", $("#status-filter").val());
 
@@ -282,98 +291,29 @@ $(function () {
                     t.clearPipeline().draw();
                     $("#addStudentModal").modal("hide");
                     $("#addStudentForm")[0].reset();
+                    $("#addStudentForm .selectpicker").selectpicker("refresh");
                 }
             },
             error: function (xhr, status, error) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    if (errors.name) {
-                        $("#addStudentForm input[name='name']")
-                            .next(".invalid-feedback")
-                            .text(errors.name[0]);
-                        $("#addStudentForm input[name='name']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.nis) {
-                        $("#addStudentForm input[name='nis']")
-                            .next(".invalid-feedback")
-                            .text(errors.nis[0]);
-                        $("#addStudentForm input[name='nis']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.nisn) {
-                        $("#addStudentForm input[name='nisn']")
-                            .next(".invalid-feedback")
-                            .text(errors.nisn[0]);
-                        $("#addStudentForm input[name='nisn']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.major_id) {
-                        $("#addStudentForm input[name='major_id']")
-                            .next(".invalid-feedback")
-                            .text(errors.major_id[0]);
-                        $("#addStudentForm input[name='major_id']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.class_id) {
-                        $("#addStudentForm input[name='class_id']")
-                            .next(".invalid-feedback")
-                            .text(errors.class_id[0]);
-                        $("#addStudentForm input[name='class_id']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.date_of_birth) {
-                        $("#addStudentForm input[name='date_of_birth']")
-                            .next(".invalid-feedback")
-                            .text(errors.date_of_birth[0]);
-                        $(
-                            "#addStudentForm input[name='date_of_birth']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.birthplace) {
-                        $("#addStudentForm input[name='birthplace']")
-                            .next(".invalid-feedback")
-                            .text(errors.birthplace[0]);
-                        $("#addStudentForm input[name='birthplace']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.gender) {
-                        $("#addStudentForm select[name='gender']")
-                            .next(".invalid-feedback")
-                            .text(errors.gender[0]);
-                        $("#addStudentForm select[name='gender']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.religion) {
-                        $("#addStudentForm select[name='religion']")
-                            .next(".invalid-feedback")
-                            .text(errors.religion[0]);
-                        $("#addStudentForm select[name='religion']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.admission_year) {
-                        $("#addStudentForm input[name='admission_year']")
-                            .next(".invalid-feedback")
-                            .text(errors.admission_year[0]);
-                        $(
-                            "#addStudentForm input[name='admission_year']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.status) {
-                        $("#addStudentForm select[name='status']")
-                            .next(".invalid-feedback")
-                            .text(errors.status[0]);
-                        $("#addStudentForm select[name='status']").addClass(
-                            "is-invalid"
-                        );
+                    for (const key in errors) {
+                        if (
+                            $("#addStudentForm [name='" + key + "']").hasClass(
+                                "selectpicker"
+                            )
+                        ) {
+                            $("#addStudentForm [name='" + key + "']")
+                                .parent()
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        } else {
+                            $("#addStudentForm [name='" + key + "']")
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        }
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -422,6 +362,7 @@ $(function () {
                     toast.show();
                     $("#editStudentModal").modal("hide");
                     $("#editStudentForm")[0].reset();
+                    $("#editStudentForm .selectpicker").selectpicker("refresh");
                     t.clearPipeline().draw();
                 }
             },
@@ -429,93 +370,23 @@ $(function () {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
 
-                    if (errors.name) {
-                        $("#editStudentForm input[name='name']")
-                            .next(".invalid-feedback")
-                            .text(errors.name[0]);
-                        $("#editStudentForm input[name='name']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.nis) {
-                        $("#editStudentForm input[name='nis']")
-                            .next(".invalid-feedback")
-                            .text(errors.nis[0]);
-                        $("#editStudentForm input[name='nis']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.nisn) {
-                        $("#editStudentForm input[name='nisn']")
-                            .next(".invalid-feedback")
-                            .text(errors.nisn[0]);
-                        $("#editStudentForm input[name='nisn']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.major_id) {
-                        $("#editStudentForm input[name='major_id']")
-                            .next(".invalid-feedback")
-                            .text(errors.major_id[0]);
-                        $("#editStudentForm input[name='major_id']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.class_id) {
-                        $("#editStudentForm input[name='class_id']")
-                            .next(".invalid-feedback")
-                            .text(errors.class_id[0]);
-                        $("#editStudentForm input[name='class_id']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.date_of_birth) {
-                        $("#editStudentForm input[name='date_of_birth']")
-                            .next(".invalid-feedback")
-                            .text(errors.date_of_birth[0]);
-                        $(
-                            "#editStudentForm input[name='date_of_birth']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.birthplace) {
-                        $("#editStudentForm input[name='birthplace']")
-                            .next(".invalid-feedback")
-                            .text(errors.birthplace[0]);
-                        $("#editStudentForm input[name='birthplace']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.gender) {
-                        $("#editStudentForm select[name='gender']")
-                            .next(".invalid-feedback")
-                            .text(errors.gender[0]);
-                        $("#editStudentForm select[name='gender']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.religion) {
-                        $("#editStudentForm select[name='religion']")
-                            .next(".invalid-feedback")
-                            .text(errors.religion[0]);
-                        $("#editStudentForm select[name='religion']").addClass(
-                            "is-invalid"
-                        );
-                    }
-                    if (errors.admission_year) {
-                        $("#editStudentForm input[name='admission_year']")
-                            .next(".invalid-feedback")
-                            .text(errors.admission_year[0]);
-                        $(
-                            "#editStudentForm input[name='admission_year']"
-                        ).addClass("is-invalid");
-                    }
-                    if (errors.status) {
-                        $("#editStudentForm select[name='status']")
-                            .next(".invalid-feedback")
-                            .text(errors.status[0]);
-                        $("#editStudentForm select[name='status']").addClass(
-                            "is-invalid"
-                        );
+                    for (const key in errors) {
+                        if (
+                            $("#editStudentForm [name='" + key + "']").hasClass(
+                                "selectpicker"
+                            )
+                        ) {
+                            $("#editStudentForm [name='" + key + "']")
+                                .parent()
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        } else {
+                            $("#editStudentForm [name='" + key + "']")
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        }
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -539,6 +410,9 @@ $(function () {
             ids: ids,
             class_id: $("#bulkEditStudentForm select[name='class_id']").val(),
             status: $("#bulkEditStudentForm select[name='status']").val(),
+            homeroom_teacher_id: $(
+                "#bulkEditStudentForm select[name='homeroom_teacher_id']"
+            ).val(),
         };
 
         var submitBtn = $("#bulkEditStudentSubmitBtn");
@@ -566,13 +440,23 @@ $(function () {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
 
-                    if (errors.class_id) {
-                        $("#bulkEditStudentForm select[name='class_id']")
-                            .next(".invalid-feedback")
-                            .text(errors.class_id[0]);
-                        $(
-                            "#bulkEditStudentForm select[name='class_id']"
-                        ).addClass("is-invalid");
+                    for (const key in errors) {
+                        if (
+                            $(
+                                "#bulkEditStudentForm [name='" + key + "']"
+                            ).hasClass("selectpicker")
+                        ) {
+                            $("#bulkEditStudentForm [name='" + key + "']")
+                                .parent()
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        } else {
+                            $("#bulkEditStudentForm [name='" + key + "']")
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        }
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -619,11 +503,11 @@ $(document).ready(function () {
                             res.data.class.major_id
                         );
                         // class
-                        classes
-                            .filter(function (cls) {
-                                return cls.major_id == res.data.class.major_id;
+                        majors
+                            .find(function (major) {
+                                return major.id == res.data.class.major_id;
                             })
-                            .forEach(function (cls) {
+                            .classes.forEach(function (cls) {
                                 classOptions +=
                                     "<option " +
                                     (cls.id === res.data.class_id
@@ -654,7 +538,12 @@ $(document).ready(function () {
                         });
                     }
 
-                    $("#editStudentForm [name='class_id']").html(classOptions);
+                    $("#editStudentForm [name='class_id']")
+                        .html(classOptions)
+                        .attr("disabled", false);
+                    $("#editStudentForm [name='homeroom_teacher_id']").val(
+                        res.data.homeroom_teacher_id
+                    );
 
                     $("#editStudentForm [name='date_of_birth']").val(
                         res.data.date_of_birth
@@ -673,6 +562,8 @@ $(document).ready(function () {
 
                     $("#editStudentForm").attr("data-id", id);
                     $("#editStudentModal").modal("show");
+
+                    $("#editStudentForm .selectpicker").selectpicker("refresh");
                 }
             },
             error: function (xhr) {
@@ -724,6 +615,11 @@ $(document).ready(function () {
                     $("#viewStudentClass").text(
                         res.data.class
                             ? `${res.data.class.name} - ${res.data.class.level}`
+                            : "-"
+                    );
+                    $("#viewStudentHomeroomTeacher").text(
+                        res.data.homeroom_teacher
+                            ? res.data.homeroom_teacher.name
                             : "-"
                     );
                     $("#viewStudentBirthplace").text(
@@ -780,15 +676,15 @@ $(document).ready(function () {
     $(document).on("change", "select[name='major_id']", function () {
         var majorId = $(this).val();
         var formId = $(this).closest("form").attr("id");
+        let options = '<option value="">Pilih Kelas</option>';
 
         if (majorId) {
-            if (classes.length > 0) {
-                let options = '<option value="">Pilih Kelas</option>';
-                classes
-                    .filter(function (cls) {
-                        return cls.major_id == majorId;
+            if (majors.length > 0) {
+                majors
+                    .find(function (major) {
+                        return major.id == majorId;
                     })
-                    .forEach(function (cls) {
+                    .classes.forEach(function (cls) {
                         options +=
                             '<option  value="' +
                             cls.id +
@@ -800,40 +696,35 @@ $(document).ready(function () {
                     });
 
                 if (formId === "addStudentForm") {
-                    $("#addStudentForm select[name='class_id']").html(options);
+                    $("#addStudentForm select[name='class_id']")
+                        .html(options)
+                        .attr("disabled", false);
                 } else if (formId === "editStudentForm") {
-                    $("#editStudentForm select[name='class_id']").html(options);
+                    $("#editStudentForm select[name='class_id']")
+                        .html(options)
+                        .attr("disabled", false);
                 } else if (formId === "bulkEditStudentForm") {
-                    $("#bulkEditStudentForm select[name='class_id']").html(
-                        options
-                    );
-                } else if (formId === "export-form") {
-                    $("#export-class-filter").html(options);
+                    $("#bulkEditStudentForm select[name='class_id']")
+                        .html(options)
+                        .attr("disabled", false);
                 }
             }
         } else {
-            let options = '<option value="">Pilih Kelas</option>';
-            classes.forEach(function (cls) {
-                options +=
-                    "<option value='" +
-                    cls.id +
-                    "'>" +
-                    cls.name +
-                    " - " +
-                    cls.level +
-                    "</option>";
-            });
-
             if (formId === "addStudentForm") {
-                $("#addStudentForm select[name='class_id']").html(options);
+                $("#addStudentForm select[name='class_id']")
+                    .html(options)
+                    .attr("disabled", true);
             } else if (formId === "editStudentForm") {
-                $("#editStudentForm select[name='class_id']").html(options);
+                $("#editStudentForm select[name='class_id']")
+                    .html(options)
+                    .attr("disabled", true);
             } else if (formId === "bulkEditStudentForm") {
-                $("#bulkEditStudentForm select[name='class_id']").html(options);
-            } else if (formId === "export-form") {
-                $("#export-class-filter").html(options);
+                $("#bulkEditStudentForm select[name='class_id']")
+                    .html(options)
+                    .attr("disabled", true);
             }
         }
+        $(".selectpicker").selectpicker("refresh");
     });
 
     // Export akun siswa

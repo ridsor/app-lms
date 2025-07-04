@@ -73,7 +73,11 @@ class Student extends Model
     {
         return $this->hasMany(Attendance::class);
     }
-    
+
+    public function homeroom_teacher(): BelongsTo
+    {
+        return $this->belongsTo(Teacher::class, 'homeroom_teacher_id');
+    }
 
     public function scopeFilter($query, array $filters)
     {
@@ -81,7 +85,7 @@ class Student extends Model
         if (!empty($filters['search']['value'])) {
             $search = $filters['search']['value'];
             $query->where(function ($q) use ($search) {
-                $q->whereFullText('students.name', $search);
+                $q->whereFullText('students.name', $search)->orWhere('students.nis', 'like', '%' . $search . '%')->orWhere('students.nisn', 'like', '%' . $search . '%');
             });
         }
 
@@ -96,6 +100,9 @@ class Student extends Model
         }
         if (!empty($filters['status'])) {
             $query->where('students.status', $filters['status']);
+        }
+        if (!empty($filters['homeroom_teacher'])) {
+            $query->whereFullText('teachers.name', $filters['homeroom_teacher']);
         }
     }
 

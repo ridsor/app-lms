@@ -9,12 +9,13 @@ use App\Models\SchoolClass;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
-use App\Http\Requests\Student\StoreStudentRequest;
+use App\Http\Requests\Student\StudentRequest;
 use App\Models\Major;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Student\BulkEditStudentRequest;
+use App\Models\Teacher;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 class StudentController extends Controller
@@ -29,6 +30,7 @@ class StudentController extends Controller
             $data = Student::query()
                 ->leftJoin('classes', 'students.class_id', '=', 'classes.id')
                 ->leftJoin('majors', 'classes.major_id', '=', 'majors.id')
+                ->leftJoin('teachers', 'students.homeroom_teacher_id', '=', 'teachers.id')
                 ->select([
                     'students.id',
                     'students.name',
@@ -39,6 +41,7 @@ class StudentController extends Controller
                     'classes.name as class_name',
                     'classes.level as class_level',
                     'majors.name as major_name',
+                    'teachers.name as homeroom_teacher_name',
                 ])
                 ->filter($request->all())
                 ->filterByPermission($request->user());
@@ -84,6 +87,12 @@ class StudentController extends Controller
                 ->addColumn('Kelas', function ($row) {
                     $html = '
                         <span class="badge badge-light-primary">' . ($row->class_name . '-' . $row->class_level) . '</span>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Wali Kelas', function ($row) {
+                    $html = '
+                        <span class="badge badge-light-primary">' . ($row->homeroom_teacher_name ? $row->homeroom_teacher_name : '-') . '</span>
                     ';
                     return $html;
                 })
@@ -137,23 +146,26 @@ class StudentController extends Controller
                     }
                     return $html;
                 })
-                ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Jurusan', 'Kelas', 'Status', 'Waktu', 'Aksi'])
+                ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Jurusan', 'Kelas', 'Wali Kelas', 'Status', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
             $classes = SchoolClass::select('id', 'name', 'level', 'major_id');
             $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
             $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
-            $majors = Major::select('id', 'name')->orderBy('name', 'asc')->get();
+            $majors = Major::with(['classes' => function ($query) {
+                $query->select('id', 'name', 'level', 'major_id');
+            }])->select('id', 'name')->orderBy('name', 'asc')->get();
             $religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'];
             $genders = [['label' => 'Laki-laki', 'value' => 'M'], ['label' => 'Perempuan', 'value' => 'F']];
             $statuses = [['label' => 'Aktif', 'value' => 'active'], ['label' => 'Pindah', 'value' => 'transferred'], ['label' => 'Lulus', 'value' => 'graduated'], ['label' => 'Keluar', 'value' => 'dropout']];
+            $teachers = Teacher::select('id', 'name')->orderBy('name', 'asc')->get();
 
             if ($request->user()->can('student.view.homeroomteacher')) {
                 $homeroomTeacherClass = SchoolClass::with('major')->select('id', 'name', 'level', 'major_id')->where('homeroom_teacher_id', $request->user()->teacher->id)->first();
                 $classes->where('major_id', $homeroomTeacherClass->major_id);
             }
-
             $classes = $classes->orderBy('name', 'asc')->get();
+            $hasMajors = Major::count() > 0;
 
             return view('user.student.index', [
                 'classes' => $classes,
@@ -163,7 +175,8 @@ class StudentController extends Controller
                 'statuses' => $statuses,
                 'religions' => $religions,
                 'genders' => $genders,
-                'homeroomTeacherClass' => $homeroomTeacherClass ?? null,
+                'teachers' => $teachers,
+                'hasMajors' => $hasMajors,
             ]);
         }
     }
@@ -171,7 +184,7 @@ class StudentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreStudentRequest $request)
+    public function store(StudentRequest $request)
     {
         if (!$request->user()->can('create', Student::class)) {
             return abort(403);
@@ -222,9 +235,12 @@ class StudentController extends Controller
         try {
             $student = Student::with([
                 'class' => function ($query) {
-                    $query->select('id', 'name', 'level', 'major_id', 'homeroom_teacher_id');
+                    $query->select('id', 'name', 'level', 'major_id');
                 },
                 'class.major' => function ($query) {
+                    $query->select('id', 'name');
+                },
+                'homeroom_teacher' => function ($query) {
                     $query->select('id', 'name');
                 },
             ])->findOrFail($id);
@@ -241,28 +257,7 @@ class StudentController extends Controller
                 );
             }
 
-            // Format data untuk kebutuhan frontend/modal
-            $data = [
-                'id' => $student->id,
-                'name' => $student->name,
-                'nis' => $student->nis,
-                'nisn' => $student->nisn,
-                'class' => $student->class ? [
-                    'id' => $student->class->id,
-                    'name' => $student->class->name,
-                    'level' => $student->class->level,
-                    'major' => $student->class->major ? $student->class->major->name : null,
-                ] : null,
-                'date_of_birth' => $student->date_of_birth ? $student->date_of_birth->format('d/m/Y') : null,
-                'birthplace' => $student->birthplace,
-                'gender' => $student->gender,
-                'religion' => $student->religion,
-                'admission_year' => $student->admission_year,
-                'status' => $student->status,
-                'created_at' => $student->created_at ? $student->created_at->translatedFormat('d/m/Y H:i') : null,
-            ];
-
-            return $this->sendResponse('Data siswa ditemukan', $data);
+            return $this->sendResponse('Data siswa ditemukan', $student);
         } catch (\Exception $e) {
             return $this->sendError(
                 'Silakan coba lagi.',
@@ -279,7 +274,8 @@ class StudentController extends Controller
     {
         try {
             $student = Student::with([
-                'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id', 'homeroom_teacher_id'),
+                'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+                'homeroom_teacher' => fn($query) => $query->select('id', 'name'),
             ])->findOrFail($id);
 
             if (!$request->user()->can('update', $student)) {
@@ -307,7 +303,7 @@ class StudentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreStudentRequest $request, $id)
+    public function update(StudentRequest $request, $id)
     {
         try {
             $student = Student::findOrFail($id);
@@ -440,6 +436,14 @@ class StudentController extends Controller
                 $data['status'] = $validated['status'];
             }
 
+            if ($validated['class_id'] === 'nothing') {
+                $data['class_id'] = null;
+            }
+            if ($validated['homeroom_teacher_id'] === 'nothing') {
+                $data['homeroom_teacher_id'] = null;
+            }
+
+
             if (!empty($data)) {
                 Student::whereIn('id', $ids)->get()->each(function ($student) use ($data, $request) {
                     if (!$request->user()->can('update', $student)) {
@@ -459,6 +463,7 @@ class StudentController extends Controller
                 );
             }
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],

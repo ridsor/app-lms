@@ -5,7 +5,7 @@ namespace App\Http\Requests\Student;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Log;
 
-class StoreStudentRequest extends FormRequest
+class StudentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -35,6 +35,7 @@ class StoreStudentRequest extends FormRequest
             'name' => 'required|string|max:100',
             'nis' => 'required|string|max:100|' . $uniqueNis,
             'nisn' => 'required|string|max:100|' . $uniqueNisn,
+            'homeroom_teacher_id' => 'nullable|exists:teachers,id',
             'class_id' => 'nullable|exists:classes,id',
             'date_of_birth' => 'required|date_format:d/m/Y',
             'birthplace' => 'required|string|max:50',
@@ -67,6 +68,7 @@ class StoreStudentRequest extends FormRequest
             'nisn.string' => 'NISN harus berupa teks',
             'nisn.max' => 'NISN maksimal 100 karakter',
             'nisn.unique' => 'NISN sudah terdaftar',
+            'homeroom_teacher_id.exists' => 'Wali kelas tidak ditemukan',
             'class_id.exists' => 'Kelas tidak ditemukan',
             'date_of_birth.required' => 'Tanggal lahir wajib diisi',
             'date_of_birth.date' => 'Tanggal lahir harus berupa tanggal yang valid',
@@ -99,6 +101,7 @@ class StoreStudentRequest extends FormRequest
             'name' => 'nama siswa',
             'nis' => 'NIS',
             'nisn' => 'NISN',
+            'homeroom_teacher_id' => 'wali kelas',
             'class_id' => 'kelas',
             'date_of_birth' => 'tanggal lahir',
             'birthplace' => 'tempat lahir',

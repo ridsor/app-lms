@@ -23,13 +23,11 @@ class ClassController extends Controller
         if ($request->ajax()) {
             $data = SchoolClass::query()
                 ->leftJoin('majors', 'classes.major_id', '=', 'majors.id')
-                ->leftJoin('teachers', 'classes.homeroom_teacher_id', '=', 'teachers.id')
                 ->select([
                     'classes.id',
                     'classes.name',
                     'classes.level',
                     'majors.name as major_name',
-                    'teachers.name as homeroom_teacher_name',
                 ])
                 ->filter($request->all());
 
@@ -65,12 +63,6 @@ class ClassController extends Controller
                     ';
                     return $html;
                 })
-                ->addColumn('Wali Kelas', function ($row) {
-                    $html = '
-                        <span class="badge badge-light-info">' . ($row->homeroom_teacher_name ? $row->homeroom_teacher_name : '-') . '</span>
-                    ';
-                    return $html;
-                })
                 ->addColumn('Aksi', function ($row) {
                     $html = '
                     <div class="common-align gap-2 justify-content-start">
@@ -83,16 +75,14 @@ class ClassController extends Controller
                     </div>';
                     return $html;
                 })
-                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Wali Kelas', 'Aksi'])
+                ->rawColumns(['id', 'Nama', 'Tingkat', 'Jurusan', 'Aksi'])
                 ->make(true);
         } else {
             $levels = SchoolClass::select('level')->distinct()->get();
             $majors = Major::select('id', 'name')->get();
-            $teachers = Teacher::select('id', 'name')->get();
             return view('user.class.index', [
                 'levels' => $levels,
                 'majors' => $majors,
-                'teachers' => $teachers
             ]);
         }
     }
@@ -109,26 +99,7 @@ class ClassController extends Controller
 
             $validated = $request->validated();
 
-            if ($request->filled('homeroom_teacher_id')) {
-                $class = SchoolClass::where('homeroom_teacher_id', $validated['homeroom_teacher_id'])->first();
-                if ($class) {
-                    $class->update([
-                        'homeroom_teacher_id' => null
-                    ]);
-                }
-            }
-
             $class = SchoolClass::create($validated);
-
-            $homeroomTeacher = $class->homeroomTeacher;
-            $user = $homeroomTeacher ? $homeroomTeacher->user : null;
-
-            if ($user && !$user->hasPermissionTo('student.view.homeroomteacher') && !$user->hasPermissionTo('student.edit.homeroomteacher')) {
-                $user->givePermissionTo([
-                    'student.view.homeroomteacher',
-                    'student.edit.homeroomteacher'
-                ]);
-            }
 
             return $this->sendResponse(
                 'Kelas berhasil ditambahkan',
@@ -137,7 +108,6 @@ class ClassController extends Controller
                     'name' => $class->name,
                     'level' => $class->level,
                     'major' => $class->major->name ?? '-',
-                    'homeroom_teacher' => $class->homeroomTeacher->name ?? '-',
                     'created_at' => $class->created_at->translatedFormat('d/m/Y H:i')
                 ],
                 201
@@ -195,32 +165,7 @@ class ClassController extends Controller
 
             $validated = $request->validated();
 
-            if ($request->filled('homeroom_teacher_id')) {
-                $classExisting = SchoolClass::where('homeroom_teacher_id', $validated['homeroom_teacher_id'])->first();
-                if ($classExisting && $classExisting->id !== $id) {
-                    $classExisting->update([
-                        'homeroom_teacher_id' => null
-                    ]);
-                }
-            }
-
             $class->update($validated);
-
-            $homeroomTeacher = $class->homeroomTeacher;
-            $user = $homeroomTeacher ? $homeroomTeacher->user : null;
-            if ($homeroomTeacher) {
-                if ($user && !$user->hasPermissionTo('student.view.homeroomteacher') && !$user->hasPermissionTo('student.edit.homeroomteacher')) {
-                    $user->givePermissionTo([
-                        'student.view.homeroomteacher',
-                        'student.edit.homeroomteacher'
-                    ]);
-                }
-            } else {
-                if ($user && $user->hasPermissionTo('student.view.homeroomteacher') && $user->hasPermissionTo('student.edit.homeroomteacher')) {
-                    $user->revokePermissionTo('student.view.homeroomteacher');
-                    $user->revokePermissionTo('student.edit.homeroomteacher');
-                }
-            }
 
             return $this->sendResponse('Kelas berhasil diedit', $class);
         } catch (\Exception $e) {

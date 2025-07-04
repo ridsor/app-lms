@@ -33,7 +33,7 @@ class StoreClassRequest extends FormRequest
                         ->where('major_id', $this->input('major_id'));
                 })->ignore($classId),
             ],
-            'level' => 'required|string|max:50',
+            'level' => 'required|integer|max:50',
             'major_id' => 'nullable|exists:majors,id',
             'homeroom_teacher_id' => 'nullable|exists:teachers,id',
         ];

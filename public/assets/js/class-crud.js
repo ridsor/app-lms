@@ -43,11 +43,6 @@ $(function () {
                 searchable: false,
             },
             {
-                data: "Wali Kelas",
-                name: "teachers.name",
-                searchable: false,
-            },
-            {
                 data: "Aksi",
                 name: "Aksi",
                 orderable: false,
@@ -260,13 +255,11 @@ $(function () {
                     t.clearPipeline().draw();
                     $("#addClassModal").modal("hide");
                     $("#addClassForm")[0].reset();
-                    $("#addClassForm .selectpicker").selectpicker("refresh");
                 }
             },
             error: function (xhr, status, error) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    console.log(errors);
                     if (errors.name) {
                         $("#addClassForm [name='name']")
                             .next(".invalid-feedback")
@@ -288,15 +281,6 @@ $(function () {
                         $("#addClassForm [name='major_id']").addClass(
                             "is-invalid"
                         );
-                    }
-                    if (errors.homeroom_teacher_id) {
-                        $("#addClassForm [name='homeroom_teacher_id']")
-                            .parent()
-                            .next(".invalid-feedback")
-                            .text(errors.homeroom_teacher_id[0]);
-                        $("#addClassForm [name='homeroom_teacher_id']")
-                            .parent()
-                            .addClass("is-invalid");
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -380,12 +364,6 @@ $(function () {
                     $("#editClassForm [name='major_id']").val(
                         res.data.major_id
                     );
-                    $("#editClassForm [name='homeroom_teacher_id']").val(
-                        res.data.homeroom_teacher_id
-                    );
-                    $(
-                        "#editClassForm [name='homeroom_teacher_id']"
-                    ).selectpicker("refresh");
                     $("#editClassForm").attr("data-id", id);
                     $("#editClassModal").modal("show");
                 }
@@ -464,15 +442,6 @@ $(function () {
                         $("#editClassForm [name='major_id']").addClass(
                             "is-invalid"
                         );
-                    }
-                    if (errors.homeroom_teacher_id) {
-                        $("#editClassForm [name='homeroom_teacher_id']")
-                            .parent()
-                            .next(".invalid-feedback")
-                            .text(errors.homeroom_teacher_id[0]);
-                        $("#editClassForm [name='homeroom_teacher_id']")
-                            .parent()
-                            .addClass("is-invalid");
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
