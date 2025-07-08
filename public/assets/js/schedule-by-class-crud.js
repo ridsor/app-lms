@@ -188,6 +188,19 @@ $(function () {
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
+                    $("#editScheduleForm [name='curriculum_id']").val(
+                        res.data.subject.curriculum_id
+                    );
+                    let subjectOptions =
+                        "<option value=''>Pilih Mata Pelajaran</option>";
+                    res.data.subject.curriculum.subjects.forEach(function (
+                        subject
+                    ) {
+                        subjectOptions += `<option value="${subject.id}">${subject.name}</option>`;
+                    });
+                    $("#editScheduleForm [name='subject_id']")
+                        .attr("disabled", false)
+                        .html(subjectOptions);
                     $("#editScheduleForm [name='subject_id']").val(
                         res.data.subject_id
                     );
@@ -547,9 +560,13 @@ $(document).ready(function () {
                 });
 
             if (formId === "addScheduleForm") {
-                $("#addScheduleForm select[name='subject_id']").html(options);
+                $("#addScheduleForm select[name='subject_id']")
+                    .html(options)
+                    .attr("disabled", false);
             } else if (formId === "editScheduleForm") {
-                $("#editScheduleForm select[name='subject_id']").html(options);
+                $("#editScheduleForm select[name='subject_id']")
+                    .html(options)
+                    .attr("disabled", false);
             }
             $(".selectpicker").selectpicker("refresh");
         }

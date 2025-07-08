@@ -47,7 +47,7 @@ $(function () {
         responsive: true,
         autoWidth: false,
         searchable: true,
-        order: [[5, "desc"]],
+        order: [[4, "desc"]],
     });
 
     t.on("draw", function () {

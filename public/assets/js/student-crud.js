@@ -408,11 +408,14 @@ $(function () {
 
         var data = {
             ids: ids,
-            class_id: $("#bulkEditStudentForm select[name='class_id']").val(),
-            status: $("#bulkEditStudentForm select[name='status']").val(),
-            homeroom_teacher_id: $(
-                "#bulkEditStudentForm select[name='homeroom_teacher_id']"
-            ).val(),
+            class_id:
+                $("#bulkEditStudentForm select[name='class_id']").val() || null,
+            status:
+                $("#bulkEditStudentForm select[name='status']").val() || null,
+            homeroom_teacher_id:
+                $(
+                    "#bulkEditStudentForm select[name='homeroom_teacher_id']"
+                ).val() || null,
         };
 
         var submitBtn = $("#bulkEditStudentSubmitBtn");
@@ -609,7 +612,7 @@ $(document).ready(function () {
                     $("#viewStudentNisn").text(res.data.nisn || "-");
                     $("#viewStudentMajor").text(
                         res.data.class && res.data.class.major
-                            ? res.data.class.major
+                            ? res.data.class.major.name
                             : "-"
                     );
                     $("#viewStudentClass").text(

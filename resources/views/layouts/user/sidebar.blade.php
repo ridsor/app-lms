@@ -126,6 +126,16 @@
                               <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
                             </svg><span class="lan-3">Jadwal </span></a>
                         </li>
+                        <li class="sidebar-list">
+                          <i class="fa-solid fa-thumbtack"></i>
+                          <a class="sidebar-link sidebar-title link-nav"
+                            href="{{ route('user.attendance.classlist') }}"><svg class="stroke-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
+                              </use>
+                            </svg><svg class="fill-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
+                            </svg><span class="lan-3">Kehadiran </span></a>
+                        </li>
                       @endcan
                     </ul>
                   </div>

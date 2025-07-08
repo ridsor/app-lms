@@ -40,7 +40,7 @@ class StudentPolicy
 
     // Teacher hanya dapat melihat siswa yang diwalinya
     if ($user->can('student.view.homeroomteacher')) {
-      return $user->teacher && $student->class->homeroom_teacher_id && $user->teacher->id === $student->class->homeroom_teacher_id;
+      return $user->teacher && $student->homeroom_teacher_id && $user->teacher->id === $student->homeroom_teacher_id;
     }
 
     return false;
@@ -65,7 +65,7 @@ class StudentPolicy
     }
 
     if ($user->can('student.edit.homeroomteacher')) {
-      return $user->teacher && $student->class->homeroom_teacher_id && $user->teacher->id === $student->class->homeroom_teacher_id;
+      return $user->teacher && $student->homeroom_teacher_id && $user->teacher->id === $student->homeroom_teacher_id;
     }
 
     return false;

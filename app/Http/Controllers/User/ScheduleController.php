@@ -20,6 +20,9 @@ use App\Models\Meeting;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\CreateScheduleMeetings;
+use App\Jobs\UpdateScheduleMeetings;
 
 class ScheduleController extends Controller
 {
@@ -262,7 +265,13 @@ class ScheduleController extends Controller
       return abort(403);
     }
 
-    $schedule = Schedule::findOrFail($id);
+    $schedule = Schedule::with([
+      'subject.curriculum' => fn($query) => $query->select('id', 'name'),
+      'subject.curriculum.subjects' => fn($query) => $query->select('id', 'name', 'curriculum_id'),
+      'subject' => fn($query) => $query->select('id', 'name', 'curriculum_id'),
+      'room' => fn($query) => $query->select('id', 'name'),
+      'teacher' => fn($query) => $query->select('id', 'name'),
+    ])->findOrFail($id);
     return $this->sendResponse('Data jadwal ditemukan', $schedule);
   }
 
@@ -292,23 +301,10 @@ class ScheduleController extends Controller
       $validated['period_id'] = $activePeriod->id;
       $schedule = Schedule::create($validated);
 
-      // meetings
-      for ($tanggal = $schedule->period->start_date; $tanggal <= $schedule->period->end_date; $tanggal->addDay()) {
-        if ($tanggal->format('l') == $schedule->day) {
-          // $isLibur = HariLibur::where('tanggal', $tanggal->format('Y-m-d'))->exists();
-          $isWeekend = $tanggal->isWeekend(); // true jika Sabtu/Minggu
+      // Menggunakan Queue untuk memproses pembuatan meeting secara asynchronous
+      Queue::push(new CreateScheduleMeetings($schedule));
 
-          if (!$isWeekend) {
-            $schedule->meetings()->create([
-              'date' => $tanggal->format('Y-m-d'),
-              'meeting_method' => $schedule->meeting_method,
-              'type' => 'Learning',
-            ]);
-          }
-        }
-      }
-
-      return $this->sendResponse('Jadwal berhasil ditambahkan', $schedule, 201);
+      return $this->sendResponse('Jadwal berhasil ditambahkan.', $schedule, 201);
     } catch (\Exception $e) {
       Log::error($e);
       return $this->sendError('Silakan coba lagi.', [], 500);
@@ -327,6 +323,21 @@ class ScheduleController extends Controller
         return $this->sendError('Tidak ada periode aktif.', [], 400);
       }
 
+      $schedule = Schedule::findOrFail($id);
+
+      // Simpan data lama untuk perbandingan
+      $oldScheduleData = [
+        'day' => $schedule->day,
+        'start_time' => $schedule->start_time,
+        'end_time' => $schedule->end_time,
+        'meeting_method' => $schedule->meeting_method,
+        'class_id' => $schedule->class_id,
+        'subject_id' => $schedule->subject_id,
+        'teacher_id' => $schedule->teacher_id,
+        'room_id' => $schedule->room_id,
+      ];
+
+      // Cek konflik jadwal (exclude jadwal yang sedang diupdate)
       $scheduleExist = Schedule::where('id', '!=', $id)
         ->where('class_id', $formRequest->input('class_id'))
         ->where('day', $formRequest->input('day'))
@@ -338,14 +349,44 @@ class ScheduleController extends Controller
         return $this->sendError('Jadwal sudah ada atau bentrok dengan jadwal lain.', [], 400);
       }
 
-      $schedule = Schedule::findOrFail($id);
       $validated = $formRequest->validated();
       $validated['period_id'] = $activePeriod->id;
+
+      // Update jadwal
       $schedule->update($validated);
-      return $this->sendResponse('Jadwal berhasil diedit', $schedule);
+
+      // Cek apakah ada perubahan yang mempengaruhi meeting
+      $meetingAffectingChanges = $this->hasMeetingAffectingChanges($oldScheduleData, $validated);
+
+      if ($meetingAffectingChanges) {
+        // Queue job untuk update meetings
+        Queue::push(new UpdateScheduleMeetings($schedule, $oldScheduleData));
+
+        return $this->sendResponse('Jadwal berhasil diedit.', $schedule);
+      } else {
+        return $this->sendResponse('Jadwal berhasil diedit.', $schedule);
+      }
     } catch (\Exception $e) {
+      Log::error("Error updating schedule: " . $e->getMessage());
       return $this->sendError('Silakan coba lagi.', [], 500);
     }
+  }
+
+  /**
+   * Cek apakah ada perubahan yang mempengaruhi meeting
+   */
+  private function hasMeetingAffectingChanges($oldData, $newData)
+  {
+    // Perubahan yang mempengaruhi meeting
+    $meetingAffectingFields = ['day', 'start_time', 'end_time', 'meeting_method'];
+
+    foreach ($meetingAffectingFields as $field) {
+      if (isset($oldData[$field]) && isset($newData[$field]) && $oldData[$field] !== $newData[$field]) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public function destroy(Request $request, $id)

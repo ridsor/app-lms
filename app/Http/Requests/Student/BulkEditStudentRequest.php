@@ -20,7 +20,7 @@ class BulkEditStudentRequest extends FormRequest
       'class_id' => [
         'nullable',
         function ($attribute, $value, $fail) {
-          if ($value === 'nothing') {
+          if ($value == 'nothing') {
             return true;
           }
           if (!is_null($value) && !DB::table('classes')->where('id', $value)->exists()) {
@@ -31,7 +31,7 @@ class BulkEditStudentRequest extends FormRequest
       'homeroom_teacher_id' => [
         'nullable',
         function ($attribute, $value, $fail) {
-          if ($value === 'nothing') {
+          if ($value == 'nothing') {
             return true;
           }
           if (!is_null($value) && !DB::table('teachers')->where('id', $value)->exists()) {

@@ -10,6 +10,7 @@ use App\Http\Controllers\User\TeacherController;
 use App\Http\Controllers\User\CurriculumController;
 use App\Http\Controllers\User\SubjectController;
 use App\Http\Controllers\User\ScheduleController;
+use App\Http\Controllers\User\AttendanceController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group(function () {
@@ -51,4 +52,9 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::delete('jadwal/hapus', [ScheduleController::class, 'bulkDestroy'])->name('user.schedule.bulkDestroy');
     Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
     Route::resource('/jadwal', ScheduleController::class)->except(['create'])->names('user.schedule');
+
+    Route::get('/kehadiran/{schedule}/export', [AttendanceController::class, 'export'])->name('user.attendance.export');
+    Route::get('/kehadiran/kelas', [AttendanceController::class, 'listKelas'])->name('user.attendance.classlist');
+    Route::get('/kehadiran/kelas/{classId}', [AttendanceController::class, 'jadwalByKelas'])->name('user.attendance.schedulebyclass');
+    Route::resource('/kehadiran', AttendanceController::class)->only(['index', 'show', 'edit', 'update'])->names('user.attendance');
 });

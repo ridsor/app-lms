@@ -149,21 +149,16 @@ class StudentController extends Controller
                 ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Jurusan', 'Kelas', 'Wali Kelas', 'Status', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
-            $classes = SchoolClass::select('id', 'name', 'level', 'major_id');
+            $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
             $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
             $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
             $majors = Major::with(['classes' => function ($query) {
-                $query->select('id', 'name', 'level', 'major_id');
+                $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
             }])->select('id', 'name')->orderBy('name', 'asc')->get();
             $religions = ['Islam', 'Kristen', 'Katolik', 'Hindu', 'Budha', 'Konghucu'];
             $genders = [['label' => 'Laki-laki', 'value' => 'M'], ['label' => 'Perempuan', 'value' => 'F']];
             $statuses = [['label' => 'Aktif', 'value' => 'active'], ['label' => 'Pindah', 'value' => 'transferred'], ['label' => 'Lulus', 'value' => 'graduated'], ['label' => 'Keluar', 'value' => 'dropout']];
             $teachers = Teacher::select('id', 'name')->orderBy('name', 'asc')->get();
-
-            if ($request->user()->can('student.view.homeroomteacher')) {
-                $homeroomTeacherClass = SchoolClass::with('major')->select('id', 'name', 'level', 'major_id')->where('homeroom_teacher_id', $request->user()->teacher->id)->first();
-                $classes->where('major_id', $homeroomTeacherClass->major_id);
-            }
             $classes = $classes->orderBy('name', 'asc')->get();
             $hasMajors = Major::count() > 0;
 
@@ -186,11 +181,11 @@ class StudentController extends Controller
      */
     public function store(StudentRequest $request)
     {
-        if (!$request->user()->can('create', Student::class)) {
-            return abort(403);
-        }
-
         try {
+            if (!$request->user()->can('create', Student::class)) {
+                return abort(403);
+            }
+
             $validated = $request->validated();
 
             $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
@@ -428,19 +423,21 @@ class StudentController extends Controller
             $data = [];
             if (!empty($validated['class_id'])) {
                 $data['class_id'] = $validated['class_id'];
+            } else {
+                if ($validated['class_id'] === 'nothing') {
+                    $data['class_id'] = null;
+                }
             }
+            Log::info($validated);
             if (!empty($validated['homeroom_teacher_id'])) {
                 $data['homeroom_teacher_id'] = $validated['homeroom_teacher_id'];
+            } else {
+                if ($validated['homeroom_teacher_id'] === 'nothing') {
+                    $data['homeroom_teacher_id'] = null;
+                }
             }
             if (!empty($validated['status'])) {
                 $data['status'] = $validated['status'];
-            }
-
-            if ($validated['class_id'] === 'nothing') {
-                $data['class_id'] = null;
-            }
-            if ($validated['homeroom_teacher_id'] === 'nothing') {
-                $data['homeroom_teacher_id'] = null;
             }
 
 

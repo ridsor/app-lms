@@ -59,7 +59,7 @@
               <div class="col-lg-6">
                 <label class="form-label" for="studentHomeroomTeacher">Wali Kelas</label>
                 <select class="selectpicker search-picker" data-live-search="true" id="studentHomeroomTeacher"
-                  name="homeroom_teacher_id">
+                  name="homeroom_teacher_id" @cannot('student.*') disabled @endcannot>
                   <option value="">Pilih Wali Kelas</option>
                   @foreach ($teachers as $teacher)
                     <option value="{{ $teacher->id }}">
@@ -210,7 +210,7 @@
               <div class="col-lg-6">
                 <label class="form-label" for="editStudentHomeroomTeacher">Wali Kelas</label>
                 <select class="selectpicker search-picker" data-live-search="true" id="editStudentHomeroomTeacher"
-                  name="homeroom_teacher_id">
+                  name="homeroom_teacher_id" @cannot('student.*') disabled @endcannot>
                   <option value="">Pilih Wali Kelas</option>
                   @foreach ($teachers as $teacher)
                     <option value="{{ $teacher->id }}">
@@ -427,23 +427,20 @@
                 <div class="invalid-feedback">
                 </div>
               </div>
-              @can('student.*')
-                @if ($hasMajors)
-                  <div class="col-12">
-                    <label class="form-label" for="bulkEditStudentMajor">Jurusan</label>
-                    <select class="form-select" id="bulkEditStudentMajor" name="major_id"
-                      @cannot('student.*') disabled @endcannot>
-                      <option value="">Pilih Jurusan</option>
-                      @foreach ($majors as $major)
-                        <option value="{{ $major->id }}">
-                          {{ $major->name }}</option>
-                      @endforeach
-                    </select>
-                    <div class="invalid-feedback">
-                    </div>
+              @if ($hasMajors)
+                <div class="col-12">
+                  <label class="form-label" for="bulkEditStudentMajor">Jurusan</label>
+                  <select class="form-select" id="bulkEditStudentMajor" name="major_id">
+                    <option value="">Pilih Jurusan</option>
+                    @foreach ($majors as $major)
+                      <option value="{{ $major->id }}">
+                        {{ $major->name }}</option>
+                    @endforeach
+                  </select>
+                  <div class="invalid-feedback">
                   </div>
-                @endif
-              @endcan
+                </div>
+              @endif
               <div class="col-12">
                 <label class="form-label" for="bulkEditStudentClass">Kelas</label>
                 <select class="selectpicker search-picker" data-live-search="true" id="bulkEditStudentClass"

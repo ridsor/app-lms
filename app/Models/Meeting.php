@@ -50,4 +50,9 @@ class Meeting extends Model
     {
         return $this->hasMany(DiscussionForum::class);
     }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(\App\Models\Attendance::class);
+    }
 }
