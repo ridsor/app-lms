@@ -20086,36 +20086,6 @@ input[type=number] {
     text-overflow: ellipsis;
   }
 }
-@media (min-width: 320px) {
-  .list-product.list-category table thead tr th:nth-child(4),
-  .list-product.list-category table thead tr td:nth-child(4),
-  .list-product.list-category table tbody tr th:nth-child(4),
-  .list-product.list-category table tbody tr td:nth-child(4) {
-    min-width: 128px;
-  }
-}
-@media (max-width: 1310px) {
-  .list-product.list-category table thead tr th:nth-child(4),
-  .list-product.list-category table thead tr td:nth-child(4),
-  .list-product.list-category table tbody tr th:nth-child(4),
-  .list-product.list-category table tbody tr td:nth-child(4) {
-    min-width: 125px;
-  }
-}
-@media (max-width: 1199px) {
-  .list-product.list-category table thead tr th:nth-child(2),
-  .list-product.list-category table thead tr td:nth-child(2),
-  .list-product.list-category table tbody tr th:nth-child(2),
-  .list-product.list-category table tbody tr td:nth-child(2) {
-    min-width: 220px;
-  }
-  .list-product.list-category table thead tr th:nth-child(3),
-  .list-product.list-category table thead tr td:nth-child(3),
-  .list-product.list-category table tbody tr th:nth-child(3),
-  .list-product.list-category table tbody tr td:nth-child(3) {
-    min-width: 510px;
-  }
-}
 .list-product.list-category table thead tr th .badge,
 .list-product.list-category table thead tr td .badge,
 .list-product.list-category table tbody tr th .badge,
@@ -53262,7 +53232,6 @@ div:where(.swal2-container) button:where(.swal2-close):hover {
   margin: 20px 0;
 }
 .user-profile .hovercard .cardheader {
-  background: url(../images/other-images/bg-profile.png);
   background-size: cover;
   background-position: 10%;
   height: 470px;

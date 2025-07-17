@@ -1,6 +1,6 @@
 @extends('layouts.user.app')
 
-@section('title', 'Pilih Kelas untuk Rekap Kehadiran')
+@section('title', 'Kehadiran')
 
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
@@ -73,7 +73,8 @@
                   <table class="table table-bordered" id="attendance-classlist-table">
                     <thead>
                       <tr>
-                        @if (isset($majors) && count($majors) > 0)
+                        <th><span class="c-o-light f-w-600">No</span></th>
+                        @if ($hasMajor)
                           <th><span class="c-o-light f-w-600">Jurusan</span></th>
                         @endif
                         <th><span class="c-o-light f-w-600">Kelas</span></th>
@@ -94,10 +95,10 @@
 
 @section('scripts')
   <script>
-    window.hasMajor = @json(isset($majors) && count($majors) > 0);
+    const hasMajor = @json($hasMajor);
   </script>
   <script src="{{ asset('assets/js/datatable/datatables/jquery.dataTables.min.js') }}"></script>
   <script src="{{ asset('assets/js/datatable/datatables/dataTables.js') }}"></script>
   <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
-  <script src="{{ asset('assets/js/attendance-classlist-crud.js') }}"></script>
+<script src="{{ asset('assets/js/attendance-classlist-crud.js') }}"></script>
 @endsection

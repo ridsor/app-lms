@@ -3,15 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\AttendanceStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Attendance extends Model
 {
     protected $fillable = [
+        'meeting_id',
         'user_id',
-        'schedule_id',
+        'status',
+        'edit_by'
     ];
 
     public function user(): BelongsTo
@@ -19,13 +19,14 @@ class Attendance extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function schedule(): BelongsTo
+    public function editby(): BelongsTo
     {
-        return $this->belongsTo(Schedule::class);
+        return $this->belongsTo(User::class, 'edit_by');
     }
 
-    public function statuses(): HasMany
+
+    public function meeting(): BelongsTo
     {
-        return $this->hasMany(AttendanceStatus::class);
+        return $this->belongsTo(Meeting::class);
     }
 }

@@ -36,13 +36,13 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/slick-theme.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/scrollbar.css') }}">
   <!-- Plugins css Ends-->
-  @yield('styles')
   <!-- Bootstrap css-->
   <link rel="stylesheet" type="text/css" href="/assets/css/vendors/bootstrap.css" />
-  <link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
-  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
   <!-- App css-->
-  {{-- @vite(['public/assets/scss/style.scss']) --}}
+  @vite(['public/assets/scss/style.scss'])
+  {{-- <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/style.css') }}" /> --}}
+  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
+  @yield('styles')
   <!-- Responsive css-->
   <link rel="stylesheet" type="text/css" href="/assets/css/responsive.css" />
   <script defer src="/assets/css/color-1.js"></script>

@@ -39,8 +39,7 @@ class GoogleAuthController extends Controller
         if ($existingUser) {
             // Log the user in if they already exist
             Auth::login($existingUser);
-            $token = $request->user()->createToken('token')->plainTextToken;
-            $request->session()->put('token', $token);
+            // Token generation removed - Sanctum no longer available
         } else {
             try {
                 DB::beginTransaction();

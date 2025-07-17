@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained('teachers');
             $table->foreignId('room_id')->nullable()->constrained('rooms');
             $table->foreignId('period_id')->constrained('periods');
+            $table->string('grouping_schedule');
             $table->enum('day', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
             $table->enum('meeting_method', ['Online', 'Offline', 'Hybrid'])->default('Offline');
             $table->time('start_time');

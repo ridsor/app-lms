@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Meeting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -38,7 +39,6 @@ class UpdateScheduleMeetings implements ShouldQueue
   public function handle()
   {
     try {
-      // Load schedule dengan relasi period
       $schedule = $this->schedule->load('period');
 
       // Hapus semua meeting yang ada untuk jadwal ini
@@ -55,11 +55,10 @@ class UpdateScheduleMeetings implements ShouldQueue
           if (!$isWeekend) {
             $meetings[] = [
               'schedule_id' => $schedule->id,
+              'grouping_schedule_id' => $schedule->grouping_schedule,
               'date' => $tanggal->format('Y-m-d'),
               'meeting_method' => $schedule->meeting_method,
               'type' => 'Learning',
-              'created_at' => now(),
-              'updated_at' => now(),
             ];
           }
         }
@@ -67,7 +66,8 @@ class UpdateScheduleMeetings implements ShouldQueue
 
       // Insert batch untuk performa yang lebih baik
       if (!empty($meetings)) {
-        $schedule->meetings()->insert($meetings);
+        // Perbaikan: createMany adalah method pada relasi, bukan pada model langsung
+        $schedule->meetings()->createMany($meetings);
         Log::info("Berhasil membuat " . count($meetings) . " meeting baru untuk schedule ID: " . $schedule->id);
       } else {
         Log::info("Tidak ada meeting yang perlu dibuat untuk schedule ID: " . $schedule->id);

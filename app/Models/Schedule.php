@@ -23,6 +23,7 @@ class Schedule extends Model
     use HasFactory;
 
     protected $fillable = [
+        'grouping_schedule',
         'class_id',
         'subject_id',
         'teacher_id',
@@ -59,19 +60,19 @@ class Schedule extends Model
         return $this->belongsTo(Period::class);
     }
 
+    public function grouping_meetings(): HasMany
+    {
+        return $this->hasMany(Meeting::class, 'grouping_schedule_id', 'grouping_schedule');
+    }
+
     public function meetings(): HasMany
     {
-        return $this->hasMany(Meeting::class);
+        return $this->hasMany(Meeting::class, 'schedule_id');
     }
 
     public function grades(): HasMany
     {
         return $this->hasMany(Grade::class);
-    }
-
-    public function attendances(): HasMany
-    {
-        return $this->hasMany(Attendance::class);
     }
 
     public function getStartTimeAttribute($value)
@@ -89,7 +90,7 @@ class Schedule extends Model
         if (!empty($filters['search']['value'])) {
             $search = $filters['search']['value'];
             $query->where(function ($q) use ($search) {
-                $q->whereFullText('subjects.name', $search);
+                $q->where('subjects.name', 'like', '%' . $search . '%');
             });
         }
 
@@ -102,5 +103,24 @@ class Schedule extends Model
         $query->when($filters['hari'] ?? false, function ($query, $hari) {
             $query->where('day', Helper::getDayValue($hari));
         });
+    }
+
+    public function scopeFilterByPermission($query, User $user)
+    {
+        if ($user->can('schedule.*')) {
+            return $query;
+        }
+
+        if ($user->can('schedule.view')) {
+            if ($user->hasRole('teacher')) {
+                return $query->where('teacher_id', $user->teacher->id);
+            }
+            if ($user->hasRole('student')) {
+                return $query->where('class_id', $user->student->class_id);
+            }
+            if ($user->hasRole('parent')) {
+                return $query->where('class_id', $user->parent->class_id);
+            }
+        }
     }
 }

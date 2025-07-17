@@ -22,9 +22,7 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        if (!$request->user()->can('viewAny', Student::class)) {
-            abort(403);
-        }
+        $this->authorize('viewAny', Student::class);
 
         if ($request->ajax()) {
             $data = Student::query()

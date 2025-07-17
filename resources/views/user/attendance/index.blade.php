@@ -1,18 +1,19 @@
 @extends('layouts.user.app')
 
-@section('title', 'Rekap Kehadiran Jadwal')
+@section('title', 'Kehadiran')
 
 @section('main_content')
   <div class="container-fluid">
     <div class="page-title">
       <div class="row">
         <div class="col-sm-6">
-          <h3>Daftar Jadwal untuk Rekap Kehadiran</h3>
+          <h3>Kehadiran</h3>
         </div>
       </div>
     </div>
     <div class="container-fluid e-category">
       <div class="row">
+        @role('teacher')
         <div class="col-12">
           <div class="card">
             <div class="card-header card-no-border">
@@ -58,10 +59,11 @@
             </div>
           </div>
         </div>
+        @endrole
         <div class="col-12">
           <div class="card">
             <div class="card-header card-no-border text-end">
-              <div class="py-2"></div>
+              <div class="py-3"></div>
             </div>
             <div class="card-body pt-0 px-0">
               <div class="list-product list-category">
@@ -69,14 +71,15 @@
                   <table class="table table-bordered" id="attendance-schedule-table">
                     <thead>
                       <tr>
-                        @if (isset($majors) && count($majors) > 0)
-                          <th><span class="c-o-light f-w-600">Jurusan</span></th>
-                        @endif
-                        <th><span class="c-o-light f-w-600">Kelas</span></th>
-                        <th><span class="c-o-light f-w-600">Tingkat</span></th>
+                        <th><span class="c-o-light f-w-600">No</span></th>
                         <th><span class="c-o-light f-w-600">Mata Pelajaran</span></th>
-                        <th><span class="c-o-light f-w-600">Guru</span></th>
-                        <th><span class="c-o-light f-w-600">Aksi</span> </th>
+                        @role(['student', 'parent'])
+                          <th><span class="c-o-light f-w-600">Guru</span></th>
+                        @endrole
+                        @role('teacher')
+                          <th><span class="c-o-light f-w-600">Kelas</span></th>
+                        @endrole
+                        <th><span class="c-o-light f-w-600">Rekap</span> </th>
                       </tr>
                     </thead>
                   </table>
@@ -92,7 +95,7 @@
 
 @section('scripts')
   <script>
-    window.hasMajor = @json(isset($majors) && count($majors) > 0);
+    const role = @json(auth()->user()->getRoleNames()->first());
   </script>
   <script src="{{ asset('assets/js/datatable/datatables/jquery.dataTables.min.js') }}"></script>
   <script src="{{ asset('assets/js/datatable/datatables/dataTables.js') }}"></script>

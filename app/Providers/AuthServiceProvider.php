@@ -6,6 +6,12 @@ use App\Models\Student;
 use App\Models\Teacher;
 use App\Policies\StudentPolicy;
 use App\Policies\TeacherPolicy;
+use App\Models\Schedule;
+use App\Policies\SchedulePolicy;
+use App\Models\Attendance;
+use App\Models\Meeting;
+use App\Policies\AttendancePolicy;
+use App\Policies\MeetingPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -18,6 +24,9 @@ class AuthServiceProvider extends ServiceProvider
   protected $policies = [
     Student::class => StudentPolicy::class,
     Teacher::class => TeacherPolicy::class,
+    Schedule::class => SchedulePolicy::class,
+    Attendance::class => AttendancePolicy::class,
+    Meeting::class => MeetingPolicy::class,
   ];
 
   /**

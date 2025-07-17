@@ -1,6 +1,18 @@
 $(function () {
-    let columns = [];
-    if (window.hasMajor) {
+    let columns = [
+        {
+            data: null,
+            name: "No",
+            orderable: false,
+            searchable: false,
+            render: function (data, type, row, meta) {
+                return meta.row + meta.settings._iDisplayStart + 1;
+            },
+            className: "text-center",
+            width: "40px",
+        },
+    ];
+    if (hasMajor) {
         columns.push({
             data: "major_name",
             name: "major_name",

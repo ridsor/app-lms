@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('meetings', function (Blueprint $table) {
             $table->id();
-        $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
+            $table->string('grouping_schedule_id');
+            $table->foreignId('schedule_id')->constrained('schedules');
             $table->date('date');
             $table->string('title', 255)->nullable();
             $table->text('description')->nullable();
-            $table->enum('meeting_method', ['online', 'offline', 'hybrid']);
+            $table->enum('meeting_method', ['Online', 'Offline', 'Hybrid']);
             $table->enum('type', ['Learning', 'Midterm', 'Final']);
             $table->dateTime('started_at')->nullable();
             $table->timestamps();

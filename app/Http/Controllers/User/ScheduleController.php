@@ -28,6 +28,66 @@ class ScheduleController extends Controller
 {
   public function index(Request $request)
   {
+    $activePeriod = Period::where('status', true)->first();
+
+    $this->authorize('viewPossession', Schedule::class);
+
+    $schedules = Schedule::with([
+      'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
+      'class.major' => fn($query) => $query->select('id', 'name'),
+      'subject' => fn($query) => $query->select('id', 'name'),
+      'teacher' => fn($query) => $query->select('id', 'name', 'user_id')->with('user:id,image'),
+      'meetings' => fn($query) => $query->select('id', 'schedule_id', 'date')->where('date', '>=', now())->orderBy('date')->limit(1),
+    ])
+      ->where('period_id', $activePeriod->id ?? 0)
+      ->filterByPermission($request->user());
+
+    $schedules = $schedules->get()->groupBy(function ($item) {
+      return $item->grouping_schedule;
+    })->map(function ($group) {
+      $first = $group->first();
+      $days_time = $group->map(function ($x) {
+        $meeting = $x->meetings->first();
+        if ($meeting) {
+          $meeting_await = $meeting->date . ' ' . $x->start_time;
+        } else {
+          $meeting_await = null;
+        }
+        return [
+          'meeting_await' => $meeting_await,
+          'day' => $x->day,
+          'start_time' => $x->start_time,
+          'end_time' => $x->end_time,
+        ];
+      })->values();
+
+      $now = now();
+
+      $meeting_await = null;
+      $closest_difference = null;
+
+      foreach ($days_time as $item) {
+        if ($item['meeting_await']) {
+          $temp = Carbon::parse($item['meeting_await']);
+          $difference = abs($temp->diffInSeconds($now, false));
+          if (is_null($closest_difference) || $difference < $closest_difference) {
+            $closest_difference = $difference;
+            $meeting_await = $temp;
+          }
+        }
+      }
+
+      $first->meeting_await = $meeting_await ? $meeting_await->diffForHumans(null, false, false, 2) : null;
+      $first->days_time = $days_time;
+
+      return $first;
+    })->values();
+
+    return view('user.schedule.index', compact('schedules'));
+  }
+
+  public function classList(Request $request)
+  {
     if (!$request->user()->can('schedule.*')) {
       return abort(403);
     }
@@ -85,7 +145,7 @@ class ScheduleController extends Controller
         })
         ->addColumn('Aksi', function ($row) {
           $url = route('user.schedule.byclass', $row->id);
-          return '<a href="' . $url . '" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Lihat Jadwal</a>';
+          return '<a href="' . $url . '" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Lihat </a>';
         });
 
       // Tentukan kolom mana saja yang perlu di-raw
@@ -103,7 +163,7 @@ class ScheduleController extends Controller
     $majors = Major::select('id', 'name')->orderBy('name', 'asc')->get();
     $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
     $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
-    return view('user.schedule.index', [
+    return view('user.schedule.class-list', [
       'classes' => $classes,
       'majors' => $majors,
       'classLevels' => $classLevels,
@@ -120,10 +180,6 @@ class ScheduleController extends Controller
     $class = SchoolClass::with(['major' => fn($query) => $query->select('id', 'name')])->find($classId);
 
     $activePeriod = Period::where('status', true)->first();
-    if (!$activePeriod) {
-      abort(404, 'Tidak ada periode aktif.');
-    }
-    Log::info('here');
 
     if ($request->ajax()) {
       $data = Schedule::query()
@@ -141,7 +197,7 @@ class ScheduleController extends Controller
         ])
         ->filter($request->all())
         ->where('class_id', $classId)
-        ->where('period_id', $activePeriod->id)
+        ->where('period_id', $activePeriod->id ?? 0)
         ->orderBy('day', 'asc')
         ->orderBy('start_time', 'asc')
         ->get();
@@ -214,7 +270,7 @@ class ScheduleController extends Controller
       $teachers = Teacher::select('id', 'name', 'specialization')->orderBy('name', 'asc')->get();
       $rooms = Room::select('id', 'name')->orderBy('name', 'asc')->get();
       $hasMajors = Major::count() > 0;
-      $meetingMethods = [['value' => 'Offline', 'label' => 'Luring'], ['value' => 'Online', 'label' => 'Daring'], ['value' => 'Hybrid', 'label' => 'Hybrid']];
+      $meetingMethods = [['value' => 'Offline', 'label' => 'Luring'], ['value' => 'Online', 'label' => 'Daring'], ['value' => 'Hybrid', 'label' => 'Campuran']];
       $days = [['value' => 'Monday', 'label' => 'Senin'], ['value' => 'Tuesday', 'label' => 'Selasa'], ['value' => 'Wednesday', 'label' => 'Rabu'], ['value' => 'Thursday', 'label' => 'Kamis'], ['value' => 'Friday', 'label' => 'Jumat']];
 
       return view('user.schedule.by-class', [
@@ -299,6 +355,19 @@ class ScheduleController extends Controller
 
       $validated = $formRequest->validated();
       $validated['period_id'] = $activePeriod->id;
+
+      $grouping_schedule = Schedule::where('class_id', $formRequest->class_id)
+        ->where('subject_id', $formRequest->subject_id)
+        ->where('teacher_id', $formRequest->teacher_id)
+        ->where('period_id', $activePeriod->id ?? 0)
+        ->first();
+
+      if ($grouping_schedule) {
+        $validated['grouping_schedule'] = $grouping_schedule->grouping_schedule;
+      } else {
+        $validated['grouping_schedule'] = uniqid('schedule_');
+      }
+
       $schedule = Schedule::create($validated);
 
       // Menggunakan Queue untuk memproses pembuatan meeting secara asynchronous
@@ -335,6 +404,7 @@ class ScheduleController extends Controller
         'subject_id' => $schedule->subject_id,
         'teacher_id' => $schedule->teacher_id,
         'room_id' => $schedule->room_id,
+        'grouping_schedule' => $schedule->grouping_schedule,
       ];
 
       // Cek konflik jadwal (exclude jadwal yang sedang diupdate)
@@ -352,20 +422,31 @@ class ScheduleController extends Controller
       $validated = $formRequest->validated();
       $validated['period_id'] = $activePeriod->id;
 
+      if ($schedule->subject_id != $formRequest->subject_id || $schedule->teacher_id != $formRequest->teacher_id || $schedule->class_id != $formRequest->class_id) {
+        $grouping_schedule = Schedule::where('class_id', $formRequest->class_id)
+          ->where('subject_id', $formRequest->subject_id)
+          ->where('teacher_id', $formRequest->teacher_id)
+          ->where('period_id', $activePeriod->id ?? 0)
+          ->first();
+
+        if ($grouping_schedule) {
+          $validated['grouping_schedule'] = $grouping_schedule->grouping_schedule;
+        } else {
+          $validated['grouping_schedule'] = uniqid('schedule_');
+        }
+      }
+
       // Update jadwal
       $schedule->update($validated);
 
       // Cek apakah ada perubahan yang mempengaruhi meeting
       $meetingAffectingChanges = $this->hasMeetingAffectingChanges($oldScheduleData, $validated);
-
+      Log::info($meetingAffectingChanges);
       if ($meetingAffectingChanges) {
         // Queue job untuk update meetings
         Queue::push(new UpdateScheduleMeetings($schedule, $oldScheduleData));
-
-        return $this->sendResponse('Jadwal berhasil diedit.', $schedule);
-      } else {
-        return $this->sendResponse('Jadwal berhasil diedit.', $schedule);
       }
+      return $this->sendResponse('Jadwal berhasil diedit.', $schedule);
     } catch (\Exception $e) {
       Log::error("Error updating schedule: " . $e->getMessage());
       return $this->sendError('Silakan coba lagi.', [], 500);
@@ -378,7 +459,7 @@ class ScheduleController extends Controller
   private function hasMeetingAffectingChanges($oldData, $newData)
   {
     // Perubahan yang mempengaruhi meeting
-    $meetingAffectingFields = ['day', 'start_time', 'end_time', 'meeting_method'];
+    $meetingAffectingFields = ['day', 'start_time', 'end_time', 'meeting_method', 'grouping_schedule'];
 
     foreach ($meetingAffectingFields as $field) {
       if (isset($oldData[$field]) && isset($newData[$field]) && $oldData[$field] !== $newData[$field]) {

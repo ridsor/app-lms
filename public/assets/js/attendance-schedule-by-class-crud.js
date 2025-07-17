@@ -1,6 +1,17 @@
 $(function () {
     if ($("#attendance-schedule-by-class-table").length) {
         let columns = [
+            {
+                data: null,
+                name: "No",
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row, meta) {
+                    return meta.row + meta.settings._iDisplayStart + 1;
+                },
+                className: "text-center",
+                width: "40px",
+            },
             { data: "Mata Pelajaran", name: "subject_name" },
             { data: "Guru Pengajar", name: "teacher_name", searchable: false },
             { data: "Aksi", name: "Aksi", orderable: false, searchable: false },
@@ -11,6 +22,9 @@ $(function () {
         if (params.get("guru")) {
             $("#teacher-filter").val(params.get("guru"));
         }
+        if (params.get("mata_pelajaran")) {
+            $("#subject-filter").val(params.get("mata_pelajaran"));
+        }
 
         var t = $("#attendance-schedule-by-class-table").DataTable({
             processing: true,
@@ -19,9 +33,7 @@ $(function () {
                 url: "/kehadiran/kelas/" + window.classId,
                 pages: 5,
                 data: function (d) {
-                    let filterParams = {};
-                    if ($("#teacher-filter").val())
-                        filterParams.guru = $("#teacher-filter").val();
+                    let filterParams = getQueryParams();
                     $.extend(d, filterParams);
                 },
             }),
@@ -51,6 +63,8 @@ $(function () {
             const params = new URLSearchParams();
             if ($("#teacher-filter").val())
                 params.append("guru", $("#teacher-filter").val());
+            if ($("#subject-filter").val())
+                params.append("mata_pelajaran", $("#subject-filter").val());
             // Update URL tanpa reload
             const newUrl =
                 window.location.pathname +

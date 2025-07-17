@@ -27,7 +27,7 @@
                 <p>Masukkan username & password untuk login</p>
                 <div class="form-group">
                   <label class="col-form-label" for="username">Username</label><input
-                    class="form-control @error('username') is-invalid @enderror" type="text" name="username"
+                    class="form-control @error('username') is-invalid @enderror" type="text" name="username" value="{{ old('username') }}"
                     id="username" placeholder="Masukkan username" autofocus />
                   @error('username')
                     <span class="invalid-feedback" role="alert">

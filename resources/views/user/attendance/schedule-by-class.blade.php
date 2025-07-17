@@ -1,6 +1,6 @@
 @extends('layouts.user.app')
 
-@section('title', 'Jadwal Kelas untuk Rekap Kehadiran')
+@section('title', 'Kehadiran')
 
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
@@ -12,15 +12,15 @@
     <div class="page-title">
       <div class="row">
         <div class="col-sm-6">
-          <h3>Jadwal Kelas {{ $class->name }} - {{ $class->level }}
+          <h3>Kelas {{ $class->name }} - {{ $class->level }}
             @if ($class->major)
               ({{ $class->major->name }})
             @endif
           </h3>
         </div>
         <div class="col-sm-6 text-end mt-2 mt-sm-0">
-          <a href="{{ route('user.attendance.classlist') }}" class="btn btn-secondary btn-sm"><i
-              class="fa fa-arrow-left"></i> Kembali ke Daftar Kelas</a>
+          <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm"><i class="fa fa-arrow-left"></i> Kembali ke
+            Daftar Kelas</a>
         </div>
       </div>
     </div>
@@ -62,6 +62,7 @@
                   <table class="table table-bordered" id="attendance-schedule-by-class-table">
                     <thead>
                       <tr>
+                        <th><span class="c-o-light f-w-600">No</span></th>
                         <th><span class="c-o-light f-w-600">Mata Pelajaran</span></th>
                         <th><span class="c-o-light f-w-600">Guru Pengajar</span></th>
                         <th><span class="c-o-light f-w-600">Aksi</span></th>

@@ -5,17 +5,6 @@
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
-  <style>
-    #subject-table td:nth-child(2) p,
-    #subject-table td:nth-child(2),
-    #subject-table th:nth-child(2) p,
-    #subject-table th:nth-child(2) {
-      white-space: nowrap !important;
-      overflow: visible !important;
-      text-overflow: unset !important;
-      max-width: none !important;
-    }
-  </style>
 @endsection
 
 @section('main_content')

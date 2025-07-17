@@ -50,11 +50,16 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
         ->names('user.subject');
 
     Route::delete('jadwal/hapus', [ScheduleController::class, 'bulkDestroy'])->name('user.schedule.bulkDestroy');
+    Route::get('/jadwal/kelas', [ScheduleController::class, 'classList'])->name('user.schedule.classlist');
     Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
     Route::resource('/jadwal', ScheduleController::class)->except(['create'])->names('user.schedule');
 
-    Route::get('/kehadiran/{schedule}/export', [AttendanceController::class, 'export'])->name('user.attendance.export');
-    Route::get('/kehadiran/kelas', [AttendanceController::class, 'listKelas'])->name('user.attendance.classlist');
-    Route::get('/kehadiran/kelas/{classId}', [AttendanceController::class, 'jadwalByKelas'])->name('user.attendance.schedulebyclass');
-    Route::resource('/kehadiran', AttendanceController::class)->only(['index', 'show', 'edit', 'update'])->names('user.attendance');
+    Route::get('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');
+    Route::patch('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'update'])->name('user.attendance.update');
+    Route::get('/kehadiran', [AttendanceController::class, 'index'])->name('user.attendance.index');
+    Route::get('/kehadiran/kelas', [AttendanceController::class, 'classList'])->name('user.attendance.classlist');
+    Route::get('/kehadiran/kelas/{classId}', [AttendanceController::class, 'scheduleByKelas'])->name('user.attendance.schedulebyclass');
+    Route::get('/kehadiran/pengguna/{user_id}', [AttendanceController::class, 'showByUser'])->name('user.attendance.showByUser');
+    Route::get('/kehadiran/jadwal/{grouping_schedule}', [AttendanceController::class, 'showAttendancRecap'])->name('user.attendance.showAttendancRecap');
+    Route::get('/kehadiran/{schedule_id}/{meeting_id}', [AttendanceController::class, 'edit'])->name('user.attendance.edit');
 });

@@ -144,10 +144,12 @@ $(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    $("#addTeacherForm [name='" + key + "']")
-                        .addClass("is-invalid")
-                        .next(".invalid-feedback")
-                        .text(errors[key][0]);
+                    for (const key in errors) {
+                        $("#addTeacherForm [name='" + key + "']")
+                            .addClass("is-invalid")
+                            .next(".invalid-feedback")
+                            .text(errors[key][0]);
+                    }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
                     $("#toast-error #toast-text").text(

@@ -419,7 +419,7 @@ $(function () {
                     } else if (labelMeetingMethod === "Online") {
                         labelMeetingMethod = "Daring";
                     } else if (labelMeetingMethod === "Hybrid") {
-                        labelMeetingMethod = "Hybrid";
+                        labelMeetingMethod = "Campuran";
                     }
                     $("#viewScheduleMethod").text(labelMeetingMethod);
                 }

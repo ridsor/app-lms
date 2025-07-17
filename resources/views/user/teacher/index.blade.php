@@ -44,7 +44,7 @@
         <div class="card">
           <div class="card-header card-no-border">
             <div class="header-top">
-              <h5>Export Akun Guru</h5>
+              <h5>Akun Guru</h5>
             </div>
           </div>
           <div class="card-body pt-0">
@@ -229,13 +229,13 @@
                     <span class="me-1 text-dark" id="selected-count">0</span> dipilih
                   </span>
                 </div>
-                  <div class="col-auto">
-                    <a id="delete-selected"
-                      class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-danger px-2 py-2"
-                      style="cursor: pointer;">
-                      <i class="fa-solid fa-trash-can txt-danger"></i>
-                    </a>
-                  </div>
+                <div class="col-auto">
+                  <a id="delete-selected"
+                    class="d-block rounded-2 d-flex justify-content-center align-items-center light-square bg-light-danger px-2 py-2"
+                    style="cursor: pointer;">
+                    <i class="fa-solid fa-trash-can txt-danger"></i>
+                  </a>
+                </div>
               </div>
             </div>
           </div>

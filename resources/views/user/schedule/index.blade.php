@@ -1,3 +1,7 @@
+@php
+  use App\Helpers\Helper;
+@endphp
+
 @extends('layouts.user.app')
 
 @section('title', 'Jadwal')
@@ -7,78 +11,86 @@
     <div class="page-title">
       <div class="row">
         <div class="col-sm-6">
-          <h3>Daftar Kelas & Jurusan</h3>
+          <h3>Jadwal</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('user.home') }}"> <svg class="stroke-icon">
+                  <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
+                </svg></a></li>
+            <li class="breadcrumb-item active">Jadwal</li>
+          </ol>
         </div>
       </div>
     </div>
     <div class="container-fluid e-category">
       <div class="row">
-        <div class="col-12">
+        <div class="col-sm-12 px-0">
           <div class="card">
-            <div class="card-header card-no-border">
-              <div class="header-top">
-                <h5>Filter</h5>
-              </div>
-            </div>
-            <div class="card-body pt-0">
-              <div class="row g-3">
-                  @if ($majors->count() > 0)
-                    <div class="col-md-3 col-xl">
-                      <label class="form-label" for="major-filter">Jurusan</label>
-                      <select class="form-select" id="major-filter" aria-label="Select major">
-                        <option value="" selected>Pilih Jurusan</option>
-                        @foreach ($majors as $major)
-                          <option value="{{ $major->name }}">{{ $major->name }}</option>
-                        @endforeach
-                      </select>
-                    </div>
-                  @endif
-                  <div class="col-md-3 col-xl">
-                    <label class="form-label" for="class-filter">Kelas</label>
-                    <select class="form-select" id="class-filter" aria-label="Select class">
-                      <option value="" selected>Pilih Kelas</option>
-                      @foreach ($classNames as $class)
-                        <option value="{{ $class->name }}">{{ $class->name }}</option>
-                      @endforeach
-                    </select>
+            <div class="card-body projects-wrapper">
+              <div class="tab-content" id="top-tabContent">
+                <div class="tab-pane fade show active" id="top-home" role="tabpanel" aria-labelledby="top-home-tab">
+                  <div class="row g-4">
+                    @foreach ($schedules as $schedule)
+                      <div class="col-xxl-3 col-md-6 col-ed-4 box-col-6">
+                        <a href="/s">
+                          <div class="progress-project-box">
+                            <div class="list-box title-line-primary">
+                              <div class="header-top"><span
+                                  class="badge badge-light-primary">{{ $schedule->meeting_await }}</span>
+                              </div>
+                              <div class="project-body">
+                                <div class="common-f-start gap-3">
+                                  <div>
+                                    <h6 class="mb-2">
+                                      <span class="text-capitalize">
+                                        {{ $schedule->subject->name }}
+                                      </span>
+                                    </h6>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                      <div>
+                                        <span class="fw-medium text-nowrap w-fit">
+                                          {{ $schedule->class->name }} -
+                                          {{ $schedule->class->level }}{{ $schedule->class->major ? ' - ' . $schedule->class->major->name : '' }}
+                                        </span>
+                                      </div>
+                                      <div style="max-width: fit-content">&middot;</div>
+                                      <div>
+                                        <span class="text-nowrap">{{ $schedule->class->students_count }} Siswa</span>
+                                      </div>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                      @foreach ($schedule->days_time as $day_time)
+                                        <div class="d-flex gap-2">
+                                          <div class="col d-flex align-items-center">
+                                            <i class="fa-solid fa-calendar"></i>
+                                            <span class="mb-0 ms-2">{{ Helper::getDayName($day_time['day']) }}</span>
+                                          </div>
+                                          <div class="col">&middot;</div>
+                                          <span>
+                                            {{ $day_time['start_time'] }} - {{ $day_time['end_time'] }} WIT
+                                          </span>
+                                        </div>
+                                      @endforeach
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="project-bottom common-space">
+                                  <div class="d-flex flex-column gap-1">
+                                    <p class="mb-0">Guru Pengajar</p>
+                                    <p class="mb-0 fw-semibold">{{ $schedule->teacher->name }}</p>
+                                  </div>
+                                  <img class="rounded-circle common-circle" style="width: 30px; height: 30px;"
+                                    src="{{ $schedule->teacher->user->image ? asset('storage/' . $schedule->teacher->user->image) : asset('assets/svg/user-placeholder.svg') }}"
+                                    alt="user">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </a>
+                      </div>
+                    @endforeach
                   </div>
-                  <div class="col-md-3 col-xl">
-                    <label class="form-label" for="level-filter">Tingkat</label>
-                    <select class="form-select" id="level-filter" aria-label="Select level">
-                      <option value="" selected>Pilih Tingkat</option>
-                      @foreach ($classLevels as $classLevel)
-                        <option value="{{ $classLevel->level }}">{{ $classLevel->level }}</option>
-                      @endforeach
-                    </select>
-                  </div>
-                <div class="col-auto d-flex justify-content-start align-items-end">
-                  <a class="btn btn-primary f-w-500 w-100" id="filter-btn">Terapkan</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header card-no-border text-end">
-              <div class="py-2"></div>
-            </div>
-            <div class="card-body pt-0 px-0">
-              <div class="list-product list-category">
-                <div class="recent-table table-responsive custom-scrollbar">
-                  <table class="table table-bordered" id="schedule-table">
-                    <thead>
-                      <tr>
-                        @if ($majors->count() > 0)
-                        <th><span class="c-o-light f-w-600">Jurusan</span></th>
-                        @endif
-                        <th><span class="c-o-light f-w-600">Kelas</span></th>
-                        <th><span class="c-o-light f-w-600">Tingkat</span></th>
-                        <th><span class="c-o-light f-w-600">Jumlah Jadwal</span></th>
-                        <th><span class="c-o-light f-w-600">Aksi</span> </th>
-                      </tr>
-                    </thead>
-                  </table>
                 </div>
               </div>
             </div>
@@ -87,14 +99,4 @@
       </div>
     </div>
   </div>
-@endsection
-
-@section('scripts')
-  <script src="{{ asset('assets/js/datatable/datatables/jquery.dataTables.min.js') }}"></script>
-  <script src="{{ asset('assets/js/datatable/datatables/dataTables.js') }}"></script>
-  <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
-  <script>
-    const hasMajor = @json($majors->count() > 0);
-  </script>
-  <script src="{{ asset('assets/js/schedule-crud.js') }}"></script>
 @endsection

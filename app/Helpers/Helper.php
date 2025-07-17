@@ -18,7 +18,8 @@ class Helper
             'teacher' => 'Guru',
             'student' => 'Siswa',
             'parent' => 'Orang Tua',
-            default => 'Siswa'
+            'admin' => 'Admin',
+            default => $role
         };
     }
 
@@ -47,7 +48,7 @@ class Helper
             'parent' => 'parent',
             'admin' => 'admin',
             'vice-principal' => 'vice-principal',
-            default => 'student'
+            default => $role
         };
     }
 
@@ -76,6 +77,34 @@ class Helper
             'Sabtu' => 'Saturday',
             'Minggu' => 'Sunday',
             default => $day
+        };
+    }
+    public static function getAttendanceLabel($value): string
+    {
+        return match ($value) {
+            'H' => '<span style="font-size: 11px" class="px-2 badge badge-light-success">Hadir</span>',
+            'I' => '<span style="font-size: 11px" class="px-2 badge badge-light-primary">Izin</span>',
+            'S' => '<span style="font-size: 11px" class="px-2 badge badge-light-warning">Sakit</span>',
+            'A' => '<span style="font-size: 11px" class="px-2 badge badge-light-danger">Absen</span>',
+            default => '<span style="font-size: 11px" class="px-2 badge badge-light-secondary">-</span>'
+        };
+    }
+
+    public static function getGenderLabel(string $gender): string
+    {
+        return match ($gender) {
+            'M' => 'Laki-laki',
+            'F' => 'Perempuan',
+            default => $gender
+        };
+    }
+    
+    public static function getMeetingMethodLabel($meeting_method) {
+        return match ($meeting_method) {
+            'Online' => 'Daring',
+            'Offline' => 'Luring',
+            'Hybrid' => 'Campuran',
+            default => $meeting_method
         };
     }
 }

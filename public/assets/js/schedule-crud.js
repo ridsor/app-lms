@@ -1,5 +1,17 @@
 $(function () {
-    let columns = [];
+    let columns = [
+        {
+            data: null,
+            name: "No",
+            orderable: false,
+            searchable: false,
+            render: function (data, type, row, meta) {
+                return meta.row + meta.settings._iDisplayStart + 1;
+            },
+            className: "text-center",
+            width: "40px",
+        },
+    ];
     if (hasMajor) {
         columns.push({ data: "Jurusan", name: "majors.name" });
     }
@@ -26,7 +38,7 @@ $(function () {
         processing: true,
         serverSide: true,
         ajax: $.fn.dataTable.pipeline({
-            url: "/jadwal",
+            url: "/jadwal/kelas",
             pages: 5,
             data: function (d) {
                 let filterParams = getQueryParams();

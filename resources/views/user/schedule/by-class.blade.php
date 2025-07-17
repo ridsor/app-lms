@@ -11,7 +11,7 @@
     #schedule-by-class-table td:nth-child(3) p,
     #schedule-by-class-table td:nth-child(3),
     #schedule-by-class-table th:nth-child(3) p,
-    #schedule-by-class-table th:nth-child(3),
+  #schedule-by-class-table th:nth-child(3),
     #schedule-by-class-table td:nth-child(4) p,
     #schedule-by-class-table td:nth-child(4),
     #schedule-by-class-table th:nth-child(4) p,

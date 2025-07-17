@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Meeting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -49,11 +50,10 @@ class CreateScheduleMeetings implements ShouldQueue
           if (!$isWeekend) {
             $meetings[] = [
               'schedule_id' => $schedule->id,
+              'grouping_schedule_id' => $schedule->grouping_schedule,
               'date' => $tanggal->format('Y-m-d'),
               'meeting_method' => $schedule->meeting_method,
               'type' => 'Learning',
-              'created_at' => now(),
-              'updated_at' => now(),
             ];
           }
         }
@@ -61,14 +61,14 @@ class CreateScheduleMeetings implements ShouldQueue
 
       // Insert batch untuk performa yang lebih baik
       if (!empty($meetings)) {
-        $schedule->meetings()->insert($meetings);
+        $schedule->meetings()->createMany($meetings);
         Log::info("Berhasil membuat " . count($meetings) . " meeting untuk schedule ID: " . $schedule->id);
       }
     } catch (\Exception $e) {
       Log::error("Error creating meetings for schedule ID: " . $this->schedule->id, [
         'error' => $e->getMessage(),
         'trace' => $e->getTraceAsString()
-      ]); 
+      ]);
 
       // Re-throw exception agar job bisa di-retry
       throw $e;
