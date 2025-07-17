@@ -116,7 +116,7 @@ class User extends Authenticatable
     {
         $base = strtolower(substr(strtok($name, " "), 0, 4));
         do {
-            $random = strtolower(Str::random(4));
+            $random = strtolower(Str::random(5));
             $username = $base  . $random;
         } while (self::where('username', $username)->exists());
         return $username;
