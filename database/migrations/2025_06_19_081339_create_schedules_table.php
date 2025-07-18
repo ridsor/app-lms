@@ -14,10 +14,11 @@ return new class extends Migration
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('class_id')->constrained('classes');
-            $table->foreignId('subject_id')->constrained('subjects');
-            $table->foreignId('teacher_id')->constrained('teachers');
-            $table->foreignId('room_id')->nullable()->constrained('rooms');
-            $table->foreignId('period_id')->constrained('periods');
+            $table->string('subject_id');
+            $table->foreign('subject_id')->references('id')->on('subjects')->onDelete('cascade');
+            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
+            $table->foreignId('room_id')->nullable()->constrained('rooms')->onDelete('cascade');
+            $table->foreignId('period_id')->constrained('periods')->onDelete('cascade');
             $table->string('grouping_schedule');
             $table->enum('day', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
             $table->enum('meeting_method', ['Online', 'Offline', 'Hybrid'])->default('Offline');

@@ -9,6 +9,8 @@ use App\Models\Subject;
 use App\Observers\SubjectObserver;
 use App\Observers\StudentObserver;
 use Illuminate\Support\ServiceProvider;
+use App\Models\Curriculum;
+use App\Observers\CurriculumObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,5 +30,6 @@ class AppServiceProvider extends ServiceProvider
         Period::observe(PeriodObserver::class);
         Subject::observe(SubjectObserver::class);
         Student::observe(StudentObserver::class);
+        Curriculum::observe(CurriculumObserver::class);
     }
 }

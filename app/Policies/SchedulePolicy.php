@@ -42,7 +42,7 @@ class SchedulePolicy
     }
     if ($user->can('schedule.view')) {
       if ($user->hasRole('teacher')) {
-        return $schedule->teacher_id === $user->id;
+        return $schedule->teacher_id === $user->teacher->id;
       } else if ($user->hasRole('student')) {
         return $user->student->class_id === $schedule->class_id;
       }

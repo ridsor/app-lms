@@ -98,13 +98,23 @@ class Helper
             default => $gender
         };
     }
-    
-    public static function getMeetingMethodLabel($meeting_method) {
+
+    public static function getMeetingMethodLabel($meeting_method)
+    {
         return match ($meeting_method) {
             'Online' => 'Daring',
             'Offline' => 'Luring',
             'Hybrid' => 'Campuran',
             default => $meeting_method
+        };
+    }
+
+    public static function getSemesterLabel($semester)
+    {
+        return match ($semester) {
+            'odd' => 'Ganjil',
+            'even' => "Genap",
+            default => $semester
         };
     }
 }

@@ -394,13 +394,13 @@ $(function () {
                 '<div id="viewScheduleLoading" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.7);z-index:10;display:flex;align-items:center;justify-content:center;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'
             );
         $.ajax({
-            url: `/jadwal/${id}`,
+            url: `/jadwal/${id}/edit`,
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
-                    $("#viewScheduleSubject").text(res.data.subject);
-                    $("#viewScheduleTeacher").text(res.data.teacher);
-                    $("#viewScheduleRoom").text(res.data.room);
+                    $("#viewScheduleSubject").text(res.data.subject.name);
+                    $("#viewScheduleTeacher").text(res.data.teacher.name);
+                    $("#viewScheduleRoom").text(res.data.room.name);
                     $("#viewScheduleMajor").text(
                         res.data.class && res.data.class.major
                             ? res.data.class.major.name

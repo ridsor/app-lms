@@ -38,7 +38,7 @@ class AttendancePolicy
   {
     if ($user->can('attendance.view')) {
       if ($user->hasRole('teacher')) {
-        return $attendance->schedule->teacher_id == $user->id;
+        return $attendance->schedule->teacher_id == $user->teacher->id;
       } else if ($user->hasRole('student')) {
         return $user->student->class_id == $attendance->schedule->class_id;
       } else if ($user->hasRole('parent')) {
@@ -57,7 +57,7 @@ class AttendancePolicy
   {
     if ($user->can('attendance.edit')) {
       if ($user->hasRole('teacher')) {
-        return $attendance->schedule->teacher_id == $user->id;
+        return $attendance->schedule->teacher_id == $user->teacher->id;
       } else {
         return true;
       }

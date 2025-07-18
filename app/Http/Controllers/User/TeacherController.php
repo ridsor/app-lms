@@ -156,6 +156,13 @@ class TeacherController extends Controller
       if ($teacher->user) {
         $teacher->user->delete();
       }
+      if ($teacher->schedules()->count() > 0) {
+        return $this->sendError(
+          'Tidak dapat dihapus karena masih memiliki jadwal.',
+          [],
+          400
+        );
+      }
       $teacher->delete();
       DB::commit();
       return $this->sendResponse('Guru berhasil dihapus.');
@@ -180,6 +187,13 @@ class TeacherController extends Controller
       foreach ($teachers as $teacher) {
         if ($teacher->user) {
           $teacher->user->delete();
+        }
+        if ($teacher->schedules()->count() > 0) {
+          return $this->sendError(
+            'Tidak dapat dihapus karena masih memiliki jadwal.',
+            [],
+            400
+          );
         }
         $teacher->delete();
       }

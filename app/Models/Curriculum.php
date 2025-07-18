@@ -12,6 +12,7 @@ class Curriculum extends Model
 
     protected $fillable = ['name', 'description', 'status'];
     protected $table = 'curriculums';
+    public $incrementing = false;
 
     protected $casts = [
         'description' => CleanHtml::class . ':strip_nl,strip_nbsp',

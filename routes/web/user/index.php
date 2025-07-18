@@ -52,7 +52,8 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::delete('jadwal/hapus', [ScheduleController::class, 'bulkDestroy'])->name('user.schedule.bulkDestroy');
     Route::get('/jadwal/kelas', [ScheduleController::class, 'classList'])->name('user.schedule.classlist');
     Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
-    Route::resource('/jadwal', ScheduleController::class)->except(['create'])->names('user.schedule');
+    Route::get('/jadwal/{grouping_schedule}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
+    Route::resource('/jadwal', ScheduleController::class)->except(['create','show'])->names('user.schedule');
 
     Route::get('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');
     Route::patch('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'update'])->name('user.attendance.update');

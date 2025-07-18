@@ -33,7 +33,7 @@
                   <div class="row g-4">
                     @foreach ($schedules as $schedule)
                       <div class="col-xxl-3 col-md-6 col-ed-4 box-col-6">
-                        <a href="{{ route('user.schedule.show' , ['jadwal' => $schedule->grouping_schedule]) }}">
+                        <a href="{{ route('user.schedule.showBySchedule' , ['grouping_schedule' => $schedule->grouping_schedule]) }}">
                           <div class="progress-project-box">
                             <div class="list-box title-line-primary">
                               <div class="header-top"><span
@@ -44,7 +44,7 @@
                                   <div>
                                     <h6 class="mb-2">
                                       <span class="text-capitalize">
-                                        {{ $schedule->subject->name }}
+                                        {{ $schedule->subject->code }} - {{ $schedule->subject->name }}
                                       </span>
                                     </h6>
                                     <div class="d-flex gap-2 flex-wrap">

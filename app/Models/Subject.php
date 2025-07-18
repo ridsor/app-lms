@@ -15,6 +15,30 @@ class Subject extends Model
         'curriculum_id',
         'name',
     ];
+    public $incrementing = false;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($curriculum) {
+            $existingIds = self::pluck('id')->toArray();
+
+            $nextId = null;
+            $i = 1;
+            while (true) {
+                $length = ($i > 99) ? 3 : 2;
+                $formattedId = str_pad($i, $length, '0', STR_PAD_LEFT);
+                if (!in_array($formattedId, $existingIds)) {
+                    $nextId = $formattedId;
+                    break;
+                }
+                $i++;
+            }
+
+            $curriculum->id = $nextId;
+        });
+    }
 
     public function schedules(): HasMany
     {

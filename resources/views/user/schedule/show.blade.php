@@ -19,7 +19,7 @@
                   <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
                 </svg></a></li>
             <li class="breadcrumb-item active">Jadwal</li>
-            <li class="breadcrumb-item active">{{ $schedule->subject->name }}</li>
+            <li class="breadcrumb-item active">{{ $schedule->subject->code }}</li>
           </ol>
         </div>
       </div>
@@ -34,7 +34,7 @@
                   <label class="form-label">Periode </label>
                   <p class="c-o-light f-w-600">
                     <span>
-                      {{ $schedule->period->academic_year }} {{ $schedule->period->semester }}
+                      {{ $schedule->period->academic_year }} {{ Helper::getSemesterLabel($schedule->period->semester) }}
                     </span>
                   </p>
                 </div>
@@ -42,7 +42,7 @@
                   <label class="form-label">Kode Matpel</label>
                   <p class="c-o-light f-w-600">
                     <span>
-                      {{ $schedule->subject->id }}
+                      {{ $schedule->subject->code }}
                     </span>
                   </p>
                 </div>

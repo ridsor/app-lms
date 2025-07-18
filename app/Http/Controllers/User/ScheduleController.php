@@ -35,7 +35,7 @@ class ScheduleController extends Controller
     $schedules = Schedule::with([
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
       'class.major' => fn($query) => $query->select('id', 'name'),
-      'subject' => fn($query) => $query->select('id', 'name'),
+      'subject' => fn($query) => $query->select('id', 'name', 'code'),
       'teacher' => fn($query) => $query->select('id', 'name', 'user_id')->with('user:id,image'),
       'meetings' => fn($query) => $query->select('id', 'schedule_id', 'date')->where('date', '>=', now()->format('Y-m-d')),
     ])->orderBy('day')
@@ -288,19 +288,19 @@ class ScheduleController extends Controller
     }
   }
 
-  public function show($grouping_schedule_id)
+  public function showBySchedule($grouping_schedule)
   {
     $schedules = Schedule::with([
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
       'class.major' => fn($query) => $query->select('id', 'name'),
       'class.students:class_id,user_id,name,nisn',
       'class.students.user:id,image',
-      'subject' => fn($query) => $query->select('id', 'name'),
+      'subject' => fn($query) => $query->select('id', 'name', 'code'),
       'teacher' => fn($query) => $query->select('id', 'name', 'user_id'),
       'teacher.user:id,image',
       'room' => fn($query) => $query->select('id', 'name'),
       'period' => fn($query) => $query->select('id', 'academic_year', 'semester')
-    ])->where('grouping_schedule', $grouping_schedule_id)->get();
+    ])->where('grouping_schedule', $grouping_schedule)->get();
 
 
     $schedules = $schedules->groupBy(function ($item) {
@@ -326,9 +326,8 @@ class ScheduleController extends Controller
     return view('user.schedule.show', compact('schedule'));
   }
 
-  public function edit($id)
+  public function show($id)
   {
-    $this->authorize('update');
 
     $schedule = Schedule::with([
       'subject.curriculum' => fn($query) => $query->select('id', 'name'),
@@ -336,6 +335,25 @@ class ScheduleController extends Controller
       'subject' => fn($query) => $query->select('id', 'name', 'curriculum_id'),
       'room' => fn($query) => $query->select('id', 'name'),
       'teacher' => fn($query) => $query->select('id', 'name'),
+    ])->findOrFail($id);
+
+    $this->authorize('view', $schedule);
+
+    return $this->sendResponse('Data jadwal ditemukan', $schedule);
+  }
+
+  public function edit($id)
+  {
+    $this->authorize('update', Schedule::class);
+
+    $schedule = Schedule::with([
+      'subject.curriculum' => fn($query) => $query->select('id', 'name'),
+      'subject.curriculum.subjects' => fn($query) => $query->select('id', 'name', 'curriculum_id'),
+      'subject' => fn($query) => $query->select('id', 'name', 'curriculum_id'),
+      'room' => fn($query) => $query->select('id', 'name'),
+      'teacher' => fn($query) => $query->select('id', 'name'),
+      'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+      'class.major:id,name'
     ])->findOrFail($id);
 
     return $this->sendResponse('Data jadwal ditemukan', $schedule);

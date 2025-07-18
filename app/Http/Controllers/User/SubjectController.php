@@ -178,9 +178,6 @@ class SubjectController extends Controller
             400
           );
         }
-      };
-
-      foreach ($subjects as $subject) {
         $subject->delete();
       }
       DB::commit();
