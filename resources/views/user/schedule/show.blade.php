@@ -4,28 +4,26 @@
 
 @extends('layouts.user.app')
 
-@section('title', 'Kehadiran')
-
-@section('styles')
-  <style>
-    #attendance-table th {
-      white-space: nowrap !important;
-      overflow: visible !important;
-      text-overflow: unset !important;
-      max-width: none !important;
-    }
-
-    #attendance-table td {
-      white-space: nowrap !important;
-      overflow: visible !important;
-      text-overflow: unset !important;
-      max-width: none !important;
-    }
-  </style>
-@endsection
+@section('title', 'Jadwal')
 
 @section('main_content')
   <div class="container-fluid">
+    <div class="page-title">
+      <div class="row">
+        <div class="col-sm-6">
+          <h3>Jadwal</h3>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ route('user.home') }}"> <svg class="stroke-icon">
+                  <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
+                </svg></a></li>
+            <li class="breadcrumb-item active">Jadwal</li>
+            <li class="breadcrumb-item active">{{ $schedule->subject->name }}</li>
+          </ol>
+        </div>
+      </div>
+    </div>
     <div class="container-fluid e-category">
       <div class="row">
         <div class="col-12">
@@ -33,81 +31,72 @@
             <div class="card-body px-0">
               <div class="row g-2 px-4 mb-4">
                 <div class="col-12 col-md-6 col-lg-4">
+                  <label class="form-label">Periode </label>
+                  <p class="c-o-light f-w-600">
+                    <span>
+                      {{ $schedule->period->academic_year }} {{ $schedule->period->semester }}
+                    </span>
+                  </p>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
+                  <label class="form-label">Kode Matpel</label>
+                  <p class="c-o-light f-w-600">
+                    <span>
+                      {{ $schedule->subject->id }}
+                    </span>
+                  </p>
+                </div>
+                <div class="col-12 col-md-6 col-lg-4">
                   <label class="form-label">Mata Pelajaran</label>
                   <p class="c-o-light f-w-600">
-                    <span id="subject">
-                      {{ $meeting->schedule->subject->name }}
+                    <span>
+                      {{ $schedule->subject->name }}
                     </span>
                   </p>
                 </div>
                 <div class="col-12 col-md-6 col-lg-4">
                   <label class="form-label">Kelas</label>
                   <p class="c-o-light f-w-600">
-                    <span id="class">
-                      {{ $meeting->schedule->class->major ? $meeting->schedule->class->major->name . ' - ' : '' }}{{ $meeting->schedule->class->name }}
-                      - {{ $meeting->schedule->class->level }}
+                    <span>
+                      {{ $schedule->class->name }}{{ $schedule->class->level }}
                     </span>
                   </p>
                 </div>
-                <div class="col-12 col-md-6 col-lg-4">
-                  <label class="form-label">Pertemuan ke</label>
-                  <p class="c-o-light f-w-600">
-                    <span id="meeting">
-                      {{ $meeting->meeting_at }}
-                    </span>
-                  </p>
-                </div>
+                @if ($schedule->class->major)
+                  <div class="col-12 col-md-6 col-lg-4">
+                    <label class="form-label">Jurusan</label>
+                    <p class="c-o-light f-w-600">
+                      <span>
+                        {{ $schedule->class->major->name }}
+                      </span>
+                    </p>
+                  </div>
+                @endif
                 <div class="col-12 col-md-6 col-lg-4">
                   <label class="form-label">Metode</label>
                   <p class="c-o-light f-w-600">
                     <span id="meething_method">
-                      {{ Helper::getMeetingMethodLabel($meeting->meeting_method) }}
+                      {{ Helper::getMeetingMethodLabel($schedule->meeting_method) }}
                     </span>
                   </p>
                 </div>
                 <div class="col-12 col-md-6 col-lg-4">
-                  <label class="form-label">Waktu Pertemuan</label>
+                  <label class="form-label">Waktu</label>
                   <div class="c-o-light f-w-600">
-                    <div class="d-flex gap-2">
-                      <div class="d-flex align-items-center">
-                        <i class="fa-solid fa-calendar"></i>
-                        <span class="mb-0 ms-2" id="date">{{ $meeting->formatted_date }}</span>
-                      </div>
-                      <div>&middot;</div>
-                      <span>
-                        <span id="start_time">{{ $meeting->schedule->start_time }}</span> - <span
-                          id="end_time">{{ $meeting->schedule->end_time }}</span> WIT
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-12 col-md-6 col-lg-4">
-                  <label class="form-label">Status</label>
-                  <p class="c-o-light f-w-600">
-                    <span id="status" class="badge badge-light-primary">
-                      {{ $meeting->status }}
-                    </span>
-                  </p>
-                </div>
-                <div class="col-12 mt-4">
-                  <div class="d-flex gap-3 mb-2 justify-content-between align-items-center">
-                    <h6>Kehadiran Pertemuan</h6>
-                  </div>
-                  <div class="row g-2">
-                    <div class="col-12 col-md-6 col-lg-4">
-                      <label class="form-label">Kelas dimulai</label>
-                      <p class="c-o-light f-w-600">
-                        <span id="started_at">
-                          {{ $meeting->formatted_started_at }}
+                    <div class="d-flex flex-column gap-1">
+                      @foreach ($schedule->days_time as $value)
+                      <div class="d-flex gap-2">
+                        
+                        <div class="d-flex align-items-center">
+                          <i class="fa-solid fa-calendar"></i>
+                          <span class="mb-0 ms-2" id="date">{{ $value['day'] }}, </span>
+                        </div>
+                        <span>
+                          <span id="start_time">{{ $value['start_time'] }}</span> - <span
+                            id="end_time">{{ $value['end_time'] }}</span> WIT
                         </span>
-                      </p>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-4">
-                      <label class="form-label">Jumlah Hadir</label>
-                      <p class="c-o-light f-w-600">
-                        <span id="total_attendance">{{ $meeting->attendances_count }}</span> dari <span
-                          id="total_user">{{ $meeting->schedule->class->students_count }}</span> Peserta
-                      </p>
+                      </div>
+                      @endforeach
                     </div>
                   </div>
                 </div>
@@ -121,40 +110,45 @@
                             height: 50px;
                             object-fit: cover;"
                         id="teacher-image"
-                        src="{{ $meeting->schedule->teacher->user->image ? asset('storage/' . $meeting->schedule->teacher->user->image) : asset('assets/svg/user-placeholder.svg') }}"
+                        src="{{ $schedule->teacher->user->image ? asset('storage/' . $schedule->teacher->user->image) : asset('assets/svg/user-placeholder.svg') }}"
                         alt="user">
                     </div>
                     <div class="d-flex">
-                      <p class="mb-0 c-o-light fw-medium" id="teacher">{{ $meeting->schedule->teacher->name }}</p>
+                      <p class="mb-0 c-o-light fw-medium" id="teacher">{{ $schedule->teacher->name }}</p>
                     </div>
                   </div>
                 </div>
               </div>
               <div>
-                <h6 class="px-4 mb-3">Peserta</h6>
-                <div class="row justify-content-between align-items-center mb-4 px-4 g-2">
-                  <div class="col-auto col-lg-6">
-                    <div class="d-flex align-items-center gap-3">
-                      <i class="fa-solid fa-circle-info txt-primary"></i>
-                      <span class="txt-primary">
-                        Pengajar melakukan presensi kehadiran peserta secara manual pada pertemuan ini
-                      </span>
-                    </div>
-                  </div>
-                  <div class="col-auto">
-                    <button class="btn btn-primary" id="change_attendance">
-                      Ubah Kehadiran
-                    </button>
-                    <button class="btn btn-outline-primary" id="cancel_change_attendance" style="display:none">
-                      Batal
-                    </button>
-                    <button class="btn btn-primary" id="save_attendance" style="display:none"
-                      data-meeting-id="{{ $meeting->id }}">
-                      Simpan Kehadiran
-                    </button>
-                  </div>
+                <div class="d-flex align-items-center mb-3">
+                  <h6 class="px-4">Peserta</h6>
+                  <p class="mb-0 c-o-light fw-medium fs-6">
+                    <span class="badge badge-light-primary">{{ $schedule->class->students_count }}</span>
+                  </p>
                 </div>
-                <div class="list-product list-category">
+                <div class="row px-4 g-4">
+                  @foreach ($schedule->class->students as $student)
+                    <div class="col-12 col-md-6 col-lg-4">
+                      <div class="d-flex align-items-center gap-3">
+                        <div class="profile-media">
+                          <img class="rounded-circle"
+                            style="
+                              width: 50px;
+                              height: 50px;
+                              object-fit: cover;"
+                            id="teacher-image"
+                            src="{{ $student->user->image ? asset('storage/' . $student->user->image) : asset('assets/svg/user-placeholder.svg') }}"
+                            alt="user">
+                        </div>
+                        <div class="d-flex flex-column">
+                          <p class="mb-0 c-o-light fw-medium" id="teacher">{{ $student->name }}</p>
+                          <p class="mb-0 c-o-light" id="teacher">{{ $student->nisn }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  @endforeach
+                </div>
+                {{-- <div class="list-product list-category">
                   <div class="recent-table table-responsive custom-scrollbar">
                     <table class="table table-bordered" id="attendance-table">
                       <thead>
@@ -219,7 +213,7 @@
                       </tbody>
                     </table>
                   </div>
-                </div>
+                </div> --}}
               </div>
             </div>
           </div>
@@ -227,11 +221,4 @@
       </div>
     </div>
   </div>
-@endsection
-
-@section('scripts')
-  <script>
-    const statuses = @json($attendanceValue);
-  </script>
-  <script src="{{ asset('assets/js/edit-attendance.js') }}"></script>
 @endsection

@@ -33,11 +33,11 @@
                   <div class="row g-4">
                     @foreach ($schedules as $schedule)
                       <div class="col-xxl-3 col-md-6 col-ed-4 box-col-6">
-                        <a href="/s">
+                        <a href="{{ route('user.schedule.show' , ['jadwal' => $schedule->grouping_schedule]) }}">
                           <div class="progress-project-box">
                             <div class="list-box title-line-primary">
                               <div class="header-top"><span
-                                  class="badge badge-light-primary">{{ $schedule->meeting_await }}</span>
+                                  class="badge badge-light-primary">{{ $schedule->meeting_await?->diffForHumans(null, false, false, 2) }}</span>
                               </div>
                               <div class="project-body">
                                 <div class="common-f-start gap-3">
@@ -80,7 +80,7 @@
                                     <p class="mb-0">Guru Pengajar</p>
                                     <p class="mb-0 fw-semibold">{{ $schedule->teacher->name }}</p>
                                   </div>
-                                  <img class="rounded-circle common-circle" style="width: 30px; height: 30px;"
+                                  <img class="rounded-circle common-circle" style="width: 30px; height: 30px; object-fit: cover"
                                     src="{{ $schedule->teacher->user->image ? asset('storage/' . $schedule->teacher->user->image) : asset('assets/svg/user-placeholder.svg') }}"
                                     alt="user">
                                 </div>

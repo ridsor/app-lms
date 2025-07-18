@@ -37,7 +37,6 @@ class SchedulePolicy
 
   public function view(User $user, Schedule $schedule)
   {
-    Log::info('thes');
     if ($user->can('schedule.*')) {
       return true;
     }
@@ -54,7 +53,7 @@ class SchedulePolicy
   /**
    * Determine whether the user can update the schedule.
    */
-  public function update(User $user, Schedule $schedule)
+  public function update(User $user)
   {
     return $user->can('schedule.*');
   }
@@ -62,7 +61,7 @@ class SchedulePolicy
   /**
    * Determine whether the user can delete the schedule.
    */
-  public function delete(User $user, Schedule $schedule)
+  public function delete(User $user)
   {
     return $user->can('schedule.*');
   }

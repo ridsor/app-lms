@@ -194,7 +194,7 @@ class StudentController extends Controller
             ]);
             $student->assignRole('student');
             $parent = User::create([
-                'name' => 'Wali  ' . $validated['name'],
+                'name' => 'Wali ' . $validated['name'],
             ]);
             $parent->assignRole('parent');
 
@@ -311,12 +311,11 @@ class StudentController extends Controller
 
             DB::beginTransaction();
             $student->update($validated);
-            $student->user->update([
-                'name' => $validated['name'],
-            ]);
-            $student->parent->update([
-                'name' => 'Wali ' . $validated['name'],
-            ]);
+            $student->user->name = $validated['name'];
+            $student->parent->name = 'Wali ' . $validated['name'];
+            $student->user->save();
+            $student->parent->save();
+
             DB::commit();
 
             return $this->sendResponse('Siswa berhasil diedit', $student);

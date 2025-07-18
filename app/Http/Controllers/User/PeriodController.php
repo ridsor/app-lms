@@ -66,7 +66,7 @@ class PeriodController extends Controller
 
         $validated = $request->validate([
             'semester' => 'required|in:odd,even',
-            'academic_year' => 'required|string|max:15',
+            'academic_year' => 'required|string|max:15|regex:/^\d{4}\/\d{4}$/',
             'start_date' => 'required|date_format:d/m/Y',
             'end_date' => 'required|date_format:d/m/Y|after:start_date',
         ]);
@@ -114,7 +114,7 @@ class PeriodController extends Controller
     {
         $validated = $request->validate([
             'semester' => 'required|in:odd,even',
-            'academic_year' => 'required|string|max:15',
+            'academic_year' => 'required|string|max:15|regex:/^\d{4}\/\d{4}$/',
             'start_date' => 'required|date_format:d/m/Y',
             'end_date' => 'required|date_format:d/m/Y|after:start_date',
         ]);

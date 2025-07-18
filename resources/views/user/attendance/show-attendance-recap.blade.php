@@ -161,12 +161,9 @@
                             </div>
                           </div>
                         </div>
-                        <div class="col-12 col-md-6 mt-4">
-                          <h6>Guru Pengajar</h6>
-                          <div class="project-bottom common-space">
-                            <div class="d-flex flex-column gap-1">
-                              <p class="mb-0 c-o-light f-w-600" id="teacher">-</p>
-                            </div>
+                        <div class="col-12 mt-4">
+                          <h6 class="mb-3">Guru Pengajar</h6>
+                          <div class="d-flex align-items-center gap-3">
                             <div class="profile-media">
                               <img class="rounded-circle"
                                 style="
@@ -174,6 +171,11 @@
                                     height: 50px;
                                     object-fit: cover;"
                                 id="teacher-image" src="{{ asset('assets/svg/user-placeholder.svg') }}" alt="user">
+                            </div>
+                            <div class="d-flex">
+                              <p class="mb-0 c-o-light fw-medium" id="teacher"> 
+                                -
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -199,7 +201,8 @@
                     <tr>
                       @foreach ($schedule->grouping_meetings as $key => $value)
                         <th class="text-center" style="padding: 12px 8px; ">
-                          <button class="btn badge {{ $value->started_at ? "btn-outline-info" : "btn-outline-danger" }}"
+                          <button
+                            class="btn badge {{ $value->started_at ? 'btn-outline-info' : 'btn-outline-secondary' }}"
                             onclick="handleDetailMeeting({{ $value->id }})">
                             {{ $key + 1 }}
                           </button>
