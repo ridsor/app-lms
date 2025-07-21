@@ -11,6 +11,8 @@ use App\Http\Controllers\User\CurriculumController;
 use App\Http\Controllers\User\SubjectController;
 use App\Http\Controllers\User\ScheduleController;
 use App\Http\Controllers\User\AttendanceController;
+use App\Http\Controllers\User\MeetingController;
+use App\Http\Controllers\User\TeachingJournalController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group(function () {
@@ -49,18 +51,28 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
         ->except(['create', 'show'])
         ->names('user.subject');
 
+    Route::get('/jadwal', [ScheduleController::class, 'index'])->name('user.schedule.index');
+    Route::post('/jadwal', [ScheduleController::class, 'store'])->name('user.schedule.store');
     Route::delete('jadwal/hapus', [ScheduleController::class, 'bulkDestroy'])->name('user.schedule.bulkDestroy');
     Route::get('/jadwal/kelas', [ScheduleController::class, 'classList'])->name('user.schedule.classlist');
     Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
-    Route::get('/jadwal/{grouping_schedule}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
-    Route::resource('/jadwal', ScheduleController::class)->except(['create','show'])->names('user.schedule');
+    Route::get('/jadwal/{id}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
+    Route::put('/jadwal/{id}/{schedule_time_id}', [ScheduleController::class, 'update'])->name('user.schedule.update');
+    Route::delete('/jadwal/{schedule_time_id}', [ScheduleController::class, 'destroy'])->name('user.schedule.destroy');
+    Route::get('/jadwal/{id}/{schedule_time_id}/edit', [ScheduleController::class, 'edit'])->name('user.schedule.edit');
+    Route::get('/jadwal/{code}/pertemuan/{meeting_id}', [ScheduleController::class, 'showByMeeting'])->name('user.schedule.showByMeeting');
 
-    Route::get('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');
+    Route::put('/jadwal/{code}/pertemuan/{meeting_id}', [MeetingController::class, 'update'])->name('user.schedule.update');
+
+    Route::post('/jadwal/pertemuan/{meeting_id}/jurnal', [TeachingJournalController::class, 'store'])->name('user.teaching_journal.store');
+    Route::patch('/jadwal/pertemuan/{meeting_id}/mulai-belajar', [MeetingController::class, 'startLearning'])->name('user.schedule.startLearning');
+    Route::patch('/jadwal/pertemuan/{meeting_id}/kehadiran', [AttendanceController::class, 'updateByMeeting'])->name('user.attendance.updateByMeeting');
+
+    Route::get('/kehadiran/{schedule_id}/pertemuan/{meeting_id}', [AttendanceController::class, 'edit'])->name('user.attendance.edit');
+    Route::get('/kehadiran/pertemuan/{meeting_id}/{schedule_time_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');
     Route::patch('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'update'])->name('user.attendance.update');
     Route::get('/kehadiran', [AttendanceController::class, 'index'])->name('user.attendance.index');
     Route::get('/kehadiran/kelas', [AttendanceController::class, 'classList'])->name('user.attendance.classlist');
     Route::get('/kehadiran/kelas/{classId}', [AttendanceController::class, 'scheduleByKelas'])->name('user.attendance.schedulebyclass');
-    Route::get('/kehadiran/pengguna/{user_id}', [AttendanceController::class, 'showByUser'])->name('user.attendance.showByUser');
-    Route::get('/kehadiran/jadwal/{grouping_schedule}', [AttendanceController::class, 'showAttendancRecap'])->name('user.attendance.showAttendancRecap');
-    Route::get('/kehadiran/{schedule_id}/{meeting_id}', [AttendanceController::class, 'edit'])->name('user.attendance.edit');
+    Route::get('/kehadiran/jadwal/{id}', [AttendanceController::class, 'showAttendancRecap'])->name('user.attendance.showAttendancRecap');
 });

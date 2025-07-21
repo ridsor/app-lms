@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Schedule;
+use App\Models\ScheduleTime;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ class UpdateScheduleMeetings implements ShouldQueue
   use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
   protected $schedule;
+  protected $schedule_time;
 
   /**
    * Create a new job instance.
@@ -26,9 +28,10 @@ class UpdateScheduleMeetings implements ShouldQueue
    * @param array $oldScheduleData
    * @return void
    */
-  public function __construct(Schedule $schedule)
+  public function __construct(Schedule $schedule, ScheduleTime $schedule_time)
   {
     $this->schedule = $schedule;
+    $this->schedule_time = $schedule_time;
   }
 
   /**
@@ -47,17 +50,18 @@ class UpdateScheduleMeetings implements ShouldQueue
 
       // Buat meeting baru berdasarkan jadwal yang diupdate
       $meetings = [];
-
+      $maxMeeting = 16;
       for ($tanggal = $schedule->period->start_date; $tanggal <= $schedule->period->end_date; $tanggal->addDay()) {
-        if ($tanggal->format('l') == $schedule->day) {
+        if (count($meetings) >= $maxMeeting) break;
+
+        if ($tanggal->format('l') == $this->schedule_time->day) {
           $isWeekend = $tanggal->isWeekend();
 
           if (!$isWeekend) {
             $meetings[] = [
               'schedule_id' => $schedule->id,
-              'grouping_schedule_id' => $schedule->grouping_schedule,
-              'date' => $tanggal->format('Y-m-d'),
-              'meeting_method' => $schedule->meeting_method,
+              'schedule_time_id' => $this->schedule_time->id,
+              'meeting_method' => $this->schedule_time->meeting_method,
               'type' => 'Learning',
             ];
           }

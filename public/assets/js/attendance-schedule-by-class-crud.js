@@ -13,7 +13,7 @@ $(function () {
                 width: "40px",
             },
             { data: "Mata Pelajaran", name: "subject_name" },
-            { data: "Guru Pengajar", name: "teacher_name", searchable: false },
+            { data: "Pengajar", name: "teacher_name", searchable: false },
             { data: "Aksi", name: "Aksi", orderable: false, searchable: false },
         ];
 

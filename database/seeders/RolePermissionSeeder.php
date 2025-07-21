@@ -34,6 +34,9 @@ class RolePermissionSeeder extends Seeder
             'meeting.view',
             'attendance.edit',
             'attendance.view',
+            'teaching_journal.view',
+            'teaching_journal.edit',
+            'teaching_journal.create',
         ];
 
         foreach ($permissions as $permission) {
@@ -58,7 +61,9 @@ class RolePermissionSeeder extends Seeder
             'schedule.*',
             'attendance.view',
             'attendance.edit',
+            'teaching_journal.view',
             'meeting.view',
+            'meeting.edit',
         ]);
 
         // Role Teacher - Limited student access (only homeroom students)
@@ -69,6 +74,9 @@ class RolePermissionSeeder extends Seeder
             'schedule.view',
             'meeting.view',
             'meeting.edit',
+            'teaching_journal.view',
+            'teaching_journal.create',
+            'teaching_journal.edit',
         ]);
 
         // Role Parent - No student management access

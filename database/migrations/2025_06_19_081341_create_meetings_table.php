@@ -13,9 +13,8 @@ return new class extends Migration
     {
         Schema::create('meetings', function (Blueprint $table) {
             $table->id();
-            $table->string('grouping_schedule_id');
-            $table->foreignId('schedule_id')->constrained('schedules');
-            $table->date('date');
+            $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
+            $table->foreignId('schedule_time_id')->references('id')->on('schedule_times')->onDelete('cascade');
             $table->string('title', 255)->nullable();
             $table->text('description')->nullable();
             $table->enum('meeting_method', ['Online', 'Offline', 'Hybrid']);

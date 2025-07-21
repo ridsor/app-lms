@@ -16,7 +16,7 @@ class CurriculumRequest extends FormRequest
     $id = $this->route('kurikulum') ?? $this->route('id');
     return [
       'name' => 'required|string|max:255|unique:curriculums,name' . ($id ? ',' . $id : ''),
-      'description' => 'nullable|string',
+      'description' => 'nullable|string'
     ];
   }
 

@@ -12,8 +12,8 @@ class PeriodSeeder extends Seeder
         Period::create([
             'semester' => 'odd',
             'academic_year' => '2025/2026',
-            'start_date' => '2025-07-01',
-            'end_date' => '2025-12-31',
+            'start_date' => '2025-07-15',
+            'end_date' => '2025-12-20',
             'status' => true
         ]);
     }

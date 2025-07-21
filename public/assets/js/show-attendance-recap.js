@@ -1,4 +1,4 @@
-function handleDetailMeeting(id) {
+function handleDetailMeeting(id, schedule_time_id) {
     if (!id) return;
 
     const button = $(event.target);
@@ -8,14 +8,15 @@ function handleDetailMeeting(id) {
         .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
     $.ajax({
-        url: `/kehadiran/pertemuan/${id}`,
+        url: `/kehadiran/pertemuan/${id}/${schedule_time_id}`,
         method: "GET",
         success: function (res) {
             $("#detailMeetingModal").modal("show");
             if (res.success && res.data) {
+                console.log(res.data);
                 $("#detailMeetingModal #change_attendance").attr(
                     "href",
-                    `/kehadiran/${res.data.schedule.id}/${res.data.id}`
+                    `/kehadiran/${res.data.schedule.id}/pertemuan/${res.data.id}`
                 );
 
                 $("#detailMeetingModal #subject").html(
@@ -45,19 +46,23 @@ function handleDetailMeeting(id) {
                 $("#detailMeetingModal #teacher").html(
                     res.data.schedule.teacher.name
                 );
-                $("#detailMeetingModal #date").html(res.data.formatted_date);
+                $("#detailMeetingModal #day").html(
+                    getDayName(res.data.schedule_time.day)
+                );
                 $("#detailMeetingModal #start_time").html(
-                    res.data.schedule.start_time
+                    res.data.schedule_time.start_time
                 );
                 $("#detailMeetingModal #end_time").html(
-                    res.data.schedule.end_time
+                    res.data.schedule_time.end_time
                 );
 
                 $("#detailMeetingModal #status").html(res.data.status);
 
                 // kehadiran pertemuan
                 $("#detailMeetingModal #started_at").html(
-                    res.data.formatted_started_at
+                    res.data.started_at
+                        ? `${res.data.date} ${res.data.formatted_started_at} WIT`
+                        : "-"
                 );
                 $("#detailMeetingModal #total_attendance").html(
                     res.data.attendances_count

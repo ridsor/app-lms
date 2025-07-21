@@ -19,14 +19,7 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
             $table->foreignId('room_id')->nullable()->constrained('rooms')->onDelete('cascade');
             $table->foreignId('period_id')->constrained('periods')->onDelete('cascade');
-            $table->string('grouping_schedule');
-            $table->enum('day', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
-            $table->enum('meeting_method', ['Online', 'Offline', 'Hybrid'])->default('Offline');
-            $table->time('start_time');
-            $table->time('end_time');
             $table->timestamps();
-            $table->unique(['class_id', 'day', 'start_time', 'end_time', 'period_id']);
-            $table->index('day');
         });
     }
 

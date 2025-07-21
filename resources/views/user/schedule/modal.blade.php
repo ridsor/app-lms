@@ -40,7 +40,7 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <label class="form-label" for="scheduleTeacher">Guru Pengajar<span class="txt-danger">*</span></label>
+                <label class="form-label" for="scheduleTeacher">Pengajar<span class="txt-danger">*</span></label>
                 <select class="selectpicker search-picker" data-live-search="true" id="scheduleTeacher"
                   name="teacher_id">
                   <option value="">Pilih Guru</option>
@@ -115,6 +115,8 @@
           <div class="p-20">
             <form class="row g-3 needs-validation" novalidate="" id="editScheduleForm">
               <input type="hidden" name="class_id" value="{{ $class->id }}">
+              <input type="hidden" name="schedule_id">
+              <input type="hidden" name="schedule_time_id">
               <div class="col-lg-6">
                 <label class="form-label" for="editScheduleCurriculum">Kurikulum<span
                     class="txt-danger">*</span></label>
@@ -139,8 +141,7 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <label class="form-label" for="editScheduleTeacher">Guru Pengajar<span
-                    class="txt-danger">*</span></label>
+                <label class="form-label" for="editScheduleTeacher">Pengajar<span class="txt-danger">*</span></label>
                 <select class="selectpicker search-picker" data-live-search="true" id="editScheduleTeacher"
                   name="teacher_id">
                   <option value="">Pilih Guru</option>
@@ -222,7 +223,7 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <label class="form-label">Guru Pengajar</label>
+                <label class="form-label">Pengajar</label>
                 <div class="form-control-plaintext" id="viewScheduleTeacher"></div>
               </div>
               <div class="col-lg-6">

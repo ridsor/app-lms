@@ -84,7 +84,7 @@ class StudentController extends Controller
                 })
                 ->addColumn('Kelas', function ($row) {
                     $html = '
-                        <span class="badge badge-light-primary">' . ($row->class_name . '-' . $row->class_level) . '</span>
+                        <span class="badge badge-light-primary">' . ($row->class_name . $row->class_level) . '</span>
                     ';
                     return $html;
                 })
@@ -318,7 +318,7 @@ class StudentController extends Controller
 
             DB::commit();
 
-            return $this->sendResponse('Siswa berhasil diedit', $student);
+            return $this->sendResponse('Siswa berhasil diperbarui', $student);
         } catch (\Exception $e) {
             DB::rollBack();
             return $this->sendError(

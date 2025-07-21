@@ -12,3 +12,16 @@ function getQueryParams() {
     });
     return params;
 }
+
+function getDayName(day) {
+    const days = {
+        'Monday': 'Senin',
+        'Tuesday': 'Selasa',
+        'Wednesday': 'Rabu',
+        'Thursday': 'Kamis',
+        'Friday': 'Jumat',
+        'Saturday': 'Sabtu',
+        'Sunday': 'Minggu'
+    };
+    return days[day] || day;
+}

@@ -70,7 +70,7 @@
 
                     <div class="flex-grow-1">
                       <span>{{ ucfirst(auth()?->user()?->name) }}</span>
-                      <p class="mb-0">{{ auth()?->user()->name }} <i class="middle fa-solid fa-angle-down"></i>
+                      <p class="mb-0">{{ auth()?->user()->username }} <i class="middle fa-solid fa-angle-down"></i>
                       </p>
                     </div>
                   </div>

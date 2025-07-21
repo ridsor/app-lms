@@ -4,7 +4,7 @@
 
 @extends('layouts.user.app')
 
-@section('title', 'Profil ' . $user->name)
+@section('title', $user->name)
 
 @section('styles')
   <style>

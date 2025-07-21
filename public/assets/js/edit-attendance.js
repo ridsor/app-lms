@@ -15,7 +15,7 @@ $(document).ready(function () {
         const originalHtml = button.html();
         button
             .prop("disabled", true)
-            .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
+            .html('Loading... <i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
         const meeting_id = $(this).data("meeting-id");
         const attendances = [];

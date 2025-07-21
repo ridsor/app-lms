@@ -1,16 +1,32 @@
 $(function () {
-    // Inisialisasi Quill untuk tambah
     var addQuill = new Quill("#addDescriptionEditor", {
         theme: "snow",
         modules: { toolbar: "#toolbar9" },
         placeholder: "Deskripsi Kurikulum",
     });
 
-    // Inisialisasi Quill untuk edit
     var editQuill = new Quill("#editDescriptionEditor", {
         theme: "snow",
         modules: { toolbar: "#toolbar10" },
         placeholder: "Deskripsi Kurikulum",
+    });
+
+    addQuill.on("text-change", function () {
+        var value = addQuill.root.innerHTML;
+        var descriptionText = addQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#addCurriculumForm [name='description']").val(value);
+    });
+
+    editQuill.on("text-change", function () {
+        var value = editQuill.root.innerHTML;
+        var descriptionText = editQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#editCurriculumForm [name='description']").val(value);
     });
 
     var t = $("#curriculum-table").DataTable({
@@ -236,14 +252,6 @@ $(function () {
     $("#addCurriculumForm").on("submit", function (e) {
         e.preventDefault();
 
-        var descriptionHTML = addQuill.root.innerHTML;
-        var descriptionText = addQuill.getText().trim();
-        if (descriptionText === "" || descriptionText === "\n") {
-            descriptionHTML = "";
-        }
-        console.log(descriptionHTML);
-        $("#addCurriculumForm [name='description']").val(descriptionHTML);
-
         $("#addCurriculumForm")
             .find("input, select, textarea")
             .removeClass("is-invalid");
@@ -326,7 +334,6 @@ $(function () {
                     $("#editCurriculumForm #editCurriculumId").val(res.data.id);
                     $("#editCurriculumForm #editName").val(res.data.name);
                     editQuill.root.innerHTML = res.data.description || "";
-                    console.log(res.data.description);
                     $("#editCurriculumModal").modal("show");
                 }
             },
@@ -344,13 +351,6 @@ $(function () {
     // Submit update kurikulum
     $("#editCurriculumForm").on("submit", function (e) {
         e.preventDefault();
-
-        var descriptionHTML = editQuill.root.innerHTML;
-        var descriptionText = editQuill.getText().trim();
-        if (descriptionText === "" || descriptionText === "\n") {
-            descriptionHTML = "";
-        }
-        $("#editCurriculumForm [name='description']").val(descriptionHTML);
 
         var id = $(this).find("#editCurriculumId").val();
         var formData = new FormData(this);

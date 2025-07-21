@@ -3,7 +3,7 @@
 @section('title', 'Kehadiran')
 
 @section('main_content')
-  <div class="container-fluid">
+  <div class="container-fluid e-category p-0">
     <div class="page-title">
       <div class="row">
         <div class="col-sm-6">
@@ -11,11 +11,10 @@
         </div>
       </div>
     </div>
-    <div class="container-fluid e-category">
-      <div class="row">
-        @role('teacher')
+    <div class="row">
+      @role('teacher')
         <div class="col-12">
-          <div class="card">
+          <div class="card rounded-responsive">
             <div class="card-header card-no-border">
               <div class="header-top">
                 <h5>Filter</h5>
@@ -59,31 +58,30 @@
             </div>
           </div>
         </div>
-        @endrole
-        <div class="col-12">
-          <div class="card">
-            <div class="card-header card-no-border text-end">
-              <div class="py-3"></div>
-            </div>
-            <div class="card-body pt-0 px-0">
-              <div class="list-product list-category">
-                <div class="recent-table table-responsive custom-scrollbar">
-                  <table class="table table-bordered" id="attendance-schedule-table">
-                    <thead>
-                      <tr>
-                        <th><span class="c-o-light f-w-600">No</span></th>
-                        <th><span class="c-o-light f-w-600">Mata Pelajaran</span></th>
-                        @role(['student', 'parent'])
-                          <th><span class="c-o-light f-w-600">Guru</span></th>
-                        @endrole
-                        @role('teacher')
-                          <th><span class="c-o-light f-w-600">Kelas</span></th>
-                        @endrole
-                        <th><span class="c-o-light f-w-600">Rekap</span> </th>
-                      </tr>
-                    </thead>
-                  </table>
-                </div>
+      @endrole
+      <div class="col-12">
+        <div class="card rounded-responsive">
+          <div class="card-header card-no-border text-end">
+            <div class="py-3"></div>
+          </div>
+          <div class="card-body pt-0 px-0">
+            <div class="list-product list-category">
+              <div class="recent-table table-responsive custom-scrollbar">
+                <table class="table table-bordered" id="attendance-schedule-table">
+                  <thead>
+                    <tr>
+                      <th><span class="c-o-light f-w-600">No</span></th>
+                      <th><span class="c-o-light f-w-600">Mata Pelajaran</span></th>
+                      @role(['student', 'parent'])
+                        <th><span class="c-o-light f-w-600">Guru</span></th>
+                      @endrole
+                      @role('teacher')
+                        <th><span class="c-o-light f-w-600">Kelas</span></th>
+                      @endrole
+                      <th><span class="c-o-light f-w-600">Rekap</span> </th>
+                    </tr>
+                  </thead>
+                </table>
               </div>
             </div>
           </div>

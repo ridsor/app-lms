@@ -50,7 +50,7 @@
                   <option value="">Pilih Kelas</option>
                   @foreach ($classes as $class)
                     <option value="{{ $class->id }}">
-                      {{ $class->name }} - {{ $class->level }}</option>
+                      {{ $class->name }}{{ $class->level }}</option>
                   @endforeach
                 </select>
                 <div class="invalid-feedback">
@@ -201,7 +201,7 @@
                   <option value="">Pilih Kelas</option>
                   @foreach ($classes as $class)
                     <option value="{{ $class->id }}">
-                      {{ $class->name }} - {{ $class->level }}</option>
+                      {{ $class->name }}{{ $class->level }}</option>
                   @endforeach
                 </select>
                 <div class="invalid-feedback">

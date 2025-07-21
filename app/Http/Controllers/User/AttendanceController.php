@@ -14,6 +14,7 @@ use App\Models\Subject;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Period;
 use App\Models\Teacher;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AttendanceController extends Controller
@@ -26,20 +27,16 @@ class AttendanceController extends Controller
     $hasMajor = Major::count() > 0;
 
     if ($request->ajax()) {
-      $data = Schedule::leftJoin('subjects', 'schedules.subject_id', '=', 'subjects.id')
+      $data = Schedule::join('subjects', 'schedules.subject_id', '=', 'subjects.id')
+        ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')
         ->select([
+          'schedules.id as id',
           'class_id',
-          'subject_id',
-          'teacher_id',
-          'grouping_schedule',
           'subjects.name as subject_name',
-        ])->with([
-          'class:id,name,level,major_id',
-          'class.major:id,name',
-          'teacher:id,name'
+          'teachers.name as teacher_name'
         ])
-        ->groupBy('subject_id', 'teacher_id', 'class_id', 'grouping_schedule')
-        ->where('period_id', $activePeriod->id ?? 0);
+        ->with(['class:id,name,level,major_id', 'class.major:id,name'])
+        ->where('schedules.period_id', $activePeriod->id ?? 0);
 
       $data
         ->filterByPermission($request->user());
@@ -77,7 +74,7 @@ class AttendanceController extends Controller
         $dataTable->addColumn('Guru', function ($row) {
           $html = '
           <div class="product-names">
-          <p>' . ($row->teacher->name) . '</p>
+          <p>' . ($row->teacher_name) . '</p>
           </div>
           ';
           return $html;
@@ -85,7 +82,7 @@ class AttendanceController extends Controller
       } else if ($request->user()->has('teacher')) {
         $dataTable->addColumn('Kelas', function ($row) {
           $html = '
-            <span class="badge badge-light-primary">' . ($row->class->major->name ?? '') . ' - ' . ($row->class->name) . ' - ' . ($row->class->level) . '</span>
+            <span class="badge badge-light-primary">' . ($row->class->name) . ($row->class->level) . ($row->class->major ? ' ' . $row->class->major->name : '') . '</span>
             ';
           return $html;
         });
@@ -102,7 +99,7 @@ class AttendanceController extends Controller
         })
         ->addColumn('Rekap', function ($row) {
           $url = route('user.attendance.showAttendancRecap', [
-            'grouping_schedule' => $row->grouping_schedule,
+            'id' => $row->id,
           ]);
           return '<a href="' . $url . '" class="badge badge-light-info">Lihat</a> ';
         });
@@ -124,7 +121,7 @@ class AttendanceController extends Controller
     return view('user.attendance.index', compact('majors', 'classLevels', 'classNames'));
   }
 
-  public function showAttendancRecap(Request $request, $grouping_schedule)
+  public function showAttendancRecap(Request $request, $id)
   {
     $this->authorize('viewAny', Attendance::class);
 
@@ -134,28 +131,23 @@ class AttendanceController extends Controller
       'class.major' => fn($query) => $query->select('id', 'name'),
       'class.students' => function ($query) use ($request) {
         $query->select('id', 'name', 'nisn', 'user_id', 'class_id');
-        if ($request->user()->hasRole('student')) {
-          $query->where('user_id', $request->user()->id);
-        }
+        // if ($request->user()->hasRole('student')) {
+        //   $query->where('user_id', $request->user()->id);
+        // }
       },
       'class.students.user' => fn($query) => $query->select('id', 'name'),
       'period' => fn($query) => $query->select('id', 'semester', 'academic_year'),
       'subject' => fn($query) => $query->select('id', 'name'),
       'teacher' => fn($query) => $query->select('id', 'name'),
-      'grouping_meetings' => function ($query) {
-        $query->select('id', 'grouping_schedule_id', 'started_at', 'date')->orderBy('date', 'asc');
+      'meetings' => function ($query) {
+        $query->select('id', 'schedule_id', 'started_at', 'schedule_time_id');
       },
-      'grouping_meetings.attendances:id,status,user_id,meeting_id',
+      'meetings.attendances:id,status,user_id,meeting_id',
     ])->filterByPermission($request->user())
-      ->where('grouping_schedule', $grouping_schedule)
       ->where('period_id', $activePeriod->id ?? 0)
-      ->first();
+      ->findOrFail($id);
 
-    if (!$schedule) {
-      abort(404);
-    }
-
-    $meetings = $schedule->grouping_meetings;
+    $meetings = $schedule->meetings;
     $students = $schedule->class->students;
     $attendances = [];
 
@@ -197,42 +189,39 @@ class AttendanceController extends Controller
 
   public function edit(Request $request, $schedule_id, $meeting_id)
   {
-
     $meeting = Meeting::select([
       'id',
       'schedule_id',
-      'grouping_schedule_id',
+      'schedule_time_id',
       'started_at',
-      'date',
       'title',
       'description',
       'meeting_method',
       'type'
     ])
       ->with([
-        'grouping_schedule:grouping_schedule,id',
-        'schedule:id,start_time,end_time,day,class_id,subject_id,teacher_id',
+        'schedule:id,class_id,subject_id,teacher_id',
         'schedule.teacher:id,name,user_id',
         'schedule.teacher.user:id,image',
-        'grouping_schedule.grouping_meetings' => fn($query) => $query->select(['grouping_schedule_id', 'id'])->orderBy('date'),
         'schedule.subject:id,name',
         'schedule.class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
         'schedule.class.major:id,name',
         'schedule.class.students:id,class_id,user_id,nisn,name',
         'attendances:id,meeting_id,user_id,status,edit_by,updated_at',
-        'attendances.editby:id,username'
+        'attendances.editby:id,username',
+        'schedule_time:id,schedule_id,day,meeting_method,start_time,end_time',
       ])->withCount('attendances')->find($meeting_id);
 
-    $this->authorize('update', $meeting);
+    $this->authorize('view', $meeting);
 
-    $index = collect($meeting->grouping_schedule->grouping_meetings->toArray())->search(function ($item) use ($meeting_id) {
-      return isset($item['id']) && $item['id'] == $meeting_id;
+    $meetings = $meeting->schedule->meetings()->get();
+    $index = $meetings->search(function ($item) use ($meeting_id) {
+      return $item->id == $meeting_id;
     });
     $meeting->meeting_at = $index + 1;
 
     $attendances = [];
     foreach ($meeting->schedule->class->students as $student) {
-      $studentAttendance = [];
       $attendance = $meeting->attendances->firstWhere('user_id', $student->user_id);
       $status = $attendance ? $attendance->status : null;
 
@@ -251,25 +240,73 @@ class AttendanceController extends Controller
 
   public function update(AttendanceStatusRequest $request, $meeting_id)
   {
-    $meeting = Meeting::findOrFail($meeting_id);
-    $this->authorize('update', $meeting);
+    try {
+      DB::beginTransaction();
 
-    $validated = $request->validated();
-    foreach ($validated['attendances'] as $x) {
-      $attendance = Attendance::where('meeting_id', $meeting_id)->where('user_id', $x['user_id'])->first();
-      if ($attendance) {
-        $attendance->update(['status' => $x['status'], 'edit_by' => $request->user()->id]);
-      } else {
-        Attendance::create([
-          'meeting_id' => $meeting_id,
-          'user_id' => $x['user_id'],
-          'status' => $x['status'],
-          'edit_by' => $request->user()->id,
-        ]);
+      $meeting = Meeting::findOrFail($meeting_id);
+      $this->authorize('update', $meeting);
+
+      $validated = $request->validated();
+      foreach ($validated['attendances'] as $x) {
+        $attendance = Attendance::where('meeting_id', $meeting_id)->where('user_id', $x['user_id'])->first();
+        if ($attendance) {
+          $attendance->update(['status' => $x['status'], 'edit_by' => $request->user()->id]);
+        } else {
+          Attendance::create([
+            'meeting_id' => $meeting_id,
+            'user_id' => $x['user_id'],
+            'status' => $x['status'],
+            'edit_by' => $request->user()->id,
+          ]);
+        }
       }
-    }
 
-    return $this->sendResponse('Status kehadiran berhasil diedit');
+      DB::commit();
+
+      return $this->sendResponse('Status kehadiran berhasil diperbarui.');
+    } catch (\Exception $e) {
+      DB::rollBack();
+      return $this->sendError('Silakan coba lagi.', [], 500);
+    }
+  }
+
+  public function updateByMeeting(AttendanceStatusRequest $request, $meeting_id)
+  {
+    try {
+      DB::beginTransaction();
+
+      $meeting = Meeting::findOrFail($meeting_id);
+      $this->authorize('update', $meeting);
+
+      $isDuringSchedule = $meeting->schedule_time->start_time <= now()
+        && now() <= $meeting->schedule_time->end_time->addHours(2);
+
+      if (!$isDuringSchedule) {
+        return $this->sendError('Kehadiran hanya dapat diisi selama waktu pertemuan hingga 2 jam setelahnya.', [], 400);
+      }
+
+      $validated = $request->validated();
+      foreach ($validated['attendances'] as $x) {
+        $attendance = Attendance::where('meeting_id', $meeting_id)->where('user_id', $x['user_id'])->first();
+        if ($attendance) {
+          $attendance->update(['status' => $x['status'], 'edit_by' => $request->user()->id]);
+        } else {
+          Attendance::create([
+            'meeting_id' => $meeting_id,
+            'user_id' => $x['user_id'],
+            'status' => $x['status'],
+            'edit_by' => $request->user()->id,
+          ]);
+        }
+      }
+
+      DB::commit();
+
+      return $this->sendResponse('Status kehadiran berhasil disimpan.');
+    } catch (\Exception $e) {
+      DB::rollBack();
+      return $this->sendError('Silakan coba lagi.', [], 500);
+    }
   }
 
   public function classList(Request $request)
@@ -344,18 +381,17 @@ class AttendanceController extends Controller
   {
     if (!$request->user()->hasRole('vice-principal')) abort(403);
 
-    $class = SchoolClass::with('major')->findOrFail($classId);
     $activePeriod = Period::where('status', true)->first();
+    $class = SchoolClass::with('major:id,name')->findOrFail($classId);
 
     if ($request->ajax()) {
       $data = Schedule::join('subjects', 'schedules.subject_id', '=', 'subjects.id')
         ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')
         ->select([
-          'schedules.grouping_schedule',
+          'schedules.id as id',
           'subjects.name as subject_name',
           'teachers.name as teacher_name'
         ])
-        ->groupBy('schedules.grouping_schedule', 'subject_id', 'teacher_id', 'class_id')
         ->where('schedules.class_id', $classId)
         ->where('schedules.period_id', $activePeriod->id ?? 0);
 
@@ -383,7 +419,7 @@ class AttendanceController extends Controller
           </div>
           ';
           return $html;
-        })->addColumn('Guru Pengajar', function ($row) {
+        })->addColumn('Pengajar', function ($row) {
           $html = '
           <div class="product-names">
           <p>' . $row->teacher_name . '</p>
@@ -393,11 +429,11 @@ class AttendanceController extends Controller
         })
         ->addColumn('Aksi', function ($row) {
           $url = route('user.attendance.showAttendancRecap', [
-            'grouping_schedule' => $row->grouping_schedule,
+            'id' => $row->id,
           ]);
           return '<a href="' . $url . '" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Lihat </a>';
         })
-        ->rawColumns(['Mata Pelajaran', 'Guru Pengajar', 'Aksi'])->make(true);
+        ->rawColumns(['Mata Pelajaran', 'Pengajar', 'Aksi'])->make(true);
     }
 
     $teachers = Teacher::select('id', 'name')->get();
@@ -405,36 +441,35 @@ class AttendanceController extends Controller
     return view('user.attendance.schedule-by-class', compact('class', 'teachers', 'subjects'));
   }
 
-  public function showMeeting(Request $request, $meeting_id)
+  public function showMeeting(Request $request, $meeting_id, $schedule_time_id)
   {
     $this->authorize('viewAny', Attendance::class);
 
     $meeting = Meeting::select([
       'id',
       'schedule_id',
-      'grouping_schedule_id',
+      'schedule_time_id',
       'started_at',
-      'date',
       'title',
       'description',
       'meeting_method',
       'type'
     ])
       ->with([
-        'grouping_schedule:grouping_schedule,id',
-        'schedule:id,start_time,end_time,day,class_id,subject_id,teacher_id',
+        'schedule:id,class_id,subject_id,teacher_id',
         'schedule.teacher:id,name,user_id',
         'schedule.teacher.user:id,image',
-        'grouping_schedule.grouping_meetings' => fn($query) => $query->select(['grouping_schedule_id', 'id'])->orderBy('date'),
         'schedule.subject:id,name',
         'schedule.class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
         'schedule.class.major:id,name',
+        'schedule_time'
       ])->withCount('attendances')->find($meeting_id);
 
-    $index = collect($meeting->grouping_schedule->grouping_meetings->toArray())->search(function ($item) use ($meeting_id) {
-      return isset($item['id']) && $item['id'] == $meeting_id;
-    });
 
+    $meetings = $meeting->schedule->meetings()->get();
+    $index = $meetings->search(function ($item) use ($meeting_id) {
+      return $item->id == $meeting_id;
+    });
     $meeting->meeting_at = $index + 1;
 
     return $this->sendResponse('Berhasil mengambil data', $meeting);

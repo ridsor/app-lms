@@ -173,7 +173,8 @@ $(function () {
     $("#schedule-by-class-table").on("click", ".edit", function (e) {
         e.preventDefault();
         var id = $(this).data("id");
-        if (!id) return;
+        var schedule_time_id = $(this).data("schedule-time-id");
+        if (!id && !schedule_time_id) return;
 
         const editBtn = $(this);
         const originalHtml = editBtn.html();
@@ -184,7 +185,7 @@ $(function () {
             );
 
         $.ajax({
-            url: `/jadwal/${id}/edit`,
+            url: `/jadwal/${id}/${schedule_time_id}/edit`,
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
@@ -210,18 +211,23 @@ $(function () {
                     $("#editScheduleForm [name='room_id']").val(
                         res.data.room_id
                     );
-                    $("#editScheduleForm [name='day']").val(res.data.day);
+                    $("#editScheduleForm [name='day']").val(
+                        res.data.schedule_times[0].day
+                    );
                     $("#editScheduleForm [name='start_time']").val(
-                        res.data.start_time
+                        res.data.schedule_times[0].start_time
                     );
                     $("#editScheduleForm [name='end_time']").val(
-                        res.data.end_time
+                        res.data.schedule_times[0].end_time
                     );
                     $("#editScheduleForm [name='meeting_method']").val(
-                        res.data.meeting_method
+                        res.data.schedule_times[0].meeting_method
                     );
 
-                    $("#editScheduleForm").attr("data-id", id);
+                    $("#editScheduleForm [name='schedule_id']").val(id);
+                    $("#editScheduleForm [name='schedule_time_id']").val(
+                        schedule_time_id
+                    );
                     $("#editScheduleModal").modal("show");
                     $("#editScheduleForm .selectpicker").selectpicker(
                         "refresh"
@@ -242,8 +248,9 @@ $(function () {
     $("#schedule-by-class-table").on("click", ".trash", function (e) {
         e.preventDefault();
         const trashBtn = $(this);
-        var id = trashBtn.attr("data-id");
-        if (!id) return;
+        
+        var schedule_time_id = $(this).data("schedule-time-id");
+        if (!schedule_time_id) return;
         Swal.fire({
             title: "Apakah Anda yakin?",
             text: "Data jadwal yang terpilih akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
@@ -265,7 +272,7 @@ $(function () {
                         '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
                     );
                 $.ajax({
-                    url: "/jadwal/" + id,
+                    url: `/jadwal/${schedule_time_id}`,
                     method: "DELETE",
                     success: function (res) {
                         if (res.success) {
@@ -300,82 +307,108 @@ $(function () {
 
     $("#editScheduleForm").on("submit", function (e) {
         e.preventDefault();
-        var id = $(this).attr("data-id");
-        var formData = new FormData(this);
 
-        $("#editScheduleForm")
-            .find("input, select, textarea")
-            .removeClass("is-invalid");
-        $("#editScheduleForm").find(".invalid-feedback").text("");
+        Swal.fire({
+            title: "Apakah anda yakin?",
+            text: "Data pertemuan yang ada pada jadwal akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: "Ya",
+            denyButtonText: `Batal`,
+            confirmButtonColor: "#FC4438",
+            cancelButtonColor: "#16C7F9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                var id = $("#editScheduleForm [name='schedule_id']").val();
+                var schedule_time_id = $(
+                    "#editScheduleForm [name='schedule_time_id']"
+                ).val();
+                if (!id && !schedule_time_id) return;
 
-        const submitBtn = $("#editScheduleSubmitBtn");
-        const originalText = submitBtn.text();
-        submitBtn
-            .prop("disabled", true)
-            .html(
-                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
-            );
+                var formData = new FormData(this);
 
-        $.ajax({
-            url: "/jadwal/" + id,
-            method: "POST",
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: { "X-HTTP-Method-Override": "PUT" },
-            success: function (response) {
-                if (response.success) {
-                    const toast = new bootstrap.Toast($("#toast-success"));
-                    $("#toast-success #toast-text").text(response.message);
-                    toast.show();
-                    $("#editScheduleModal").modal("hide");
-                    $("#editScheduleForm")[0].reset();
-                    $("#editScheduleForm .selectpicker").selectpicker(
-                        "refresh"
+                $("#editScheduleForm")
+                    .find("input, select, textarea")
+                    .removeClass("is-invalid");
+                $("#editScheduleForm").find(".invalid-feedback").text("");
+
+                const submitBtn = $("#editScheduleSubmitBtn");
+                const originalText = submitBtn.text();
+                submitBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
                     );
-                    t.clearPipeline().draw();
-                }
-            },
-            error: function (xhr) {
-                if (xhr.status === 422) {
-                    const errors = xhr.responseJSON.errors;
 
-                    for (const key in errors) {
-                        if (
-                            $(
-                                "#editScheduleForm [name='" + key + "']"
-                            ).hasClass("selectpicker")
-                        ) {
-                            $("#editScheduleForm [name='" + key + "']")
-                                .parent()
-                                .addClass("is-invalid")
-                                .next(".invalid-feedback")
-                                .text(errors[key][0]);
-                        } else {
-                            $("#editScheduleForm [name='" + key + "']")
-                                .addClass("is-invalid")
-                                .next(".invalid-feedback")
-                                .text(errors[key][0]);
+                $.ajax({
+                    url: `/jadwal/${id}/${schedule_time_id}`,
+                    method: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: { "X-HTTP-Method-Override": "PUT" },
+                    success: function (response) {
+                        if (response.success) {
+                            const toast = new bootstrap.Toast(
+                                $("#toast-success")
+                            );
+                            $("#toast-success #toast-text").text(
+                                response.message
+                            );
+                            toast.show();
+                            $("#editScheduleModal").modal("hide");
+                            $("#editScheduleForm")[0].reset();
+                            $("#editScheduleForm .selectpicker").selectpicker(
+                                "refresh"
+                            );
+                            t.clearPipeline().draw();
                         }
-                    }
-                } else {
-                    const toast = new bootstrap.Toast($("#toast-error"));
-                    $("#toast-error #toast-text").text(
-                        xhr.responseJSON.message
-                    );
-                    toast.show();
-                }
-            },
-            complete: function () {
-                submitBtn.prop("disabled", false).html(originalText);
-            },
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+
+                            for (const key in errors) {
+                                if (
+                                    $(
+                                        "#editScheduleForm [name='" + key + "']"
+                                    ).hasClass("selectpicker")
+                                ) {
+                                    $("#editScheduleForm [name='" + key + "']")
+                                        .parent()
+                                        .addClass("is-invalid")
+                                        .next(".invalid-feedback")
+                                        .text(errors[key][0]);
+                                } else {
+                                    $("#editScheduleForm [name='" + key + "']")
+                                        .addClass("is-invalid")
+                                        .next(".invalid-feedback")
+                                        .text(errors[key][0]);
+                                }
+                            }
+                        } else {
+                            const toast = new bootstrap.Toast(
+                                $("#toast-error")
+                            );
+                            $("#toast-error #toast-text").text(
+                                xhr.responseJSON.message
+                            );
+                            toast.show();
+                        }
+                    },
+                    complete: function () {
+                        submitBtn.prop("disabled", false).html(originalText);
+                    },
+                });
+            }
         });
     });
 
     $("#schedule-by-class-table").on("click", ".view", function (e) {
         e.preventDefault();
         var id = $(this).data("id");
-        if (!id) return;
+        var schedule_time_id = $(this).data("schedule-time-id");
+        if (!id && !schedule_time_id) return;
 
         const viewBtn = $(this);
         const originalHtml = viewBtn.html();
@@ -394,7 +427,7 @@ $(function () {
                 '<div id="viewScheduleLoading" style="position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,0.7);z-index:10;display:flex;align-items:center;justify-content:center;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>'
             );
         $.ajax({
-            url: `/jadwal/${id}/edit`,
+            url: `/jadwal/${id}/${schedule_time_id}/edit`,
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
@@ -409,11 +442,16 @@ $(function () {
                     $("#viewScheduleClass").text(
                         `${res.data.class.name} - ${res.data.class.level}`
                     );
-                    $("#viewScheduleDay").text(res.data.day);
-                    $("#viewScheduleStartTime").text(res.data.start_time);
-                    $("#viewScheduleEndTime").text(res.data.end_time);
+                    $("#viewScheduleDay").text(res.data.schedule_times[0].day);
+                    $("#viewScheduleStartTime").text(
+                        res.data.schedule_times[0].start_time
+                    );
+                    $("#viewScheduleEndTime").text(
+                        res.data.schedule_times[0].end_time
+                    );
 
-                    let labelMeetingMethod = res.data.meeting_method;
+                    let labelMeetingMethod =
+                        res.data.schedule_times[0].meeting_method;
                     if (labelMeetingMethod === "Offline") {
                         labelMeetingMethod = "Luring";
                     } else if (labelMeetingMethod === "Online") {

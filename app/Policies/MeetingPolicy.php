@@ -19,11 +19,25 @@ class MeetingPolicy
     return false;
   }
 
+  public function viewPossession(User $user, Meeting $meeting)
+  {
+    if ($user->can('meeting.view')) {
+      if ($user->hasRole('teacher')) {
+        return $meeting->schedule->teacher_id == $user->teacher->id;
+      } else if ($user->hasRole('student')) {
+        return $user->student->class_id == $meeting->schedule->class_id;
+      } else if ($user->hasRole('parent')) {
+        return $user->parent->class_id == $meeting->schedule->class_id;
+      }
+    }
+    return false;
+  }
+
   public function view(User $user, Meeting $meeting)
   {
     if ($user->can('meeting.view')) {
       if ($user->hasRole('teacher')) {
-        return $meeting->schedule->teacher_id == $user->id;
+        return $meeting->schedule->teacher_id == $user->teacher->id;
       } else if ($user->hasRole('student')) {
         return $user->student->class_id == $meeting->schedule->class_id;
       } else if ($user->hasRole('parent')) {
@@ -42,10 +56,9 @@ class MeetingPolicy
   {
     if ($user->can('meeting.edit')) {
       if ($user->hasRole('teacher')) {
-        return $meeting->schedule->teacher_id == $user->id;
-      } else {
-        return true;
+        return $meeting->schedule->teacher_id == $user->teacher->id;
       }
+      return true;
     }
     return false;
   }

@@ -12,7 +12,7 @@ class CreateMajorsTable extends Migration
     public function up(): void
     {
         Schema::create('majors', function (Blueprint $table) {
-            $table->string('id')->primary();
+            $table->string('id', 5)->primary();
             $table->string('name')->unique();
             $table->timestamps();
 

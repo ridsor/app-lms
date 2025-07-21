@@ -17,6 +17,15 @@
       text-overflow: unset !important;
       max-width: none !important;
     }
+    #curriculum-table td:nth-child(4) p,
+    #curriculum-table td:nth-child(4),
+    #curriculum-table th:nth-child(4) p,
+    #curriculum-table th:nth-child(4) {
+      white-space: nowrap !important;
+      overflow: visible !important;
+      text-overflow: unset !important;
+      max-width: none !important;
+    }
   </style>
 @endsection
 
@@ -83,7 +92,7 @@
                                   <button class="ql-link"></button>
                                 </div>
                                 <div id="addDescriptionEditor"></div>
-                                <input type="hidden" id="addDescription" name="description">
+                                <input type="hidden" id="addDescription" name="description" class="quill">
                               </div>
                               <div class="invalid-feedback"></div>
                             </div>
@@ -134,7 +143,7 @@
                                   <button class="ql-link"></button>
                                 </div>
                                 <div id="editDescriptionEditor"></div>
-                                <input type="hidden" id="editDescription" name="description">
+                                <input type="hidden" id="editDescription" name="description" class="quill">
                               </div>
                               <div class="invalid-feedback"></div>
                             </div>

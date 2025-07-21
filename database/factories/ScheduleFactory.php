@@ -17,16 +17,11 @@ class ScheduleFactory extends Factory
     public function definition()
     {
         return [
-            'grouping_schedule' => rand(1, 10),
             'class_id' => SchoolClass::first()?->id ?? SchoolClass::factory()->create()->id,
             'subject_id' => Subject::inRandomOrder()->first()?->id ?? Subject::factory()->create()->id,
             'teacher_id' => Teacher::inRandomOrder()->first()?->id ?? Teacher::factory()->create()->id,
             'room_id' => Room::inRandomOrder()->first()?->id ?? Room::factory()->create()->id,
             'period_id' => Period::first()?->id ?? Period::factory()->create()->id,
-            'day' => $this->faker->randomElement(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']),
-            'meeting_method' => $this->faker->randomElement(['online', 'offline', 'hybrid']),
-            'start_time' => $this->faker->time('H:i'),
-            'end_time' => $this->faker->time('H:i')
         ];
     }
 }

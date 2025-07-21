@@ -10,7 +10,6 @@ use App\Models\Room;
 use App\Models\Period;
 use App\Models\Meeting;
 use App\Models\Grade;
-use App\Models\Attendance;
 use App\Helpers\Helper;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,16 +22,11 @@ class Schedule extends Model
     use HasFactory;
 
     protected $fillable = [
-        'grouping_schedule',
         'class_id',
         'subject_id',
         'teacher_id',
         'room_id',
         'period_id',
-        'day',
-        'meeting_method',
-        'start_time',
-        'end_time'
     ];
 
     public function class(): BelongsTo
@@ -60,14 +54,14 @@ class Schedule extends Model
         return $this->belongsTo(Period::class);
     }
 
-    public function grouping_meetings(): HasMany
-    {
-        return $this->hasMany(Meeting::class, 'grouping_schedule_id', 'grouping_schedule');
-    }
-
     public function meetings(): HasMany
     {
         return $this->hasMany(Meeting::class, 'schedule_id');
+    }
+
+    public function schedule_times(): HasMany
+    {
+        return $this->hasMany(ScheduleTime::class, 'schedule_id');
     }
 
     public function grades(): HasMany

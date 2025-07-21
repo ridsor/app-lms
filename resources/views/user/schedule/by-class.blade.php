@@ -8,14 +8,10 @@
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select/bootstrap-select.min.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
   <style>
-    #schedule-by-class-table td:nth-child(3) p,
-    #schedule-by-class-table td:nth-child(3),
-    #schedule-by-class-table th:nth-child(3) p,
-  #schedule-by-class-table th:nth-child(3),
-    #schedule-by-class-table td:nth-child(4) p,
-    #schedule-by-class-table td:nth-child(4),
-    #schedule-by-class-table th:nth-child(4) p,
-    #schedule-by-class-table th:nth-child(4) {
+    #schedule-by-class-table td p,
+    #schedule-by-class-table td,
+    #schedule-by-class-table th p,
+    #schedule-by-class-table th {
       white-space: nowrap !important;
       overflow: visible !important;
       text-overflow: unset !important;

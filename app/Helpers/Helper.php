@@ -52,7 +52,7 @@ class Helper
         };
     }
 
-    public static function getDayName(string $day): string
+    public static function getDayName($day)
     {
         return match ($day) {
             'Monday' => 'Senin',
@@ -83,7 +83,7 @@ class Helper
     {
         return match ($value) {
             'H' => '<span style="font-size: 11px" class="px-2 badge badge-light-success">Hadir</span>',
-            'I' => '<span style="font-size: 11px" class="px-2 badge badge-light-primary">Izin</span>',
+            'I' => '<span style="font-size: 11px" class="px-2 badge badge-light-info">Izin</span>',
             'S' => '<span style="font-size: 11px" class="px-2 badge badge-light-warning">Sakit</span>',
             'A' => '<span style="font-size: 11px" class="px-2 badge badge-light-danger">Absen</span>',
             default => '<span style="font-size: 11px" class="px-2 badge badge-light-secondary">-</span>'
@@ -115,6 +115,17 @@ class Helper
             'odd' => 'Ganjil',
             'even' => "Genap",
             default => $semester
+        };
+    }
+
+    // getMeetingTypeLabel
+    public static function getMeetingTypeLabel($type)
+    {
+        return match ($type) {
+            'Learning' => 'Belajar',
+            'Midterm' => 'UTS',
+            'Final' => 'UAS',
+            default => $type
         };
     }
 }

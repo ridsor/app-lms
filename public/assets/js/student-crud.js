@@ -520,7 +520,6 @@ $(document).ready(function () {
                                     cls.id +
                                     '">' +
                                     cls.name +
-                                    " - " +
                                     cls.level +
                                     "</option>";
                             });
@@ -535,7 +534,6 @@ $(document).ready(function () {
                                 cls.id +
                                 '">' +
                                 cls.name +
-                                " - " +
                                 cls.level +
                                 "</option>";
                         });
@@ -617,7 +615,7 @@ $(document).ready(function () {
                     );
                     $("#viewStudentClass").text(
                         res.data.class
-                            ? `${res.data.class.name} - ${res.data.class.level}`
+                            ? `${res.data.class.name}${res.data.class.level}`
                             : "-"
                     );
                     $("#viewStudentHomeroomTeacher").text(
@@ -693,7 +691,6 @@ $(document).ready(function () {
                             cls.id +
                             '">' +
                             cls.name +
-                            " - " +
                             cls.level +
                             "</option>";
                     });
