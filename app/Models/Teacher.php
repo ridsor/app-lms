@@ -4,11 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
-use App\Models\HomeroomTeacher;
 use App\Models\Schedule;
 use App\Models\AssignmentSubmission;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -21,10 +19,14 @@ class Teacher extends Model
         'name',
         'nip',
         'specialization',
-        'education_level',
+        'gender',
         'date_of_birth',
         'birthplace',
         'religion'
+    ];
+
+    protected $casts = [
+        'date_of_birth' => 'date:d/m/Y',
     ];
 
     public function user(): BelongsTo
@@ -32,9 +34,9 @@ class Teacher extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function homeroomTeacher(): HasOne
+    public function students(): HasMany
     {
-        return $this->hasOne(HomeroomTeacher::class);
+        return $this->hasMany(Student::class, 'homeroom_teacher_id');
     }
 
     public function schedules(): HasMany
@@ -45,5 +47,15 @@ class Teacher extends Model
     public function assignmentSubmissions(): HasMany
     {
         return $this->hasMany(AssignmentSubmission::class, 'graded_by');
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['search']['value'])) {
+            $search = $filters['search']['value'];
+            $query->where(function ($q) use ($search) {
+                $q->whereFullText('teachers.name', $search);
+            });
+        }
     }
 }

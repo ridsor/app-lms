@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Parent\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\Request;
 
 class LoginController extends Controller
@@ -12,9 +13,14 @@ class LoginController extends Controller
         return view('auth.login', ['role' => 'parent']);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        // Dummy login logic
-        return redirect()->route('home');
+        $request->authenticate('parent');
+
+        $request->session()->regenerate();
+
+        // Token generation removed - Sanctum no longer available
+
+        return redirect()->intended(route('user.home', absolute: false));
     }
 }

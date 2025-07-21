@@ -5,41 +5,38 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Room;
 use Illuminate\Http\Request;
-use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 
 class RoomController extends Controller
 {
-    public function __construct()
+    public function index(Request $request)
     {
-        $this->middleware(['role:vice-principal']);
-    }
+        if (!$request->user()->can('room.*')) {
+            return abort(403);
+        }
 
-    public function index()
-    {
-        $rooms = Room::filter(request()->all())->paginate(10)->onEachSide(1);
-        return view('user.rooms.index', [
-            'rooms' => $rooms
-        ]);
-    }
-
-    public function show($id)
-    {
-        try {
-            $room = Room::find($id);
-            if (!$room) {
-                return $this->sendError(
-                    'Data ruangan tidak ditemukan.',
-                    [],
-                    404
-                );
-            }
-            return $this->sendResponse('Data ruangan berhasil diambil.', $room);
-        } catch (\Exception $e) {
-            return $this->sendError(
-                'Silakan coba lagi.',
-                [],
-                500
-            );
+        if ($request->ajax()) {
+            $data = Room::filter(request()->all());
+            return DataTables::of($data)
+                ->addColumn('id', function ($row) {
+                    $html = '<div class="checkbox-checked"><div class="form-check d-flex justify-content-center align-items-center"><input class="form-check-input select-row" type="checkbox" style="width: 12px; height: 12px;" value="' . $row->id . '" name="selected_ids[]" id="select-row-' . $row->id . '"></div></div>';
+                    return $html;
+                })
+                ->addColumn('Nama', function ($row) {
+                    return '<div class="product-names"><p>' . $row->name . '</p></div>';
+                })
+                ->addColumn('Aksi', function ($row) {
+                    $html = '<div class="common-align gap-2 justify-content-start"><a class="square-white edit"  data-id="' . $row->id . '"><svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg></a><a class="square-white trash"  data-id="' . $row->id . '"><svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg></a></div>';
+                    return $html;
+                })
+                ->addColumn('Waktu', function ($row) {
+                    return $row->created_at->translatedFormat('d/m/Y H:i');
+                })
+                ->rawColumns(['id', 'Nama', 'Waktu', 'Aksi'])
+                ->make(true);
+        } else {
+            return view('user.room.index');
         }
     }
 
@@ -49,16 +46,29 @@ class RoomController extends Controller
             'name' => 'required|string|max:255|unique:rooms,name',
         ]);
         try {
-
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
             $room = Room::create($validated);
-
             return $this->sendResponse('Ruangan berhasil ditambahkan.', $room);
         } catch (\Exception $e) {
-            return $this->sendError(
-                'Silakan coba lagi.',
-                [],
-                500
-            );
+            return $this->sendError('Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function edit(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
+            $room = Room::find($id);
+            if (!$room) {
+                return $this->sendError('Data ruangan tidak ditemukan.', [], 404);
+            }
+            return $this->sendResponse('Data ruangan berhasil diambil.', $room);
+        } catch (\Exception $e) {
+            return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }
 
@@ -68,43 +78,67 @@ class RoomController extends Controller
             'name' => 'required|string|max:255|unique:rooms,name,' . $id,
         ]);
         try {
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
 
             $room = Room::findOrFail($id);
             $room->update($validated);
-
             return $this->sendResponse('Ruangan berhasil diedit.', $room->refresh());
         } catch (\Exception $e) {
-            return $this->sendError(
-                'Silakan coba lagi.',
-                [],
-                500
-            );
+            return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         try {
-            $room = Room::findOrFail($id);
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
 
-            // Cek apakah ruangan memiliki jadwal terkait
+            $room = Room::findOrFail($id);
             if ($room->schedules()->count() > 0) {
                 return $this->sendError(
-                    'Ruangan ini masih digunakan dalam jadwal pembelajaran.',
+                    'Ruangan tidak dapat dihapus karena masih memiliki jadwal.',
                     [],
-                    422
+                    400
                 );
             }
 
             $room->delete();
-
             return $this->sendResponse('Ruangan berhasil dihapus.');
         } catch (\Exception $e) {
-            return $this->sendError(
-                'Silakan coba lagi.',
-                [],
-                500
-            );
+            return $this->sendError('Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function bulkDestroy(Request $request)
+    {
+        try {
+            if (!$request->user()->can('room.*')) {
+                return abort(403);
+            }
+
+            $ids = $request->input('ids');
+            if (empty($ids)) {
+                return $this->sendError('Tidak ada data yang dipilih untuk dihapus.', [], 400);
+            }
+            $rooms = Room::whereIn('id', $ids)->get();
+            foreach ($rooms as $room) {
+                if ($room->schedules()->count() > 0) {
+                    return $this->sendError(
+                        'Ruangan tidak dapat dihapus karena masih memiliki jadwal.',
+                        [],
+                        400
+                    );
+                }
+                $room->delete();
+            }
+            return $this->sendResponse('Data yang dipilih berhasil dihapus.');
+        } catch (\Exception $e) {
+            Log::info($e->getMessage());
+            return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }
 }

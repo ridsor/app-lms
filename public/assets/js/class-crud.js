@@ -1,17 +1,24 @@
 $(function () {
+    // filter
+    const params = getQueryParams();
+    if (params.major) {
+        $("#major-filter").val(params.major);
+    }
+    if (params.level) {
+        $("#level-filter").val(params.level);
+    }
+
     var t = $("#class-table").DataTable({
         processing: true,
         serverSide: true,
-        ajax: {
+        ajax: $.fn.dataTable.pipeline({
             url: "/kelas",
+            pages: 5,
             data: function (d) {
-                d.level = $("#level-filter").val();
-                d.major = $("#major-filter").val();
+                let filterParams = getQueryParams();
+                $.extend(d, filterParams);
             },
-            complete: function () {
-                updateDeleteButtonState();
-            },
-        },
+        }),
         columns: [
             {
                 data: "id",
@@ -28,25 +35,18 @@ $(function () {
             {
                 data: "Tingkat",
                 name: "level",
+                searchable: false,
             },
             {
                 data: "Jurusan",
-                name: "major",
-            },
-            {
-                data: "Kapasitas",
-                name: "capacity",
+                name: "majors.name",
+                searchable: false,
             },
             {
                 data: "Aksi",
                 name: "Aksi",
                 orderable: false,
                 searchable: false,
-            },
-            {
-                data: "created_at",
-                name: "created_at",
-                visible: false,
             },
         ],
         language: {
@@ -55,6 +55,7 @@ $(function () {
             sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
             sInfoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
             sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
+            sEmptyTable: "Tidak ada data di tabel",
             sInfoPostFix: "",
             sSearch: "Cari:",
             sUrl: "",
@@ -65,27 +66,23 @@ $(function () {
                 },
             },
         },
-        // columnDefs: [
-        //     {
-        //         orderable: false,
-        //         render: $.fn.dataTable.render.select(),
-        //         targets: 0,
-        //     },
-        // ],
-        // select: {
-        //     style: "multi",
-        //     selector: "td:first-child",
-        // },
         fixedColumns: {
             leftColumns: 2,
         },
         scrollCollapse: true,
         pageLength: 10,
-        lengthMenu: [5, 10, 50, 100],
+        searchDelay: 300,
+        lengthMenu: [10, 25, 50, 100],
         responsive: true,
-        autoWidth: true,
+        autoWidth: false,
         searchable: true,
-        order: [[6, "desc"]],
+        order: [],
+    });
+
+    t.on("draw", function () {
+        $("#select-all").prop("checked", false);
+        $("#delete-selected").prop("disabled", true);
+        $("#delete-selected").parent().css("display", "none");
     });
 
     // Hapus banyak
@@ -107,11 +104,18 @@ $(function () {
             denyButtonText: `Batal`,
             confirmButtonColor: "#FC4438",
             cancelButtonColor: "#16C7F9",
-            imageUrl: "../assets/images/gif/trash.gif",
+            imageUrl: "/assets/images/gif/trash.gif",
             imageWidth: 120,
             imageHeight: 120,
         }).then((result) => {
             if (result.isConfirmed) {
+                const deleteBtn = $("#delete-selected");
+                const originalHtml = deleteBtn.html();
+                deleteBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span>'
+                    );
                 $.ajax({
                     url: "/kelas/hapus",
                     method: "DELETE",
@@ -119,7 +123,7 @@ $(function () {
                         ids: selectedIds,
                     },
                     success: function (res) {
-                        t.ajax.reload();
+                        t.clearPipeline().draw();
                         const toast = new bootstrap.Toast($("#toast-success"));
                         $("#toast-success #toast-text").text(res.message);
                         toast.show();
@@ -131,6 +135,9 @@ $(function () {
                         );
                         toast.show();
                     },
+                    complete: function () {
+                        deleteBtn.prop("disabled", false).html(originalHtml);
+                    },
                 });
             }
         });
@@ -139,13 +146,28 @@ $(function () {
     // Event handler untuk filter
     $("#filter-btn").click(function (e) {
         e.preventDefault();
-        t.draw();
+
+        // Buat query string
+        const params = new URLSearchParams();
+        if ($("#major-filter").val())
+            params.append("major", $("#major-filter").val());
+        if ($("#level-filter").val())
+            params.append("level", $("#level-filter").val());
+
+        // Update URL tanpa reload
+        const newUrl =
+            window.location.pathname +
+            (params.toString() ? "?" + params.toString() : "");
+        window.history.replaceState({}, "", newUrl);
+
+        // Refresh datatable
+        t.clearPipeline().draw();
     });
 
     $("#class-table").on("click", ".trash", function (e) {
         e.preventDefault();
-        var row = $(this).closest("tr");
-        var id = row.attr("id");
+        const trashBtn = $(this);
+        var id = trashBtn.attr("data-id");
         if (!id) return;
         Swal.fire({
             title: "Apakah Anda yakin?",
@@ -156,17 +178,23 @@ $(function () {
             denyButtonText: `Batal`,
             confirmButtonColor: "#FC4438",
             cancelButtonColor: "#16C7F9",
-            imageUrl: "../assets/images/gif/trash.gif",
+            imageUrl: "/assets/images/gif/trash.gif",
             imageWidth: 120,
             imageHeight: 120,
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                $.ajax({
+                const originalHtml = trashBtn.html();
+                trashBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+                    );
+                await $.ajax({
                     url: "/kelas/" + id,
                     method: "DELETE",
                     success: function (res) {
                         if (res.success) {
-                            t.ajax.reload();
+                            t.clearPipeline().draw();
                             const toast = new bootstrap.Toast(
                                 $("#toast-success")
                             );
@@ -181,7 +209,14 @@ $(function () {
                         }
                     },
                     error: function (xhr) {
-                        alert("Terjadi kesalahan saat menghapus kelas.");
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON.message
+                        );
+                        toast.show();
+                    },
+                    complete: function () {
+                        trashBtn.prop("disabled", false).html(originalHtml);
                     },
                 });
             }
@@ -217,7 +252,7 @@ $(function () {
                     const toast = new bootstrap.Toast($("#toast-success"));
                     $("#toast-success #toast-text").text(response.message);
                     toast.show();
-                    t.draw();
+                    t.clearPipeline().draw();
                     $("#addClassModal").modal("hide");
                     $("#addClassForm")[0].reset();
                 }
@@ -226,28 +261,26 @@ $(function () {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     if (errors.name) {
-                        $("#className")
+                        $("#addClassForm [name='name']")
                             .next(".invalid-feedback")
                             .text(errors.name[0]);
-                        $("#className").addClass("is-invalid");
+                        $("#addClassForm [name='name']").addClass("is-invalid");
                     }
                     if (errors.level) {
-                        $("#classLevel")
+                        $("#addClassForm [name='level']")
                             .next(".invalid-feedback")
                             .text(errors.level[0]);
-                        $("#classLevel").addClass("is-invalid");
+                        $("#addClassForm [name='level']").addClass(
+                            "is-invalid"
+                        );
                     }
-                    if (errors.major) {
-                        $("#classMajor")
+                    if (errors.major_id) {
+                        $("#addClassForm [name='major_id']")
                             .next(".invalid-feedback")
-                            .text(errors.major[0]);
-                        $("#classMajor").addClass("is-invalid");
-                    }
-                    if (errors.capacity) {
-                        $("#classCapacity")
-                            .next(".invalid-feedback")
-                            .text(errors.capacity[0]);
-                        $("#classCapacity").addClass("is-invalid");
+                            .text(errors.major_id[0]);
+                        $("#addClassForm [name='major_id']").addClass(
+                            "is-invalid"
+                        );
                     }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
@@ -276,7 +309,7 @@ $(function () {
             var checkedCheckbox = $(
                 "#class-table tbody input[type='checkbox'].select-row:checked"
             ).length;
-
+            $("#delete-selected-count").text(checkedCheckbox);
             // Jika semua dicentang, centang juga #select-all
             $("#select-all").prop(
                 "checked",
@@ -290,6 +323,10 @@ $(function () {
         $('#class-table tbody input[type="checkbox"].select-row').prop(
             "checked",
             checked
+        );
+        $("#delete-selected-count").text(
+            $("#class-table tbody input[type='checkbox'].select-row:checked")
+                .length
         );
         updateDeleteButtonState();
     });
@@ -318,20 +355,23 @@ $(function () {
             );
 
         $.ajax({
-            url: "/kelas/" + id,
+            url: `/kelas/${id}/edit`,
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
-                    $("#editClassForm #className").val(res.data.name);
-                    $("#editClassForm #classLevel").val(res.data.level);
-                    $("#editClassForm #classMajor").val(res.data.major);
-                    $("#editClassForm #classCapacity").val(res.data.capacity);
+                    $("#editClassForm [name='name']").val(res.data.name);
+                    $("#editClassForm [name='level']").val(res.data.level);
+                    $("#editClassForm [name='major_id']").val(
+                        res.data.major_id
+                    );
                     $("#editClassForm").attr("data-id", id);
                     $("#editClassModal").modal("show");
                 }
             },
             error: function () {
-                alert("Gagal mengambil data kelas.");
+                const toast = new bootstrap.Toast($("#toast-error"));
+                $("#toast-error #toast-text").text(xhr.responseJSON.message);
+                toast.show();
             },
             complete: function () {
                 editBtn.prop("disabled", false).html(originalHtml);
@@ -372,35 +412,34 @@ $(function () {
                     toast.show();
                     $("#editClassModal").modal("hide");
                     $("#editClassForm")[0].reset();
-                    $("#class-table").DataTable().ajax.reload();
+                    $("#editClassForm .selectpicker").selectpicker("refresh");
+                    t.clearPipeline().draw();
                 }
             },
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     if (errors.name) {
-                        $("#editClassForm #className")
+                        $("#editClassForm [name='name']")
                             .next(".invalid-feedback")
                             .text(errors.name[0]);
-                        $("#editClassForm #className").addClass("is-invalid");
+                        $("#editClassForm [name='name']").addClass(
+                            "is-invalid"
+                        );
                     }
                     if (errors.level) {
-                        $("#editClassForm #classLevel")
+                        $("#editClassForm [name='level']")
                             .next(".invalid-feedback")
                             .text(errors.level[0]);
-                        $("#editClassForm #classLevel").addClass("is-invalid");
+                        $("#editClassForm [name='level']").addClass(
+                            "is-invalid"
+                        );
                     }
-                    if (errors.major) {
-                        $("#editClassForm #classMajor")
+                    if (errors.major_id) {
+                        $("#editClassForm [name='major_id']")
                             .next(".invalid-feedback")
-                            .text(errors.major[0]);
-                        $("#editClassForm #classMajor").addClass("is-invalid");
-                    }
-                    if (errors.capacity) {
-                        $("#editClassForm #classCapacity")
-                            .next(".invalid-feedback")
-                            .text(errors.capacity[0]);
-                        $("#editClassForm #classCapacity").addClass(
+                            .text(errors.major_id[0]);
+                        $("#editClassForm [name='major_id']").addClass(
                             "is-invalid"
                         );
                     }

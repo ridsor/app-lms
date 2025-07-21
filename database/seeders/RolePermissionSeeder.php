@@ -14,37 +14,90 @@ class RolePermissionSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Buat permissions
+        // Buat permissions untuk student management
         $permissions = [
+            'student.*',
+            'student.edit.homeroomteacher',
+            'student.view.homeroomteacher',
+            'teacher.*',
+            'parent.*',
+            'class.*',
+            'major.*',
+            'room.*',
+            'period.*',
+            'curriculum.*',
+            'subject.*',
+            'user.*',
+            'schedule.*',
+            'schedule.view',
+            'meeting.edit',
+            'meeting.view',
+            'attendance.edit',
+            'attendance.view',
+            'teaching_journal.view',
+            'teaching_journal.edit',
+            'teaching_journal.create',
         ];
 
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
         }
 
-        // Buat roles dan assign permissions
-
-        // $admin = Role::create(['name' => 'admin']);
-        // $admin->givePermissionTo(Permission::all());    
-        // $admin->givePermissionTo([
-        //     'user_management',
-        //     'content_management'
-        // ]);
-
+        // Role Admin - Full access
         $roleAdmin = Role::create(['name' => 'admin']);
+        $roleAdmin->givePermissionTo([]);
 
+        // Role Vice Principal (Wakasek) - Full student management
         $roleVicePrincipal = Role::create(['name' => 'vice-principal']);
-        // $roleVicePrincipal->givePermissionTo([
-        //     'room-management',
-        // ]);
+        $roleVicePrincipal->givePermissionTo([
+            'room.*',
+            'period.*',
+            'class.*',
+            'major.*',
+            'teacher.*',
+            'student.*',
+            'curriculum.*',
+            'subject.*',
+            'schedule.*',
+            'attendance.view',
+            'attendance.edit',
+            'teaching_journal.view',
+            'meeting.view',
+            'meeting.edit',
+        ]);
 
+        // Role Teacher - Limited student access (only homeroom students)
         $roleTeacher = Role::create(['name' => 'teacher']);
+        $roleTeacher->givePermissionTo([
+            'attendance.edit',
+            'attendance.view',
+            'schedule.view',
+            'meeting.view',
+            'meeting.edit',
+            'teaching_journal.view',
+            'teaching_journal.create',
+            'teaching_journal.edit',
+        ]);
+
+        // Role Parent - No student management access
+        $roleParent = Role::create(['name' => 'parent']);
+        $roleParent->givePermissionTo([
+            'attendance.view',
+            'schedule.view',
+            'meeting.view',
+        ]);
+
+        // Role Student - No student management access
         $roleStudent = Role::create(['name' => 'student']);
+        $roleStudent->givePermissionTo([
+            'attendance.view',
+            'schedule.view',
+            'meeting.view',
+        ]);
 
         $role = User::create([
             'name' => 'Admin',
             'username' => 'admin',
-            'email' => 'admin@gmail.com',
             'password' => bcrypt('password')
         ]);
         $role->assignRole('admin');
@@ -52,7 +105,6 @@ class RolePermissionSeeder extends Seeder
         $role = User::create([
             'name' => 'Wakil Kepala Sekolah',
             'username' => 'wakasek',
-            'email' => 'wakasek@gmail.com',
             'password' => bcrypt('password')
         ]);
         $role->assignRole('vice-principal');
@@ -60,7 +112,6 @@ class RolePermissionSeeder extends Seeder
         $student = User::create([
             'name' => 'Student',
             'username' => 'student',
-            'email' => 'student@gmail.com',
             'password' => bcrypt('password')
         ]);
         $student->assignRole('student');
@@ -68,9 +119,15 @@ class RolePermissionSeeder extends Seeder
         $teacher = User::create([
             'name' => 'Teacher',
             'username' => 'teacher',
-            'email' => 'teacher@gmail.com',
             'password' => bcrypt('password')
         ]);
         $teacher->assignRole('teacher');
+
+        $parent = User::create([
+            'name' => 'Parent',
+            'username' => 'parent',
+            'password' => bcrypt('password')
+        ]);
+        $parent->assignRole('parent');
     }
 }

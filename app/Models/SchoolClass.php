@@ -7,7 +7,6 @@ use App\Models\Student;
 use App\Models\Schedule;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Log;
 
 class SchoolClass extends Model
 {
@@ -17,18 +16,22 @@ class SchoolClass extends Model
     protected $fillable = [
         'name',
         'level',
-        'major',
-        'capacity'
+        'major_id',
     ];
 
     public function students(): HasMany
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(Student::class, 'class_id');
     }
 
     public function schedules(): HasMany
     {
-        return $this->hasMany(Schedule::class);
+        return $this->hasMany(Schedule::class, 'class_id');
+    }
+
+    public function major()
+    {
+        return $this->belongsTo(Major::class);
     }
 
     public function scopeFilter($query, array $filters)
@@ -36,9 +39,25 @@ class SchoolClass extends Model
 
         // Search global - mencari di semua kolom
         $query->when($filters['search']['value'] ?? false, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->whereFullText('name', $search);
-            });
+            $query->where('classes.name', 'like', '%' . $search . '%');
+        });
+
+        // Filter berdasarkan level
+        $query->when($filters['level'] ?? false, function ($query, $level) {
+            $query->where('classes.level', $level);
+        });
+
+        // Filter berdasarkan major
+        $query->when($filters['major'] ?? false, function ($query, $major) {
+            $query->where('majors.name', $major);
+        });
+    }
+
+    public function scopeFilterSchedule($query, $class)
+    {
+        // Filter berdasarkan Class
+        $query->when($filters['level'] ?? false, function ($query, $level) {
+            $query->where('classes.name', $level);
         });
 
         // Filter berdasarkan level
@@ -48,7 +67,7 @@ class SchoolClass extends Model
 
         // Filter berdasarkan major
         $query->when($filters['major'] ?? false, function ($query, $major) {
-            $query->where('major', $major);
+            $query->where('majors.name', $major);
         });
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Class;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class StoreClassRequest extends FormRequest
 {
@@ -21,11 +23,19 @@ class StoreClassRequest extends FormRequest
      */
     public function rules(): array
     {
+        $classId = $this->route('kela');
+
         return [
-            'name' => 'required|string|max:255',
-            'level' => 'required|string|max:50',
-            'major' => 'required|string|max:100',
-            'capacity' => 'required|integer|min:1|max:100'
+            'name' => [
+                'required',
+                Rule::unique('classes')->where(function ($query) {
+                    return $query->where('level', $this->input('level'))
+                        ->where('major_id', $this->input('major_id'));
+                })->ignore($classId),
+            ],
+            'level' => 'required|integer|max:50',
+            'major_id' => 'nullable|exists:majors,id',
+            'homeroom_teacher_id' => 'nullable|exists:teachers,id',
         ];
     }
 
@@ -44,13 +54,9 @@ class StoreClassRequest extends FormRequest
             'level.required' => 'Tingkat wajib diisi',
             'level.string' => 'Tingkat harus berupa teks',
             'level.max' => 'Tingkat maksimal 50 karakter',
-            'major.required' => 'Jurusan wajib diisi',
-            'major.string' => 'Jurusan harus berupa teks',
-            'major.max' => 'Jurusan maksimal 100 karakter',
-            'capacity.required' => 'Kapasitas wajib diisi',
-            'capacity.integer' => 'Kapasitas harus berupa angka',
-            'capacity.min' => 'Kapasitas minimal 1',
-            'capacity.max' => 'Kapasitas maksimal 100'
+            'major_id.exists' => 'Jurusan tidak ditemukan',
+            'homeroom_teacher_id.exists' => 'Guru tidak ditemukan',
+            'name.unique' => 'Kelas sudah ada'
         ];
     }
 
@@ -64,8 +70,8 @@ class StoreClassRequest extends FormRequest
         return [
             'name' => 'nama kelas',
             'level' => 'tingkat',
-            'major' => 'jurusan',
-            'capacity' => 'kapasitas'
+            'major_id' => 'jurusan',
+            'homeroom_teacher_id' => 'guru wali kelas',
         ];
     }
 }

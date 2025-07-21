@@ -11,11 +11,13 @@ class SchoolClassFactory extends Factory
 
     public function definition()
     {
+        $majors = \App\Models\Major::all();
+        $major = $majors->random();
+
         return [
-            'name' => $this->faker->unique()->bothify('Kelas ##'),
+            'name' => $this->faker->randomElement(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']),
             'level' => $this->faker->randomElement(['10', '11', '12']),
-            'major' => $this->faker->randomElement(['IPA', 'IPS', 'Bahasa']),
-            'capacity' => $this->faker->numberBetween(20, 40)
+            'major_id' => $major->id,
         ];
     }
 }

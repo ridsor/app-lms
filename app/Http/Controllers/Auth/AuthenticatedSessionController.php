@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->user()->tokens()->delete();
+        // Token deletion removed - Sanctum no longer available
         Auth::guard('web')->logout();
         $request->session()->forget('token');
 

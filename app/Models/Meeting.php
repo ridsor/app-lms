@@ -11,6 +11,9 @@ use App\Models\DiscussionForum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Mews\Purifier\Casts\CleanHtml;
+use Illuminate\Support\Facades\Log;
 
 class Meeting extends Model
 {
@@ -18,18 +21,29 @@ class Meeting extends Model
 
     protected $fillable = [
         'schedule_id',
-        'meeting_number',
-        'date',
+        'schedule_time_id',
         'title',
         'description',
         'meeting_method',
         'type',
-        'status'
+        'started_at'
     ];
+
+    protected $casts = [
+        'started_at' => 'datetime',
+        'description' => CleanHtml::class . ':strip_nl,strip_nbsp',
+    ];
+
+    protected $appends = ['date', 'status', 'formatted_started_at'];
 
     public function schedule(): BelongsTo
     {
-        return $this->belongsTo(Schedule::class);
+        return $this->belongsTo(Schedule::class, 'schedule_id');
+    }
+
+    public function schedule_time(): BelongsTo
+    {
+        return $this->belongsTo(ScheduleTime::class, 'schedule_time_id');
     }
 
     public function materials(): HasMany
@@ -50,5 +64,67 @@ class Meeting extends Model
     public function discussionForums(): HasMany
     {
         return $this->hasMany(DiscussionForum::class);
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function teaching_journal(): HasOne
+    {
+        return $this->hasOne(TeachingJournal::class);
+    }
+
+    public function getDateAttribute()
+    {
+        if ($this->started_at) {
+            return $this->started_at->translatedFormat('j M Y');
+        }
+        return null;
+    }
+
+    public function getFormattedStartedAtAttribute()
+    {
+        if ($this->started_at) {
+            return $this->started_at->translatedFormat('H:i');
+        }
+        return null;
+    }
+
+    public function getStatusAttribute()
+    {
+        // Jika belum ada waktu mulai, status belum dimulai
+        if (!$this->started_at) {
+            return 'Belum Dimulai';
+        }
+
+        $now = now();
+        $start = $this->started_at;
+
+        if (!$this->relationLoaded('schedule_time')) {
+            $this->load('schedule_time');
+        }
+
+        if (!$this->schedule_time || empty($this->schedule_time->end_time)) {
+            return 'Tidak Diketahui';
+        }
+
+        $endTime = $this->schedule_time->end_time;
+        $end = $this->started_at->copy()->setTimeFromTimeString($endTime);
+
+        if ($now->lt($start)) {
+            return 'Belum Dimulai';
+        }
+
+        if ($now->gte($start) && $now->lte($end)) {
+            return 'Sedang Berlangsung';
+        }
+
+        if ($now->gt($end)) {
+            return 'Telah Berakhir';
+        }
+
+        return 'Tidak Diketahui';
     }
 }

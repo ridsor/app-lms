@@ -3,33 +3,30 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Student;
-use App\Models\Schedule;
-use App\Models\AttendanceStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Attendance extends Model
 {
     protected $fillable = [
-        'student_id',
-        'schedule_id',
-        'start_time',
-        'end_time'
+        'meeting_id',
+        'user_id',
+        'status',
+        'edit_by'
     ];
 
-    public function student(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(User::class);
     }
 
-    public function schedule(): BelongsTo
+    public function editby(): BelongsTo
     {
-        return $this->belongsTo(Schedule::class);
+        return $this->belongsTo(User::class, 'edit_by');
     }
 
-    public function statuses(): HasMany
+
+    public function meeting(): BelongsTo
     {
-        return $this->hasMany(AttendanceStatus::class);
+        return $this->belongsTo(Meeting::class);
     }
 }

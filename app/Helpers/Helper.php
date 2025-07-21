@@ -13,12 +13,24 @@ class Helper
     public static function getRoleLabel(string $role): string
     {
         return match ($role) {
-            'vice-principal' => 'Wakil Kepala Sekolah Bidang Kurikulum',
+            'vice-principal' => 'Wakil Kepala Sekolah',
             'admin' => 'Admin',
             'teacher' => 'Guru',
             'student' => 'Siswa',
             'parent' => 'Orang Tua',
-            default => 'Siswa'
+            'admin' => 'Admin',
+            default => $role
+        };
+    }
+
+    public static function getStudentStatusLabel(string $status): string
+    {
+        return match ($status) {
+            'active' => 'Aktif',
+            'transferred' => 'Pindah',
+            'graduated' => 'Lulus',
+            'dropout' => 'Keluar',
+            default => $status
         };
     }
 
@@ -36,7 +48,84 @@ class Helper
             'parent' => 'parent',
             'admin' => 'admin',
             'vice-principal' => 'vice-principal',
-            default => 'student'
+            default => $role
+        };
+    }
+
+    public static function getDayName($day)
+    {
+        return match ($day) {
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu',
+            'Sunday' => 'Minggu',
+            default => $day
+        };
+    }
+
+    public static function getDayValue(string $day): string
+    {
+        return match ($day) {
+            'Senin' => 'Monday',
+            'Selasa' => 'Tuesday',
+            'Rabu' => 'Wednesday',
+            'Kamis' => 'Thursday',
+            'Jumat' => 'Friday',
+            'Sabtu' => 'Saturday',
+            'Minggu' => 'Sunday',
+            default => $day
+        };
+    }
+    public static function getAttendanceLabel($value): string
+    {
+        return match ($value) {
+            'H' => '<span style="font-size: 11px" class="px-2 badge badge-light-success">Hadir</span>',
+            'I' => '<span style="font-size: 11px" class="px-2 badge badge-light-info">Izin</span>',
+            'S' => '<span style="font-size: 11px" class="px-2 badge badge-light-warning">Sakit</span>',
+            'A' => '<span style="font-size: 11px" class="px-2 badge badge-light-danger">Absen</span>',
+            default => '<span style="font-size: 11px" class="px-2 badge badge-light-secondary">-</span>'
+        };
+    }
+
+    public static function getGenderLabel(string $gender): string
+    {
+        return match ($gender) {
+            'M' => 'Laki-laki',
+            'F' => 'Perempuan',
+            default => $gender
+        };
+    }
+
+    public static function getMeetingMethodLabel($meeting_method)
+    {
+        return match ($meeting_method) {
+            'Online' => 'Daring',
+            'Offline' => 'Luring',
+            'Hybrid' => 'Campuran',
+            default => $meeting_method
+        };
+    }
+
+    public static function getSemesterLabel($semester)
+    {
+        return match ($semester) {
+            'odd' => 'Ganjil',
+            'even' => "Genap",
+            default => $semester
+        };
+    }
+
+    // getMeetingTypeLabel
+    public static function getMeetingTypeLabel($type)
+    {
+        return match ($type) {
+            'Learning' => 'Belajar',
+            'Midterm' => 'UTS',
+            'Final' => 'UAS',
+            default => $type
         };
     }
 }

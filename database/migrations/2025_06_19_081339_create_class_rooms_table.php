@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
+            $table->string('major_id')->nullable();
+            $table->foreign('major_id')->references('id')->on('majors');
             $table->string('name', 20);
             $table->string('level', 20);
-            $table->string('major', 100)->nullable();
-            $table->integer('capacity')->default(40);
             $table->timestamps();
 
-            $table->fullText('name');
+            $table->index('name');
+            $table->index('level');
+            $table->unique(['level', 'name', 'major_id']);
         });
     }
 

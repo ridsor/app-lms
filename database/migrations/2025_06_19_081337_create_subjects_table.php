@@ -12,14 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subjects', function (Blueprint $table) {
-            $table->id();
-            $table->string('subject_code', 10)->unique();
-            $table->string('subject_name', 100);
-            $table->string('category',100);
-            $table->string('grade_level', 20)->default('all');
-            $table->string('major')->nullable();
-            $table->text('description')->nullable();
+            $table->string('id', 5)->primary();
+            $table->string('curriculum_id');
+            $table->foreign('curriculum_id')->references('id')->on('curriculums')->onDelete('cascade');
+            $table->string('code', 30)->unique();
+            $table->string('name', 100)->unique();
             $table->timestamps();
+            $table->index('name');
         });
     }
 

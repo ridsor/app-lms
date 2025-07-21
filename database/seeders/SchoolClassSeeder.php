@@ -4,11 +4,26 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\SchoolClass;
+use App\Models\Major;
 
 class SchoolClassSeeder extends Seeder
 {
     public function run(): void
     {
-        SchoolClass::factory()->count(3)->create();
+        $majors = Major::all();
+        $names = ['A', 'B', 'C'];
+        $levels = ['10', '11', '12'];
+
+        foreach ($majors as $major) {
+            foreach ($levels as $level) {
+                foreach ($names as $name) {
+                    SchoolClass::firstOrCreate([
+                        'name' => $name,
+                        'level' => $level,
+                        'major_id' => $major->id,
+                    ]);
+                }
+            }
+        }
     }
 }

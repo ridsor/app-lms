@@ -1,6 +1,5 @@
 {{-- <div class="toastr-message" data-type="success">{{ session('success') }}</div> --}}
-<div class="toasts common-toasts">
-
+<div class="toasts common-toasts" style="z-index: 10000;">
     <div data-type="success" class="toast-container position-fixed bottom-0 end-0 p-3 toast-index toast-rtl">
         <div class="toast" id="toast-success" role="alert" aria-live="polite" aria-atomic="true">
             <div class="common-space alert-light-success">

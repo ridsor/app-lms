@@ -2,12 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Teacher;
@@ -16,7 +13,7 @@ use App\Models\Student;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, CanResetPassword, SoftDeletes, HasRoles;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -26,11 +23,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'username',
-        'email',
         'password',
-        'email_verified_at'
+        'image'
     ];
-    protected $dates = ['deleted_at'];
+
+    protected $with = ['student', 'teacher', 'parent'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -50,7 +47,6 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -63,11 +59,15 @@ class User extends Authenticatable
             if (empty($user->username)) {
                 $user->username = self::generateUsername($user->name);
             }
+            if (empty($user->password)) {
+                $user->password = bcrypt($user->username);
+            }
         });
 
         static::updating(function ($user) {
-            if ($user->isDirty('name') && empty($user->username)) {
+            if ($user->isDirty('name')) {
                 $user->username = self::generateUsername($user->name);
+                $user->password = bcrypt($user->username);
             }
         });
     }
@@ -79,8 +79,29 @@ class User extends Authenticatable
 
     public function student()
     {
-        return $this->hasOne(Student::class);
+        return $this->hasOne(Student::class, 'user_id');
     }
+
+    public function parent()
+    {
+        return $this->hasOne(Student::class, 'parent_id');
+    }
+
+    public function form_replies()
+    {
+        return $this->hasMany(ForumReply::class);
+    }
+
+    public function discussion_forums()
+    {
+        return $this->hasMany(DiscussionForum::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
 
     /**
      * Generate unique username dari nama, format: slug_nama_4karakteracak
@@ -91,10 +112,10 @@ class User extends Authenticatable
      */
     public static function generateUsername($name)
     {
-        $base = Str::slug($name, "_");
+        $base = strtolower(substr(strtok($name, " "), 0, 4));
         do {
-            $random = strtolower(Str::random(4));
-            $username = $base . '_' . $random;
+            $random = strtolower(Str::random(5));
+            $username = $base  . $random;
         } while (self::where('username', $username)->exists());
         return $username;
     }

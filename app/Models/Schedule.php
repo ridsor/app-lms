@@ -10,10 +10,12 @@ use App\Models\Room;
 use App\Models\Period;
 use App\Models\Meeting;
 use App\Models\Grade;
-use App\Models\Attendance;
+use App\Helpers\Helper;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 
 class Schedule extends Model
 {
@@ -25,10 +27,6 @@ class Schedule extends Model
         'teacher_id',
         'room_id',
         'period_id',
-        'hari',
-        'metode_pertemuan',
-        'jam_mulai',
-        'jam_selesai'
     ];
 
     public function class(): BelongsTo
@@ -58,7 +56,12 @@ class Schedule extends Model
 
     public function meetings(): HasMany
     {
-        return $this->hasMany(Meeting::class);
+        return $this->hasMany(Meeting::class, 'schedule_id');
+    }
+
+    public function schedule_times(): HasMany
+    {
+        return $this->hasMany(ScheduleTime::class, 'schedule_id');
     }
 
     public function grades(): HasMany
@@ -66,8 +69,52 @@ class Schedule extends Model
         return $this->hasMany(Grade::class);
     }
 
-    public function attendances(): HasMany
+    public function getStartTimeAttribute($value)
     {
-        return $this->hasMany(Attendance::class);
+        return Carbon::parse($value)->format('H:i');
+    }
+
+    public function getEndTimeAttribute($value)
+    {
+        return Carbon::parse($value)->format('H:i');
+    }
+
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['search']['value'])) {
+            $search = $filters['search']['value'];
+            $query->where(function ($q) use ($search) {
+                $q->where('subjects.name', 'like', '%' . $search . '%');
+            });
+        }
+
+        $query->when($filters['guru'] ?? false, function ($query, $guru) {
+            $query->whereFullText('teachers.name', $guru);
+        });
+        $query->when($filters['ruangan'] ?? false, function ($query, $ruangan) {
+            $query->where('rooms.name', 'like', '%' . $ruangan . '%');
+        });
+        $query->when($filters['hari'] ?? false, function ($query, $hari) {
+            $query->where('day', Helper::getDayValue($hari));
+        });
+    }
+
+    public function scopeFilterByPermission($query, User $user)
+    {
+        if ($user->can('schedule.*')) {
+            return $query;
+        }
+
+        if ($user->can('schedule.view')) {
+            if ($user->hasRole('teacher')) {
+                return $query->where('teacher_id', $user->teacher->id);
+            }
+            if ($user->hasRole('student')) {
+                return $query->where('class_id', $user->student->class_id);
+            }
+            if ($user->hasRole('parent')) {
+                return $query->where('class_id', $user->parent->class_id);
+            }
+        }
     }
 }

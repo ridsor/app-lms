@@ -1,3 +1,4 @@
+/* Pagination */
 .pagination-wrapper .page-item.active .page-link {
     background-color: var(--theme-default);
     border-color: var(--theme-default);
@@ -45,3 +46,98 @@
         justify-content: center !important;
     }
 } */
+
+/* Custom Select */
+.custom-select-search .selected-box:after {
+    top: 6px !important;
+    right: 0 !important;
+    transform: rotateX(0deg) !important;
+}
+
+.custom-select-search *,
+.custom-select-search {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+body.dark-only
+    .custom-select-search
+    .options-container.active
+    ~ .search-box
+    input {
+    background-color: #fff !important;
+}
+
+/* Custom Quill */
+.ql-editor p {
+    margin: 0 !important;
+}
+
+/* custom table */
+.list-product.list-category table thead tr th:nth-child(3),
+.list-product.list-category table thead tr td:nth-child(3),
+.list-product.list-category table tbody tr th:nth-child(3),
+.list-product.list-category table tbody tr td:nth-child(3) {
+    min-width: auto;
+}
+
+.list-product.list-category table thead tr th:nth-child(4),
+.list-product.list-category table thead tr td:nth-child(4),
+.list-product.list-category table tbody tr th:nth-child(4),
+.list-product.list-category table tbody tr td:nth-child(4) {
+    min-width: auto;
+}
+
+.list-product.list-category table thead tr th:nth-child(4),
+.list-product.list-category table thead tr td:nth-child(4),
+.list-product.list-category table tbody tr th:nth-child(4),
+.list-product.list-category table tbody tr td:nth-child(4) {
+    min-width: auto;
+}
+
+.list-product.list-category table thead tr th:nth-child(2),
+.list-product.list-category table thead tr td:nth-child(2),
+.list-product.list-category table tbody tr th:nth-child(2),
+.list-product.list-category table tbody tr td:nth-child(2) {
+    min-width: auto;
+}
+
+.selected-item {
+    position: relative;
+}
+
+.selected-item.active:before {
+    position: absolute;
+    content: "";
+    width: 5px;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border-radius: 15px 0 0 15px;
+    background-color: var(--theme-default);
+}
+.selected-item.active {
+    border-radius: 15px 0 0 15px;
+    background-color: rgba(115, 102, 255, 0.05);
+}
+
+.meeting-sidebar {
+    height: calc(100vh - 79px);
+    transition: all 0.3s ease;
+}
+
+@media (max-width: 992px) {
+    .meeting-sidebar {
+        height: 300px !important;
+    }
+}
+
+/* rounded */
+.rounded-responsive {
+    border-radius: 0px !important;
+}
+
+@media (min-width: 576px) {
+    .rounded-responsive {
+        border-radius: 0.375rem !important;
+    }
+}
