@@ -31,6 +31,9 @@ class SchedulePolicy
       if ($user->hasRole('student')) {
         return true;
       }
+      if ($user->hasRole('parent')) {
+        return true;
+      }
     }
     return false;
   }
@@ -45,6 +48,8 @@ class SchedulePolicy
         return $schedule->teacher_id === $user->teacher->id;
       } else if ($user->hasRole('student')) {
         return $user->student->class_id === $schedule->class_id;
+      } else if ($user->hasRole('parent')) {
+        return $user->parent->class_id === $schedule->class_id;
       }
     }
     return false;

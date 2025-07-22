@@ -305,6 +305,8 @@ $(function () {
                                 .text(res.data.status);
 
                             button.prop("disabled", true).html(originalHtml);
+
+                            $("#fillRealizationModal").modal("show");
                         }
                     },
                     error: function (xhr) {
