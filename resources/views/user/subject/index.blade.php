@@ -26,10 +26,10 @@
       </div>
     </div>
   </div><!-- Container-fluid starts-->
-  <div class="container-fluid e-category">
+  <div class="e-category">
     <div class="row">
       <div class="col-12">
-        <div class="card">
+        <div class="card rounded-responsive">
           <div class="card-header card-no-border text-end">
             <div class="card-header-right-icon">
               <button class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal" data-bs-target="#addSubjectModal"><i
@@ -109,7 +109,7 @@
               </div>
             </div>
           </div>
-          <div class="card-body pt-0">
+          <div class="card-body p-0">
             <div class="list-product list-category mt-3">
               <div class="recent-table table-responsive custom-scrollbar">
                 <table class="table" id="subject-table">

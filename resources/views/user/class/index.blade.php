@@ -27,10 +27,10 @@
       </div>
     </div>
   </div><!-- Container-fluid starts-->
-  <div class="container-fluid e-category">
+  <div class="e-category">
     <div class="row">
       <div class="col-12">
-        <div class="card">
+        <div class="card rounded-responsive">
           <div class="card-body">
             <div class="row g-3 mb-3">
               @if ($majors->count() > 0)
@@ -58,7 +58,7 @@
         </div>
       </div>
       <div class="col-sm-12">
-        <div class="card">
+        <div class="card rounded-responsive">
           <div class="card-header card-no-border text-end">
             <div class="card-header-right-icon">
               <a class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal" data-bs-target="#addClassModal"><i

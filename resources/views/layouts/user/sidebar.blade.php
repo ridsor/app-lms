@@ -138,7 +138,7 @@
                         </li>
                       @endcan
                       @can('schedule.view')
-                        @role(['teacher', 'student'])
+                        @role(['teacher', 'student', 'parent'])
                           <li class="sidebar-list">
                             <i class="fa-solid fa-thumbtack"></i>
                             <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.schedule.index') }}"><svg

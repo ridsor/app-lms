@@ -33,7 +33,7 @@ class CurriculumController extends Controller
         })
         ->addColumn('Mata Pelajaran', function ($row) {
           $html = '
-          <a class="square-white view d-flex align-items-center" style="cursor: pointer; width: fit-content" href="' . route('user.subject.index', ['curriculum_id' => $row->id]) . '">
+          <a class="square-white view d-flex align-items-center bg-transparent" style="cursor: pointer; width: fit-content" href="' . route('user.subject.index', ['curriculum_id' => $row->id]) . '">
                 <span class="badge badge-light-primary">Mata Pelajaran (' . $row->subjects_count . ')</span>
           </a>
           ';
