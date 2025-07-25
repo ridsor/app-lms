@@ -156,43 +156,5 @@
 @endsection
 
 @section('scripts')
-  <script>
-    // Script sticky dengan batas bawah parent, dan sticky tetap ikut saat scroll ke atas
-    document.addEventListener("DOMContentLoaded", function() {
-      var stickyElement = document.getElementById("my-sticky");
-      var parentElement = stickyElement.parentElement;
-      var stickyTop = 0; // Jarak sticky dari atas, misal 0 atau 100
-
-      function updateSticky() {
-        var parentRect = parentElement.getBoundingClientRect();
-        var stickyRect = stickyElement.getBoundingClientRect();
-        var parentTop = parentElement.offsetTop;
-        var parentBottom = parentElement.offsetTop + parentElement.offsetHeight;
-        var stickyHeight = stickyElement.offsetHeight;
-        var scrollY = window.scrollY || window.pageYOffset;
-        var stickyOffset = parentTop; // stickyOffset diambil dari parent, bukan stickyElement
-
-        // Hitung posisi maksimal sticky agar tidak keluar dari parent
-        var maxTop = parentBottom - stickyHeight - stickyOffset;
-
-        if (scrollY > stickyOffset - stickyTop) {
-          var newTop = scrollY - stickyOffset + stickyTop;
-          if (newTop > maxTop) {
-            stickyElement.style.top = maxTop + "px";
-          } else if (newTop < 0) {
-            stickyElement.style.top = "0px";
-          } else {
-            stickyElement.style.top = newTop + "px";
-          }
-        } else {
-          stickyElement.style.top = "0px";
-        }
-      }
-
-      window.addEventListener("scroll", updateSticky);
-      window.addEventListener("resize", updateSticky);
-      // Inisialisasi posisi sticky saat load
-      updateSticky();
-    });
-  </script>
+  <script src="{{ asset('assets/js/sticky.js') }}"></script>
 @endsection

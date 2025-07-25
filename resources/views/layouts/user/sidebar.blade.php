@@ -24,11 +24,6 @@
                           <h6>Pinned</h6>
                         </div>
                       </li>
-                      <li class="sidebar-main-title">
-                        <div>
-                          <h6 class="lan-1">General</h6>
-                        </div>
-                      </li>
                       <li class="sidebar-list">
                         <i class="fa-solid fa-thumbtack"></i>
                         {{-- <label class="badge badge-light-primary">0</label> --}}

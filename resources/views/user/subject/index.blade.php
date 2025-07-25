@@ -96,7 +96,7 @@
               <div class="row g-3 justify-content-end align-items-center" id="subject-action-buttons">
                 <div class="col-auto">
                   <span>
-                    <span class="me-1 text-dark" id="selected-count">0</span> dipilih
+                    <span class="me-1" id="selected-count">0</span> dipilih
                   </span>
                 </div>
                 <div class="col-auto">

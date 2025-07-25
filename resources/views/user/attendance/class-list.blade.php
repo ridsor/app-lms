@@ -15,10 +15,10 @@
         </div>
       </div>
     </div>
-    <div class="container-fluid e-category">
+    <div class="e-category">
       <div class="row">
-        <div class="col-12">
-          <div class="card">
+        <div class="col-12 px-0">
+          <div class="card rounded-responsive">
             <div class="card-header card-no-border">
               <div class="header-top">
                 <h5>Filter</h5>
@@ -62,8 +62,8 @@
             </div>
           </div>
         </div>
-        <div class="col-12">
-          <div class="card">
+        <div class="col-12 px-0">
+          <div class="card rounded-responsive">
             <div class="card-header card-no-border text-end">
               <div class="py-2"></div>
             </div>

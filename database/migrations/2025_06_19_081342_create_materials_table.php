@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
             $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
-            $table->string('title', 200);
-            $table->text('description')->nullable();
+            $table->string('title');
+            $table->text('description');
             $table->string('file_path', 255);
             $table->enum('file_type', ['eBook', 'Archive', 'Link']);
             $table->timestamps();

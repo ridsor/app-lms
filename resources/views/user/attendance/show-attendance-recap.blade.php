@@ -27,15 +27,15 @@
 @section('main_content')
   <div class="container-fluid e-category p-0">
     <div class="page-title">
-      <div class="row">
-        <div class="col-sm-6">
+      <div class="row justify-content-between">
+        <div class="col col-sm-6">
           <h3>Rekap Kehadiran Kelas</h3>
         </div>
-        <div class="col-sm-6 text-end mt-2 mt-sm-0">
-          <div class="col-sm-6 text-end mt-2 mt-sm-0">
-            <a href="{{ url()->previous() }}" class="btn btn-secondary btn-sm"><i class="fa fa-arrow-left"></i> Kembali</a>
-          </div>
+        <div class="col-auto text-end mt-2 mt-sm-0">
+          <a href="{{ url()->previous() }}" class="btn text-nowrap btn-secondary btn-sm"><i class="fa fa-arrow-left"></i>
+            Kembali</a>
         </div>
+        
       </div>
     </div>
     <div class="row">

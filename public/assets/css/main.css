@@ -1,3 +1,12 @@
+/* Theme */
+.light .theme-aware-icon {
+    filter: invert(0);
+}
+
+.dark-only .theme-aware-icon {
+    filter: invert(1);
+}
+
 /* Pagination */
 .pagination-wrapper .page-item.active .page-link {
     background-color: var(--theme-default);
@@ -140,4 +149,26 @@ body.dark-only
     .rounded-responsive {
         border-radius: 0.375rem !important;
     }
+}
+
+/* custom file upload */
+#custom-file-upload {
+    border-width: 2px !important;
+    border-style: dashed !important;
+    padding: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease-in-out;
+}
+
+#custom-file-upload.is-drag {
+    border-style: solid !important;
+    background-color: #f0f0f0 !important;
+}
+
+.dark-only #custom-file-upload.is-drag {
+    border-style: solid !important;
+    background-color: #333 !important;
 }

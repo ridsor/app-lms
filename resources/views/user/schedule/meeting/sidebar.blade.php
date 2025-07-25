@@ -2,8 +2,8 @@
   use App\Helpers\Helper;
 @endphp
 
-<div class="position-relative overflow-auto custom-scrollbar meeting-sidebar" id="meeting-sidebar" id="my-sticky">
-  <div class="d-flex flex-column">
+<div class="position-relative overflow-auto custom-scrollbar meeting-sidebar" id="my-sticky">
+  <div class="d-flex flex-column" id="meeting-sidebar">
     @foreach ($schedule->meetings as $key => $value)
       <a href="{{ route('user.schedule.showByMeeting', ['code' => $schedule->subject->code, 'meeting_id' => $value->id]) }}"
         data-meeting-id="{{ $value->id }}"

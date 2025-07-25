@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\User\MaterialController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\RoomController;
 use App\Http\Controllers\User\PeriodController;
@@ -67,6 +68,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::post('/jadwal/pertemuan/{meeting_id}/jurnal', [TeachingJournalController::class, 'store'])->name('user.teaching_journal.store');
     Route::patch('/jadwal/pertemuan/{meeting_id}/mulai-belajar', [MeetingController::class, 'startLearning'])->name('user.schedule.startLearning');
     Route::patch('/jadwal/pertemuan/{meeting_id}/kehadiran', [AttendanceController::class, 'updateByMeeting'])->name('user.attendance.updateByMeeting');
+    Route::post('/jadwal/pertemuan/{meeting_id}/materi', [MaterialController::class, 'store'])->name('user.material.store');
 
     Route::get('/kehadiran/{schedule_id}/pertemuan/{meeting_id}', [AttendanceController::class, 'edit'])->name('user.attendance.edit');
     Route::get('/kehadiran/pertemuan/{meeting_id}/{schedule_time_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');

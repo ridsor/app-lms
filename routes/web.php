@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/profil/{username}', [ProfileController::class, 'index'])->name('profile');
-    Route::patch('/profil/{username}/image', [ProfileController::class, 'updateImage'])->name('profile.image.update');
-});
-
 Route::prefix('wakasek')->group(function () {
     require __DIR__ . '/web/vice-principal/index.php';
 });
@@ -27,4 +22,5 @@ Route::prefix('admin')->group(function () {
     require __DIR__ . '/web/admin/index.php';
 });
 require __DIR__ . '/auth.php';
+require __DIR__ . '/account.php';
 require __DIR__ . '/web/user/index.php';

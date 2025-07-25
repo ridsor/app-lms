@@ -8,7 +8,7 @@ var loadFile = async function (event) {
     formData.append("image", event.target.files[0]);
 
     $.ajax({
-        url: `/profil/${username}/image`,
+        url: `/profil/${username}/gambar`,
         method: "POST",
         data: formData,
         processData: false,
@@ -103,7 +103,7 @@ document.getElementById("cancelButton").addEventListener("click", function () {
     formData.append("image", "");
 
     $.ajax({
-        url: `/profil/${username}/image`,
+        url: `/profil/${username}/gambar`,
         method: "POST",
         data: formData,
         processData: false,

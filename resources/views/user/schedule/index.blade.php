@@ -7,7 +7,7 @@
 @section('title', 'Jadwal')
 
 @section('main_content')
-  <div class="container-fluid p-0">
+  <div class="container-fluid">
     <div class="page-title">
       <div class="row">
         <div class="col-sm-6">
@@ -24,7 +24,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-12">
+      <div class="col-12 px-0">
         <div class="card rounded-responsive">
           <div class="card-body projects-wrapper">
             <div class="tab-content" id="top-tabContent">
