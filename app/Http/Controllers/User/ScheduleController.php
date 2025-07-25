@@ -338,6 +338,9 @@ class ScheduleController extends Controller
       ['value' => 'Midterm', 'label' => 'UTS'],
       ['value' => 'Final', 'label' => 'UAS']
     ];
+    $materialType = [
+      ['value' => 'eBook', 'label' => 'eBook'], ['value' => 'Archive', 'label' => 'Arsip'], ['value' => 'Link', 'label' => 'Link']
+    ];
 
     $isStartedAt = $meeting->schedule_time->start_time <= now() && $meeting->schedule_time->end_time >= now() && (!$meeting->started_at);
     $isRealization = $meeting->started_at && $meeting->schedule_time->start_time <= now() && $meeting->schedule_time->end_time->addHours(2) >= now();
@@ -350,7 +353,7 @@ class ScheduleController extends Controller
       $attendancePercentage = round(($totalAttendances / $totalStudents) * 100, 1);
     }
 
-    return view('user.schedule.meeting.show', compact('meeting', 'schedule', 'meetingTypes', 'rooms', 'meetingMethods', 'attendances', 'attendanceValue', 'isStartedAt', 'isRealization', 'attendancePercentage'));
+    return view('user.schedule.meeting.show', compact('meeting', 'schedule', 'meetingTypes', 'rooms', 'meetingMethods', 'attendances', 'attendanceValue', 'isStartedAt', 'isRealization', 'attendancePercentage', 'materialType'));
   }
 
   public function show($id)

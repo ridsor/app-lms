@@ -5,6 +5,12 @@ var meetingDescriptionQuill = new Quill("#meetingDescriptionQuill", {
     placeholder: "Masukan deskripsi pertemuan",
 });
 
+var materialDescriptionQuill = new Quill("#materialDescriptionQuill", {
+    theme: "snow",
+    modules: { toolbar: "#materialToolbar" },
+    placeholder: "Masukan deskripsi materi",
+});
+
 const subSubjectMatterQuill = new Quill("#subSubjectMatterQuill", {
     theme: "snow",
     modules: { toolbar: "#toolbarsubSubjectMatter" },
@@ -18,7 +24,87 @@ const additionalNoteQuill = new Quill("#additionalNoteQuill", {
 
 handleQuill();
 
-$(function () {
+function handleQuill() {
+    meetingDescriptionQuill.root.innerHTML = defaultDescription;
+    $("#meetingDescription").val(defaultDescription);
+    subSubjectMatterQuill.root.innerHTML = defaultSubSubjectMatter;
+    $("#subSubjectMatter").val(defaultSubSubjectMatter);
+    additionalNoteQuill.root.innerHTML = defaultAdditionalNote;
+    $("#additionalNote").val(defaultAdditionalNote);
+
+    meetingDescriptionQuill.on("text-change", function () {
+        var value = meetingDescriptionQuill.root.innerHTML;
+        var descriptionText = meetingDescriptionQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#editMeetingForm [name='description']").val(value);
+    });
+    materialDescriptionQuill.on("text-change", function () {
+        var value = materialDescriptionQuill.root.innerHTML;
+        var descriptionText = materialDescriptionQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#addMaterialForm [name='description']").val(value);
+    });
+
+    subSubjectMatterQuill.on("text-change", function () {
+        var value = subSubjectMatterQuill.root.innerHTML;
+        var subSubjectMatterText = subSubjectMatterQuill.getText().trim();
+        if (subSubjectMatterText === "" || subSubjectMatterText === "\n") {
+            value = "";
+        }
+        $("#fillRealizationForm [name='sub_subject_matter']").val(value);
+    });
+
+    additionalNoteQuill.on("text-change", function () {
+        var value = additionalNoteQuill.root.innerHTML;
+        var additionalNoteText = additionalNoteQuill.getText().trim();
+        if (additionalNoteText === "" || additionalNoteText === "\n") {
+            value = "";
+        }
+        $("#fillRealizationForm [name='additional_note']").val(value);
+    });
+}
+
+$(document).ready(function () {
+    statuses.forEach(function (value) {
+        $(`.status-all-${value}`).on("click", function () {
+            $(`.status-input`).each(function () {
+                $(this)
+                    .find(`.status-value[value="${value}"]`)
+                    .prop("checked", true);
+            });
+        });
+    });
+
+    function checkStatusAll() {
+        let statuses = [];
+        $("#fill_attendance .status-value:checked").each(function () {
+            statuses.push($(this).val());
+        });
+        let statusIsSame =
+            statuses.length > 0 &&
+            statuses.every(function (s) {
+                return s === statuses[0];
+            });
+        if (statusIsSame) {
+            $(`[name='status-all'][value='${statuses[0]}']`).prop(
+                "checked",
+                true
+            );
+        } else {
+            $(`[name='status-all']:checked`).prop("checked", false);
+        }
+    }
+
+    checkStatusAll();
+
+    $("#fill_attendance .status-value").on("change", function (e) {
+        checkStatusAll();
+    });
+
     $("#editMeetingForm").on("submit", function (e) {
         e.preventDefault();
         const meeting_id = $(this).data("id");
@@ -91,6 +177,7 @@ $(function () {
             },
         });
     });
+
     $("#fillRealizationForm").on("submit", function (e) {
         e.preventDefault();
         const meeting_id = $(this).data("id");
@@ -217,41 +304,6 @@ $(function () {
         });
     });
 
-    statuses.forEach(function (value) {
-        $(`.status-all-${value}`).on("click", function () {
-            $(`.status-input`).each(function () {
-                $(this)
-                    .find(`.status-value[value="${value}"]`)
-                    .prop("checked", true);
-            });
-        });
-    });
-
-    function checkStatusAll() {
-        let statuses = [];
-        $("#fill_attendance .status-value:checked").each(function () {
-            statuses.push($(this).val());
-        });
-        let statusIsSame =
-            statuses.length > 0 &&
-            statuses.every(function (s) {
-                return s === statuses[0];
-            });
-        if (statusIsSame) {
-            $(`[name='status-all'][value='${statuses[0]}']`).prop(
-                "checked",
-                true
-            );
-        } else {
-            $(`[name='status-all']:checked`).prop("checked", false);
-        }
-    }
-
-    checkStatusAll();
-    $("#fill_attendance .status-value").on("change", function (e) {
-        checkStatusAll();
-    });
-
     $("#start_learning").on("click", function () {
         const title = $(this).data("title");
 
@@ -323,39 +375,3 @@ $(function () {
         });
     });
 });
-
-function handleQuill() {
-    meetingDescriptionQuill.root.innerHTML = defaultDescription;
-    $("#meetingDescription").val(defaultDescription);
-    subSubjectMatterQuill.root.innerHTML = defaultSubSubjectMatter;
-    $("#subSubjectMatter").val(defaultSubSubjectMatter);
-    additionalNoteQuill.root.innerHTML = defaultAdditionalNote;
-    $("#additionalNote").val(defaultAdditionalNote);
-
-    meetingDescriptionQuill.on("text-change", function () {
-        var value = meetingDescriptionQuill.root.innerHTML;
-        var descriptionText = meetingDescriptionQuill.getText().trim();
-        if (descriptionText === "" || descriptionText === "\n") {
-            value = "";
-        }
-        $("#meetingDescription").val(value);
-    });
-
-    subSubjectMatterQuill.on("text-change", function () {
-        var value = subSubjectMatterQuill.root.innerHTML;
-        var subSubjectMatterText = subSubjectMatterQuill.getText().trim();
-        if (subSubjectMatterText === "" || subSubjectMatterText === "\n") {
-            value = "";
-        }
-        $("#subSubjectMatter").val(value);
-    });
-
-    additionalNoteQuill.on("text-change", function () {
-        var value = additionalNoteQuill.root.innerHTML;
-        var additionalNoteText = additionalNoteQuill.getText().trim();
-        if (additionalNoteText === "" || additionalNoteText === "\n") {
-            value = "";
-        }
-        $("#additionalNote").val(value);
-    });
-}

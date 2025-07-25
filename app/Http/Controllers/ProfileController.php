@@ -42,4 +42,22 @@ class ProfileController extends Controller
             $user
         );
     }
+
+    public function getImage(Request $request, $username)
+    {
+        $loggedInUser = $request->user();
+
+        if ($loggedInUser->username !== $username) {
+            return abort(403, 'Akses ditolak');
+        }
+
+        $user = $loggedInUser;
+        if ($user && $user->image) {
+            $imagePath = $user->image;
+            if (Storage::exists($imagePath)) {
+                return response()->file(Storage::path($imagePath));
+            }
+        }
+        return abort(404, 'Image not found');
+    }
 }

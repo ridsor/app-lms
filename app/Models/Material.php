@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Meeting;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Mews\Purifier\Casts\CleanHtml;
 
 class Material extends Model
 {
@@ -17,6 +18,10 @@ class Material extends Model
         'description',
         'file_path',
         'file_type'
+    ];
+
+    protected $casts = [
+        'description' => CleanHtml::class . ':strip_nl,strip_nbsp',
     ];
 
     public function meeting(): BelongsTo

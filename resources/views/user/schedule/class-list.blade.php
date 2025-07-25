@@ -11,16 +11,16 @@
         </div>
       </div>
     </div>
-    <div class="container-fluid e-category">
+    <div class="e-category">
       <div class="row">
-        <div class="col-12">
-          <div class="card">
+        <div class="col-12 px-0">
+          <div class="card rounded-responsive">
             <div class="card-header card-no-border">
               <div class="header-top">
                 <h5>Filter</h5>
               </div>
             </div>
-            <div class="card-body pt-0">
+            <div class="card-body">
               <div class="row g-3">
                   @if ($majors->count() > 0)
                     <div class="col-md-3 col-xl">
@@ -58,12 +58,12 @@
             </div>
           </div>
         </div>
-        <div class="col-12">
-          <div class="card">
+        <div class="col-12 px-0">
+          <div class="card rounded-responsive">
             <div class="card-header card-no-border text-end">
               <div class="py-2"></div>
             </div>
-            <div class="card-body pt-0 px-0">
+            <div class="card-body p-0">
               <div class="list-product list-category">
                 <div class="recent-table table-responsive custom-scrollbar">
                   <table class="table table-bordered" id="schedule-table">

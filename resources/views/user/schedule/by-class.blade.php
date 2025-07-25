@@ -34,10 +34,10 @@
         </div>
       </div>
     </div>
-    <div class="container-fluid e-category">
+    <div class="e-category">
       <div class="row">
-        <div class="col-12">
-          <div class="card">
+        <div class="col-12 px-0">
+          <div class="card rounded-responsive">
             <div class="card-header card-no-border">
               <div class="header-top">
                 <h5>Filter</h5>
@@ -79,15 +79,15 @@
             </div>
           </div>
         </div>
-        <div class="col-12">
-          <div class="card">
+        <div class="col-12 px-0">
+          <div class="card rounded-responsive">
             <div class="card-header card-no-border text-end">
               <button class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal" data-bs-target="#addScheduleModal"><i
                   class="fa fa-plus pe-2"></i>Tambah Jadwal</button>
               <div class="row g-3 justify-content-end align-items-center" id="schedule-by-class-action-buttons">
                 <div class="col-auto">
                   <span>
-                    <span class="me-1 text-dark" id="selected-count">0</span> dipilih
+                    <span class="me-1" id="selected-count">0</span> dipilih
                   </span>
                 </div>
                 <div class="col-auto">

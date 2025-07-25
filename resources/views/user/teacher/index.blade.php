@@ -38,10 +38,10 @@
       </div>
     </div>
   </div><!-- Container-fluid starts-->
-  <div class="container-fluid e-category">
+  <div class="e-category">
     <div class="row">
       <div class="col-12">
-        <div class="card">
+        <div class="card rounded-responsive">
           <div class="card-header card-no-border">
             <div class="header-top">
               <h5>Akun Guru</h5>
@@ -61,7 +61,7 @@
         </div>
       </div>
       <div class="col-sm-12">
-        <div class="card">
+        <div class="card rounded-responsive">
           <div class="card-header card-no-border text-end">
             <div class="card-header-right-icon">
               <a class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal" data-bs-target="#addTeacherModal"><i
@@ -226,7 +226,7 @@
               <div class="row g-3 justify-content-end align-items-center" id="teacher-action-buttons">
                 <div class="col-auto">
                   <span>
-                    <span class="me-1 text-dark" id="selected-count">0</span> dipilih
+                    <span class="me-1" id="selected-count">0</span> dipilih
                   </span>
                 </div>
                 <div class="col-auto">
