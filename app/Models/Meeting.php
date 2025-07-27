@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Schedule;
 use App\Models\Material;
-use App\Models\Assignment;
 use App\Models\Exam;
 use App\Models\DiscussionForum;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -51,9 +50,9 @@ class Meeting extends Model
         return $this->hasMany(Material::class);
     }
 
-    public function assignments(): HasMany
+    public function tasks(): HasMany
     {
-        return $this->hasMany(Assignment::class);
+        return $this->hasMany(Task::class);
     }
 
     public function exams(): HasMany
@@ -74,6 +73,11 @@ class Meeting extends Model
     public function teaching_journal(): HasOne
     {
         return $this->hasOne(TeachingJournal::class);
+    }
+
+    public function meeting_texts(): HasMany
+    {
+        return $this->hasMany(MeetingText::class);
     }
 
     public function getDateAttribute()

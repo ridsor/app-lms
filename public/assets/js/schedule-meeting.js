@@ -5,12 +5,6 @@ var meetingDescriptionQuill = new Quill("#meetingDescriptionQuill", {
     placeholder: "Masukan deskripsi pertemuan",
 });
 
-var materialDescriptionQuill = new Quill("#materialDescriptionQuill", {
-    theme: "snow",
-    modules: { toolbar: "#materialToolbar" },
-    placeholder: "Masukan deskripsi materi",
-});
-
 const subSubjectMatterQuill = new Quill("#subSubjectMatterQuill", {
     theme: "snow",
     modules: { toolbar: "#toolbarsubSubjectMatter" },
@@ -22,9 +16,7 @@ const additionalNoteQuill = new Quill("#additionalNoteQuill", {
     placeholder: "Masukan catatan tambahan",
 });
 
-handleQuill();
-
-function handleQuill() {
+$(function () {
     meetingDescriptionQuill.root.innerHTML = defaultDescription;
     $("#meetingDescription").val(defaultDescription);
     subSubjectMatterQuill.root.innerHTML = defaultSubSubjectMatter;
@@ -39,14 +31,6 @@ function handleQuill() {
             value = "";
         }
         $("#editMeetingForm [name='description']").val(value);
-    });
-    materialDescriptionQuill.on("text-change", function () {
-        var value = materialDescriptionQuill.root.innerHTML;
-        var descriptionText = materialDescriptionQuill.getText().trim();
-        if (descriptionText === "" || descriptionText === "\n") {
-            value = "";
-        }
-        $("#addMaterialForm [name='description']").val(value);
     });
 
     subSubjectMatterQuill.on("text-change", function () {
@@ -66,7 +50,7 @@ function handleQuill() {
         }
         $("#fillRealizationForm [name='additional_note']").val(value);
     });
-}
+});
 
 $(document).ready(function () {
     statuses.forEach(function (value) {

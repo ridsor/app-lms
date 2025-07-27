@@ -21,6 +21,7 @@ Route::prefix('guru')->group(function () {
 Route::prefix('admin')->group(function () {
     require __DIR__ . '/web/admin/index.php';
 });
+
 require __DIR__ . '/auth.php';
 require __DIR__ . '/account.php';
 require __DIR__ . '/web/user/index.php';

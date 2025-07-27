@@ -57,8 +57,9 @@ class MeetingPolicy
     if ($user->can('meeting.edit')) {
       if ($user->hasRole('teacher')) {
         return $meeting->schedule->teacher_id == $user->teacher->id;
+      } else {
+        return true;
       }
-      return true;
     }
     return false;
   }

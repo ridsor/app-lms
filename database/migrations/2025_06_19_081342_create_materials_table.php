@@ -16,7 +16,9 @@ return new class extends Migration
             $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
             $table->string('title');
             $table->text('description');
-            $table->string('file_path', 255);
+            $table->string('file_name')->nullable();
+            $table->unsignedBigInteger('file_size')->nullable();
+            $table->string('file_path');
             $table->enum('file_type', ['eBook', 'Archive', 'Link']);
             $table->timestamps();
         });

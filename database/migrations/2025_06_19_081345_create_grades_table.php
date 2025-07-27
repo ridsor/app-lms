@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
             $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->json('quiz_scores')->nullable();
-            $table->json('assignment_scores')->nullable();
+            $table->json('task_scores')->nullable();
             $table->decimal('midterm_score', 5, 1)->nullable();
             $table->decimal('final_score', 5, 1)->nullable();
             $table->decimal('final_grade', 5, 1)->nullable();

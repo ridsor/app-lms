@@ -69,8 +69,8 @@
                             <div class="user-image">
                                 <div class="avatar">
                                     <div class="common-align">
-                                        <div><img id="output"
-                                                src="{{ auth()->user()->image ? route('profile.image.get', ['username' => auth()->user()->username]) : asset('assets/svg/user-placeholder.svg') }}"
+                                        <div class="bg-light"><img id="output" style="aspect-ratio: 1/1 !important; object-fit: cover; min-height: 120px;"
+                                                src="{{ auth()->user()->image ? asset('storage/' . auth()->user()->image) : asset('assets/svg/user-placeholder.svg') }}"
                                                 alt="Profile Image"><input type="file"
                                                 accept="image/png, image/jpg, image/jpeg" onchange="loadFile(event)">
                                             <div class="icon-wrapper" id="cancelButton"><i
@@ -226,8 +226,8 @@
                                                                 <div class="form-group mb-2">
                                                                     <label class="col-form-label">Kata Sandi Baru</label>
                                                                     <div class="form-input position-relative">
-                                                                        <input class="form-control password" type="password"
-                                                                            name="password">
+                                                                        <input class="form-control password"
+                                                                            type="password" name="password">
                                                                         <div class="show-hide-change-password"><span
                                                                                 class="show"></span></div>
                                                                     </div>

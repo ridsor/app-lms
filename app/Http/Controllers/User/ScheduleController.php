@@ -21,6 +21,7 @@ use App\Jobs\CreateScheduleMeetings;
 use App\Jobs\UpdateScheduleMeetings;
 use App\Models\Meeting;
 use App\Models\ScheduleTime;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ScheduleController extends Controller
@@ -49,7 +50,7 @@ class ScheduleController extends Controller
         'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
         'class.major' => fn($query) => $query->select('id', 'name'),
         'subject' => fn($query) => $query->select('id', 'name', 'code'),
-        'teacher' => fn($query) => $query->select('id', 'name', 'user_id')->with('user:id,image'),
+        'teacher' => fn($query) => $query->select('id', 'name', 'user_id')->with('user:id,image,username'),
         'schedule_times' => function ($query) {
           $query->orderByRaw(
             "FIELD(day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')"
@@ -265,22 +266,22 @@ class ScheduleController extends Controller
     }
   }
 
-  public function showBySchedule($id)
+  public function showBySchedule($code)
   {
     $schedule = Schedule::with([
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
       'class.major' => fn($query) => $query->select('id', 'name'),
       'class.students:class_id,user_id,name,nisn',
-      'class.students.user:id,image',
+      'class.students.user:id,image,username',
       'subject' => fn($query) => $query->select('id', 'name', 'code'),
       'teacher' => fn($query) => $query->select('id', 'name', 'user_id'),
-      'teacher.user:id,image',
+      'teacher.user:id,image,username',
       'room' => fn($query) => $query->select('id', 'name'),
       'period' => fn($query) => $query->select('id', 'academic_year', 'semester'),
       'schedule_times',
       'meetings' => fn($query) => $query->select('id', 'schedule_id', 'schedule_time_id', 'started_at', 'type'),
       'meetings.schedule_time:id,meeting_method,start_time,end_time'
-    ])->findOrFail($id);
+    ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
 
     $this->authorize('view', $schedule);
 
@@ -302,6 +303,10 @@ class ScheduleController extends Controller
       'schedule.meetings.schedule_time:id,meeting_method,start_time,end_time',
       'teaching_journal',
       'attendances:id,meeting_id,user_id,status',
+      'materials',
+      'meeting_texts',
+      'tasks',
+      'exams'
     ])->findOrFail($meeting_id);
 
     $this->authorize('viewPossession', $meeting);
@@ -339,11 +344,16 @@ class ScheduleController extends Controller
       ['value' => 'Final', 'label' => 'UAS']
     ];
     $materialType = [
-      ['value' => 'eBook', 'label' => 'eBook'], ['value' => 'Archive', 'label' => 'Arsip'], ['value' => 'Link', 'label' => 'Link']
+      ['value' => 'eBook', 'label' => 'eBook'],
+      ['value' => 'Archive', 'label' => 'Arsip'],
+      ['value' => 'Link', 'label' => 'Link']
     ];
 
-    $isStartedAt = $meeting->schedule_time->start_time <= now() && $meeting->schedule_time->end_time >= now() && (!$meeting->started_at);
-    $isRealization = $meeting->started_at && $meeting->schedule_time->start_time <= now() && $meeting->schedule_time->end_time->addHours(2) >= now();
+    $today = Carbon::now();
+    $scheduleTime = $meeting->schedule_time;
+
+    $isStartedAt = !$meeting->started_at && $today->format('l') == $scheduleTime->day && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time;
+    $isRealization = $meeting->started_at && $today->format('l') == $scheduleTime->day && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time->addHours(2);
 
     $attendancePercentage = 0.0;
     $totalStudents = $meeting->schedule->class->students->count();
@@ -353,7 +363,27 @@ class ScheduleController extends Controller
       $attendancePercentage = round(($totalAttendances / $totalStudents) * 100, 1);
     }
 
-    return view('user.schedule.meeting.show', compact('meeting', 'schedule', 'meetingTypes', 'rooms', 'meetingMethods', 'attendances', 'attendanceValue', 'isStartedAt', 'isRealization', 'attendancePercentage', 'materialType'));
+    $contents = collect()
+      ->merge($meeting->materials->map(function ($item) {
+        $item->data_type = 'material';
+        return $item;
+      }))
+      ->merge($meeting->meeting_texts->map(function ($item) {
+        $item->data_type = 'meeting_text';
+        return $item;
+      }))
+      ->merge($meeting->tasks->map(function ($item) {
+        $item->data_type = 'task';
+        return $item;
+      }))
+      ->merge($meeting->exams->map(function ($item) {
+        $item->data_type = 'exam';
+        return $item;
+      }))
+      ->sortByDesc('created_at')
+      ->values();
+
+    return view('user.schedule.meeting.show', compact('meeting', 'schedule', 'meetingTypes', 'rooms', 'meetingMethods', 'attendances', 'attendanceValue', 'isStartedAt', 'isRealization', 'attendancePercentage', 'materialType', 'contents'));
   }
 
   public function show($id)

@@ -368,7 +368,7 @@ $(function () {
                     $("#editClassModal").modal("show");
                 }
             },
-            error: function () {
+            error: function (xhr) {
                 const toast = new bootstrap.Toast($("#toast-error"));
                 $("#toast-error #toast-text").text(xhr.responseJSON.message);
                 toast.show();

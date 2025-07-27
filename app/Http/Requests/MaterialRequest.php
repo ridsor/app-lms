@@ -25,14 +25,19 @@ class MaterialRequest extends FormRequest
             'title' => 'required|string',
             'description' => 'required|string',
             'file_type' => 'required|in:eBook,Archive,Link',
+            'deletedFile' => 'nullable|boolean'
         ];
 
         if ($this->file_type === 'Link') {
             $rules['material_link'] = 'required|url';
         } else if ($this->file_type === 'Archive') {
-            $rules['file_path'] = 'required|file|mimes:zip,rar|max:5120';
+            $rules['file_path'] = $this->isMethod('post') || $this->deletedFile
+                ? 'required|file|mimes:zip,rar|max:5120'
+                : 'nullable|file|mimes:zip,rar|max:5120';
         } else if ($this->file_type === 'eBook') {
-            $rules['file_path'] = 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120';
+            $rules['file_path'] = $this->isMethod('post') || $this->deletedFile
+                ? 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120'
+                : 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120';
         }
 
         return $rules;

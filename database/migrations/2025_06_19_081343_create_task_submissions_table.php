@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assignment_submissions', function (Blueprint $table) {
+        Schema::create('task_submissions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('assignment_id')->constrained('assignments')->onDelete('cascade');
+            $table->foreignId('task_id')->constrained('tasks')->onDelete('cascade');
             $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
-            $table->string('assignment_file', 255)->nullable();
+            $table->string('file', 255)->nullable();
             $table->string('link', 255)->nullable();
             $table->dateTime('submitted_at')->useCurrent();
             $table->boolean('is_late')->default(false);
             $table->integer('score')->nullable();
             $table->text('feedback')->nullable();
             $table->foreignId('graded_by')->nullable()->constrained('teachers')->onDelete('set null');
-            $table->unique(['assignment_id', 'student_id'], 'unique_submission');
+            $table->unique(['task_id', 'student_id'], 'unique_submission');
             $table->timestamps();
         });
     }
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('assignment_submissions');
+        Schema::dropIfExists('task_submissions');
     }
 };

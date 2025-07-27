@@ -13,6 +13,7 @@ use App\Http\Controllers\User\SubjectController;
 use App\Http\Controllers\User\ScheduleController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\MeetingController;
+use App\Http\Controllers\User\MeetingTextController;
 use App\Http\Controllers\User\TeachingJournalController;
 use Illuminate\Support\Facades\Route;
 
@@ -57,8 +58,8 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::delete('jadwal/hapus', [ScheduleController::class, 'bulkDestroy'])->name('user.schedule.bulkDestroy');
     Route::get('/jadwal/kelas', [ScheduleController::class, 'classList'])->name('user.schedule.classlist');
     Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
-    Route::get('/jadwal/{id}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
-    Route::put('/jadwal/{id}/{schedule_time_id}', [ScheduleController::class, 'update'])->name('user.schedule.update');
+    Route::get('/jadwal/{code}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
+    Route::put('/jadwal/{code}/{schedule_time_id}', [ScheduleController::class, 'update'])->name('user.schedule.update');
     Route::delete('/jadwal/{schedule_time_id}', [ScheduleController::class, 'destroy'])->name('user.schedule.destroy');
     Route::get('/jadwal/{id}/{schedule_time_id}/edit', [ScheduleController::class, 'edit'])->name('user.schedule.edit');
     Route::get('/jadwal/{code}/pertemuan/{meeting_id}', [ScheduleController::class, 'showByMeeting'])->name('user.schedule.showByMeeting');
@@ -68,7 +69,19 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::post('/jadwal/pertemuan/{meeting_id}/jurnal', [TeachingJournalController::class, 'store'])->name('user.teaching_journal.store');
     Route::patch('/jadwal/pertemuan/{meeting_id}/mulai-belajar', [MeetingController::class, 'startLearning'])->name('user.schedule.startLearning');
     Route::patch('/jadwal/pertemuan/{meeting_id}/kehadiran', [AttendanceController::class, 'updateByMeeting'])->name('user.attendance.updateByMeeting');
+
     Route::post('/jadwal/pertemuan/{meeting_id}/materi', [MaterialController::class, 'store'])->name('user.material.store');
+    Route::get('/jadwal/pertemuan/materi/{materi_id}', [MaterialController::class, 'index'])->name('user.material.index');
+    Route::put('/jadwal/pertemuan/materi/{materi_id}', [MaterialController::class, 'update'])->name('user.material.update');
+    Route::delete('/jadwal/pertemuan/materi/{materi_id}', [MaterialController::class, 'destroy'])->name('user.material.destroy');
+
+    Route::post('/jadwal/pertemuan/{meeting_id}/text', [MeetingTextController::class, 'store'])->name('user.meeting_text.store');
+    Route::get('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'index'])->name('user.meeting_text.index');
+    Route::put('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'update'])->name('user.meeting_text.update');
+    Route::delete('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'destroy'])->name('user.meeting_text.destroy');
+
+    Route::get('/materi/{materi_id}/file', [MaterialController::class, 'getFile'])->name('user.material.file.get');
+    Route::get('/materi/{materi_id}/file/download', [MaterialController::class, 'downloadFile'])->name('user.material.file.download');
 
     Route::get('/kehadiran/{schedule_id}/pertemuan/{meeting_id}', [AttendanceController::class, 'edit'])->name('user.attendance.edit');
     Route::get('/kehadiran/pertemuan/{meeting_id}/{schedule_time_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');

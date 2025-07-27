@@ -15,13 +15,20 @@ function getQueryParams() {
 
 function getDayName(day) {
     const days = {
-        'Monday': 'Senin',
-        'Tuesday': 'Selasa',
-        'Wednesday': 'Rabu',
-        'Thursday': 'Kamis',
-        'Friday': 'Jumat',
-        'Saturday': 'Sabtu',
-        'Sunday': 'Minggu'
+        Monday: "Senin",
+        Tuesday: "Selasa",
+        Wednesday: "Rabu",
+        Thursday: "Kamis",
+        Friday: "Jumat",
+        Saturday: "Sabtu",
+        Sunday: "Minggu",
     };
     return days[day] || day;
+}
+
+function handleCopyText(text) {
+    navigator.clipboard.writeText(text);
+    const toast = new bootstrap.Toast($("#toast-success"));
+    $("#toast-success #toast-text").text("Link berhasil disalin!");
+    toast.show();
 }

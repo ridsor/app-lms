@@ -9,9 +9,13 @@ use App\Policies\TeacherPolicy;
 use App\Models\Schedule;
 use App\Policies\SchedulePolicy;
 use App\Models\Attendance;
+use App\Models\Material;
 use App\Models\Meeting;
+use App\Models\MeetingText;
 use App\Policies\AttendancePolicy;
+use App\Policies\MaterialPolicy;
 use App\Policies\MeetingPolicy;
+use App\Policies\MeetingTextPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -27,6 +31,8 @@ class AuthServiceProvider extends ServiceProvider
     Schedule::class => SchedulePolicy::class,
     Attendance::class => AttendancePolicy::class,
     Meeting::class => MeetingPolicy::class,
+    Material::class => MaterialPolicy::class,
+    MeetingText::class => MeetingTextPolicy::class,
   ];
 
   /**
