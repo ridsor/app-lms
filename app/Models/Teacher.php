@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Schedule;
-use App\Models\AssignmentSubmission;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -44,9 +43,9 @@ class Teacher extends Model
         return $this->hasMany(Schedule::class);
     }
 
-    public function assignmentSubmissions(): HasMany
+    public function task_submissions(): HasMany
     {
-        return $this->hasMany(AssignmentSubmission::class, 'graded_by');
+        return $this->hasMany(TaskSubmission::class, 'graded_by');
     }
 
     public function scopeFilter($query, array $filters)

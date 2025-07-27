@@ -37,6 +37,10 @@ class RolePermissionSeeder extends Seeder
             'teaching_journal.view',
             'teaching_journal.edit',
             'teaching_journal.create',
+            'material.view',
+            'material.*',
+            'meeting_text.view',
+            'meeting_text.*',
         ];
 
         foreach ($permissions as $permission) {
@@ -77,6 +81,8 @@ class RolePermissionSeeder extends Seeder
             'teaching_journal.view',
             'teaching_journal.create',
             'teaching_journal.edit',
+            'material.*',
+            'meeting_text.*',
         ]);
 
         // Role Parent - No student management access
@@ -85,6 +91,8 @@ class RolePermissionSeeder extends Seeder
             'attendance.view',
             'schedule.view',
             'meeting.view',
+            'material.view',
+            'meeting_text.view',
         ]);
 
         // Role Student - No student management access
@@ -93,6 +101,8 @@ class RolePermissionSeeder extends Seeder
             'attendance.view',
             'schedule.view',
             'meeting.view',
+            'material.view',
+            'meeting_text.view',
         ]);
 
         $role = User::create([

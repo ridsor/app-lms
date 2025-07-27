@@ -64,9 +64,9 @@ class Student extends Model
         return $this->hasMany(ExamResult::class);
     }
 
-    public function assignment_submissions(): HasMany
+    public function task_submissions(): HasMany
     {
-        return $this->hasMany(AssignmentSubmission::class);
+        return $this->hasMany(TaskSubmission::class);
     }
 
     public function attendances(): HasMany

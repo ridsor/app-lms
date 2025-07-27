@@ -17,7 +17,9 @@ class Material extends Model
         'title',
         'description',
         'file_path',
-        'file_type'
+        'file_type',
+        'file_name',
+        'file_size',
     ];
 
     protected $casts = [

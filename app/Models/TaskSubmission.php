@@ -3,17 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Assignment;
 use App\Models\Student;
 use App\Models\Teacher;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class AssignmentSubmission extends Model
+class TaskSubmission extends Model
 {
     protected $fillable = [
-        'assignment_id',
+        'task_id',
         'student_id',
-        'assignment_file',
+        'file',
         'link',
         'submitted_at',
         'is_late',
@@ -22,9 +21,9 @@ class AssignmentSubmission extends Model
         'graded_by'
     ];
 
-    public function assignment(): BelongsTo
+    public function task(): BelongsTo
     {
-        return $this->belongsTo(Assignment::class);
+        return $this->belongsTo(Task::class);
     }
 
     public function student(): BelongsTo

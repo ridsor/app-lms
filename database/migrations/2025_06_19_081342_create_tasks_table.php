@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('assignments', function (Blueprint $table) {
+        Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->string('title', 200);
             $table->text('description')->nullable();
             $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
-            $table->enum('assignment_type', ['individual', 'group'])->default('individual');
+            $table->enum('type', ['individual', 'group'])->default('individual');
             $table->string('file_path', 255)->nullable();
             $table->dateTime('start_date');
             $table->dateTime('deadline_date');
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('assignments');
+        Schema::dropIfExists('tasks');
     }
 };

@@ -13,7 +13,7 @@ class Grade extends Model
         'student_id',
         'schedule_id',
         'quiz_scores',
-        'assignment_scores',
+        'task_scores',
         'midterm_score',
         'final_score',
         'final_grade',
