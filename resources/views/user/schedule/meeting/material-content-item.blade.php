@@ -78,7 +78,6 @@
 
                             // $fileUrl =
                             //     'https://pmb.uii.ac.id/wp-content/uploads/2020/04/Panduan-Merubah-Dokumen-ke-Format-PDF-Secara-Online.pdf';
-
                         @endphp
                         <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true" width="100%"
                             height="500px"></iframe>
