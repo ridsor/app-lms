@@ -1,12 +1,12 @@
 var addMaterialDescriptionQuill = new Quill("#addMaterialDescriptionQuill", {
     theme: "snow",
     modules: { toolbar: "#addMaterialMaterialToolbar" },
-    placeholder: "Masukan deskripsi materi",
+    placeholder: "Tulis deskripsi",
 });
 var editMaterialDescriptionQuill = new Quill("#editMaterialDescriptionQuill", {
     theme: "snow",
     modules: { toolbar: "#editMaterialMaterialToolbar" },
-    placeholder: "Masukan deskripsi materi",
+    placeholder: "Tulis deskripsi",
 });
 
 function handleChangeFileType(value, file) {
@@ -245,31 +245,12 @@ function handleEditMaterial(e, id) {
                     $dropArea.hide();
                     const $preview_file = $file_path.next();
 
-                    $preview_file.html(
-                        `
-                            <div class="d-flex align-items-center gap-1 justify-content-between file border w-100 rounded-2 p-3 mb-2 file-preview-item">
-                                <div class="d-flex align-items-center">
-                                    <div  style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;margin-right:5px;">
-                                        <i class="${getFileIcon(
-                                            res.data.file_name
-                                        )}" style="color:#1976d2;font-size:18px;"></i>
-                                    </div>
-                                    <div>
-                                        <div class="fw-bold">${
-                                            res.data.file_name
-                                        }</div>
-                                        <div style="font-size:12px;color:#888;">${
-                                            (
-                                                res.data.file_size /
-                                                (1024 * 1024)
-                                            ).toFixed(2) + "MB"
-                                        }</div>
-                                    </div>
-                                </div>
-                                <button type="button" class="btn btn-link text-danger p-0 btn-remove-file" style="width:32px;height:32px;" title="Hapus"><i class="fa fa-trash"></i></button>
-                            </div>
-                            `
+                    const elementFile = getElementFile(
+                        res.data.file_name,
+                        (res.data.file_size / (1024 * 1024)).toFixed(2) + "mb",
+                        getFileIcon(res.data.file_name)
                     );
+                    $preview_file.html(elementFile);
                     $preview_file
                         .find(".btn-remove-file")
                         .on("click", function () {
@@ -277,7 +258,7 @@ function handleEditMaterial(e, id) {
                                 "1"
                             );
 
-                            $(this).parent().remove();
+                            $(this).parent().parent().remove();
                             if (
                                 $preview_file.find(".file-preview-item")
                                     .length === 0

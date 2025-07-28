@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select/bootstrap-select.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
     <style>
         .view_material_file_path .Archive,
         .view_material_file_path .Link {
@@ -75,7 +76,8 @@
                             @foreach ($schedule->schedule_times as $schedule_time)
                                 <div class="d-flex gap-2 text-white">
                                     <div class="d-flex align-items-center">
-                                        <i class="fa-solid fa-calendar"></i>
+                                        <span class="icon"><i data-feather="calendar"
+                                                style="width:18px; height: 18px"></i></span>
                                         <span class="mb-0 ms-2">{{ Helper::getDayName($schedule_time->day) }}</span>
                                     </div>
                                     <div>&middot;</div>
@@ -184,112 +186,123 @@
                                                             'content' => $content,
                                                         ]
                                                     )
-                                                @endswitch
-                                            @endforeach
-                                        @else
-                                            {{-- empty data --}}
-                                            <div class="d-flex justify-content-center mb-3 w-100">
-                                                <div class="px-4 py-5 d-grid" style="justify-items: center">
-                                                    <img style="width: 120px; height: 120px"
-                                                        src="{{ asset('assets/images/data-empty.png') }}" />
-                                                    <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
-                                                    <p class="mb-0 text-center">Tidak ada konten yang tersedia pada pertemuan
-                                                        ini.</p>
-                                                </div>
+                                                @break
+
+                                                @case('task')
+                                                    @include('user.schedule.meeting.task-content-item', [
+                                                        'content' => $content,
+                                                    ])
+                                                @break
+
+                                                @default
+                                            @endswitch
+                                        @endforeach
+                                    @else
+                                        {{-- empty data --}}
+                                        <div class="d-flex justify-content-center mb-3 w-100">
+                                            <div class="px-4 py-5 d-grid" style="justify-items: center">
+                                                <img style="width: 120px; height: 120px"
+                                                    src="{{ asset('assets/images/data-empty.png') }}" />
+                                                <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
+                                                <p class="mb-0 text-center">Tidak ada konten yang tersedia pada pertemuan
+                                                    ini.</p>
                                             </div>
-                                        @endif
-                                    </div>
-                                    @role('teacher')
-                                        <div style="align-self: end">
-                                            <div class="d-flex justify-content-end">
-                                                <button class="btn d-flex align-items-center border justify-content-center gap-2"
-                                                    type="button" data-bs-toggle="collapse" data-bs-target="#addContent"
-                                                    aria-expanded="false" aria-controls="addContent">
-                                                    <i class="fa-solid fa-plus"></i>
-                                                    Tambah Konten
-                                                </button>
-                                            </div>
-                                            <div class="collapse" id="addContent">
-                                                <div class="p-20">
+                                        </div>
+                                    @endif
+                                </div>
+                                @role('teacher')
+                                    <div style="align-self: end">
+                                        <div class="d-flex justify-content-end">
+                                            <button class="btn d-flex align-items-center border justify-content-center gap-2"
+                                                type="button" data-bs-toggle="collapse" data-bs-target="#addContent"
+                                                aria-expanded="false" aria-controls="addContent">
+                                                <i class="fa-solid fa-plus"></i>
+                                                Tambah Konten
+                                            </button>
+                                        </div>
+                                        <div class="collapse" id="addContent">
+                                            <div class="p-20">
+                                                <div
+                                                    class="d-flex gap-4 justify-content-evenly flex-wrap flex-column flex-sm-row">
                                                     <div
-                                                        class="d-flex gap-4 justify-content-evenly flex-wrap flex-column flex-sm-row">
-                                                        <div
-                                                            class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
-                                                            <button class="btn border border-secondary-sublte"
-                                                                data-bs-toggle="modal" data-bs-target="#addMeetingTextModal"
-                                                                style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
-                                                                <div class="p-1">
-                                                                    <img style="width:30px; height:30px" class="theme-aware-icon"
-                                                                        src="{{ asset('assets/icons/text.png') }}" />
-                                                                </div>
-                                                            </button>
-                                                            <p class="mb-0 text-center">Text</p>
-                                                        </div>
-                                                        <div
-                                                            class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
-                                                            <button class="btn border border-secondary-sublte"
-                                                                data-bs-toggle="modal" data-bs-target="#addMaterialModal"
-                                                                style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
-                                                                <div class="p-1">
-                                                                    <img style="width:30px; height:30px" class="theme-aware-icon"
-                                                                        src="{{ asset('assets/icons/agenda.png') }}" />
-                                                                </div>
-                                                            </button>
-                                                            <p class="mb-0 text-center">Materi</p>
-                                                        </div>
-                                                        <div
-                                                            class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
-                                                            <button class="btn border border-secondary-sublte"
-                                                                data-bs-toggle="modal" data-bs-target="#addMeetingTextModal"
-                                                                style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
-                                                                <div class="p-1">
-                                                                    <img style="width:30px; height:30px" class="theme-aware-icon"
-                                                                        src="{{ asset('assets/icons/task.png') }}" />
-                                                                </div>
-                                                            </button>
-                                                            <p class="mb-0 text-center">Tugas</p>
-                                                        </div>
-                                                        <div
-                                                            class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
-                                                            <button class="btn border border-secondary-sublte"
-                                                                data-bs-toggle="modal" data-bs-target="#addMeetingTextModal"
-                                                                style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
-                                                                <div class="p-1">
-                                                                    <img style="width:30px; height:30px" class="theme-aware-icon"
-                                                                        src="{{ asset('assets/icons/exam.png') }}" />
-                                                                </div>
-                                                            </button>
-                                                            <p class="mb-0 text-center">Ujian</p>
-                                                        </div>
+                                                        class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
+                                                        <button class="btn border border-secondary-sublte"
+                                                            data-bs-toggle="modal" data-bs-target="#addMeetingTextModal"
+                                                            style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
+                                                            <div class="p-1">
+                                                                <img style="width:30px; height:30px" class="theme-aware-icon"
+                                                                    src="{{ asset('assets/icons/text.png') }}" />
+                                                            </div>
+                                                        </button>
+                                                        <p class="mb-0 text-center">Text</p>
+                                                    </div>
+                                                    <div
+                                                        class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
+                                                        <button class="btn border border-secondary-sublte"
+                                                            data-bs-toggle="modal" data-bs-target="#addMaterialModal"
+                                                            style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
+                                                            <div class="p-1">
+                                                                <img style="width:30px; height:30px" class="theme-aware-icon"
+                                                                    src="{{ asset('assets/icons/agenda.png') }}" />
+                                                            </div>
+                                                        </button>
+                                                        <p class="mb-0 text-center">Materi</p>
+                                                    </div>
+                                                    <div
+                                                        class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
+                                                        <button class="btn border border-secondary-sublte"
+                                                            data-bs-toggle="modal" data-bs-target="#addTaskModal"
+                                                            style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
+                                                            <div class="p-1">
+                                                                <img style="width:30px; height:30px" class="theme-aware-icon"
+                                                                    src="{{ asset('assets/icons/task.png') }}" />
+                                                            </div>
+                                                        </button>
+                                                        <p class="mb-0 text-center">Tugas</p>
+                                                    </div>
+                                                    <div
+                                                        class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
+                                                        <button class="btn border border-secondary-sublte"
+                                                            data-bs-toggle="modal" data-bs-target="#addExamModal"
+                                                            style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
+                                                            <div class="p-1">
+                                                                <img style="width:30px; height:30px" class="theme-aware-icon"
+                                                                    src="{{ asset('assets/icons/exam.png') }}" />
+                                                            </div>
+                                                        </button>
+                                                        <p class="mb-0 text-center">Ujian</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    @endrole
-                                </div>
+                                    </div>
+                                @endrole
                             </div>
                         </div>
                     </div>
-                    @include('user.schedule.meeting.modal')
                 </div>
+                @include('user.schedule.meeting.modal')
             </div>
         </div>
-    @endsection
+    </div>
+@endsection
 
-    @section('scripts')
-        <script>
-            const statuses = @json($attendanceValue);
-            const defaultDescription = `{!! addslashes($meeting->description) !!}`;
-            const defaultSubSubjectMatter = `{!! addslashes($meeting->teaching_journal?->sub_subject_matter) !!}`;
-            const defaultAdditionalNote = `{!! addslashes($meeting->teaching_journal?->additional_note) !!}`;
-        </script>
-        <script src="{{ asset('assets/js/select/bootstrap-select.min.js') }}"></script>
-        <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
-        <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
-        <script src="{{ asset('assets/js/tooltip-init.js') }}"></script>
-        <script src={{ asset('assets/js/schedule-meeting.js') }}></script>
-        <script src={{ asset('assets/js/schedule-meeting-material.js') }}></script>
-        <script src={{ asset('assets/js/schedule-meeting-text.js') }}></script>
-        <script src="{{ asset('assets/js/custom-file-upload.js') }}"></script>
-        <script src="{{ asset('assets/js/sticky.js') }}"></script>
-    @endsection
+@section('scripts')
+    <script>
+        const statuses = @json($attendanceValue);
+        const defaultDescription = `{!! addslashes($meeting->description) !!}`;
+        const defaultSubSubjectMatter = `{!! addslashes($meeting->teaching_journal?->sub_subject_matter) !!}`;
+        const defaultAdditionalNote = `{!! addslashes($meeting->teaching_journal?->additional_note) !!}`;
+    </script>
+    <script src="{{ asset('assets/js/select/bootstrap-select.min.js') }}"></script>
+    <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
+    <script src="{{ asset('assets/js/tooltip-init.js') }}"></script>
+    <script src={{ asset('assets/js/schedule-meeting.js') }}></script>
+    <script src={{ asset('assets/js/schedule-meeting-material.js') }}></script>
+    <script src={{ asset('assets/js/schedule-meeting-task.js') }}></script>
+    <script src={{ asset('assets/js/schedule-meeting-text.js') }}></script>
+    <script src="{{ asset('assets/js/custom-file-upload.js') }}"></script>
+    <script src="{{ asset('assets/js/sticky.js') }}"></script>
+    <script src="{{ asset('assets/js/flat-pickr/flatpickr.js') }}"></script>
+@endsection

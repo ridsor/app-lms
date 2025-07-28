@@ -128,4 +128,13 @@ class Helper
             default => $type
         };
     }
+
+    public static function getTaskTypeLabel($type)
+    {
+        return match ($type) {
+            'individual' => 'Individu',
+            'group' => 'Kelompok',
+            default => $type
+        };
+    }
 }

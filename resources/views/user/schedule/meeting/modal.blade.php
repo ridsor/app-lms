@@ -60,7 +60,8 @@
                                 <div class="d-flex flex-column gap-1">
                                     <div class="d-flex gap-2 c-o-light f-w-600 flex-wrap text-nowrap">
                                         <div class="d-flex align-items-center">
-                                            <i class="fa-solid fa-calendar"></i>
+                                            <span><i data-feather="calendar"
+                                                    style="width:18px; height: 18px"></i></span>
                                             <span class="mb-0 ms-2"
                                                 id="date">{{ Helper::getDayName($schedule_time->day) }},
                                             </span>
@@ -83,9 +84,8 @@
                             data-code="{{ $schedule->subject->code }}" data-id='{{ $meeting->id }}'>
                             <div class="col-12">
                                 <label class="form-label" for="meetingTitle">Judul</label>
-                                <input class="form-control" id="meetingTitle" type="text"
-                                    placeholder="Masukan judul pertemuan" name="title" value='{{ $meeting->title }}'
-                                    value="{{ $meeting->title }}">
+                                <input class="form-control" id="meetingTitle" type="text" placeholder="Tulis judul"
+                                    name="title" value='{{ $meeting->title }}' value="{{ $meeting->title }}">
                                 <div class="invalid-feedback">
                                 </div>
                             </div>
@@ -144,7 +144,7 @@
 </div>
 
 <div class="modal fade" id="fillRealizationModal" tabindex="-1" aria-labelledby="fillRealizationModal"
-    data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content category-popup">
             <div class="modal-header">
@@ -183,7 +183,8 @@
                                 <label class="form-label">Tanggal</label>
                                 <div class="c-o-light f-w-600">
                                     <div class="d-flex align-items-center">
-                                        <i class="fa-solid fa-calendar"></i>
+                                        <span class="icon"><i data-feather="calendar"
+                                                style="width:18px; height: 18px"></i></span>
                                         <span class="mb-0 ms-2" id="date">{{ $meeting?->date ?? '-' }}</span>
                                     </div>
                                 </div>
@@ -291,22 +292,21 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content category-popup">
             <div class="modal-header">
-                <h5 class="modal-title">Materi</h5>
+                <h5 class="modal-title">Buat Materi</h5>
                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0 custom-input">
                 <div class="text-start">
                     <div class="p-20">
                         <form class="material-form needs-validation row g-3" method="POST" novalidate=""
-                            id="addMaterialForm" data-meeting-id="{{ $meeting->id }}"
-                            data-id='{{ $meeting->id }}'>
+                            id="addMaterialForm" data-id='{{ $meeting->id }}'>
                             <div class="col-12 col-md-6">
                                 <div class="row g-3">
                                     <div class="col-12">
                                         <label class="form-label" for="addMaterialTitle">Judul<span
                                                 class="txt-danger">*</span></label>
                                         <input class="form-control" id="addMaterialTitle" type="text"
-                                            placeholder="Masukan judul pertemuan" name="title">
+                                            placeholder="Tulis judul" name="title">
                                         <div class="invalid-feedback">
                                         </div>
                                     </div>
@@ -399,15 +399,14 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content category-popup">
             <div class="modal-header">
-                <h5 class="modal-title">Materi</h5>
+                <h5 class="modal-title">Edit Materi</h5>
                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0 custom-input">
                 <div class="text-start">
                     <div class="p-20">
                         <form class="material-form needs-validation row g-3" method="POST" novalidate=""
-                            id="editMaterialForm" data-meeting-id="{{ $meeting->id }}"
-                            data-id='{{ $meeting->id }}'>
+                            id="editMaterialForm" data-id='{{ $meeting->id }}'>
                             <input type="hidden" name="deletedFile" value="0">
                             <div class="col-12 col-md-6">
                                 <div class="row g-3">
@@ -415,7 +414,7 @@
                                         <label class="form-label" for="editMaterialTitle">Judul<span
                                                 class="txt-danger">*</span></label>
                                         <input class="form-control" id="editMaterialTitle" type="text"
-                                            placeholder="Masukan judul pertemuan" name="title">
+                                            placeholder="Tulis judul" name="title">
                                         <div class="invalid-feedback">
                                         </div>
                                     </div>
@@ -503,12 +502,277 @@
     </div>
 </div>
 
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-labelledby="addTaskModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content category-popup">
+            <div class="modal-header">
+                <h5 class="modal-title">Buat Tugas</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 custom-input">
+                <div class="text-start">
+                    <div class="p-20">
+                        <form class="material-form needs-validation row g-3" method="POST" novalidate=""
+                            id="addTaskForm" data-id='{{ $meeting->id }}'>
+                            <div class="col-12 col-md-6">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label" for="addMaterialTitle">Judul<span
+                                                class="txt-danger">*</span></label>
+                                        <input class="form-control" id="addMaterialTitle" type="text"
+                                            placeholder="Tulis judul" name="title">
+                                        <div class="invalid-feedback">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="addTaskType">Jenis Tugas<span
+                                                class="txt-danger">*</span></label>
+                                        <select class="form-select" id="addTaskType" name="type">
+                                            <option value="">Jenis Tugas</option>
+                                            @foreach ($taskType as $item)
+                                                <option value="{{ $item['value'] }}">
+                                                    {{ $item['label'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex flex-column flatpicker-input">
+                                            <label class="form-label" for="startDate">Waktu Mulai<span
+                                                    class="txt-danger">*</span></label>
+                                            <input class="form-control" id="addTaskStartTime" type="date"
+                                                placeholder="Pilih waktu mulai" name="start_time" data-language="id">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex flex-column flatpicker-input">
+                                            <label class="form-label" for="endDate">Waktu Selesai<span
+                                                    class="txt-danger">*</span></label>
+                                            <input class="form-control flatpicker" autocomplete="off"
+                                                id="addTaskEndTime" type="date" placeholder="Pilih waktu selesai"
+                                                name="end_time" data-language="id">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="addAllowLateSubmission">Pengiriman
+                                            Terlambat</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input flatpicker" id="addAllowLateSubmission"
+                                                name="allow_late_submission" type="checkbox" role="switch">
+                                        </div>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="col-12 lateSubmission" style="display: none;">
+                                        <div class="d-flex flex-column flatpicker-input">
+                                            <label class="form-label" for="endDate">Batas Waktu Terlambat</label>
+                                            <input class="form-control flatpicker" autocomplete="off"
+                                                id="addLateSubmissionTime" type="date"
+                                                placeholder="Pilih batas waktu terlambat" name="late_submission_time"
+                                                data-language="id">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="taskFile">
+                                            <label class="form-label">File</label>
+                                            <div class="info text-danger mb-1" style="font-size: 12px;">
+                                                Ukuran maksimal file 5mb
+                                            </div>
+                                            <div class="custom-file-upload w-100 border rounded-2 px-3 py-3">
+                                                <label for="addTaskFile" class="d-flex align-items-center mb-0 w-100"
+                                                    style="cursor:pointer;">
+                                                    <span
+                                                        style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; background:#e3f0ff; border-radius:6px; margin-right:12px;">
+                                                        <i class="fa fa-upload text-primary fs-5"></i>
+                                                    </span>
+                                                    <span style="color:#b0b0b0; font-weight:500;">Unggah File</span>
+                                                </label>
+                                            </div>
+                                            <input type="file" class="form-control file_path" id="addTaskFile"
+                                                name="file_path" hidden>
+                                            <div id="file-preview" class="d-flex flex-column gap-1"></div>
+                                        </div>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="addTaskDescription">Deskripsi<span
+                                                class="txt-danger"></span></label>
+                                        <div class="toolbar-box">
+                                            <div id="addTaskToolbar">
+                                                <button class="ql-bold">Bold</button>
+                                                <button class="ql-italic">Italic</button>
+                                                <button class="ql-underline">underline</button>
+                                                <button class="ql-strike">Strike</button>
+                                                <button class="ql-list" value="ordered">List</button>
+                                                <button class="ql-list" value="bullet"></button>
+                                                <button class="ql-indent" value="-1"></button>
+                                                <button class="ql-indent" value="+1"></button>
+                                                <button class="ql-link"></button>
+                                            </div>
+                                            <div id="addTaskDescriptionQuill"></div>
+                                            <input type="hidden" id="addTaskDescription" name="description"
+                                                class="quill">
+                                        </div>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 d-flex justify-content-end">
+                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content category-popup">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Tugas</h5>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 custom-input">
+                <div class="text-start">
+                    <div class="p-20">
+                        <form class="material-form needs-validation row g-3" method="POST" novalidate=""
+                            id="editTaskForm" data-id='{{ $meeting->id }}'>
+                            <input type="hidden" name="deletedFile" value="0">
+                            <div class="col-12 col-md-6">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label" for="editMaterialTitle">Judul<span
+                                                class="txt-danger">*</span></label>
+                                        <input class="form-control" id="editMaterialTitle" type="text"
+                                            placeholder="Tulis judul" name="title">
+                                        <div class="invalid-feedback">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="editTaskType">Jenis Tugas<span
+                                                class="txt-danger">*</span></label>
+                                        <select class="form-select" id="editTaskType" name="type">
+                                            <option value="">Jenis Tugas</option>
+                                            @foreach ($taskType as $item)
+                                                <option value="{{ $item['value'] }}">
+                                                    {{ $item['label'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex flex-column flatpicker-input">
+                                            <label class="form-label" for="startDate">Waktu Mulai<span
+                                                    class="txt-danger">*</span></label>
+                                            <input class="form-control" id="editTaskStartTime" type="date"
+                                                placeholder="Pilih waktu mulai" name="start_time" data-language="id">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="d-flex flex-column flatpicker-input">
+                                            <label class="form-label" for="endDate">Waktu Selesai<span
+                                                    class="txt-danger">*</span></label>
+                                            <input class="form-control flatpicker" autocomplete="off"
+                                                id="editTaskEndTime" type="date" placeholder="Pilih waktu selesai"
+                                                name="end_time" data-language="id">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="editAllowLateSubmission">Pengiriman
+                                            Terlambat</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input flatpicker" id="editAllowLateSubmission"
+                                                name="allow_late_submission" type="checkbox" role="switch">
+                                        </div>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="col-12 lateSubmission" style="display: none;">
+                                        <div class="d-flex flex-column flatpicker-input">
+                                            <label class="form-label" for="endDate">Batas Waktu Terlambat</label>
+                                            <input class="form-control flatpicker" autocomplete="off"
+                                                id="editLateSubmissionTime" type="date"
+                                                placeholder="Pilih batas waktu terlambat" name="late_submission_time"
+                                                data-language="id">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="taskFile">
+                                            <label class="form-label">File</label>
+                                            <div class="info text-danger mb-1" style="font-size: 12px;">
+                                                Ukuran maksimal file 5mb
+                                            </div>
+                                            <div class="custom-file-upload w-100 border rounded-2 px-3 py-3">
+                                                <label for="editTaskFile" class="d-flex align-items-center mb-0 w-100"
+                                                    style="cursor:pointer;">
+                                                    <span
+                                                        style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; background:#e3f0ff; border-radius:6px; margin-right:12px;">
+                                                        <i class="fa fa-upload text-primary fs-5"></i>
+                                                    </span>
+                                                    <span style="color:#b0b0b0; font-weight:500;">Unggah File</span>
+                                                </label>
+                                            </div>
+                                            <input type="file" class="form-control file_path" id="editTaskFile"
+                                                name="file_path" hidden>
+                                            <div id="file-preview" class="d-flex flex-column gap-1"></div>
+                                        </div>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label" for="editTaskDescription">Deskripsi<span
+                                                class="txt-danger"></span></label>
+                                        <div class="toolbar-box">
+                                            <div id="editTaskToolbar">
+                                                <button class="ql-bold">Bold</button>
+                                                <button class="ql-italic">Italic</button>
+                                                <button class="ql-underline">underline</button>
+                                                <button class="ql-strike">Strike</button>
+                                                <button class="ql-list" value="ordered">List</button>
+                                                <button class="ql-list" value="bullet"></button>
+                                                <button class="ql-indent" value="-1"></button>
+                                                <button class="ql-indent" value="+1"></button>
+                                                <button class="ql-link"></button>
+                                            </div>
+                                            <div id="editTaskDescriptionQuill"></div>
+                                            <input type="hidden" id="editTaskDescription" name="description"
+                                                class="quill">
+                                        </div>
+                                        <div class="invalid-feedback"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 d-flex justify-content-end">
+                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="addMeetingTextModal" tabindex="-1" aria-labelledby="addMeetingTextModal"
     aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content category-popup">
             <div class="modal-header">
-                <h5 class="modal-title">Teks Pertemuan</h5>
+                <h5 class="modal-title">Buat Teks Pertemuan</h5>
                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0 custom-input">
@@ -622,7 +886,7 @@
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content category-popup">
             <div class="modal-header">
-                <h5 class="modal-title">Teks Pertemuan</h5>
+                <h5 class="modal-title">Edit Teks Pertemuan</h5>
                 <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0 custom-input">

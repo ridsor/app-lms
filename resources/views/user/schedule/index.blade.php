@@ -67,7 +67,8 @@
                                                                             {{-- {{ dd($schedule_time) }} --}}
                                                                             <div class="d-flex gap-2">
                                                                                 <div class="col d-flex align-items-center">
-                                                                                    <i class="fa-solid fa-calendar"></i>
+                                                                                    <i data-feather="calendar"
+                                                                                        witdh="24"></i>
                                                                                     <span
                                                                                         class="mb-0 ms-2">{{ Helper::getDayName($schedule_time->day) }}</span>
                                                                                 </div>

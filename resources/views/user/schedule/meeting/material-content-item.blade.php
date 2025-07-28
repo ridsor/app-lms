@@ -20,7 +20,8 @@
                     <div style="font-size: .8rem;" class="text-secondary">
                         <div class="d-flex gap-2">
                             <div class="d-flex align-items-center">
-                                <i class="fa-solid fa-calendar"></i>
+                                <span class="icon"><i data-feather="calendar"
+                                        style="width:18px; height: 18px"></i></span>
                                 <span class="mb-0 ms-2">{{ $content->created_at->translatedFormat('d M Y') }}</span>
                             </div>
                             <div>&middot;</div>
@@ -40,14 +41,16 @@
     </button>
     <div class="accordion-collapse collapse w-100" id="material-content-{{ $content->id }}">
         <div class="d-flex justify-content-end gap-2 p-3">
-            @can('material.*')
-                @if ($content->file_type !== 'Link')
+            @if ($content->file_type != 'Archive' && $content->file_type != 'Link')
+                @can('material.view')
                     <a href="{{ route('user.material.file.download', ['materi_id' => $content->id]) }}"
                         style="width: 38px; height: 38px;"
                         class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
                         <i data-feather="download" style="width: 20px; height: 20px"></i>
                     </a>
-                @endif
+                @endcan
+            @endif
+            @can('material.*')
                 <button class="btn d-flex align-items-center bg-20-warning border justify-content-center text-warning p-2"
                     style="width: 38px; height: 38px;" onclick="handleEditMaterial(event, {{ $content->id }})">
                     <i data-feather="edit-2" style="width: 20px; height: 20px"></i>
@@ -56,13 +59,6 @@
                     style="width: 38px; height: 38px;" onclick="handleDeleteMaterial(event, {{ $content->id }})">
                     <i data-feather="trash-2" style="width: 20px; height: 20px"></i>
                 </button>
-            @endcan
-            @can('material.view')
-                <a href="{{ route('user.material.file.download', ['materi_id' => $content->id]) }}"
-                    style="width: 38px; height: 38px;"
-                    class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
-                    <i data-feather="download" style="width: 20px; height: 20px"></i>
-                </a>
             @endcan
         </div>
         <div class="mb-4 view_material_file_path">
@@ -93,6 +89,11 @@
                         <div class="fw-medium text-break" style="font-size: .8rem">
                             {{ $content?->file_name . ' (' . number_format($content?->file_size / (1024 * 1024), 2) . 'mb)' ?? '-' }}
                         </div>
+                        <a href="{{ route('user.material.file.download', ['materi_id' => $content->id]) }}"
+                            style="width: 38px; height: 38px;"
+                            class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
+                            <i data-feather="download" style="width: 20px; height: 20px"></i>
+                        </a>
                     </div>
                 @break
 

@@ -14,6 +14,7 @@ use App\Http\Controllers\User\ScheduleController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\MeetingController;
 use App\Http\Controllers\User\MeetingTextController;
+use App\Http\Controllers\User\TaskController;
 use App\Http\Controllers\User\TeachingJournalController;
 use Illuminate\Support\Facades\Route;
 
@@ -63,7 +64,6 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::delete('/jadwal/{schedule_time_id}', [ScheduleController::class, 'destroy'])->name('user.schedule.destroy');
     Route::get('/jadwal/{id}/{schedule_time_id}/edit', [ScheduleController::class, 'edit'])->name('user.schedule.edit');
     Route::get('/jadwal/{code}/pertemuan/{meeting_id}', [ScheduleController::class, 'showByMeeting'])->name('user.schedule.showByMeeting');
-
     Route::put('/jadwal/{code}/pertemuan/{meeting_id}', [MeetingController::class, 'update'])->name('user.schedule.update');
 
     Route::post('/jadwal/pertemuan/{meeting_id}/jurnal', [TeachingJournalController::class, 'store'])->name('user.teaching_journal.store');
@@ -71,9 +71,17 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::patch('/jadwal/pertemuan/{meeting_id}/kehadiran', [AttendanceController::class, 'updateByMeeting'])->name('user.attendance.updateByMeeting');
 
     Route::post('/jadwal/pertemuan/{meeting_id}/materi', [MaterialController::class, 'store'])->name('user.material.store');
-    Route::get('/jadwal/pertemuan/materi/{materi_id}', [MaterialController::class, 'index'])->name('user.material.index');
+    Route::get('/jadwal/pertemuan/materi/{materi_id}', [MaterialController::class, 'show'])->name('user.material.show');
     Route::put('/jadwal/pertemuan/materi/{materi_id}', [MaterialController::class, 'update'])->name('user.material.update');
     Route::delete('/jadwal/pertemuan/materi/{materi_id}', [MaterialController::class, 'destroy'])->name('user.material.destroy');
+    Route::get('/materi/{materi_id}/file/download', [MaterialController::class, 'downloadFile'])->name('user.material.file.download');
+
+    Route::post('/jadwal/pertemuan/{meeting_id}/tugas', [TaskController::class, 'store'])->name('user.task.store');
+    Route::get('/jadwal/pertemuan/tugas/{task_id}', [TaskController::class, 'show'])->name('user.task.show');
+    Route::put('/jadwal/pertemuan/tugas/{task_id}', [TaskController::class, 'update'])->name('user.task.update');
+    Route::delete('/jadwal/pertemuan/tugas/{task_id}', [TaskController::class, 'destroy'])->name('user.task.destroy');
+    Route::get('/tugas/{task_id}/file', [TaskController::class, 'getFile'])->name('user.task.file.get');
+    Route::get('/tugas/{task_id}/file/download', [TaskController::class, 'downloadFile'])->name('user.task.file.download');
 
     Route::post('/jadwal/pertemuan/{meeting_id}/text', [MeetingTextController::class, 'store'])->name('user.meeting_text.store');
     Route::get('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'index'])->name('user.meeting_text.index');

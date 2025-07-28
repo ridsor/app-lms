@@ -16,6 +16,8 @@ use App\Policies\AttendancePolicy;
 use App\Policies\MaterialPolicy;
 use App\Policies\MeetingPolicy;
 use App\Policies\MeetingTextPolicy;
+use App\Models\Task;
+use App\Policies\TaskPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -33,6 +35,7 @@ class AuthServiceProvider extends ServiceProvider
     Meeting::class => MeetingPolicy::class,
     Material::class => MaterialPolicy::class,
     MeetingText::class => MeetingTextPolicy::class,
+    Task::class => TaskPolicy::class,
   ];
 
   /**

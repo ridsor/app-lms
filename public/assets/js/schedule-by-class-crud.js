@@ -248,7 +248,7 @@ $(function () {
     $("#schedule-by-class-table").on("click", ".trash", function (e) {
         e.preventDefault();
         const trashBtn = $(this);
-        
+
         var schedule_time_id = $(this).data("schedule-time-id");
         if (!schedule_time_id) return;
         Swal.fire({
@@ -608,5 +608,50 @@ $(document).ready(function () {
             }
             $(".selectpicker").selectpicker("refresh");
         }
+    });
+});
+
+$("#addScheduleModal").on("shown.bs.modal", function () {
+    const end_time = flatpickr("#addScheduleEnd", {
+        static: true,
+        noCalendar: true,
+        enableTime: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        appendTo: document.getElementById("addScheduleModal"),
+    });
+    const start_time = flatpickr("#addScheduleStart", {
+        static: true,
+        time_24hr: true,
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        appendTo: document.getElementById("addScheduleModal"),
+        onChange: function (selectedDates) {
+            end_time.set("minTime", selectedDates[0]);
+        },
+    });
+});
+$("#editScheduleModal").on("shown.bs.modal", function () {
+    const end_time = flatpickr("#editScheduleEnd", {
+        defaultDate: new Date(),
+        static: true,
+        noCalendar: true,
+        enableTime: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        appendTo: document.getElementById("editScheduleModal"),
+    });
+    const start_time = flatpickr("#editScheduleStart", {
+        defaultDate: new Date(),
+        static: true,
+        time_24hr: true,
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        appendTo: document.getElementById("editScheduleModal"),
+        onChange: function (selectedDates) {
+            end_time.set("minTime", selectedDates[0]);
+        },
     });
 });

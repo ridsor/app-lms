@@ -305,7 +305,11 @@ class ScheduleController extends Controller
       'attendances:id,meeting_id,user_id,status',
       'materials',
       'meeting_texts',
-      'tasks',
+      'tasks' => fn($query) => $query->withCount([
+        'submissions as not_yet_rated' => function ($query) {
+          $query->whereNull('score');
+        }
+      ]),
       'exams'
     ])->findOrFail($meeting_id);
 
@@ -348,6 +352,10 @@ class ScheduleController extends Controller
       ['value' => 'Archive', 'label' => 'Arsip'],
       ['value' => 'Link', 'label' => 'Link']
     ];
+    $taskType = [
+      ['value' => 'individual', 'label' => 'Individu'],
+      ['value' => 'group', 'label' => 'Kelompok'],
+    ];
 
     $today = Carbon::now();
     $scheduleTime = $meeting->schedule_time;
@@ -383,7 +391,7 @@ class ScheduleController extends Controller
       ->sortByDesc('created_at')
       ->values();
 
-    return view('user.schedule.meeting.show', compact('meeting', 'schedule', 'meetingTypes', 'rooms', 'meetingMethods', 'attendances', 'attendanceValue', 'isStartedAt', 'isRealization', 'attendancePercentage', 'materialType', 'contents'));
+    return view('user.schedule.meeting.show', compact('meeting', 'schedule', 'meetingTypes', 'rooms', 'meetingMethods', 'attendances', 'attendanceValue', 'isStartedAt', 'isRealization', 'attendancePercentage', 'materialType', 'taskType', 'contents'));
   }
 
   public function show($id)

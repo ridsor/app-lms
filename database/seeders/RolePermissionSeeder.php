@@ -39,6 +39,10 @@ class RolePermissionSeeder extends Seeder
             'teaching_journal.create',
             'material.view',
             'material.*',
+            'material.view',
+            'material.*',
+            'task.view',
+            'task.*',
             'meeting_text.view',
             'meeting_text.*',
         ];
@@ -82,6 +86,9 @@ class RolePermissionSeeder extends Seeder
             'teaching_journal.create',
             'teaching_journal.edit',
             'material.*',
+            'task.*',
+            'material.view',
+            'task.view',
             'meeting_text.*',
         ]);
 
@@ -92,6 +99,7 @@ class RolePermissionSeeder extends Seeder
             'schedule.view',
             'meeting.view',
             'material.view',
+            'task.view',
             'meeting_text.view',
         ]);
 

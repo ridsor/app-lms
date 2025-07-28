@@ -89,7 +89,8 @@
                                         @foreach ($schedule->schedule_times as $schedule_time)
                                             <div class="d-flex gap-2 c-o-light f-w-600 flex-wrap text-nowrap">
                                                 <div class="d-flex align-items-center">
-                                                    <i class="fa-solid fa-calendar"></i>
+                                                    <span><i data-feather="calendar"
+                                                            style="width:18px; height: 18px"></i></span>
                                                     <span class="mb-0 ms-2"
                                                         id="date">{{ Helper::getDayName($schedule_time->day) }},
                                                     </span>
