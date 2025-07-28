@@ -59,7 +59,7 @@
             @endcan
             @can('material.view')
                 <a href="{{ route('user.material.file.download', ['materi_id' => $content->id]) }}"
-                style="width: 38px; height: 38px;"
+                    style="width: 38px; height: 38px;"
                     class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
                     <i data-feather="download" style="width: 20px; height: 20px"></i>
                 </a>
@@ -70,7 +70,12 @@
                 @case('eBook')
                     <div class="eBook">
                         @php
-                            $fileUrl = route('user.material.file.get', ['materi_id' => $content->id]);
+                            $fileUrl = URL::temporarySignedRoute(
+                                'user.material.file.get', // nama route
+                                now()->addMinutes(60), // masa berlaku
+                                ['materi_id' => $content->id],
+                            );
+
                             // $fileUrl =
                             //     'https://pmb.uii.ac.id/wp-content/uploads/2020/04/Panduan-Merubah-Dokumen-ke-Format-PDF-Secara-Online.pdf';
                         @endphp
