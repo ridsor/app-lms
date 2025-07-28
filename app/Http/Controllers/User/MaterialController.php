@@ -117,13 +117,15 @@ class MaterialController extends Controller
         }
     }
 
-    public function getFile($materi_id)
+    public function getFile(Request $request, $materi_id)
     {
         $material = Material::findOrFail($materi_id);
-        $this->authorize('view', $material);
+        if (!$request->hasValidSignature()) {
+            $this->authorize('view', $material);
+        }
 
         if ($material->file_type === 'Link') {
-            return redirect($material->file_path);
+            return abort(404, 'File not found');
         }
 
         if (Storage::exists($material->file_path)) {

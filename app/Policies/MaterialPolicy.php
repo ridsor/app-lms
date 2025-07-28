@@ -22,8 +22,6 @@ class MaterialPolicy
 
     public function view(User $user, $material)
     {
-        Log::info($user);
-        Log::info($material);
         if ($user->can('material.view') || $user->can('material.*')) {
             if ($user->hasRole('teacher')) {
                 return $user->teacher->id === $material->meeting->schedule->teacher_id;

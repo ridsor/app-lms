@@ -80,9 +80,6 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::put('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'update'])->name('user.meeting_text.update');
     Route::delete('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'destroy'])->name('user.meeting_text.destroy');
 
-    Route::get('/materi/{materi_id}/file', [MaterialController::class, 'getFile'])->name('user.material.file.get');
-    Route::get('/materi/{materi_id}/file/download', [MaterialController::class, 'downloadFile'])->name('user.material.file.download');
-
     Route::get('/kehadiran/{schedule_id}/pertemuan/{meeting_id}', [AttendanceController::class, 'edit'])->name('user.attendance.edit');
     Route::get('/kehadiran/pertemuan/{meeting_id}/{schedule_time_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');
     Route::patch('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'update'])->name('user.attendance.update');
