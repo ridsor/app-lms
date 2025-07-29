@@ -54,10 +54,10 @@ $(function () {
 
 $(document).ready(function () {
     statuses.forEach(function (value) {
-        $(`.status-all-${value}`).on("click", function () {
-            $(`.status-input`).each(function () {
+        $(`#fill_attendance .status-all-${value}`).on("click", function () {
+            $(`#fill_attendance .status-input`).each(function () {
                 $(this)
-                    .find(`.status-value[value="${value}"]`)
+                    .find(`input.status-value[value="${value}"]`)
                     .prop("checked", true);
             });
         });

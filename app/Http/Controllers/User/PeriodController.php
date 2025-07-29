@@ -192,7 +192,7 @@ class PeriodController extends Controller
             }
 
             $period = Period::findOrFail($id);
-            $period->update(['status' => true]);
+            $period->update(['status' => !$period->status]);
             return $this->sendResponse('Periode berhasil diaktifkan.', $period);
         } catch (\Exception $e) {
             Log::info($e->getMessage());

@@ -132,8 +132,14 @@
                                 </select>
                                 <div class="invalid-feedback"></div>
                             </div>
-                            <div class="col-md-12 d-flex justify-content-end">
-                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        Batal
+                                    </button>
+                                    <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -277,10 +283,101 @@
                                 </div>
                                 <div class="invalid-feedback"></div>
                             </div>
-                            <div class="col-md-12 d-flex justify-content-end">
-                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        Batal
+                                    </button>
+                                    <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                                </div>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade p-0 p-md-1" id="fillAttendanceModal" tabindex="-1" aria-labelledby="fillAttendanceModal"
+    aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 1000px;">
+        <div class="modal-content category-popup">
+            <div class="modal-header">
+                <h5 class="modal-title">Isi Kehadiran</h5>
+                <button class="btn-close" type="button" data-bs-toggle="modal"
+                    data-bs-target="#fillRealizationModal"></button>
+            </div>
+            <div class="modal-body p-0 overflow-hidden">
+                <div id="fill_attendance">
+                    <div class="list-product list-category">
+                        <div class="recent-table table-responsive custom-scrollbar">
+                            <table class="table table-bordered" id="attendance-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2"> <span class="c-o-light f-w-600">No</span></th>
+                                        <th rowspan="2"> <span class="c-o-light f-w-600">Nama</span></th>
+                                        <th class="status-column"> <span class="c-o-light f-w-600">Status</span>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th class="status-column">
+                                            <div class="d-flex gap-3 align-items-center checkbox-checked">
+                                                @foreach ($attendanceValue as $key => $value)
+                                                    <div class="form-check">
+                                                        <label class="form-check-label fs-6 mb-0">
+                                                            <input
+                                                                class="form-check-input border-secondary border status-all-{{ $value }}"
+                                                                name="{{ 'status-all' }}"
+                                                                value="{{ $value }}"
+                                                                type="radio">{{ $value }}</label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($attendances as $key => $attendance)
+                                        <tr>
+                                            <td>
+                                                <p class="f-light mb-0">{{ $key + 1 }}</p>
+                                            </td>
+                                            <td>
+                                                <p class="f-light mb-0">
+                                                    {{ $attendance['student']->name }}</p>
+                                                <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
+                                            </td>
+                                            <td class="status-input" style="padding: 12px 20px;"
+                                                data-user-id="{{ $attendance['student']->user_id }}">
+                                                <div class="d-flex gap-3 align-items-center checkbox-checked">
+                                                    @foreach ($attendanceValue as $value)
+                                                        <div class="form-check">
+                                                            <label class="form-check-label fs-6 mb-0">
+                                                                <input class="form-check-input border-3 status-value"
+                                                                    name="{{ 'status' . $key }}"
+                                                                    value="{{ $value }}" type="radio"
+                                                                    @if ($attendance['status'] == $value) checked @endif>{{ $value }}</label>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-end gap-2 p-3">
+                            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                aria-label="Close">
+                                Batal
+                            </button>
+                            <button class="btn btn-primary" type="submit" id="save_attendance"
+                                data-meeting-id="{{ $meeting->id }}">Simpan</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -383,8 +480,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-12 d-flex justify-content-end">
-                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        Batal
+                                    </button>
+                                    <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -491,8 +594,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-12 d-flex justify-content-end">
-                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        Batal
+                                    </button>
+                                    <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -540,7 +649,7 @@
                                         <div class="d-flex flex-column flatpicker-input">
                                             <label class="form-label" for="startDate">Waktu Mulai<span
                                                     class="txt-danger">*</span></label>
-                                            <input class="form-control" id="addTaskStartTime" type="date"
+                                            <input class="form-control flatpicker" id="addTaskStartTime" type="date"
                                                 placeholder="Pilih waktu mulai" name="start_time" data-language="id">
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -623,8 +732,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-12 d-flex justify-content-end">
-                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        Batal
+                                    </button>
+                                    <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -756,8 +871,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-12 d-flex justify-content-end">
-                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        Batal
+                                    </button>
+                                    <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -788,10 +909,14 @@
                                 </div>
                                 <div class="invalid-feedback"></div>
                             </div>
-
-
-                            <div class="col-md-12 d-flex justify-content-end">
-                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        Batal
+                                    </button>
+                                    <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -800,85 +925,6 @@
         </div>
     </div>
 
-    <div class="modal fade p-0 p-md-1" id="fillAttendanceModal" tabindex="-1" aria-labelledby="fillAttendanceModal"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 1000px;">
-            <div class="modal-content category-popup">
-                <div class="modal-header">
-                    <h5 class="modal-title">Isi Kehadiran</h5>
-                    <button class="btn-close" type="button" data-bs-toggle="modal"
-                        data-bs-target="#fillRealizationModal"></button>
-                </div>
-                <div class="modal-body p-0 overflow-hidden">
-                    <div id="fill_attendance">
-                        <div class="list-product list-category">
-                            <div class="recent-table table-responsive custom-scrollbar">
-                                <table class="table table-bordered" id="attendance-table">
-                                    <thead>
-                                        <tr>
-                                            <th rowspan="2"> <span class="c-o-light f-w-600">No</span></th>
-                                            <th rowspan="2"> <span class="c-o-light f-w-600">Nama</span></th>
-                                            <th class="status-column"> <span class="c-o-light f-w-600">Status</span>
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <th class="status-column">
-                                                <div class="d-flex gap-3 align-items-center checkbox-checked">
-                                                    @foreach ($attendanceValue as $key => $value)
-                                                        <div class="form-check">
-                                                            <label class="form-check-label fs-6 mb-0">
-                                                                <input
-                                                                    class="form-check-input border-secondary border status-all-{{ $value }}"
-                                                                    name="{{ 'status-all' }}"
-                                                                    value="{{ $value }}"
-                                                                    type="radio">{{ $value }}</label>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($attendances as $key => $attendance)
-                                            <tr>
-                                                <td>
-                                                    <p class="f-light mb-0">{{ $key + 1 }}</p>
-                                                </td>
-                                                <td>
-                                                    <p class="f-light mb-0">
-                                                        {{ $attendance['student']->name }}</p>
-                                                    <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
-                                                </td>
-                                                <td class="status-input" style="padding: 12px 20px;"
-                                                    data-user-id="{{ $attendance['student']->user_id }}">
-                                                    <div class="d-flex gap-3 align-items-center checkbox-checked">
-                                                        @foreach ($attendanceValue as $value)
-                                                            <div class="form-check">
-                                                                <label class="form-check-label fs-6 mb-0">
-                                                                    <input
-                                                                        class="form-check-input border-3 status-value"
-                                                                        name="{{ 'status' . $key }}"
-                                                                        value="{{ $value }}" type="radio"
-                                                                        @if ($attendance['status'] == $value) checked @endif>{{ $value }}</label>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="col-md-12 p-3 d-flex justify-content-end">
-                            <button class="btn btn-primary" type="submit" id="save_attendance"
-                                data-meeting-id="{{ $meeting->id }}">Simpan</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <div class="modal fade" id="editMeetingTextModal" tabindex="-1" aria-labelledby="editMeetingTextModal"
@@ -902,90 +948,16 @@
                                 <div class="invalid-feedback"></div>
                             </div>
 
-                            <div class="col-md-12 d-flex justify-content-end">
-                                <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                        aria-label="Close">
+                                        Batal
+                                    </button>
+                                    <button class="btn btn-primary" type="submit" id="submit">Simpan</button>
+                                </div>
                             </div>
                         </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade p-0 p-md-1" id="fillAttendanceModal" tabindex="-1" aria-labelledby="fillAttendanceModal"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 1000px;">
-            <div class="modal-content category-popup">
-                <div class="modal-header">
-                    <h5 class="modal-title">Isi Kehadiran</h5>
-                    <button class="btn-close" type="button" data-bs-toggle="modal"
-                        data-bs-target="#fillRealizationModal"></button>
-                </div>
-                <div class="modal-body p-0 overflow-hidden">
-                    <div id="fill_attendance">
-                        <div class="list-product list-category">
-                            <div class="recent-table table-responsive custom-scrollbar">
-                                <table class="table table-bordered" id="attendance-table">
-                                    <thead>
-                                        <tr>
-                                            <th rowspan="2"> <span class="c-o-light f-w-600">No</span></th>
-                                            <th rowspan="2"> <span class="c-o-light f-w-600">Nama</span></th>
-                                            <th class="status-column"> <span class="c-o-light f-w-600">Status</span>
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <th class="status-column">
-                                                <div class="d-flex gap-3 align-items-center checkbox-checked">
-                                                    @foreach ($attendanceValue as $key => $value)
-                                                        <div class="form-check">
-                                                            <label class="form-check-label fs-6 mb-0">
-                                                                <input
-                                                                    class="form-check-input border-secondary border status-all-{{ $value }}"
-                                                                    name="{{ 'status-all' }}"
-                                                                    value="{{ $value }}"
-                                                                    type="radio">{{ $value }}</label>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($attendances as $key => $attendance)
-                                            <tr>
-                                                <td>
-                                                    <p class="f-light mb-0">{{ $key + 1 }}</p>
-                                                </td>
-                                                <td>
-                                                    <p class="f-light mb-0">
-                                                        {{ $attendance['student']->name }}</p>
-                                                    <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
-                                                </td>
-                                                <td class="status-input" style="padding: 12px 20px;"
-                                                    data-user-id="{{ $attendance['student']->user_id }}">
-                                                    <div class="d-flex gap-3 align-items-center checkbox-checked">
-                                                        @foreach ($attendanceValue as $value)
-                                                            <div class="form-check">
-                                                                <label class="form-check-label fs-6 mb-0">
-                                                                    <input
-                                                                        class="form-check-input border-3 status-value"
-                                                                        name="{{ 'status' . $key }}"
-                                                                        value="{{ $value }}" type="radio"
-                                                                        @if ($attendance['status'] == $value) checked @endif>{{ $value }}</label>
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="col-md-12 p-3 d-flex justify-content-end">
-                            <button class="btn btn-primary" type="submit" id="save_attendance"
-                                data-meeting-id="{{ $meeting->id }}">Simpan</button>
-                        </div>
                     </div>
                 </div>
             </div>

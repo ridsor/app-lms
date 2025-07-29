@@ -1,3 +1,5 @@
+let t;
+
 $(function () {
     // filter
     const params = getQueryParams();
@@ -12,7 +14,7 @@ $(function () {
     }
     $(".filter").selectpicker("refresh");
 
-    const t = $("#schedule-by-class-table").DataTable({
+    t = $("#schedule-by-class-table").DataTable({
         processing: true,
         serverSide: true,
         ajax: $.fn.dataTable.pipeline({
@@ -81,6 +83,111 @@ $(function () {
     t.on("draw", function () {
         $("#select-all").prop("checked", false);
         $("#schedule-by-class-action-buttons").css("display", "none");
+    });
+});
+
+$(document).ready(function () {
+    const add_end_time = flatpickr("#addScheduleEnd", {
+        defaultDate: new Date(),
+        minDate: new Date(),
+        static: true,
+        noCalendar: true,
+        enableTime: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+    });
+    const add_start_time = flatpickr("#addScheduleStart", {
+        defaultDate: new Date(),
+        static: true,
+        time_24hr: true,
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        onChange: function (selectedDates) {
+            add_end_time.set("minTime", selectedDates[0]);
+        },
+    });
+    const edit_end_time = flatpickr("#editScheduleEnd", {
+        static: true,
+        noCalendar: true,
+        enableTime: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+    });
+    const edit_start_time = flatpickr("#editScheduleStart", {
+        static: true,
+        time_24hr: true,
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        onChange: function (selectedDates) {
+            edit_end_time.set("minTime", selectedDates[0]);
+        },
+    });
+
+    $("#schedule-by-class-table tbody").on(
+        "change",
+        'input[type="checkbox"].select-row',
+        function () {
+            updateActionState();
+        }
+    );
+
+    $("#select-all").on("click", function () {
+        var checked = this.checked;
+        $(
+            '#schedule-by-class-table tbody input[type="checkbox"].select-row'
+        ).prop("checked", checked);
+        updateActionState();
+    });
+
+    function updateActionState() {
+        var selectedRows = $(
+            "#schedule-by-class-table tbody input[type='checkbox'].select-row:checked"
+        ).length;
+        $("#selected-count").text(selectedRows);
+        $("#schedule-by-class-action-buttons").css(
+            "display",
+            selectedRows > 0 ? "flex" : "none"
+        );
+
+        var totalCheckbox = $(
+            "#schedule-by-class-table tbody input[type='checkbox'].select-row"
+        ).length;
+
+        $("#select-all").prop("checked", totalCheckbox === selectedRows);
+    }
+
+    $(document).on("change", "select[name='curriculum_id']", function () {
+        var curriculumId = $(this).val();
+        var formId = $(this).closest("form").attr("id");
+
+        if (curriculumId) {
+            let options = '<option value="">Pilih Mata Pelajaran</option>';
+            curriculums
+                .find(function (curriculum) {
+                    return curriculum.id == curriculumId;
+                })
+                .subjects.forEach(function (subject) {
+                    options +=
+                        '<option  value="' +
+                        subject.id +
+                        '">' +
+                        subject.name +
+                        "</option>";
+                });
+
+            if (formId === "addScheduleForm") {
+                $("#addScheduleForm select[name='subject_id']")
+                    .html(options)
+                    .attr("disabled", false);
+            } else if (formId === "editScheduleForm") {
+                $("#editScheduleForm select[name='subject_id']")
+                    .html(options)
+                    .attr("disabled", false);
+            }
+            $(".selectpicker").selectpicker("refresh");
+        }
     });
 
     $("#filter-btn").click(function (e) {
@@ -214,12 +321,15 @@ $(function () {
                     $("#editScheduleForm [name='day']").val(
                         res.data.schedule_times[0].day
                     );
-                    $("#editScheduleForm [name='start_time']").val(
+                    edit_start_time.setDate(
                         res.data.schedule_times[0].start_time
                     );
-                    $("#editScheduleForm [name='end_time']").val(
-                        res.data.schedule_times[0].end_time
+                    edit_end_time.setDate(res.data.schedule_times[0].end_time);
+                    edit_end_time.set(
+                        "minDate",
+                        res.data.schedule_times[0].start_time
                     );
+
                     $("#editScheduleForm [name='meeting_method']").val(
                         res.data.schedule_times[0].meeting_method
                     );
@@ -533,125 +643,5 @@ $(function () {
                 });
             }
         });
-    });
-});
-
-$(document).ready(function () {
-    flatpickr(".twenty-four-hour", {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        allowInput: true,
-    });
-
-    $("#schedule-by-class-table tbody").on(
-        "change",
-        'input[type="checkbox"].select-row',
-        function () {
-            updateActionState();
-        }
-    );
-
-    $("#select-all").on("click", function () {
-        var checked = this.checked;
-        $(
-            '#schedule-by-class-table tbody input[type="checkbox"].select-row'
-        ).prop("checked", checked);
-        updateActionState();
-    });
-
-    function updateActionState() {
-        var selectedRows = $(
-            "#schedule-by-class-table tbody input[type='checkbox'].select-row:checked"
-        ).length;
-        $("#selected-count").text(selectedRows);
-        $("#schedule-by-class-action-buttons").css(
-            "display",
-            selectedRows > 0 ? "flex" : "none"
-        );
-
-        var totalCheckbox = $(
-            "#schedule-by-class-table tbody input[type='checkbox'].select-row"
-        ).length;
-
-        $("#select-all").prop("checked", totalCheckbox === selectedRows);
-    }
-
-    $(document).on("change", "select[name='curriculum_id']", function () {
-        var curriculumId = $(this).val();
-        var formId = $(this).closest("form").attr("id");
-
-        if (curriculumId) {
-            let options = '<option value="">Pilih Mata Pelajaran</option>';
-            curriculums
-                .find(function (curriculum) {
-                    return curriculum.id == curriculumId;
-                })
-                .subjects.forEach(function (subject) {
-                    options +=
-                        '<option  value="' +
-                        subject.id +
-                        '">' +
-                        subject.name +
-                        "</option>";
-                });
-
-            if (formId === "addScheduleForm") {
-                $("#addScheduleForm select[name='subject_id']")
-                    .html(options)
-                    .attr("disabled", false);
-            } else if (formId === "editScheduleForm") {
-                $("#editScheduleForm select[name='subject_id']")
-                    .html(options)
-                    .attr("disabled", false);
-            }
-            $(".selectpicker").selectpicker("refresh");
-        }
-    });
-});
-
-$("#addScheduleModal").on("shown.bs.modal", function () {
-    const end_time = flatpickr("#addScheduleEnd", {
-        static: true,
-        noCalendar: true,
-        enableTime: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        appendTo: document.getElementById("addScheduleModal"),
-    });
-    const start_time = flatpickr("#addScheduleStart", {
-        static: true,
-        time_24hr: true,
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        appendTo: document.getElementById("addScheduleModal"),
-        onChange: function (selectedDates) {
-            end_time.set("minTime", selectedDates[0]);
-        },
-    });
-});
-$("#editScheduleModal").on("shown.bs.modal", function () {
-    const end_time = flatpickr("#editScheduleEnd", {
-        defaultDate: new Date(),
-        static: true,
-        noCalendar: true,
-        enableTime: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        appendTo: document.getElementById("editScheduleModal"),
-    });
-    const start_time = flatpickr("#editScheduleStart", {
-        defaultDate: new Date(),
-        static: true,
-        time_24hr: true,
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        appendTo: document.getElementById("editScheduleModal"),
-        onChange: function (selectedDates) {
-            end_time.set("minTime", selectedDates[0]);
-        },
     });
 });

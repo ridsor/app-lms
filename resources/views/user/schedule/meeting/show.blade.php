@@ -153,7 +153,7 @@
                                         </button>
                                     </span>
                                     <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip"
-                                        data-bs-title="Realisasi dapat diisi setelah klik Mulai Belajar">
+                                        data-bs-title="Realisasi dapat diisi setelah Mulai Belajar">
                                         <button class="btn btn-success" id="btn_fill_realization" data-bs-toggle="modal"
                                             {{ $isRealization ? '' : 'disabled' }} data-bs-target="#fillRealizationModal">
                                             Isi Realisasi
@@ -259,18 +259,6 @@
                                                             </div>
                                                         </button>
                                                         <p class="mb-0 text-center">Tugas</p>
-                                                    </div>
-                                                    <div
-                                                        class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
-                                                        <button class="btn border border-secondary-sublte"
-                                                            data-bs-toggle="modal" data-bs-target="#addExamModal"
-                                                            style="aspect-ratio: 1/1; width: fit-content; border-style:dashed!important">
-                                                            <div class="p-1">
-                                                                <img style="width:30px; height:30px" class="theme-aware-icon"
-                                                                    src="{{ asset('assets/icons/exam.png') }}" />
-                                                            </div>
-                                                        </button>
-                                                        <p class="mb-0 text-center">Ujian</p>
                                                     </div>
                                                 </div>
                                             </div>
