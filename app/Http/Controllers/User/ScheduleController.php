@@ -271,7 +271,7 @@ class ScheduleController extends Controller
     $schedule = Schedule::with([
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
       'class.major' => fn($query) => $query->select('id', 'name'),
-      'class.students:class_id,user_id,name,nisn',
+      'class.students:class_id,user_id,name,nis',
       'class.students.user:id,image,username',
       'subject' => fn($query) => $query->select('id', 'name', 'code'),
       'teacher' => fn($query) => $query->select('id', 'name', 'user_id'),
@@ -292,6 +292,7 @@ class ScheduleController extends Controller
     $meeting = Meeting::with([
       'schedule' => fn($query) => $query->select('id', 'class_id', 'subject_id', 'teacher_id', 'room_id', 'period_id'),
       'schedule.class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+      'schedule.class.students:class_id,user_id,name,nis',
       'schedule.class.major' => fn($query) => $query->select('id', 'name'),
       'schedule.subject' => fn($query) => $query->select('id', 'name', 'code'),
       'schedule.teacher' => fn($query) => $query->select('id', 'name', 'user_id'),

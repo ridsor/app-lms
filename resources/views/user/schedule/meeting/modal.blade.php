@@ -60,8 +60,9 @@
                                 <div class="d-flex flex-column gap-1">
                                     <div class="d-flex gap-2 c-o-light f-w-600 flex-wrap text-nowrap">
                                         <div class="d-flex align-items-center">
-                                            <span><i data-feather="calendar"
-                                                    style="width:18px; height: 18px"></i></span>
+                                            <span class="icon d-inline-flex justify-content-center align-items-center">
+                                                <i data-feather="calendar" style="width:18px; height: 18px"></i>
+                                            </span>
                                             <span class="mb-0 ms-2"
                                                 id="date">{{ Helper::getDayName($schedule_time->day) }},
                                             </span>
@@ -114,8 +115,7 @@
                                 <select class="form-select" id="meetingMethod" name="meeting_method">
                                     @foreach ($meetingMethods as $item)
                                         <option value="{{ $item['value'] }}"
-                                            @if ($item['value'] == $meeting->type) checked @endif>
-                                            {{ $item['label'] }}</option>
+                                            @if ($item['value'] == $meeting->meeting_method) selected @endif>{{ $item['label'] }}</option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback"></div>
@@ -126,7 +126,7 @@
                                 <select class="form-select" id="meetingType" name="type">
                                     @foreach ($meetingTypes as $item)
                                         <option value="{{ $item['value'] }}"
-                                            @if ($item['value'] == $meeting->type) checked @endif>
+                                            @if ($item['value'] == $meeting->type) selected @endif>
                                             {{ $item['label'] }}</option>
                                     @endforeach
                                 </select>
@@ -347,7 +347,7 @@
                                             <td>
                                                 <p class="f-light mb-0">
                                                     {{ $attendance['student']->name }}</p>
-                                                <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
+                                                <p class="f-light mb-0">{{ $attendance['student']->nis }}</p>
                                             </td>
                                             <td class="status-input" style="padding: 12px 20px;"
                                                 data-user-id="{{ $attendance['student']->user_id }}">
@@ -646,16 +646,17 @@
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="d-flex flex-column flatpicker-input">
+                                        <div class="d-flex flex-column flatpicker-form">
                                             <label class="form-label" for="startDate">Waktu Mulai<span
                                                     class="txt-danger">*</span></label>
-                                            <input class="form-control flatpicker" id="addTaskStartTime" type="date"
-                                                placeholder="Pilih waktu mulai" name="start_time" data-language="id">
+                                            <input class="form-control flatpicker" id="addTaskStartTime"
+                                                type="date" placeholder="Pilih waktu mulai" name="start_time"
+                                                data-language="id">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="d-flex flex-column flatpicker-input">
+                                        <div class="d-flex flex-column flatpicker-form">
                                             <label class="form-label" for="endDate">Waktu Selesai<span
                                                     class="txt-danger">*</span></label>
                                             <input class="form-control flatpicker" autocomplete="off"
@@ -674,7 +675,7 @@
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="col-12 lateSubmission" style="display: none;">
-                                        <div class="d-flex flex-column flatpicker-input">
+                                        <div class="d-flex flex-column flatpicker-form">
                                             <label class="form-label" for="endDate">Batas Waktu Terlambat</label>
                                             <input class="form-control flatpicker" autocomplete="off"
                                                 id="addLateSubmissionTime" type="date"
@@ -704,7 +705,8 @@
                                                 </label>
                                             </div>
                                             <input type="file" class="form-control file_path" id="addTaskFile"
-                                                name="file_path" hidden>
+                                                name="file_path" hidden
+                                                accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
                                             <div id="file-preview" class="d-flex flex-column gap-1"></div>
                                         </div>
                                         <div class="invalid-feedback"></div>
@@ -785,16 +787,17 @@
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="d-flex flex-column flatpicker-input">
+                                        <div class="d-flex flex-column flatpicker-form">
                                             <label class="form-label" for="startDate">Waktu Mulai<span
                                                     class="txt-danger">*</span></label>
-                                            <input class="form-control" id="editTaskStartTime" type="date"
-                                                placeholder="Pilih waktu mulai" name="start_time" data-language="id">
+                                            <input class="form-control flatpicker" id="editTaskStartTime"
+                                                type="date" placeholder="Pilih waktu mulai" name="start_time"
+                                                data-language="id">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <div class="d-flex flex-column flatpicker-input">
+                                        <div class="d-flex flex-column flatpicker-form">
                                             <label class="form-label" for="endDate">Waktu Selesai<span
                                                     class="txt-danger">*</span></label>
                                             <input class="form-control flatpicker" autocomplete="off"
@@ -807,13 +810,13 @@
                                         <label class="form-label" for="editAllowLateSubmission">Pengiriman
                                             Terlambat</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input flatpicker" id="editAllowLateSubmission"
+                                            <input class="form-check-input" id="editAllowLateSubmission"
                                                 name="allow_late_submission" type="checkbox" role="switch">
                                         </div>
                                         <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="col-12 lateSubmission" style="display: none;">
-                                        <div class="d-flex flex-column flatpicker-input">
+                                        <div class="d-flex flex-column flatpicker-form">
                                             <label class="form-label" for="endDate">Batas Waktu Terlambat</label>
                                             <input class="form-control flatpicker" autocomplete="off"
                                                 id="editLateSubmissionTime" type="date"
@@ -843,6 +846,7 @@
                                                 </label>
                                             </div>
                                             <input type="file" class="form-control file_path" id="editTaskFile"
+                                                accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
                                                 name="file_path" hidden>
                                             <div id="file-preview" class="d-flex flex-column gap-1"></div>
                                         </div>

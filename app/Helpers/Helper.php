@@ -137,4 +137,34 @@ class Helper
             default => $type
         };
     }
+
+    public static function isValidUrl($value)
+    {
+        // Simple URL check - you might want a more robust validation
+        return filter_var($value, FILTER_VALIDATE_URL) !== false;
+    }
+
+    public static function getContentIcon($value)
+    {
+        $parts = explode('.', $value);
+        $ext = strtolower(end($parts));
+
+        if (in_array($ext, ['doc', 'docx'])) {
+            return "fa fa-file-word text-primary";
+        }
+        if (in_array($ext, ['pdf'])) {
+            return "fa fa-file-pdf text-danger";
+        }
+        if (in_array($ext, ['xls', 'xlsx'])) {
+            return "fa fa-file-excel text-success";
+        }
+        if (in_array($ext, ['ppt', 'pptx'])) {
+            return "fa fa-file-powerpoint text-warning";
+        }
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+            return "fa fa-file-image text-info";
+        }
+
+        return "fa fa-file";
+    }
 }

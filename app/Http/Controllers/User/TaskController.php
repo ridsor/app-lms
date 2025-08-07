@@ -5,13 +5,137 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskRequest;
 use App\Models\Task;
+use App\Models\TaskSubmission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
 
 class TaskController extends Controller
 {
-    public function show($task_id)
+    public function index(Request $request)
+    {
+        $tasks = Task::all()->filterByPermission($request->user());
+        $this->authorize('viewAny', $tasks);
+
+        return view('user.task.index', compact('tasks'));
+    }
+
+    public function show(Request $request, $task_id)
+    {
+        $task = Task::with([
+            'meeting:id,schedule_id',
+            'meeting.schedule:id,subject_id,teacher_id,class_id',
+            'meeting.schedule.meetings:id,schedule_id',
+            'meeting.schedule.subject:id,name,code',
+            'meeting.schedule.class:id,name,level,major_id',
+            'meeting.schedule.class.major:id,name',
+        ])
+            ->withCount([
+                'submissions as not_yet_rated' => function ($query) {
+                    $query->whereNull('score');
+                }
+            ])
+            ->findOrFail($task_id);
+        $this->authorize('update', $task);
+
+        $index = $task->meeting->schedule->meetings->search(function ($item) use ($task) {
+            return $item->id == $task->meeting->id;
+        });
+        $task->meeting->meeting_at = $index + 1;
+
+        $taskType = [
+            ['value' => 'individual', 'label' => 'Individu'],
+            ['value' => 'group', 'label' => 'Kelompok'],
+        ];
+
+        return view('user.task.show', compact('task', 'taskType'));
+    }
+
+    public function collection(Request $request, $task_id)
+    {
+        $task = Task::with([
+            'meeting:id,schedule_id',
+            'meeting.schedule:id,subject_id,teacher_id,class_id',
+            'meeting.schedule.subject:id,name,code',
+            'meeting.schedule.class:id,name,level,major_id',
+            'meeting.schedule.class.major:id,name',
+            'submissions:id,task_id'
+        ])
+            ->withCount([
+                'submissions as not_yet_rated' => function ($query) {
+                    $query->whereNull('score');
+                }
+            ])
+            ->findOrFail($task_id);
+
+        $this->authorize('update', $task);
+
+        if ($request->ajax()) {
+            $data = TaskSubmission::select([
+                'task_submissions.id',
+                'students.name',
+                'students.nis',
+                'task_submissions.submitted_at',
+                'task_submissions.graded_at',
+                'task_submissions.score',
+                'task_submissions.graded_by',
+            ])
+                ->leftJoin('students', 'student_id', '=', 'students.id')
+                ->with('grader:id,name')
+                ->where('task_id', $task->id);
+
+            if ($request->filled('search') && !empty($request->search['value'])) {
+                $search = $request->search['value'];
+                $data->where(function ($q) use ($search) {
+                    Log::info('here');
+                    $q->whereFullText('students.name', $search);
+                });
+            }
+
+            return Datatables::of($data)
+                ->addColumn('Nama', function ($row) {
+                    $html = '
+                    <div>
+                    <p class="f-light mb-0">
+                        ' . $row->name  . '</p>
+                    <p class="f-light mb-0">' . $row->nis  . '</p> 
+                    </div>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Pengumpulan', function ($row) {
+                    $html = '
+                        <p class="f-light">' . $row->submitted_at->translatedFormat('j M Y H:i') . '</p>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Nilai', function ($row) {
+                    $html = '
+                    <span class="badge badge-light-primary">' . ($row->formatted_score ?? '-') . '</span>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Penilaian', function ($row) {
+                    $html = '
+                    <p class="f-light">' . (optional($row->graded_at)->translatedFormat('j M Y H:i') ?? '-') . '</p>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Penilai', function ($row) {
+                    $html = '
+                    <p class="f-light">' . ($row->grader->name  ?? '-') . '</p>
+                    ';
+                    return $html;
+                })
+                ->rawColumns(['Nama', 'Pengumpulan', 'Nilai', 'Penilaian', 'Penilai'])
+                ->make(true);
+        } else {
+            return view('user.task.show-collection', compact('task'));
+        }
+    }
+
+    public function edit($task_id)
     {
         try {
             $task = Task::findOrFail($task_id);
@@ -125,7 +249,7 @@ class TaskController extends Controller
             return response()->file(Storage::path($task->file_path));
         }
 
-        return abort(404, 'File not found');
+        return abort(404, 'File tidak ditemukan.');
     }
 
     public function downloadFile($task_id)
@@ -137,6 +261,22 @@ class TaskController extends Controller
             return Storage::download($task->file_path, $task->file_name);
         }
 
-        return abort(404, 'File not found');
+        return abort(404, 'File tidak ditemukan.');
+    }
+
+    public function value_displayed(Request $request, $task_id)
+    {
+        try {
+            $task = Task::findOrFail($task_id);
+            $this->authorize('update', $task);
+
+            $task->update([
+                'value_displayed' => !$task->value_displayed
+            ]);
+
+            return $this->sendResponse('Tugas berhasil ditampilkan nilai.');
+        } catch (\Exception $e) {
+            return $this->sendError('Silakan coba lagi.', [], 500);
+        }
     }
 }

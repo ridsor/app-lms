@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Student;
 use App\Models\Teacher;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TaskSubmission extends Model
@@ -12,13 +13,20 @@ class TaskSubmission extends Model
     protected $fillable = [
         'task_id',
         'student_id',
-        'file',
-        'link',
+        'contents',
         'submitted_at',
-        'is_late',
+        'graded_at',
+        'group_members',
         'score',
         'feedback',
         'graded_by'
+    ];
+
+    protected $casts = [
+        'contents' => 'array',
+        'group_members' => 'array',
+        'submitted_at' => 'datetime',
+        'graded_at' => 'datetime',
     ];
 
     public function task(): BelongsTo
@@ -34,5 +42,13 @@ class TaskSubmission extends Model
     public function grader(): BelongsTo
     {
         return $this->belongsTo(Teacher::class, 'graded_by');
+    }
+
+    public function getFormattedScoreAttribute()
+    {
+        $value = $this->score;
+        return $value == (int)$value
+            ? (int)$value
+            : rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.');
     }
 }

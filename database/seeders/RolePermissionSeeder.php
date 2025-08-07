@@ -39,12 +39,12 @@ class RolePermissionSeeder extends Seeder
             'teaching_journal.create',
             'material.view',
             'material.*',
-            'material.view',
-            'material.*',
             'task.view',
             'task.*',
             'meeting_text.view',
             'meeting_text.*',
+            'task_submission.view',
+            'task_submission.edit',
         ];
 
         foreach ($permissions as $permission) {
@@ -90,6 +90,8 @@ class RolePermissionSeeder extends Seeder
             'material.view',
             'task.view',
             'meeting_text.*',
+            'task_submission.view',
+            'task_submission.edit',
         ]);
 
         // Role Parent - No student management access
@@ -101,6 +103,7 @@ class RolePermissionSeeder extends Seeder
             'material.view',
             'task.view',
             'meeting_text.view',
+            'task_submission.view',
         ]);
 
         // Role Student - No student management access
@@ -111,41 +114,23 @@ class RolePermissionSeeder extends Seeder
             'meeting.view',
             'material.view',
             'meeting_text.view',
+            'task.view',
+            'task_submission.view',
+            'task_submission.edit',
         ]);
 
-        $role = User::create([
+        $admin = User::create([
             'name' => 'Admin',
             'username' => 'admin',
             'password' => bcrypt('password')
         ]);
-        $role->assignRole('admin');
+        $admin->assignRole('admin');
 
-        $role = User::create([
+        $wakasek = User::create([
             'name' => 'Wakil Kepala Sekolah',
             'username' => 'wakasek',
             'password' => bcrypt('password')
         ]);
-        $role->assignRole('vice-principal');
-
-        $student = User::create([
-            'name' => 'Student',
-            'username' => 'student',
-            'password' => bcrypt('password')
-        ]);
-        $student->assignRole('student');
-
-        $teacher = User::create([
-            'name' => 'Teacher',
-            'username' => 'teacher',
-            'password' => bcrypt('password')
-        ]);
-        $teacher->assignRole('teacher');
-
-        $parent = User::create([
-            'name' => 'Parent',
-            'username' => 'parent',
-            'password' => bcrypt('password')
-        ]);
-        $parent->assignRole('parent');
+        $wakasek->assignRole('vice-principal');
     }
 }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 200);
+            $table->string('title');
             $table->text('description')->nullable();
             $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
             $table->enum('type', ['individual', 'group'])->default('individual');
@@ -24,6 +24,7 @@ return new class extends Migration
             $table->dateTime('end_time');
             $table->dateTime('late_submission_time')->nullable();
             $table->boolean('allow_late_submission')->default(false);
+            $table->boolean('value_displayed')->default(false);
             $table->timestamps();
         });
     }

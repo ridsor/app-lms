@@ -97,7 +97,7 @@
                                                             <div class="invalid-feedback"></div>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <div class="d-flex flex-column flatpicker-input">
+                                                            <div class="d-flex flex-column flatpicker-form">
                                                                 <label class="form-label" for="addStartDate">Tanggal
                                                                     Mulai<span class="txt-danger">*</span></label>
                                                                 <input class="form-control flatpickr start-date"
@@ -108,7 +108,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <div class="d-flex flex-column flatpicker-input">
+                                                            <div class="d-flex flex-column flatpicker-form">
                                                                 <label class="form-label" for="addEndDate">Tanggal
                                                                     Selesai<span class="txt-danger">*</span></label>
                                                                 <input class="form-control flatpickr end-date"
@@ -165,7 +165,7 @@
                                                             <div class="invalid-feedback"></div>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <div class="d-flex flex-column flatpicker-input">
+                                                            <div class="d-flex flex-column flatpicker-form">
                                                                 <label class="form-label" for="editStartDate">
                                                                     Tanggal
                                                                     Mulai<span class="txt-danger">*</span>
@@ -178,7 +178,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6">
-                                                            <div class="d-flex flex-column flatpicker-input">
+                                                            <div class="d-flex flex-column flatpicker-form">
                                                                 <label class="form-label" for="editEndDate">
                                                                     Tanggal
                                                                     Selesai<span class="txt-danger">*</span>

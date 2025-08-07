@@ -12,13 +12,13 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
     <style>
-        .view_material_file_path .Archive,
-        .view_material_file_path .Link {
+        .view_file_path .Archive,
+        .view_file_path .Link {
             background: #f5f6f9 !important;
         }
 
-        .dark-only .view_material_file_path .Archive,
-        .dark-only .view_material_file_path .Link {
+        .dark-only .view_file_path .Archive,
+        .dark-only .view_file_path .Link {
             background: #1d1e26 !important;
         }
 
@@ -76,8 +76,9 @@
                             @foreach ($schedule->schedule_times as $schedule_time)
                                 <div class="d-flex gap-2 text-white">
                                     <div class="d-flex align-items-center">
-                                        <span class="icon"><i data-feather="calendar"
-                                                style="width:18px; height: 18px"></i></span>
+                                        <span class="icon d-inline-flex justify-content-center align-items-center">
+                                            <i data-feather="calendar" style="width:18px; height: 18px"></i>
+                                        </span>
                                         <span class="mb-0 ms-2">{{ Helper::getDayName($schedule_time->day) }}</span>
                                     </div>
                                     <div>&middot;</div>
@@ -97,7 +98,11 @@
                 <div class="p-3">
                     <div class="fs-6">Daftar Pertemuan</div>
                 </div>
-                @include('user.schedule.meeting.sidebar')
+                <div class="h-100 flex-grow-1 w-100">
+                    <div class="position-relative overflow-auto custom-scrollbar meeting-sidebar" id="my-sticky">
+                        @include('user.schedule.meeting.sidebar')
+                    </div>
+                </div>
             </div>
             <div class="col-12 col-lg-9">
                 <div class="card my-0 h-100 rounded-responsive shadow-none">
@@ -223,7 +228,7 @@
                                         <div class="collapse" id="addContent">
                                             <div class="p-20">
                                                 <div
-                                                    class="d-flex gap-4 justify-content-evenly flex-wrap flex-column flex-sm-row">
+                                                    class="d-flex gap-4 justify-content-center flex-wrap flex-column flex-sm-row">
                                                     <div
                                                         class="item d-flex flex-sm-column align-items-center row-gap-2 column-gap-3 flex-row">
                                                         <button class="btn border border-secondary-sublte"
@@ -285,6 +290,7 @@
     <script src="{{ asset('assets/js/select/bootstrap-select.min.js') }}"></script>
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
+    <script src="{{ asset('assets/js/flat-pickr/flatpickr.js') }}"></script>
     <script src="{{ asset('assets/js/tooltip-init.js') }}"></script>
     <script src={{ asset('assets/js/schedule-meeting.js') }}></script>
     <script src={{ asset('assets/js/schedule-meeting-material.js') }}></script>
@@ -292,5 +298,4 @@
     <script src={{ asset('assets/js/schedule-meeting-text.js') }}></script>
     <script src="{{ asset('assets/js/custom-file-upload.js') }}"></script>
     <script src="{{ asset('assets/js/sticky.js') }}"></script>
-    <script src="{{ asset('assets/js/flat-pickr/flatpickr.js') }}"></script>
 @endsection

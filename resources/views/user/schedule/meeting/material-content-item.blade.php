@@ -61,7 +61,13 @@
                 </button>
             @endcan
         </div>
-        <div class="mb-4 view_material_file_path">
+        <div class="description mb-3">
+            <p class="px-3 mb-0 fw-medium">Deskripsi</p>
+            <div class="ql-editor text-wrap h-auto">
+                {!! $content->description !!}
+            </div>
+        </div>
+        <div class="mb-3 view_file_path">
             @switch($content->file_type)
                 @case('eBook')
                     <div class="eBook">
@@ -71,10 +77,6 @@
                                 now()->addMinutes(60), // masa berlaku
                                 ['materi_id' => $content->id],
                             );
-
-                            // $fileUrl =
-                            //     'https://pmb.uii.ac.id/wp-content/uploads/2020/04/Panduan-Merubah-Dokumen-ke-Format-PDF-Secara-Online.pdf';
-
                         @endphp
                         <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true" width="100%"
                             height="500px"></iframe>
@@ -99,7 +101,7 @@
 
                 @case('Link')
                     <div class="Link py-3 px-3 mx-2 rounded-2 d-flex align-items-center flex-md-row flex-column gap-2">
-                        <div class="link d-flex align-items-center gap-2 copy-link" style="cursor:pointer;" title="Salin link"
+                        <div class="link d-flex align-items-center gap-2 copy-link" style="cursor:pointer;" title="Salin link" tabindex="0"
                             onclick="handleCopyText('{{ $content->file_path }}')">
                             <div class="px-2"
                                 style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;">
@@ -118,11 +120,6 @@
                 @default
             @endswitch
         </div>
-        <div class="description mb-3">
-            <p class="px-3 mb-0 fw-medium">Deskripsi</p>
-            <div class="ql-editor text-wrap h-auto">
-                {!! $content->description !!}
-            </div>
-        </div>
+
     </div>
 </div>

@@ -89,7 +89,7 @@ $(function () {
 $(document).ready(function () {
     const add_end_time = flatpickr("#addScheduleEnd", {
         defaultDate: new Date(),
-        minDate: new Date(),
+        minTime: new Date(),
         static: true,
         noCalendar: true,
         enableTime: true,
@@ -326,7 +326,7 @@ $(document).ready(function () {
                     );
                     edit_end_time.setDate(res.data.schedule_times[0].end_time);
                     edit_end_time.set(
-                        "minDate",
+                        "minTime",
                         res.data.schedule_times[0].start_time
                     );
 

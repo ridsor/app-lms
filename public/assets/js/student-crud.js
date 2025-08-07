@@ -369,7 +369,7 @@ $(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-
+                                
                     for (const key in errors) {
                         if (
                             $("#editStudentForm [name='" + key + "']").hasClass(

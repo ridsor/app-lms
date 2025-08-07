@@ -25,8 +25,8 @@
         </div>
         <div class="row">
             <div class="col-12 px-0">
-                <div class="card rounded-responsive">
-                    <div class="card-body projects-wrapper">
+                <div class="rounded-responsive">
+                    <div class="projects-wrapper">
                         <div class="tab-content" id="top-tabContent">
                             <div class="tab-pane fade show active" id="top-home" role="tabpanel"
                                 aria-labelledby="top-home-tab">

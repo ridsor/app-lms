@@ -204,14 +204,14 @@
                                                     <td>
                                                         <p class="f-light mb-0">
                                                             {{ $attendance['student']->name }}</p>
-                                                        <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
+                                                        <p class="f-light mb-0">{{ $attendance['student']->nis }}</p>
                                                     </td>
                                                     <td>
                                                         {!! Helper::getAttendanceLabel($attendance['status']) !!}
                                                     </td>
                                                     <td class="update-value">
                                                         <p class="f-light mb-0">
-                                                            {{ $attendance['editby'] ? $attendance['editby']->username . ' | ' . $attendance['updated_at']->translatedFormat('l, d F Y - H:i:s') . ' WIT' : ' - ' }}
+                                                            {{ $attendance['editby'] ? $attendance['editby']->name . ' | ' . $attendance['updated_at']->translatedFormat('l, d F Y - H:i:s') . ' WIT' : ' - ' }}
                                                         </p>
                                                     </td>
                                                     <td class="status-input" style="padding: 12px 20px; display: none"

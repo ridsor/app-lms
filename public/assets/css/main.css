@@ -3,7 +3,7 @@
     overflow-wrap: break-word;
 }
 
-.flatpicker-input > div {
+.flatpicker-form > div {
     width: 100% !important;
 }
 
@@ -196,10 +196,15 @@ body.dark-only
     background-color: #333 !important;
 }
 
-.view_material_file_path .file {
+.view_file_path .file {
     background: #f5f6f9;
 }
 
-.dark-only .view_material_file_path .file {
+.dark-only .view_file_path .file {
     background: #1d1e26;
+}
+
+/* tags */
+.dark-only .tagify__dropdown > div {
+    background: rgb(38, 41, 50) !important;
 }

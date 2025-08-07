@@ -171,9 +171,9 @@
                                                     <div class="profile-media">
                                                         <img class="rounded-circle"
                                                             style="
-                                  width: 50px;
-                                  height: 50px;
-                                  object-fit: cover;"
+                                                                width: 50px;
+                                                                height: 50px;
+                                                                object-fit: cover;"
                                                             id="teacher-image"
                                                             src="{{ asset('assets/svg/user-placeholder.svg') }}"
                                                             alt="user">
@@ -231,7 +231,7 @@
                                             <td>
                                                 <p class="f-light mb-0">
                                                     {{ $attendance['student']->name }}</p>
-                                                <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
+                                                <p class="f-light mb-0">{{ $attendance['student']->nis }}</p>
                                             </td>
                                             @foreach ($attendance['attendances'] as $status)
                                                 <td class="text-center">

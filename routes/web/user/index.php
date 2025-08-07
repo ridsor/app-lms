@@ -15,6 +15,7 @@ use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\MeetingController;
 use App\Http\Controllers\User\MeetingTextController;
 use App\Http\Controllers\User\TaskController;
+use App\Http\Controllers\User\TaskSubmissionController;
 use App\Http\Controllers\User\TeachingJournalController;
 use Illuminate\Support\Facades\Route;
 
@@ -78,10 +79,14 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
 
     Route::post('/jadwal/pertemuan/{meeting_id}/tugas', [TaskController::class, 'store'])->name('user.task.store');
     Route::get('/jadwal/pertemuan/tugas/{task_id}', [TaskController::class, 'show'])->name('user.task.show');
+    Route::get('/jadwal/pertemuan/tugas/{task_id}/pengumpulan', [TaskController::class, 'collection'])->name('user.task.collection');
+    Route::get('/jadwal/pertemuan/tugas/{task_id}/edit', [TaskController::class, 'edit'])->name('user.task.edit');
     Route::put('/jadwal/pertemuan/tugas/{task_id}', [TaskController::class, 'update'])->name('user.task.update');
     Route::delete('/jadwal/pertemuan/tugas/{task_id}', [TaskController::class, 'destroy'])->name('user.task.destroy');
-    Route::get('/tugas/{task_id}/file', [TaskController::class, 'getFile'])->name('user.task.file.get');
-    Route::get('/tugas/{task_id}/file/download', [TaskController::class, 'downloadFile'])->name('user.task.file.download');
+    Route::patch('/jadwal/pertemuan/tugas/{task_id}/tampilkan_nilai', [TaskController::class, 'value_displayed'])->name('user.task.value_displayed');
+    Route::get('/jadwal/pertemuan/tugas/{task_id}/penilaian/{page?}', [TaskSubmissionController::class, 'evaluation'])->name('user.task.evaluation');
+    Route::post('/jadwal/pertemuan/tugas/penilaian/{task_submissio_id}', [TaskSubmissionController::class, 'postEvaluation'])->name('user.task.evaluation.post');
+    Route::get('/jadwal/pertemuan/tugas/penilaian/{task_submission_id}/{id}/file', [TaskSubmissionController::class, 'downloadFile'])->name('user.task.evaluation.file.download');
 
     Route::post('/jadwal/pertemuan/{meeting_id}/text', [MeetingTextController::class, 'store'])->name('user.meeting_text.store');
     Route::get('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'index'])->name('user.meeting_text.index');
@@ -95,4 +100,10 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::get('/kehadiran/kelas', [AttendanceController::class, 'classList'])->name('user.attendance.classlist');
     Route::get('/kehadiran/kelas/{classId}', [AttendanceController::class, 'scheduleByKelas'])->name('user.attendance.schedulebyclass');
     Route::get('/kehadiran/jadwal/{id}', [AttendanceController::class, 'showAttendancRecap'])->name('user.attendance.showAttendancRecap');
+
+    Route::get('/tugas', [TaskController::class, 'index'])->name('user.task.index');
+    Route::get('/tugas/{task_id}/file', [TaskController::class, 'getFile'])->name('user.task.file.get');
+    Route::get('/tugas/{task_id}/file/download', [TaskController::class, 'downloadFile'])->name('user.task.file.download');
+    Route::get('/penyerahan-tugas/{task_id}', [TaskSubmissionController::class, 'show'])->name('user.tasksubmission.show');
+    Route::post('/penyerahan-tugas/{task_id}', [TaskSubmissionController::class, 'submitTask'])->name('user.tasksubmission.store');
 });

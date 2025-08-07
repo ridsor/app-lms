@@ -130,10 +130,12 @@ class AttendanceController extends Controller
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
       'class.major' => fn($query) => $query->select('id', 'name'),
       'class.students' => function ($query) use ($request) {
-        $query->select('id', 'name', 'nisn', 'user_id', 'class_id');
-        // if ($request->user()->hasRole('student')) {
-        //   $query->where('user_id', $request->user()->id);
-        // }
+        $query->select('id', 'name', 'nis', 'user_id', 'class_id', 'parent_id');
+        if ($request->user()->hasRole('parent')) {
+          $query->where('parent_id', $request->user()->id);
+        } elseif ($request->user()->hasRole('student')) {
+          $query->where('user_id', $request->user()->id);
+        }
       },
       'class.students.user' => fn($query) => $query->select('id', 'name'),
       'period' => fn($query) => $query->select('id', 'semester', 'academic_year'),
@@ -206,9 +208,9 @@ class AttendanceController extends Controller
         'schedule.subject:id,name',
         'schedule.class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
         'schedule.class.major:id,name',
-        'schedule.class.students:id,class_id,user_id,nisn,name',
+        'schedule.class.students:id,class_id,user_id,nis,name',
         'attendances:id,meeting_id,user_id,status,edit_by,updated_at',
-        'attendances.editby:id,username',
+        'attendances.editby:id,name',
         'schedule_time:id,schedule_id,day,meeting_method,start_time,end_time',
       ])->withCount('attendances')->find($meeting_id);
 

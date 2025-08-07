@@ -34,7 +34,11 @@
                     <div class="p-3">
                         <div class="fs-6">Daftar Pertemuan</div>
                     </div>
-                    @include('user.schedule.meeting.sidebar')
+                    <div class="h-100 flex-grow-1 w-100">
+                        <div class="position-relative overflow-auto custom-scrollbar meeting-sidebar" id="my-sticky">
+                            @include('user.schedule.meeting.sidebar')
+                        </div>
+                    </div>
                 </div>
                 <div class="col-12 col-lg-9 p-0">
                     <div class="card h-100 my-0 rounded-responsive">
@@ -87,10 +91,13 @@
                                     <label class="form-label">Waktu</label>
                                     <div class="d-flex flex-column gap-1">
                                         @foreach ($schedule->schedule_times as $schedule_time)
-                                            <div class="d-flex gap-2 c-o-light f-w-600 flex-wrap text-nowrap">
+                                            <div
+                                                class="d-flex gap-2 align-items-center c-o-light f-w-600 flex-wrap text-nowrap">
                                                 <div class="d-flex align-items-center">
-                                                    <span><i data-feather="calendar"
-                                                            style="width:18px; height: 18px"></i></span>
+                                                    <span
+                                                        class="icon d-inline-flex justify-content-center align-items-center">
+                                                        <i data-feather="calendar" style="width:18px; height: 18px"></i>
+                                                    </span>
                                                     <span class="mb-0 ms-2"
                                                         id="date">{{ Helper::getDayName($schedule_time->day) }},
                                                     </span>
@@ -144,9 +151,9 @@
                                                 <div class="profile-media">
                                                     <img class="rounded-circle"
                                                         style="
-                                width: 50px;
-                                height: 50px;
-                                object-fit: cover;"
+                                                            width: 50px;
+                                                            height: 50px;
+                                                            object-fit: cover;"
                                                         id="teacher-image"
                                                         src="{{ $student->user->image ? asset('storage/' . $student->user->image) : asset('assets/svg/user-placeholder.svg') }}"
                                                         alt="user">
@@ -154,7 +161,7 @@
                                                 <div class="d-flex flex-column">
                                                     <p class="mb-0 c-o-light fw-medium" id="teacher">{{ $student->name }}
                                                     </p>
-                                                    <p class="mb-0 c-o-light" id="teacher">{{ $student->nisn }}</p>
+                                                    <p class="mb-0 c-o-light" id="teacher">{{ $student->nis }}</p>
                                                 </div>
                                             </div>
                                         </div>

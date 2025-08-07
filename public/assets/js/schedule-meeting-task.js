@@ -9,6 +9,149 @@ var editTaskDescriptionQuill = new Quill("#editTaskDescriptionQuill", {
     placeholder: "Tulis deskripsi",
 });
 
+const formatTime = (date) => {
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
+};
+
+const indonesianLocale = {
+    firstDayOfWeek: 1, // Mulai dari Senin
+    weekdays: {
+        shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+        longhand: [
+            "Minggu",
+            "Senin",
+            "Selasa",
+            "Rabu",
+            "Kamis",
+            "Jumat",
+            "Sabtu",
+        ],
+    },
+    months: {
+        shorthand: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "Mei",
+            "Jun",
+            "Jul",
+            "Agu",
+            "Sep",
+            "Okt",
+            "Nov",
+            "Des",
+        ],
+        longhand: [
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember",
+        ],
+    },
+};
+
+const add_start_time = flatpickr("#addTaskStartTime", {
+    defaultDate: new Date(),
+    minDate: "today",
+    minTime: formatTime(new Date()),
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    time_24hr: true,
+    locale: indonesianLocale,
+    onChange: function (selectedDates) {
+        if (selectedDates.length > 0) {
+            const selectedDate = selectedDates[0];
+            add_end_time.set({
+                minDate: selectedDate,
+                minTime: formatTime(selectedDate),
+            });
+            add_end_time.setDate(selectedDate);
+        }
+    },
+});
+
+const add_end_time = flatpickr("#addTaskEndTime", {
+    defaultDate: new Date(),
+    minDate: "today",
+    minTime: formatTime(new Date()),
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    time_24hr: true,
+    locale: indonesianLocale,
+    onChange: function (selectedDates) {
+        if (selectedDates.length > 0) {
+            const selectedDate = selectedDates[0];
+            add_late_submission_time.set({
+                minDate: selectedDate,
+                minTime: formatTime(selectedDate),
+            });
+        }
+    },
+});
+
+const add_late_submission_time = flatpickr("#addLateSubmissionTime", {
+    defaultDate: new Date(),
+    minDate: "today",
+    minTime: formatTime(new Date()),
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    time_24hr: true,
+    locale: indonesianLocale,
+});
+
+const edit_start_time = flatpickr("#editTaskStartTime", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    time_24hr: true,
+    minDate: "today",
+    minTime: formatTime(new Date()),
+    locale: indonesianLocale,
+    onChange: function (selectedDates) {
+        if (selectedDates.length > 0) {
+            const selectedDate = selectedDates[0];
+            edit_end_time.set({
+                minDate: selectedDate,
+                minTime: formatTime(selectedDate),
+            });
+            edit_end_time.setDate(selectedDate);
+        }
+    },
+});
+
+const edit_end_time = flatpickr("#editTaskEndTime", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    time_24hr: true,
+    locale: indonesianLocale,
+    onChange: function (selectedDates) {
+        if (selectedDates.length > 0) {
+            const selectedDate = selectedDates[0];
+            edit_late_submission_time.set({
+                minDate: selectedDate,
+                minTime: formatTime(selectedDate),
+            });
+        }
+    },
+});
+
+const edit_late_submission_time = flatpickr("#editLateSubmissionTime", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i",
+    time_24hr: true,
+    locale: indonesianLocale,
+});
+
 $(document).ready(function () {
     $("[name='allow_late_submission']").on("change", function () {
         const value = $(this).is(":checked");
@@ -83,9 +226,6 @@ $(document).ready(function () {
                             ) ||
                             $("#addTaskForm [name='" + key + "']").hasClass(
                                 "quill"
-                            ) ||
-                            $("#addTaskForm [name='" + key + "']").hasClass(
-                                "flatpicker"
                             )
                         ) {
                             $("#addTaskForm [name='" + key + "']")
@@ -195,14 +335,6 @@ $(document).ready(function () {
         });
     });
 
-    addTaskDescriptionQuill.on("text-change", function () {
-        var value = addTaskDescriptionQuill.root.innerHTML;
-        var descriptionText = addTaskDescriptionQuill.getText().trim();
-        if (descriptionText === "" || descriptionText === "\n") {
-            value = "";
-        }
-        $("#addTaskForm [name='description']").val(value);
-    });
     editTaskDescriptionQuill.on("text-change", function () {
         var value = editTaskDescriptionQuill.root.innerHTML;
         var descriptionText = editTaskDescriptionQuill.getText().trim();
@@ -210,6 +342,15 @@ $(document).ready(function () {
             value = "";
         }
         $("#editTaskForm [name='description']").val(value);
+        console.log(value);
+    });
+    addTaskDescriptionQuill.on("text-change", function () {
+        var value = addTaskDescriptionQuill.root.innerHTML;
+        var descriptionText = addTaskDescriptionQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#addTaskForm [name='description']").val(value);
     });
 });
 
@@ -223,7 +364,7 @@ function handleEditTask(e, id) {
         .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
     $.ajax({
-        url: `/jadwal/pertemuan/tugas/${id}`,
+        url: `/jadwal/pertemuan/tugas/${id}/edit`,
         method: "GET",
         success: function (res) {
             if (res.success && res.data) {
@@ -235,10 +376,26 @@ function handleEditTask(e, id) {
                     )
                 );
                 $("#editTaskForm [name='type']").val(res.data.type);
-                $("#editTaskForm [name='start_time']").val(res.data.start_time);
-                $("#editTaskForm [name='end_time']").val(res.data.end_time);
-                $("#editTaskForm [name='late_submission_time']").val(
+                edit_start_time.setDate(new Date(res.data.start_time));
+                edit_end_time.setDate(new Date(res.data.end_time));
+                edit_end_time.set("minTime", new Date(res.data.start_time));
+                edit_end_time.set("minDate", new Date(res.data.start_time));
+                edit_late_submission_time.setDate(
                     res.data.late_submission_time
+                        ? new Date(res.data.late_submission_time)
+                        : null
+                );
+                edit_late_submission_time.set(
+                    "minTime",
+                    res.data.late_submission_time
+                        ? new Date(res.data.late_submission_time)
+                        : null
+                );
+                edit_late_submission_time.set(
+                    "minDate",
+                    res.data.late_submission_time
+                        ? new Date(res.data.late_submission_time)
+                        : null
                 );
                 $("#editTaskForm [name='allow_late_submission']").prop(
                     "checked",
@@ -276,225 +433,6 @@ function handleEditTask(e, id) {
                             }
                         });
                 }
-
-                // Inisialisasi flatpickr untuk tanggal
-                const late_submission_time = flatpickr(
-                    "#editLateSubmissionTime",
-                    {
-                        defaultDate: res.data.late_submission_time
-                            ? new Date(res.data.late_submission_time)
-                            : null,
-                        static: true,
-                        enableTime: true,
-                        dateFormat: "Y-m-d H:i",
-                        time_24hr: true,
-                        locale: "id",
-                        appendTo: document.getElementById("editTaskModal"),
-                        minDate: "today",
-                        locale: {
-                            firstDayOfWeek: 1, // Mulai dari Senin
-                            weekdays: {
-                                shorthand: [
-                                    "Min",
-                                    "Sen",
-                                    "Sel",
-                                    "Rab",
-                                    "Kam",
-                                    "Jum",
-                                    "Sab",
-                                ],
-                                longhand: [
-                                    "Minggu",
-                                    "Senin",
-                                    "Selasa",
-                                    "Rabu",
-                                    "Kamis",
-                                    "Jumat",
-                                    "Sabtu",
-                                ],
-                            },
-                            months: {
-                                shorthand: [
-                                    "Jan",
-                                    "Feb",
-                                    "Mar",
-                                    "Apr",
-                                    "Mei",
-                                    "Jun",
-                                    "Jul",
-                                    "Agu",
-                                    "Sep",
-                                    "Okt",
-                                    "Nov",
-                                    "Des",
-                                ],
-                                longhand: [
-                                    "Januari",
-                                    "Februari",
-                                    "Maret",
-                                    "April",
-                                    "Mei",
-                                    "Juni",
-                                    "Juli",
-                                    "Agustus",
-                                    "September",
-                                    "Oktober",
-                                    "November",
-                                    "Desember",
-                                ],
-                            },
-                        },
-                    }
-                );
-                const end_time = flatpickr("#editTaskEndTime", {
-                    defaultDate: new Date(res.data.end_time),
-                    static: true,
-                    enableTime: true,
-                    dateFormat: "Y-m-d H:i",
-                    time_24hr: true,
-                    locale: "id",
-                    appendTo: document.getElementById("editTaskModal"),
-                    minDate: "today",
-                    onChange: function (selectedDates, dateStr, instance) {
-                        if (selectedDates.length > 0) {
-                            const selectedDate = selectedDates[0];
-                            late_submission_time.set("minDate", selectedDate);
-                            const selectedTime =
-                                selectedDate.getHours() +
-                                ":" +
-                                selectedDate.getMinutes();
-                            late_submission_time.set("minTime", selectedTime);
-                        }
-                    },
-                    locale: {
-                        firstDayOfWeek: 1, // Mulai dari Senin
-                        weekdays: {
-                            shorthand: [
-                                "Min",
-                                "Sen",
-                                "Sel",
-                                "Rab",
-                                "Kam",
-                                "Jum",
-                                "Sab",
-                            ],
-                            longhand: [
-                                "Minggu",
-                                "Senin",
-                                "Selasa",
-                                "Rabu",
-                                "Kamis",
-                                "Jumat",
-                                "Sabtu",
-                            ],
-                        },
-                        months: {
-                            shorthand: [
-                                "Jan",
-                                "Feb",
-                                "Mar",
-                                "Apr",
-                                "Mei",
-                                "Jun",
-                                "Jul",
-                                "Agu",
-                                "Sep",
-                                "Okt",
-                                "Nov",
-                                "Des",
-                            ],
-                            longhand: [
-                                "Januari",
-                                "Februari",
-                                "Maret",
-                                "April",
-                                "Mei",
-                                "Juni",
-                                "Juli",
-                                "Agustus",
-                                "September",
-                                "Oktober",
-                                "November",
-                                "Desember",
-                            ],
-                        },
-                    },
-                });
-                const start_time = flatpickr("#editTaskStartTime", {
-                    defaultDate: new Date(res.data.start_time),
-                    static: true,
-                    enableTime: true,
-                    dateFormat: "Y-m-d H:i",
-                    time_24hr: true,
-                    locale: "id",
-                    minDate: "today",
-                    minTime: "00:00",
-                    appendTo: document.getElementById("editTaskModal"),
-                    onChange: function (selectedDates, dateStr, instance) {
-                        if (selectedDates.length > 0) {
-                            const selectedDate = selectedDates[0];
-                            end_time.set("minDate", selectedDate);
-                            const selectedTime =
-                                selectedDate.getHours() +
-                                ":" +
-                                selectedDate.getMinutes();
-                            end_time.set("minTime", selectedTime);
-                        }
-                    },
-                    locale: {
-                        firstDayOfWeek: 1, // Mulai dari Senin
-                        weekdays: {
-                            shorthand: [
-                                "Min",
-                                "Sen",
-                                "Sel",
-                                "Rab",
-                                "Kam",
-                                "Jum",
-                                "Sab",
-                            ],
-                            longhand: [
-                                "Minggu",
-                                "Senin",
-                                "Selasa",
-                                "Rabu",
-                                "Kamis",
-                                "Jumat",
-                                "Sabtu",
-                            ],
-                        },
-                        months: {
-                            shorthand: [
-                                "Jan",
-                                "Feb",
-                                "Mar",
-                                "Apr",
-                                "Mei",
-                                "Jun",
-                                "Jul",
-                                "Agu",
-                                "Sep",
-                                "Okt",
-                                "Nov",
-                                "Des",
-                            ],
-                            longhand: [
-                                "Januari",
-                                "Februari",
-                                "Maret",
-                                "April",
-                                "Mei",
-                                "Juni",
-                                "Juli",
-                                "Agustus",
-                                "September",
-                                "Oktober",
-                                "November",
-                                "Desember",
-                            ],
-                        },
-                    },
-                });
             }
         },
         error: function (xhr) {
@@ -511,6 +449,7 @@ function handleEditTask(e, id) {
 function handleDeleteTask(e, id) {
     e.preventDefault();
     const deleteBtn = $(e.currentTarget);
+    const redirectWhenSuccess = deleteBtn.data("redirect");
     const originalHtml = deleteBtn.html();
 
     Swal.fire({
@@ -538,7 +477,11 @@ function handleDeleteTask(e, id) {
                         const toast = new bootstrap.Toast($("#toast-success"));
                         $("#toast-success #toast-text").text(response.message);
                         toast.show();
-                        location.reload();
+                        if (redirectWhenSuccess) {
+                            window.location.href = redirectWhenSuccess;
+                        } else {
+                            location.reload();
+                        }
                     }
                 },
                 error: function (xhr) {
@@ -553,188 +496,3 @@ function handleDeleteTask(e, id) {
         }
     });
 }
-
-$("#addTaskModal").on("shown.bs.modal", function () {
-    const late_submission_time = flatpickr("#addLateSubmissionTime", {
-        static: true,
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true,
-        locale: "id",
-        appendTo: document.getElementById("addTaskModal"),
-        minDate: "today",
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
-    });
-    const end_time = flatpickr("#addTaskEndTime", {
-        static: true,
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true,
-        locale: "id",
-        appendTo: document.getElementById("addTaskModal"),
-        minDate: "today",
-        onChange: function (selectedDates, dateStr, instance) {
-            if (selectedDates.length > 0) {
-                const selectedDate = selectedDates[0];
-                late_submission_time.set("minDate", selectedDate);
-                const selectedTime =
-                    selectedDate.getHours() + ":" + selectedDate.getMinutes();
-                late_submission_time.set("minTime", selectedTime);
-            }
-        },
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
-    });
-    const start_time = flatpickr("#addTaskStartTime", {
-        defaultDate: new Date(),
-        static: true,
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true,
-        locale: "id",
-        minDate: "today",
-        minTime: "00:00",
-        appendTo: document.getElementById("addTaskModal"),
-        onChange: function (selectedDates, dateStr, instance) {
-            if (selectedDates.length > 0) {
-                const selectedDate = selectedDates[0];
-                end_time.set("minDate", selectedDate);
-                const selectedTime =
-                    selectedDate.getHours() + ":" + selectedDate.getMinutes();
-                end_time.set("minTime", selectedTime);
-            }
-        },
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
-    });
-});

@@ -22,7 +22,8 @@ class Task extends Model
         'start_time',
         'end_time',
         'late_submission_time',
-        'allow_late_submission'
+        'allow_late_submission',
+        'value_displayed'
     ];
 
     protected $casts = [
@@ -68,5 +69,30 @@ class Task extends Model
     public function getIsLateSubmissionAllowedWithTimeAttribute(): bool
     {
         return $this->allow_late_submission && $this->late_submission_time && now() > $this->end_time && now() < $this->late_submission_time;
+    }
+
+    public function scopeFilterByPermission($query, User $user)
+    {
+        if ($user->can('task.*')) {
+            return $query;
+        }
+
+        if ($user->can('task.view')) {
+            if ($user->hasRole('teacher')) {
+                return $query->whereHas('meeting.schedule', function ($q) use ($user) {
+                    $q->where('teacher_id', $user->teacher->id);
+                });
+            }
+            if ($user->hasRole('student')) {
+                return $query->whereHas('meeting.schedule', function ($q) use ($user) {
+                    $q->where('class_id', $user->student->class_id);
+                });
+            }
+            if ($user->hasRole('parent')) {
+                return $query->whereHas('meeting.schedule', function ($q) use ($user) {
+                    $q->where('class_id', $user->parent->class_id);
+                });
+            }
+        }
     }
 }

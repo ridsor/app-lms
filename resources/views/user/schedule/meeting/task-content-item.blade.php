@@ -6,8 +6,8 @@
 
 <div class="item d-flex w-100 border rounded-1 flex-column">
     <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse"
-        data-bs-target="#material-content-{{ $content->id }}" aria-expanded="false"
-        aria-controls="material-content-{{ $content->id }}">
+        data-bs-target="#task-content-{{ $content->id }}" aria-expanded="false"
+        aria-controls="task-content-{{ $content->id }}">
         <div class="row g-0 align-items-center w-100">
             <div class="col-12 col-md-auto">
                 <div class="d-flex flex-column align-items-center py-3 px-4">
@@ -47,7 +47,7 @@
                             </div>
                             <div class="col-12 col-md-auto d-flex justify-content-center align-items-center">
                                 <span class="icon d-flex align-items-center justify-content-center">
-                                    <i data-feather="minus"></i>
+                                    <i data-feather="minus" style="width:18px; height: 18px"></i>
                                 </span>
                             </div>
                             <div class="col-12 col-md-auto d-flex align-items-center gap-2 justify-content-center">
@@ -72,13 +72,9 @@
             </div>
         </div>
     </button>
-    <div class="accordion-collapse collapse w-100" id="material-content-{{ $content->id }}">
+    <div class="accordion-collapse collapse w-100" id="task-content-{{ $content->id }}">
         <div class="d-flex justify-content-end gap-2 p-3">
             @can('material.*')
-                <a style="width: 38px; height: 38px;"
-                    class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
-                    <i data-feather="eye" style="width: 20px; height: 20px"></i>
-                </a>
                 <button class="btn d-flex align-items-center bg-20-warning border justify-content-center text-warning p-2"
                     style="width: 38px; height: 38px;" onclick="handleEditTask(event, {{ $content->id }})">
                     <i data-feather="edit-2" style="width: 20px; height: 20px"></i>
@@ -91,13 +87,20 @@
         </div>
         <div class="d-flex px-3 mb-2 justify-content-between align-items-center">
             <p class="fw-medium mb-0">Tugas {{ Helper::getTaskTypeLabel($content->type) }}</p>
-            @if ($content->not_yet_rated)
+            @if ($content?->not_yet_rated)
                 <span class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum dinilai <span
                         class="badge ms-1 badge-danger">{{ $content->not_yet_rated }}</span></span>
             @endif
         </div>
+        <div class="description mb-2">
+            @if ($content->description)
+                <div class="ql-editor text-wrap h-auto">
+                    {!! $content->description !!}
+                </div>
+            @endif
+        </div>
         @if ($content->file_path)
-            <div class="mb-2 view_material_file_path">
+            <div class="mb-3 view_file_path">
                 <div class="Archive py-3 px-3 mx-2 rounded-2 d-flex align-items-center flex-column gap-1">
                     <div style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;">
                         <i class="fa fa-file text-primary fs-2"></i>
@@ -113,12 +116,21 @@
                 </div>
             </div>
         @endif
-        <div class="description mb-3">
-            @if ($content->description)
-                <div class="ql-editor text-wrap h-auto">
-                    {!! $content->description !!}
-                </div>
-            @endif
-        </div>
+        @role('student')
+            <div class="mb-3 px-3 d-flex justify-content-end">
+                <a href="{{ route('user.tasksubmission.show', ['task_id' => $content->id]) }}"
+                    class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
+                    Lihat
+                </a>
+            </div>
+        @endrole
+        @role('teacher')
+            <div class="mb-3 px-3 d-flex justify-content-end">
+                <a href="{{ route('user.task.show', ['task_id' => $content->id]) }}"
+                    class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
+                    Lihat
+                </a>
+            </div>
+        @endrole
     </div>
 </div>

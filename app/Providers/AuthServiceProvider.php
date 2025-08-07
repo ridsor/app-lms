@@ -17,7 +17,9 @@ use App\Policies\MaterialPolicy;
 use App\Policies\MeetingPolicy;
 use App\Policies\MeetingTextPolicy;
 use App\Models\Task;
+use App\Models\TaskSubmission;
 use App\Policies\TaskPolicy;
+use App\Policies\TaskSubmissionPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -36,6 +38,7 @@ class AuthServiceProvider extends ServiceProvider
     Material::class => MaterialPolicy::class,
     MeetingText::class => MeetingTextPolicy::class,
     Task::class => TaskPolicy::class,
+    TaskSubmission::class => TaskSubmissionPolicy::class,
   ];
 
   /**

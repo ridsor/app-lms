@@ -59,17 +59,18 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid">
+    <div class="container-fluid p-0">
         <div class="user-profile">
-            <div class="row"><!-- user profile first-style start-->
+            <div class="row g-0"><!-- user profile first-style start-->
                 <div class="col-sm-12 mb-3">
-                    <div class="card hovercard text-center common-user-image"
+                    <div class="card rounded-responsive hovercard text-center common-user-image"
                         style="background: linear-gradient(103.75deg,#33B1EE -13.9%,var(--theme-default) 79.68%)">
                         <div class="cardheader" style="height:300px">
                             <div class="user-image">
                                 <div class="avatar">
                                     <div class="common-align">
-                                        <div class="bg-light"><img id="output" style="aspect-ratio: 1/1 !important; object-fit: cover; min-height: 120px;"
+                                        <div class="bg-light"><img id="output"
+                                                style="aspect-ratio: 1/1 !important; object-fit: cover; min-height: 120px; min-width: 120px"
                                                 src="{{ auth()->user()->image ? asset('storage/' . auth()->user()->image) : asset('assets/svg/user-placeholder.svg') }}"
                                                 alt="Profile Image"><input type="file"
                                                 accept="image/png, image/jpg, image/jpeg" onchange="loadFile(event)">
@@ -90,7 +91,7 @@
                 </div>
                 @role('teacher')
                     <div class="col-12">
-                        <div class="card user-bio">
+                        <div class="card user-bio rounded-responsive">
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-lg-3 col-md-4 col-sm-6">
@@ -131,7 +132,7 @@
                 @endrole
                 @role('student')
                     <div class="col-12">
-                        <div class="card user-bio">
+                        <div class="card user-bio rounded-responsive">
                             <div class="card-body">
                                 <div class="row g-3">
                                     <div class="col-lg-3 col-md-4 col-sm-6">
@@ -202,7 +203,7 @@
                                         <div class="tab-pane fade show active" id="security" role="tabpanel"
                                             aria-labelledby="security-tab">
                                             <div class="notification">
-                                                <div class="card">
+                                                <div class="card rounded-responsive">
                                                     <div class="card-header">
                                                         <h5>Keamanan</h5>
                                                     </div>
