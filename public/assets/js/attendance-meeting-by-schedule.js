@@ -1,65 +1,27 @@
-// attendance-crud.js
 $(function () {
-    // filter
-    const params = getQueryParams();
-    if (params.major) {
-        $("#major-filter").val(params.major);
-    }
-    if (params.class) {
-        $("#class-filter").val(params.class);
-    }
-    if (params.level) {
-        $("#level-filter").val(params.level);
-    }
-
     // Halaman index: daftar jadwal (schedule)
     if ($("#attendance-schedule-table").length) {
         var t = $("#attendance-schedule-table").DataTable({
             processing: true,
             serverSide: true,
             ajax: $.fn.dataTable.pipeline({
-                url: "/kehadiran",
+                url: `/kehadiran/jadwal/${schedule_id}/pertemuan`,
                 pages: 5,
-                data: function (d) {
-                    let filterParams = getQueryParams();
-                    $.extend(d, filterParams);
-                },
+                data: function (d) {},
             }),
             columns: [
                 {
                     data: null,
-                    name: "No",
+                    name: "Pertemuan",
                     orderable: false,
                     searchable: false,
                     render: function (data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart + 1;
+                        return `Pertemuan ke-${
+                            meta.row + meta.settings._iDisplayStart + 1
+                        }`;
                     },
-                    className: "text-center",
-                    width: "40px",
                 },
-                { data: "Mata Pelajaran", name: "subjects.name" },
-                role == "teacher"
-                    ? {
-                          data: "Kelas",
-                          name: "class_name",
-                          searchable: false,
-                          orderable: false,
-                      }
-                    : null,
-                role == "student" || role == "parent"
-                    ? {
-                          data: "Guru",
-                          name: "teachers.name",
-                          searchable: false,
-                          orderable: false,
-                      }
-                    : null,
-                {
-                    data: "Rekap",
-                    name: "subjects.name",
-                    orderable: false,
-                    searchable: false,
-                },
+                { data: "Waktu", name: "date", searchable: false },
                 {
                     data: "",
                     orderable: false,
@@ -91,8 +53,8 @@ $(function () {
             lengthMenu: [10, 25, 50, 100],
             responsive: true,
             autoWidth: false,
-            searchable: true,
-            searching: true,
+            searchable: false,
+            searching: false,
             searchDelay: 300,
             order: [],
         });

@@ -108,35 +108,51 @@
                 <div class="card my-0 h-100 rounded-responsive shadow-none">
                     <div class="card-body px-2 py-4 px-sm-3">
                         <div class="d-flex flex-column h-100 gap-3">
-                            <div class="d-flex flex-column flex-sm-row justify-content-between gap-3 flex-wrap w-100">
-                                <div class="text-nowrap">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <h3>Pertemuan {{ $meeting->meeting_at }}</h3>
-                                        <p class="mb-0 c-o-light fw-medium fs-6">
-                                            <span
-                                                class="badge badge-light-primary">{{ Helper::getMeetingTypeLabel($meeting->type) }}</span>
-                                        </p>
+                            <div class="w-100">
+                                <div
+                                    class="mb-3 d-flex flex-column flex-sm-row justify-content-between gap-3 flex-wrap w-100">
+                                    <div class="text-nowrap">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <h3>Pertemuan {{ $meeting->meeting_at }}</h3>
+                                            <p class="mb-0 c-o-light fw-medium fs-6">
+                                                {!! Helper::getMeetingTypeLabel($meeting->type) !!}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a href="{{ route('user.attendance.edit', ['schedule_id' => $schedule->id, 'meeting_id' => $meeting->id]) }}"
+                                            class="d-flex gap-2 align-items-center">
+                                            <div class="rounded-circle ratio ratio-1x1 badge badge-light-warning"
+                                                style="width: 40px; height: 40px;">
+                                                <i data-feather="bar-chart-2" class="p-2 w-100 h-100">
+                                                </i>
+                                            </div>
+                                            <div>
+                                                <p class="fw-semibold" style="margin-bottom:4px">
+                                                    {{ $attendancePercentage }}%
+                                                </p>
+                                                <div class="progress" style="width: 100px; height:4px;">
+                                                    <div class="progress-bar bg-warning" role="progressbar"
+                                                        style="width: {{ $attendancePercentage }}%"
+                                                        aria-valuenow="{{ $attendancePercentage }}" aria-valuemin="0"
+                                                        aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                        </a>
                                     </div>
                                 </div>
-                                <div style="align-self: end">
-                                    <a href="{{ route('user.attendance.edit', ['schedule_id' => $schedule->id, 'meeting_id' => $meeting->id]) }}"
-                                        class="d-flex gap-2 align-items-center">
-                                        <div class="rounded-circle ratio ratio-1x1 badge badge-light-warning"
-                                            style="width: 40px; height: 40px;">
-                                            <i data-feather="bar-chart-2" class="p-2 w-100 h-100">
-                                            </i>
-                                        </div>
-                                        <div>
-                                            <p class="fw-semibold" style="margin-bottom:4px">{{ $attendancePercentage }}%
-                                            </p>
-                                            <div class="progress" style="width: 100px; height:4px;">
-                                                <div class="progress-bar bg-warning" role="progressbar"
-                                                    style="width: {{ $attendancePercentage }}%"
-                                                    aria-valuenow="{{ $attendancePercentage }}" aria-valuemin="0"
-                                                    aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
-                                    </a>
+                                <div class="d-flex gap-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="icon d-inline-flex justify-content-center align-items-center">
+                                            <i data-feather="calendar" style="width:18px; height: 18px"></i>
+                                        </span>
+                                        <span class="mb-0 ms-2">{{ $meeting->formatted_date }}</span>
+                                    </div>
+                                    <div>&middot;</div>
+                                    <span>
+                                        {{ $meeting->schedule_time->start_time->translatedFormat('H:i') }} -
+                                        {{ $meeting->schedule_time->end_time->translatedFormat('H:i') }} WIT
+                                    </span>
                                 </div>
                             </div>
                             @role('teacher')

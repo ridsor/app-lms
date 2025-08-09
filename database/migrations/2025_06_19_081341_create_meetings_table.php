@@ -18,8 +18,9 @@ return new class extends Migration
             $table->string('title', 255)->nullable();
             $table->text('description')->nullable();
             $table->enum('meeting_method', ['Online', 'Offline', 'Hybrid']);
-            $table->enum('type', ['Learning', 'Midterm', 'Final']);
+            $table->enum('type', ['Learning', 'Midterm', 'Final', 'Holiday']);
             $table->dateTime('started_at')->nullable();
+            $table->date('date');
             $table->timestamps();
         });
     }

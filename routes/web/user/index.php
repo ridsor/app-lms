@@ -99,6 +99,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::get('/kehadiran', [AttendanceController::class, 'index'])->name('user.attendance.index');
     Route::get('/kehadiran/kelas', [AttendanceController::class, 'classList'])->name('user.attendance.classlist');
     Route::get('/kehadiran/kelas/{classId}', [AttendanceController::class, 'scheduleByKelas'])->name('user.attendance.schedulebyclass');
+    Route::get('/kehadiran/jadwal/{schedule_id}/pertemuan', [AttendanceController::class, 'meetingBySchedule'])->name('user.attendance.meetingBySchedule');
     Route::get('/kehadiran/jadwal/{id}', [AttendanceController::class, 'showAttendancRecap'])->name('user.attendance.showAttendancRecap');
 
     Route::get('/tugas', [TaskController::class, 'index'])->name('user.task.index');

@@ -327,10 +327,7 @@ $(document).ready(function () {
                             toast.show();
 
                             $("#fillRealizationModal #date").text(
-                                res.data.date
-                            );
-                            $("#fillRealizationModal #start_time").text(
-                                res.data.formatted_started_at
+                                res.data.formatted_date
                             );
                             $("#btn_fill_realization").attr("disabled", false);
 

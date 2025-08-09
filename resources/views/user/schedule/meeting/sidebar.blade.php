@@ -13,8 +13,7 @@
                 <span
                     class="badge m-0 badge-light-secondary px-2 py-1">{{ Helper::getMeetingMethodLabel($value->schedule_time->meeting_method) }}</span>
                 <span class="badge m-0 badge-light-primary px-2 py-1" id="status">{{ $value->status }}</span>
-                <span
-                    class="badge m-0 badge-light-warning px-2 py-1">{{ Helper::getMeetingTypeLabel($value->type) }}</span>
+                {!! Helper::getMeetingTypeLabel($value->type) !!}
             </div>
         </a>
     @endforeach

@@ -79,6 +79,7 @@
                         <th><span class="c-o-light f-w-600">Kelas</span></th>
                       @endrole
                       <th><span class="c-o-light f-w-600">Rekap</span> </th>
+                      <th><span class="c-o-light f-w-600"></span> </th>
                     </tr>
                   </thead>
                 </table>

@@ -63,8 +63,7 @@
                                             <span class="icon d-inline-flex justify-content-center align-items-center">
                                                 <i data-feather="calendar" style="width:18px; height: 18px"></i>
                                             </span>
-                                            <span class="mb-0 ms-2"
-                                                id="date">{{ Helper::getDayName($schedule_time->day) }},
+                                            <span class="mb-0 ms-2" id="date">{{ $meeting->formatted_date }},
                                             </span>
                                         </div>
                                         <div>
@@ -115,7 +114,8 @@
                                 <select class="form-select" id="meetingMethod" name="meeting_method">
                                     @foreach ($meetingMethods as $item)
                                         <option value="{{ $item['value'] }}"
-                                            @if ($item['value'] == $meeting->meeting_method) selected @endif>{{ $item['label'] }}</option>
+                                            @if ($item['value'] == $meeting->meeting_method) selected @endif>{{ $item['label'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div class="invalid-feedback"></div>
@@ -191,7 +191,8 @@
                                     <div class="d-flex align-items-center">
                                         <span class="icon"><i data-feather="calendar"
                                                 style="width:18px; height: 18px"></i></span>
-                                        <span class="mb-0 ms-2" id="date">{{ $meeting?->date ?? '-' }}</span>
+                                        <span class="mb-0 ms-2"
+                                            id="date">{{ $meeting?->formatted_date ?? '-' }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -201,10 +202,10 @@
                                     <div class="c-o-light f-w-600 text-nowrap">
                                         <span>
                                             <span
-                                                id="start_time">{{ $meeting->started_at?->translatedFormat('H:i') }}</span>
+                                                id="start_time">{{ $meeting->schedule_time->start_time?->translatedFormat('H:i') }}</span>
                                             -
                                             <span
-                                                id="end_time">{{ $meeting->schedule_time->end_time->translatedFormat('H:i') }}</span>
+                                                id="end_time">{{ $meeting->schedule_time->end_time?->translatedFormat('H:i') }}</span>
                                             WIT
                                         </span>
                                     </div>

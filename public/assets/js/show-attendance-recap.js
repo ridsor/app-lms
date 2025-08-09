@@ -13,7 +13,6 @@ function handleDetailMeeting(id, schedule_time_id) {
         success: function (res) {
             $("#detailMeetingModal").modal("show");
             if (res.success && res.data) {
-                console.log(res.data);
                 $("#detailMeetingModal #change_attendance").attr(
                     "href",
                     `/kehadiran/${res.data.schedule.id}/pertemuan/${res.data.id}`
@@ -46,8 +45,8 @@ function handleDetailMeeting(id, schedule_time_id) {
                 $("#detailMeetingModal #teacher").html(
                     res.data.schedule.teacher.name
                 );
-                $("#detailMeetingModal #day").html(
-                    getDayName(res.data.schedule_time.day)
+                $("#detailMeetingModal #date").html(
+                    getDayName(res.data.formatted_date)
                 );
                 $("#detailMeetingModal #start_time").html(
                     res.data.schedule_time.start_time
@@ -61,7 +60,7 @@ function handleDetailMeeting(id, schedule_time_id) {
                 // kehadiran pertemuan
                 $("#detailMeetingModal #started_at").html(
                     res.data.started_at
-                        ? `${res.data.date} ${res.data.formatted_started_at} WIT`
+                        ? `${res.data.formatted_date} ${res.data.formatted_started_at} WIT`
                         : "-"
                 );
                 $("#detailMeetingModal #total_attendance").html(

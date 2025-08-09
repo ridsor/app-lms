@@ -118,9 +118,12 @@
                                                 <div class="c-o-light f-w-600">
                                                     <div class="d-flex gap-2">
                                                         <div class="d-flex align-items-center">
-                                                            <span><i data-feather="calendar"
-                                                                    style="width:18px; height: 18px"></i></span>
-                                                            <span class="mb-0 ms-2" id="day">-</span>
+                                                            <span
+                                                                class="icon d-inline-flex justify-content-center align-items-center">
+                                                                <i data-feather="calendar"
+                                                                    style="width:18px; height: 18px"></i>
+                                                            </span>
+                                                            <span class="mb-0 ms-2" id="date">-</span>
                                                         </div>
                                                         <div>&middot;</div>
                                                         <span>

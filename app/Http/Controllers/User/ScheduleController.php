@@ -346,7 +346,8 @@ class ScheduleController extends Controller
     $meetingTypes = [
       ['value' => 'Learning', 'label' => 'Belajar'],
       ['value' => 'Midterm', 'label' => 'UTS'],
-      ['value' => 'Final', 'label' => 'UAS']
+      ['value' => 'Final', 'label' => 'UAS'],
+      ['value' => 'Holiday', 'label' => 'Libur'],
     ];
     $materialType = [
       ['value' => 'eBook', 'label' => 'eBook'],

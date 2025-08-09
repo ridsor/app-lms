@@ -72,7 +72,7 @@
                                             <span class="icon"><i data-feather="calendar"
                                                     style="width:18px; height: 18px"></i></span>
                                             <span class="mb-0 ms-2"
-                                                id="date">{{ Helper::getDayName($meeting->schedule_time->day) }}</span>
+                                                id="date">{{ Helper::getDayName($meeting->formatted_date) }}</span>
                                         </div>
                                         <div>&middot;</div>
                                         <span>

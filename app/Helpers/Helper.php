@@ -122,9 +122,10 @@ class Helper
     public static function getMeetingTypeLabel($type)
     {
         return match ($type) {
-            'Learning' => 'Belajar',
-            'Midterm' => 'UTS',
-            'Final' => 'UAS',
+            'Learning' => '<span class="badge px-2 py-1 badge-light-info">Belajar</span>',
+            'Midterm' => '<span class="badge px-2 py-1 badge-light-warning">UTS</span>',
+            'Final' => '<span class="badge px-2 py-1 badge-light-warning">UAS</span>',
+            'Holiday' => '<span class="badge px-2 py-1 badge-light-danger">Libur</span>',
             default => $type
         };
     }
