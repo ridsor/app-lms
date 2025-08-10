@@ -143,7 +143,7 @@
                 </div>
                 <div class="col-12 col-lg-4 position-static d-flex flex-column">
                     <div class="h-100 flex-grow-1 w-100">
-                        <div class="position-relative overflow-auto" id="my-sticky">
+                        <div class="position-relative overflow-y-auto overflow-x-hidden" id="my-sticky">
                             <div class="p-3">
                                 @if ($task->value_displayed && $task_submission->formatted_score)
                                     <div class="d-flex align-items-center gap-2 mb-1">
@@ -161,7 +161,8 @@
                                     <div class="mb-2">
                                         <p class="fs-7 mb-1">Tag Anggota Kelompok</p>
                                         <form>
-                                            <textarea id="group_members" class="w-100" placeholder="Masukan anggota kelompokmu">{{ $task_submission?->group_members }}</textarea>
+                                            <textarea id="group_members" class="w-100" placeholder="Masukan anggota kelompokmu"
+                                                @cannot('task_submission.edit') disabled @endcannot>{{ $task_submission?->group_members }}</textarea>
                                         </form>
                                     </div>
                                 @endif
@@ -170,34 +171,36 @@
                                         <i class="fa-solid fa-arrows-rotate fa-spin"></i>
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse"
-                                        data-bs-target="#addContent" aria-expanded="false" aria-controls="addContent">
-                                        <div class="d-flex align-items-center justify-content-center gap-1">
-                                            <i data-feather="plus" style="width: 20px; height:20px"></i>
-                                            <span>Tambah</span>
-                                        </div>
-                                    </button>
-                                    <div class="collapse" id="addContent">
-                                        <div class="d-flex flex-column w-100">
-                                            <label
-                                                class="mb-0 btn btn-light rounded-0 border-0 text-inherit w-100 text-center p-2 tasksubmission-content-item">
-                                                <p class="mb-0">File</p>
-                                                <input type="file" hidden multiple
-                                                    accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
-                                                    id="task-submission-content-file">
-                                            </label>
-                                            <button data-bs-toggle="modal" data-bs-target="#linkModal"
-                                                class="btn btn-light rounded-0 border-0 text-inherit w-100 text-center p-2 tasksubmission-content-item">
-                                                <p class="mb-0">Link</p>
-                                            </button>
+                                @can('task_submission.edit')
+                                    <div class="mb-3">
+                                        <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse"
+                                            data-bs-target="#addContent" aria-expanded="false" aria-controls="addContent">
+                                            <div class="d-flex align-items-center justify-content-center gap-1">
+                                                <i data-feather="plus" style="width: 20px; height:20px"></i>
+                                                <span>Tambah</span>
+                                            </div>
+                                        </button>
+                                        <div class="collapse" id="addContent">
+                                            <div class="d-flex flex-column w-100">
+                                                <label
+                                                    class="mb-0 btn btn-light rounded-0 border-0 text-inherit w-100 text-center p-2 tasksubmission-content-item">
+                                                    <p class="mb-0">File</p>
+                                                    <input type="file" hidden multiple
+                                                        accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                                                        id="task-submission-content-file">
+                                                </label>
+                                                <button data-bs-toggle="modal" data-bs-target="#linkModal"
+                                                    class="btn btn-light rounded-0 border-0 text-inherit w-100 text-center p-2 tasksubmission-content-item">
+                                                    <p class="mb-0">Link</p>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <button class="btn btn-primary w-100 mb-3" id="submit-task" disabled
-                                    data-id="{{ $task->id }}">
-                                    Serahkan
-                                </button>
+                                    <button class="btn btn-primary w-100 mb-3" id="submit-task" disabled
+                                        data-id="{{ $task->id }}">
+                                        Serahkan
+                                    </button>
+                                @endcan
                                 @if ($task->allow_late_submission)
                                     <p class="fst-italic text-center mb-3" style="font-size: .8rem">
                                         Tugas tidak dapat
@@ -205,7 +208,7 @@
                                         setelah batas waktu
                                     </p>
                                 @endif
-                                @if ($task_submission->feedback)
+                                @if ($task_submission?->feedback)
                                     <hr />
                                     <div class="mb-3">
                                         <label class="form-label mb-0">Feedback</label>
@@ -222,7 +225,7 @@
                 </div>
             </div>
             <div class="modal fade" id="linkModal" tabindex="-1" aria-labelledby="linkModal" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content category-popup">
                         <div class="modal-body">
                             <div class="text-start">

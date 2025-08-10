@@ -154,6 +154,8 @@ body.dark-only
 
 .meeting-sidebar {
     height: calc(100vh - 79px);
+}
+#my-sticky {
     transition: all 0.3s ease;
 }
 

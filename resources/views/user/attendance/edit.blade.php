@@ -123,9 +123,9 @@
                                     <div class="profile-media">
                                         <img class="rounded-circle"
                                             style="
-                          width: 50px;
-                          height: 50px;
-                          object-fit: cover;"
+                                            width: 50px;
+                                            height: 50px;
+                                            object-fit: cover;"
                                             id="teacher-image"
                                             src="{{ $meeting->schedule->teacher->user->image ? asset('storage/' . $meeting->schedule->teacher->user->image) : asset('assets/svg/user-placeholder.svg') }}"
                                             alt="user">
@@ -139,8 +139,8 @@
                         </div>
                         <div>
                             <h6 class="px-4 mb-3">Peserta</h6>
-                            <div class="row justify-content-between align-items-center mb-4 px-4 g-2">
-                                @can('attendance.edit')
+                            @can('attendance.edit')
+                                <div class="row justify-content-between align-items-center mb-4 px-4 g-2">
                                     <div class="col-auto col-lg-6">
                                         <div class="d-flex align-items-center gap-3">
                                             <i class="fa-solid fa-circle-info txt-primary"></i>

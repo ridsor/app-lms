@@ -104,7 +104,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-lg-9">
+            <div class="col-12 col-lg-9" style="height: 2000px">
                 <div class="card my-0 h-100 rounded-responsive shadow-none">
                     <div class="card-body px-2 py-4 px-sm-3">
                         <div class="d-flex flex-column h-100 gap-3">

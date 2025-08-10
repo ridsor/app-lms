@@ -116,7 +116,7 @@
                 </div>
             </div>
         @endif
-        @role('student')
+        @role(['student','parent'])
             <div class="mb-3 px-3 d-flex justify-content-end">
                 <a href="{{ route('user.tasksubmission.show', ['task_id' => $content->id]) }}"
                     class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">

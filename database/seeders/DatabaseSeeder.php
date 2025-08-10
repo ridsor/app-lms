@@ -72,15 +72,28 @@ class DatabaseSeeder extends Seeder
             ]);
             $studentUser->assignRole('student');
 
+            // Create student user
+            $parentUser = User::create([
+                'name' => 'Parent',
+                'username' => 'parent',
+                'password' => bcrypt('password')
+            ]);
+            $parentUser->assignRole('parent');
+
             // Assign user to student
             $student = $schedule->class->students->first();
             if ($student) {
+                $student->user->attendances()->update([
+                    'user_id' => $studentUser->id,
+                ]);
                 $student->update([
-                    'user_id' => $studentUser->id
+                    'user_id' => $studentUser->id,
+                    'parent_id' => $parentUser->id
                 ]);
             } else {
                 throw new Exception('No student found to assign user to');
             }
+            $schedule->class->students->first()->user->delete();
         } catch (Exception $e) {
             // Handle any errors that occur
             Log::error('Error in user creation: ' . $e->getMessage());

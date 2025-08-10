@@ -183,9 +183,9 @@
                     </a>
                     <div class="d-flex flex-column align-items-center justify-content-center px-2">
                         <p class="mb-0 fw-medium text-break">
-                            {{ 'Andi Ahmad' }}
+                            {{ $task_submission->student->name }}
                         </p>
-                        <p class="f-light mb-0 text-break">{{ 1231312312312 }}</p>
+                        <p class="f-light mb-0 text-break">{{ $task_submission->student->nis }}</p>
                     </div>
                     <a {{ $submission->hasMorePages() ? 'href=' . route('user.task.evaluation', ['task_id' => $task->id, 'page' => $submission->currentPage() + 1]) : '' }}
                         role="button" {{ !$submission->hasMorePages() ? 'aria-disabled="true"' : '' }}
@@ -263,7 +263,7 @@
                                             <i data-feather="calendar" style="width:18px; height: 18px"></i>
                                         </span>
                                         <span class="mb-0 ms-2"
-                                            id="date">{{ $task?->late_submission_time->translatedFormat('j M Y H:i') . ' WIT' ?? '-' }}</span>
+                                            id="date">{{ optional($task?->late_submission_time)->translatedFormat('j M Y H:i') . ' WIT' ?? '-' }}</span>
                                     </div>
                                 </div>
                             </div>

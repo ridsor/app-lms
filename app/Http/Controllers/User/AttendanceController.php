@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Attendance\AttendanceStatusRequest;
 use Illuminate\Http\Request;
@@ -72,21 +73,30 @@ class AttendanceController extends Controller
         'class' => function ($query) {
           $query->select(['id', 'name', 'level', 'major_id'])->withCount('students');
         },
-        'meetings' => function ($query) {
-          $query->select(['id', 'schedule_id', 'type', 'date'])->withCount([
-            'attendances as present_count' => function ($query) {
-              $query->where('status', 'H');
+        'meetings' => fn($query) =>  $query->select(['id', 'schedule_id', 'type', 'date'])->withCount([
+          'attendances as present_count' => function ($query) use ($request) {
+            $query->where('status', 'H');
+            if ($request->user()->hasRole('student')) {
+              $query->where('user_id', $request->user()->id);
+            } else if ($request->user()->hasRole('parent')) {
+              $query->where('user_id', $request->user()->parent->user->id);
             }
-          ]);
-        },
+          }
+        ]),
       ])->get();
 
-      $data = $data->map(function ($schedule) {
+      $data = $data->map(function ($schedule) use ($request) {
         $totalStudents = $schedule->class->students_count;
+        if ($request->user()->hasRole('student') || $request->user()->hasRole('parent')) {
+          $totalStudents = 1;
+        }
+
 
         $totalAttendancePercentage = 0.0;
+        $totalMeetings = 0;
         foreach ($schedule->meetings as $meeting) {
           if ($meeting->type != "Holiday" && Carbon::parse($meeting->date)->lte(Carbon::today())) {
+            $totalMeetings++;
             $attendancePercentage = 0.0;
             if ($totalStudents > 0) {
               $attendancePercentage = round(($meeting->present_count / $totalStudents) * 100, 1);
@@ -95,7 +105,11 @@ class AttendanceController extends Controller
           }
         }
 
-        $schedule->attendance_percentage =  round(($totalAttendancePercentage / count($schedule->meetings->toArray())), 1);
+        if ($totalMeetings) {
+          $schedule->attendance_percentage =  round(($totalAttendancePercentage / $totalMeetings), 1);
+        } else {
+          $schedule->attendance_percentage = 0.0;
+        }
 
         return $schedule;
       });
@@ -145,7 +159,7 @@ class AttendanceController extends Controller
           ]);
           return '
           <div>
-          <a href="' . $url . '" class="badge badge-light-info">Lihat</a>
+          <a href="' . $url . '" class="badge badge-light-info">Lihat Pertemuan</a>
           </div>
           ';
         });
@@ -174,16 +188,28 @@ class AttendanceController extends Controller
     $this->authorize('view', $schedule);
 
     if ($request->ajax()) {
-      $data = Meeting::select('id', 'date', 'started_at')
+      $data = Meeting::select('meetings.id as id', 'meetings.schedule_id as schedule_id', 'date', 'started_at', 'schedule_time_id', 'schedule_times.start_time as start_time', 'schedule_times.end_time as end_time')
+        ->join('schedule_times', 'schedule_times.id', '=', 'meetings.schedule_time_id')
         ->withCount([
           'attendances as present_count' => function ($query) {
             $query->where('status', 'H');
           }
         ])
-        ->with(['schedule.class' => function ($query) {
-          $query->withCount('students');
-        }])
-        ->where('schedule_id', $schedule_id)->orderBy('date', 'asc');
+        ->with([
+          'schedule.class' => function ($query) {
+            $query->withCount('students');
+          },
+          'schedule_time:id,start_time,end_time',
+          'attendances' => function ($q) use ($request) {
+            $q->select(['status', 'user_id', 'meeting_id']);
+            if ($request->user()->hasRole('student')) {
+              $q->where('user_id', $request->user()->id);
+            } else if ($request->user()->hasRole('parent')) {
+              $q->where('user_id', $request->user()->parent->user->id);
+            }
+          }
+        ])
+        ->where('meetings.schedule_id', $schedule_id)->orderBy('meetings.date', 'asc')->orderBy('schedule_times.start_time', 'asc');
 
       $data = $data->get();
 
@@ -205,21 +231,29 @@ class AttendanceController extends Controller
         ->addColumn('Waktu', function ($row) {
           $html = '
           <div class="product-names">
-          <p>' . ($row->formatted_date) . '</p>
+          <p class="text-nowrap">' . ($row->formatted_date . ' ' . $row->schedule_time->formatted_staart_time . ' - ' . $row->schedule_time->formatted_end_time . ' WIT') . '</p>
           </div>
           ';
           return $html;
         })
-        ->addColumn('', function ($row) use ($schedule) {
-          $url = route('user.attendance.edit', [
-            'schedule_id' => $schedule->id,
-            'meeting_id' => $row->id,
-          ]);
-          return '
-          <div class="d-flex justify-content-center">
-          <a href="' . $url . '" class="badge ' . (is_null($row->started_at) ? 'badge-light-secondary' : 'badge-light-primary') . ' fs-6">' . $row->attendance_percentage . '%</a>
-          </div>
-          ';
+        ->addColumn('', function ($row) use ($schedule, $request) {
+          if ($request->user()->hasRole('student') || $request->user()->hasRole('parent')) {
+            return '<button
+                        class="bg-transparent border-0 p-0 m-0 text-start"
+                        onclick="handleDetailMeeting(' . $row->id . ',' . $row->schedule_time_id . ')">
+                        ' . Helper::getAttendanceLabel(optional($row->attendances)[0]->status ?? null) . '
+                    </button>';
+          } else {
+            $url = route('user.attendance.edit', [
+              'schedule_id' => $schedule->id,
+              'meeting_id' => $row->id,
+            ]);
+            return '
+            <div class="">
+            <a href="' . $url . '" class="badge ' . (is_null($row->started_at) ? 'badge-light-secondary' : 'badge-light-primary') . ' fs-6">' . $row->attendance_percentage . '%</a>
+            </div>
+            ';
+          }
         });
 
       return $dataTable
@@ -428,21 +462,79 @@ class AttendanceController extends Controller
     $hasMajor = Major::count() > 0;
     if ($request->ajax()) {
       $data = SchoolClass::query();
+
+      // Apply filters based on request and major availability
       if ($hasMajor) {
         $data->leftJoin('majors', 'classes.major_id', '=', 'majors.id')
           ->select(['classes.id', 'classes.name', 'classes.level', 'majors.name as major_name']);
+
         if ($request->filled('major')) {
           $data->where('majors.name', $request->major);
         }
       } else {
         $data->select(['classes.id', 'classes.name', 'classes.level']);
       }
+
       if ($request->filled('level')) {
         $data->where('classes.level', $request->level);
       }
+
       if ($request->filled('class')) {
         $data->where('classes.name', $request->class);
       }
+
+      // Eager load relationships with optimized queries
+      $data->with([
+        'schedules:id,class_id',
+        'schedules.meetings' => function ($query) {
+          $query->select(['id', 'schedule_id', 'type', 'date'])
+            ->withCount([
+              'attendances as present_count' => function ($query) {
+                $query->where('status', 'H');
+              }
+            ]);
+        },
+      ])
+        ->withCount('students');
+
+      // Execute the query and process results
+      $data = $data->get()->map(function ($class) {
+        $totalStudents = $class->students_count;
+
+        // Skip calculation if no students
+        if ($totalStudents === 0) {
+          $class->attendance_percentage = 0.0;
+          return $class;
+        }
+
+        $totalSchedule = 0;
+        $totalAttendancePercentage = 0.0;
+
+        foreach ($class->schedules as $schedule) {
+          $validMeetings = $schedule->meetings->filter(function ($meeting) {
+            return $meeting->type != "Holiday" &&
+              Carbon::parse($meeting->date)->lte(Carbon::today());
+          });
+
+          if ($validMeetings->isEmpty()) {
+            continue;
+          }
+
+          $totalSchedule++;
+
+          $meetingPercentages = $validMeetings->map(function ($meeting) use ($totalStudents) {
+            return round(($meeting->present_count / $totalStudents) * 100, 1);
+          });
+
+          $totalAttendancePercentage += $meetingPercentages->avg();
+        }
+
+        $class->attendance_percentage = $totalSchedule > 0
+          ? round($totalAttendancePercentage / $totalSchedule, 1)
+          : 0.0;
+
+        return $class;
+      });
 
       $dataTable = DataTables::of($data);
 
@@ -468,9 +560,13 @@ class AttendanceController extends Controller
           ';
           return $html;
         })
-        ->addColumn('Aksi', function ($row) {
+        ->addColumn('', function ($row) {
           $url = route('user.attendance.schedulebyclass', $row->id);
-          return '<a href="' . $url . '" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Lihat</a>';
+          return '
+          <div>
+          <a href="' . $url . '" class="badge badge-light-primary fs-6">' . $row->attendance_percentage . '%</a>
+          </div>
+          ';
         });
 
       $rawColumns = [];
@@ -479,7 +575,7 @@ class AttendanceController extends Controller
       }
       $rawColumns[] = 'Kelas';
       $rawColumns[] = 'Tingkat';
-      $rawColumns[] = 'Aksi';
+      $rawColumns[] = '';
 
       return $dataTable->rawColumns($rawColumns)->make(true);
     }
@@ -501,6 +597,7 @@ class AttendanceController extends Controller
         ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')
         ->select([
           'schedules.id as id',
+          'class_id',
           'subjects.name as subject_name',
           'teachers.name as teacher_name'
         ])
@@ -521,7 +618,41 @@ class AttendanceController extends Controller
         $data->where('subjects.name', 'like', '%' . $request->mata_pelajaran . '%');
       }
 
-      $data = $data->get();
+      $data = $data->with([
+        'meetings' => fn($query) =>  $query->select(['id', 'schedule_id', 'type', 'date'])->withCount([
+          'attendances as present_count' => function ($query) {
+            $query->where('status', 'H');
+          }
+        ]),
+        'class' => function ($query) {
+          $query->select(['id', 'name', 'level', 'major_id'])->withCount('students');
+        },
+      ]);
+
+      $data = $data->get()->map(function ($schedule) use ($request) {
+        $totalStudents = $schedule->class->students_count;
+
+        $totalAttendancePercentage = 0.0;
+        $totalMeetings = 0;
+        foreach ($schedule->meetings as $meeting) {
+          if ($meeting->type != "Holiday" && Carbon::parse($meeting->date)->lte(Carbon::today())) {
+            $totalMeetings++;
+            $attendancePercentage = 0.0;
+            if ($totalStudents > 0) {
+              $attendancePercentage = round(($meeting->present_count / $totalStudents) * 100, 1);
+            }
+            $totalAttendancePercentage += $attendancePercentage;
+          }
+        }
+
+        if ($totalMeetings) {
+          $schedule->attendance_percentage =  round(($totalAttendancePercentage / $totalMeetings), 1);
+        } else {
+          $schedule->attendance_percentage = 0.0;
+        }
+
+        return $schedule;
+      });
 
       return DataTables::of($data)
         ->addColumn('Mata Pelajaran', function ($row) {
@@ -531,7 +662,8 @@ class AttendanceController extends Controller
           </div>
           ';
           return $html;
-        })->addColumn('Pengajar', function ($row) {
+        })
+        ->addColumn('Pengajar', function ($row) {
           $html = '
           <div class="product-names">
           <p>' . $row->teacher_name . '</p>
@@ -539,13 +671,27 @@ class AttendanceController extends Controller
           ';
           return $html;
         })
-        ->addColumn('Aksi', function ($row) {
+        ->addColumn('Rekap', function ($row) {
           $url = route('user.attendance.showAttendancRecap', [
             'id' => $row->id,
           ]);
-          return '<a href="' . $url . '" class="btn btn-info btn-sm"><i class="fa fa-eye"></i> Lihat </a>';
+          return '
+          <div>
+          <a href="' . $url . '" class="badge badge-light-primary fs-6">' . $row->attendance_percentage . '%</a>
+          </div>
+          ';
         })
-        ->rawColumns(['Mata Pelajaran', 'Pengajar', 'Aksi'])->make(true);
+        ->addColumn('', function ($row) {
+          $url = route('user.attendance.meetingBySchedule', [
+            'schedule_id' => $row->id,
+          ]);
+          return '
+          <div>
+          <a href="' . $url . '" class="badge badge-light-info">Lihat Pertemuan</a>
+          </div>
+          ';
+        })
+        ->rawColumns(['Mata Pelajaran', 'Pengajar', 'Rekap', ''])->make(true);
     }
 
     $teachers = Teacher::select('id', 'name')->get();

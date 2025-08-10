@@ -79,7 +79,7 @@
                         @endif
                         <th><span class="c-o-light f-w-600">Kelas</span></th>
                         <th><span class="c-o-light f-w-600">Tingkat</span></th>
-                        <th><span class="c-o-light f-w-600">Aksi</span> </th>
+                        <th><span class="c-o-light f-w-600"></span> </th>
                       </tr>
                     </thead>
                   </table>

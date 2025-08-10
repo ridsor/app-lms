@@ -75,7 +75,7 @@ class TaskSubmissionController extends Controller
     {
         $user = $request->user();
         $task = Task::with(['meeting.schedule.class.students:id,user_id,class_id,nis,name'])->findOrFail($task_id);
-        $this->authorize('view', $task);
+        $this->authorize('viewPossession', $task);
         $members = $task->meeting->schedule->class->students
             ->where('user_id', '!=', $user->id)
             ->pluck('nis', 'name')
@@ -85,9 +85,15 @@ class TaskSubmissionController extends Controller
             ->values()
             ->toArray();
 
-        $task_submission = TaskSubmission::where('task_id', $task->id)->where('student_id', $user->student->id)->first();
+        $task_submission = TaskSubmission::where('task_id', $task->id);
+        if ($user->hasRole('parent')) {
+            $task_submission->where('student_id', $user->parent->id);
+        } else {
+            $task_submission->where('student_id', $user->student->id);
+        }
+        $task_submission = $task_submission->first();
 
-        if (json_decode($task_submission?->contents, true)) {
+        if (!is_null($task_submission?->contents)) {
             $task_submission->contents = json_decode($task_submission?->contents ?? '[]', true);
         }
 
