@@ -227,7 +227,8 @@ $(document).ready(function () {
                     );
                     toast.show();
                 }
-
+            },
+            complete: function () {
                 submitBtn.prop("disabled", false).html(originalHtml);
             },
         });
@@ -337,8 +338,6 @@ $(document).ready(function () {
                                 .find("#status")
                                 .text(res.data.status);
 
-                            button.prop("disabled", true).html(originalHtml);
-
                             $("#fillRealizationModal").modal("show");
                         }
                     },
@@ -349,6 +348,9 @@ $(document).ready(function () {
                                 "Gagal menyimpan kehadiran"
                         );
                         toast.show();
+                        button.prop("disabled", false).html(originalHtml);
+                    },
+                    complete: function () {
                         button.prop("disabled", false).html(originalHtml);
                     },
                 });

@@ -36,7 +36,7 @@ class Meeting extends Model
         'description' => CleanHtml::class . ':strip_nl,strip_nbsp',
     ];
 
-    protected $appends = ['status', 'formatted_date'];
+    protected $appends = ['status', 'formatted_date', 'formatted_started_at'];
 
     public function schedule(): BelongsTo
     {
@@ -87,6 +87,14 @@ class Meeting extends Model
     {
         if ($this->date) {
             return $this->date->translatedFormat('j M Y');
+        }
+        return null;
+    }
+
+    public function getFormattedStartedAtAttribute()
+    {
+        if ($this->started_at) {
+            return $this->started_at->translatedFormat('j M Y  H:i');
         }
         return null;
     }

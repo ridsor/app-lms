@@ -22,7 +22,7 @@ $(function () {
     columns = columns.concat([
         { data: "name", name: "name" },
         { data: "level", name: "level" },
-        { data: '', name: "", orderable: false, searchable: false },
+        { data: "", name: "", orderable: false, searchable: false },
     ]);
 
     // filter
@@ -37,7 +37,7 @@ $(function () {
         $("#class-filter").val(params.get("class"));
     }
 
-    var t = $("#attendance-classlist-table").DataTable({
+    var t = $("#teaching-journal-classlist-table").DataTable({
         processing: true,
         serverSide: true,
         ajax: $.fn.dataTable.pipeline({

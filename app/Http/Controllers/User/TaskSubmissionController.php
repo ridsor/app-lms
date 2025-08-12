@@ -150,7 +150,7 @@ class TaskSubmissionController extends Controller
                 'id' => Str::uuid(),
                 'type' => 'file',
                 'name' => $item['file']->getClientOriginalName(),
-                'path' => $item['file']->store('file/penyerahan-tugas'),
+                'path' => $item['file']->store('file/tugas'),
                 'size' => $item['file']->getSize(),
             ];
         }

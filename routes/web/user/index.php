@@ -94,7 +94,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::delete('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'destroy'])->name('user.meeting_text.destroy');
 
     Route::get('/kehadiran/{schedule_id}/pertemuan/{meeting_id}', [AttendanceController::class, 'edit'])->name('user.attendance.edit');
-    Route::get('/kehadiran/pertemuan/{meeting_id}/{schedule_time_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');
+    Route::get('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'showMeeting'])->name('user.attendance.showMeeting');
     Route::patch('/kehadiran/pertemuan/{meeting_id}', [AttendanceController::class, 'update'])->name('user.attendance.update');
     Route::get('/kehadiran', [AttendanceController::class, 'index'])->name('user.attendance.index');
     Route::get('/kehadiran/kelas', [AttendanceController::class, 'classList'])->name('user.attendance.classlist');
@@ -105,6 +105,11 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::get('/tugas', [TaskController::class, 'index'])->name('user.task.index');
     Route::get('/tugas/{task_id}/file', [TaskController::class, 'getFile'])->name('user.task.file.get');
     Route::get('/tugas/{task_id}/file/download', [TaskController::class, 'downloadFile'])->name('user.task.file.download');
-    Route::get('/penyerahan-tugas/{task_id}', [TaskSubmissionController::class, 'show'])->name('user.tasksubmission.show');
-    Route::post('/penyerahan-tugas/{task_id}', [TaskSubmissionController::class, 'submitTask'])->name('user.tasksubmission.store');
+    Route::get('/tugas/{task_id}', [TaskSubmissionController::class, 'show'])->name('user.tasksubmission.show');
+    Route::post('/tugas/{task_id}', [TaskSubmissionController::class, 'submitTask'])->name('user.tasksubmission.store');
+
+    Route::get('/jurnal-mengajar/kelas', [TeachingJournalController::class, 'classList'])->name('user.journal.classlist');
+    Route::get('/jurnal-mengajar/pertemuan/{meeting_id}', [TeachingJournalController::class, 'showJournal'])->name('user.journal.showMeeting');
+    Route::get('/jurnal-mengajar/kelas/{classId}', [TeachingJournalController::class, 'scheduleByKelas'])->name('user.journal.schedulebyclass');
+    Route::get('/jurnal-mengajar/jadwal/{schedule_id}/pertemuan', [TeachingJournalController::class, 'meetingBySchedule'])->name('user.journal.meetingBySchedule');
 });

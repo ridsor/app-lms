@@ -362,15 +362,16 @@ class ScheduleController extends Controller
     $today = Carbon::now();
     $scheduleTime = $meeting->schedule_time;
 
-    $isStartedAt = !$meeting->started_at && $today->format('l') == $scheduleTime->day && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time;
-    $isRealization = $meeting->started_at && $today->format('l') == $scheduleTime->day && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time->addHours(2);
+    $isToday = $today->isSameDay(Carbon::parse($meeting->date));
+    $isStartedAt = !$meeting->started_at && $isToday && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time;
+    $isRealization = $meeting->started_at && $isToday && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time->addHours(2);
 
     $attendancePercentage = 0.0;
     $totalStudents = $meeting->schedule->class->students->count();
     $totalAttendances = $meeting->attendances->where('status', 'H')->count();
 
     if ($totalStudents > 0) {
-      $attendancePercentage = round(($totalAttendances / $totalStudents) * 100, 1);
+      $attendancePercentage = round(($totalAttendances / $totalStudents) * 100, 2);
     }
 
     $contents = collect()

@@ -73,75 +73,69 @@ $(document).ready(function () {
     }
     $("#submit-task").on("click", function () {
         const task_id = $(this).data("id");
-        const is_submitted = $(this).data("is_submitted");
         const btnSubmit = $(this);
         const originalHtml = btnSubmit.html();
         btnSubmit
             .prop("disabled", true)
             .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
-        if (is_submitted) {
-        } else {
-            const payload = {
-                links: [],
-                files: [],
-            };
+        const payload = {
+            links: [],
+            files: [],
+        };
 
-            taskSubmissioncontents.forEach((item, i) => {
-                if (isValidUrlContent(item)) {
-                    payload.links.push({
-                        id: item.id ?? i,
-                        url: item.url,
-                    });
-                } else if (item instanceof File) {
-                    payload.files.push({
-                        id: item.id ?? i,
-                        file: item,
-                    });
-                }
-            });
-
-            const formData = new FormData();
-            if (document.querySelector("#group_members")) {
-                group_members.value.forEach((item, index) => {
-                    formData.append(`group_members[${index}]`, item.value);
+        taskSubmissioncontents.forEach((item, i) => {
+            if (isValidUrlContent(item)) {
+                payload.links.push({
+                    id: item.id ?? i,
+                    url: item.url,
+                });
+            } else if (item instanceof File) {
+                payload.files.push({
+                    id: item.id ?? i,
+                    file: item,
                 });
             }
-            deleteContent.forEach((item, index) => {
-                formData.append(`deleteContent[${index}]`, item);
-            });
-            payload.links.forEach((link, index) => {
-                formData.append(`links[${index}][id]`, link.id);
-                formData.append(`links[${index}][url]`, link.url);
-            });
-            payload.files.forEach((item, index) => {
-                formData.append(`files[${index}][id]`, item.id);
-                formData.append(`files[${index}][file]`, item.file);
-            });
+        });
 
-            $.ajax({
-                url: `/penyerahan-tugas/${task_id}`,
-                type: "POST",
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (res) {
-                    if (res.success) {
-                        const toast = new bootstrap.Toast($("#toast-success"));
-                        $("#toast-success #toast-text").text(res.message);
-                        toast.show();
-                        location.reload();
-                    }
-                },
-                error: function (xhr, status, error) {
-                    const toast = new bootstrap.Toast($("#toast-error"));
-                    $("#toast-error #toast-text").text(
-                        xhr.responseJSON.message
-                    );
-                    toast.show();
-                    btnSubmit.prop("disabled", false).html(originalHtml);
-                },
+        const formData = new FormData();
+        if (document.querySelector("#group_members")) {
+            group_members.value.forEach((item, index) => {
+                formData.append(`group_members[${index}]`, item.value);
             });
         }
+        deleteContent.forEach((item, index) => {
+            formData.append(`deleteContent[${index}]`, item);
+        });
+        payload.links.forEach((link, index) => {
+            formData.append(`links[${index}][id]`, link.id);
+            formData.append(`links[${index}][url]`, link.url);
+        });
+        payload.files.forEach((item, index) => {
+            formData.append(`files[${index}][id]`, item.id);
+            formData.append(`files[${index}][file]`, item.file);
+        });
+
+        $.ajax({
+            url: `/tugas/${task_id}`,
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (res) {
+                if (res.success) {
+                    const toast = new bootstrap.Toast($("#toast-success"));
+                    $("#toast-success #toast-text").text(res.message);
+                    toast.show();
+                    location.reload();
+                }
+            },
+            error: function (xhr, status, error) {
+                const toast = new bootstrap.Toast($("#toast-error"));
+                $("#toast-error #toast-text").text(xhr.responseJSON.message);
+                toast.show();
+                btnSubmit.prop("disabled", false).html(originalHtml);
+            },
+        });
     });
 });

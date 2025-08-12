@@ -185,6 +185,16 @@
                                     </span>
                                 </p>
                             </div>
+                            @if ($schedule->class->major)
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <label class="form-label">Jurusan</label>
+                                    <p class="c-o-light f-w-600">
+                                        <span>
+                                            {{ $schedule->class->major->name }}
+                                        </span>
+                                    </p>
+                                </div>
+                            @endif
                             <div class="col-12 col-md-6 col-lg-4">
                                 <label class="form-label">Tanggal</label>
                                 <div class="c-o-light f-w-600">
@@ -196,7 +206,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-6 col-lg-6">
+                            <div class="col-12 col-md-6 col-lg-4">
                                 <label class="form-label">Waktu Mulai & Selesai</label>
                                 <div class="d-flex flex-column gap-1">
                                     <div class="c-o-light f-w-600 text-nowrap">
@@ -215,7 +225,7 @@
                                 <label class="form-label">Ruangan</label>
                                 <p class="c-o-light f-w-600">
                                     <span>
-                                        Ruangan 1
+                                        {{  $schedule->room->name }}
                                     </span>
                                 </p>
                             </div>

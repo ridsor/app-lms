@@ -1,4 +1,4 @@
-function handleDetailMeeting(id, schedule_time_id) {
+function handleDetailMeeting(id) {
     if (!id) return;
 
     const button = $(event.target);
@@ -8,7 +8,7 @@ function handleDetailMeeting(id, schedule_time_id) {
         .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
     $.ajax({
-        url: `/kehadiran/pertemuan/${id}/${schedule_time_id}`,
+        url: `/kehadiran/pertemuan/${id}`,
         method: "GET",
         success: function (res) {
             $("#detailMeetingModal").modal("show");
@@ -60,7 +60,7 @@ function handleDetailMeeting(id, schedule_time_id) {
                 // kehadiran pertemuan
                 $("#detailMeetingModal #started_at").html(
                     res.data.started_at
-                        ? `${res.data.formatted_date} ${res.data.formatted_started_at} WIT`
+                        ? `${res.data.formatted_started_at} WIT`
                         : "-"
                 );
                 $("#detailMeetingModal #total_attendance").html(

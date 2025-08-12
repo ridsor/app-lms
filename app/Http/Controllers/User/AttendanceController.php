@@ -240,7 +240,7 @@ class AttendanceController extends Controller
           if ($request->user()->hasRole('student') || $request->user()->hasRole('parent')) {
             return '<button
                         class="bg-transparent border-0 p-0 m-0 text-start"
-                        onclick="handleDetailMeeting(' . $row->id . ',' . $row->schedule_time_id . ')">
+                        onclick="handleDetailMeeting(' . $row->id .')">
                         ' . Helper::getAttendanceLabel(optional($row->attendances)[0]->status ?? null) . '
                     </button>';
           } else {
@@ -424,7 +424,9 @@ class AttendanceController extends Controller
       $meeting = Meeting::findOrFail($meeting_id);
       $this->authorize('update', $meeting);
 
-      $isDuringSchedule = $meeting->schedule_time->start_time <= now()
+      $today = Carbon::now();
+      $isToday = $today->isSameDay(Carbon::parse($meeting->date));
+      $isDuringSchedule = $isToday && $meeting->schedule_time->start_time <= now()
         && now() <= $meeting->schedule_time->end_time->addHours(2);
 
       if (!$isDuringSchedule) {
@@ -523,14 +525,14 @@ class AttendanceController extends Controller
           $totalSchedule++;
 
           $meetingPercentages = $validMeetings->map(function ($meeting) use ($totalStudents) {
-            return round(($meeting->present_count / $totalStudents) * 100, 1);
+            return round(($meeting->present_count / $totalStudents) * 100, 2);
           });
 
           $totalAttendancePercentage += $meetingPercentages->avg();
         }
 
         $class->attendance_percentage = $totalSchedule > 0
-          ? round($totalAttendancePercentage / $totalSchedule, 1)
+          ? round($totalAttendancePercentage / $totalSchedule, 2)
           : 0.0;
 
         return $class;
@@ -639,14 +641,14 @@ class AttendanceController extends Controller
             $totalMeetings++;
             $attendancePercentage = 0.0;
             if ($totalStudents > 0) {
-              $attendancePercentage = round(($meeting->present_count / $totalStudents) * 100, 1);
+              $attendancePercentage = round(($meeting->present_count / $totalStudents) * 100, 2);
             }
             $totalAttendancePercentage += $attendancePercentage;
           }
         }
 
         if ($totalMeetings) {
-          $schedule->attendance_percentage =  round(($totalAttendancePercentage / $totalMeetings), 1);
+          $schedule->attendance_percentage =  round(($totalAttendancePercentage / $totalMeetings), 2);
         } else {
           $schedule->attendance_percentage = 0.0;
         }
@@ -699,9 +701,8 @@ class AttendanceController extends Controller
     return view('user.attendance.schedule-by-class', compact('class', 'teachers', 'subjects'));
   }
 
-  public function showMeeting(Request $request, $meeting_id, $schedule_time_id)
+  public function showMeeting($meeting_id)
   {
-    $this->authorize('viewAny', Attendance::class);
 
     $meeting = Meeting::select([
       'id',
@@ -724,6 +725,7 @@ class AttendanceController extends Controller
         'schedule_time'
       ])->withCount('attendances')->find($meeting_id);
 
+    $this->authorize('view', $meeting);
 
     $meetings = $meeting->schedule->meetings()->get();
     $index = $meetings->search(function ($item) use ($meeting_id) {

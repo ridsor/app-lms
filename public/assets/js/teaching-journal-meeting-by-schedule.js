@@ -1,11 +1,25 @@
+const subSubjectMatterQuill = new Quill("#subSubjectMatterQuill", {
+    theme: "snow",
+    modules: { toolbar: "#toolbarsubSubjectMatter" },
+    placeholder: "Masukan sub pokok pembahasan",
+});
+subSubjectMatterQuill.disable();
+
+const additionalNoteQuill = new Quill("#additionalNoteQuill", {
+    theme: "snow",
+    modules: { toolbar: "#toolbaradditionalNote" },
+    placeholder: "Masukan catatan tambahan",
+});
+additionalNoteQuill.disable();
+
 $(function () {
     // Halaman index: daftar jadwal (schedule)
-    if ($("#attendance-schedule-table").length) {
-        var t = $("#attendance-schedule-table").DataTable({
+    if ($("#teaching-journal-schedule-table").length) {
+        var t = $("#teaching-journal-schedule-table").DataTable({
             processing: true,
             serverSide: true,
             ajax: $.fn.dataTable.pipeline({
-                url: `/kehadiran/jadwal/${schedule_id}/pertemuan`,
+                url: window.location.pathname,
                 pages: 5,
                 data: function (d) {},
             }),
@@ -71,75 +85,40 @@ function handleDetailMeeting(id) {
         .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
     $.ajax({
-        url: `/kehadiran/pertemuan/${id}`,
+        url: `/jurnal-mengajar/pertemuan/${id}`,
         method: "GET",
         success: function (res) {
-            $("#detailMeetingModal").modal("show");
+            $("#journalModal").modal("show");
             if (res.success && res.data) {
-                $("#detailMeetingModal #change_attendance").attr(
-                    "href",
-                    `/kehadiran/${res.data.schedule.id}/pertemuan/${res.data.id}`
+                $("#journalModal #subjectMatter").val(
+                    res.data.teaching_journal.subject_matter
                 );
-
-                $("#detailMeetingModal #subject").html(
-                    res.data.schedule.subject.name
+                subSubjectMatterQuill.setContents(
+                    subSubjectMatterQuill.clipboard.convert(
+                        res.data.teaching_journal.sub_subject_matter
+                    )
                 );
-                $("#detailMeetingModal #class").html(
-                    (res.data.schedule.class.major
-                        ? res.data.schedule.class.major.name + " - "
-                        : "") +
-                        res.data.schedule.class.name +
-                        " - " +
-                        res.data.schedule.class.level
+                additionalNoteQuill.setContents(
+                    additionalNoteQuill.clipboard.convert(
+                        res.data.teaching_journal.additional_note
+                    )
                 );
-                $("#detailMeetingModal #meeting").html(res.data.meeting_at);
-                let meeting_method;
-                switch (res.data.meeting_method) {
-                    case "Online":
-                        meeting_method = "Daring";
-                        break;
-                    case "Offline":
-                        meeting_method = "Luring";
-                        break;
-                    default:
-                        meeting_method = "Campuran";
-                }
-                $("#detailMeetingModal #meeting_method").html(meeting_method);
-                $("#detailMeetingModal #teacher").html(
-                    res.data.schedule.teacher.name
-                );
-                $("#detailMeetingModal #date").html(
-                    getDayName(res.data.formatted_date)
-                );
-                $("#detailMeetingModal #start_time").html(
+                $("#journalModal #start_time").html(
                     res.data.schedule_time.start_time
                 );
-                $("#detailMeetingModal #end_time").html(
+                $("#journalModal #end_time").html(
                     res.data.schedule_time.end_time
                 );
-
-                $("#detailMeetingModal #status").html(res.data.status);
-
-                // kehadiran pertemuan
-                $("#detailMeetingModal #started_at").html(
-                    res.data.started_at
-                        ? `${res.data.formatted_date} ${res.data.formatted_started_at} WIT`
+                console.log(res.data.schedule_time);
+                $("#journalModal #date").html(
+                    res.data.formatted_date
+                        ? `${res.data.formatted_date} WIT`
                         : "-"
                 );
-                $("#detailMeetingModal #total_attendance").html(
-                    res.data.attendances_count
-                );
-                $("#detailMeetingModal #total_user").html(
-                    res.data.schedule.class.students_count
-                );
-                $("#detailMeetingModal #teacher").html(
-                    res.data.schedule.teacher.name
-                );
-                $("#detailMeetingModal #teacher-image").attr(
-                    "src",
-                    res.data.schedule.teacher.user.image
-                        ? `/storage/${res.data.schedule.teacher.user.image}`
-                        : "/assets/svg/user-placeholder.svg"
+                $("#journalModal #started_at").html(
+                    res.data.formatted_started_at
+                        ? `${res.data.formatted_started_at} WIT`
+                        : "-"
                 );
             }
         },

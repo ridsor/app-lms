@@ -11,7 +11,7 @@
     <div class="page-title">
       <div class="row">
         <div class="col-sm-6">
-          <h3>Pilih Kelas</h3>
+          <h3>Kehadiran</h3>
         </div>
       </div>
     </div>
