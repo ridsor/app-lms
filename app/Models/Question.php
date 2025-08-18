@@ -29,9 +29,9 @@ class Question extends Model
         'question_file'
     ];
 
-    public function exam(): BelongsTo
+    public function questionable()
     {
-        return $this->belongsTo(Exam::class);
+        return $this->morphTo();
     }
 
     public function answers(): HasMany

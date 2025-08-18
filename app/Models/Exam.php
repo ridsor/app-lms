@@ -14,7 +14,7 @@ class Exam extends Model
     protected $fillable = [
         'title',
         'description',
-        'meeting_id',
+        'schedule_id',
         'type',
         'start_date',
         'end_date',
@@ -24,14 +24,14 @@ class Exam extends Model
         'is_shuffle_questions',
     ];
 
-    public function meeting(): BelongsTo
+    public function schedule(): BelongsTo
     {
-        return $this->belongsTo(Meeting::class);
+        return $this->belongsTo(Schedule::class);
     }
 
-    public function questions(): HasMany
+    public function questions()
     {
-        return $this->hasMany(Question::class);
+        return $this->morphMany(Question::class, 'questionable');
     }
 
     public function results(): HasMany

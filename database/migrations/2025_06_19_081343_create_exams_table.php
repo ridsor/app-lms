@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title', 200);
             $table->text('description')->nullable();
-            $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
+            $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->enum('type', ['Quiz', 'Midterm', 'Final', 'Remedial']);
             $table->dateTime('start_date');
             $table->dateTime('end_date');

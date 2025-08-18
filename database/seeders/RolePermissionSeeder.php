@@ -45,6 +45,10 @@ class RolePermissionSeeder extends Seeder
             'meeting_text.*',
             'task_submission.view',
             'task_submission.edit',
+            'exam.view',
+            'exam.create',
+            'exam.edit',
+            'exam.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -74,6 +78,8 @@ class RolePermissionSeeder extends Seeder
             'meeting.edit',
         ]);
 
+        $roleOperator = Role::create(['name' => 'operator']);
+
         // Role Teacher - Limited student access (only homeroom students)
         $roleTeacher = Role::create(['name' => 'teacher']);
         $roleTeacher->givePermissionTo([
@@ -92,6 +98,8 @@ class RolePermissionSeeder extends Seeder
             'meeting_text.*',
             'task_submission.view',
             'task_submission.edit',
+            'exam.view',
+            'exam.edit'
         ]);
 
         // Role Parent - No student management access
@@ -104,6 +112,7 @@ class RolePermissionSeeder extends Seeder
             'task.view',
             'meeting_text.view',
             'task_submission.view',
+            'exam.view'
         ]);
 
         // Role Student - No student management access
@@ -117,6 +126,8 @@ class RolePermissionSeeder extends Seeder
             'task.view',
             'task_submission.view',
             'task_submission.edit',
+            'exam.view',
+            'exam.create'
         ]);
 
         $admin = User::create([
@@ -132,5 +143,13 @@ class RolePermissionSeeder extends Seeder
             'password' => bcrypt('password')
         ]);
         $wakasek->assignRole('vice-principal');
+
+        $operatorExam = User::create([
+            'name' => 'Operator Ujian',
+            'username' => 'operator',
+            'password' => bcrypt('password')
+        ]);
+        $operatorExam->assignRole('operator');
+        $operatorExam->givePermissionTo(['exam.view', 'exam.edit', 'exam.create', 'exam.delete']);
     }
 }

@@ -14,12 +14,13 @@ use App\Http\Controllers\User\ScheduleController;
 use App\Http\Controllers\User\AttendanceController;
 use App\Http\Controllers\User\MeetingController;
 use App\Http\Controllers\User\MeetingTextController;
+use App\Http\Controllers\User\QuestionBankController;
 use App\Http\Controllers\User\TaskController;
 use App\Http\Controllers\User\TaskSubmissionController;
 use App\Http\Controllers\User\TeachingJournalController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group(function () {
+Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"])->group(function () {
     Route::get('/beranda', [HomeController::class, 'index'])->name('user.home');
 
     Route::delete('ruangan/hapus', [RoomController::class, 'bulkDestroy'])->name('user.room.bulkDestroy');
@@ -112,4 +113,10 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent"])->group
     Route::get('/jurnal-mengajar/pertemuan/{meeting_id}', [TeachingJournalController::class, 'showJournal'])->name('user.journal.showMeeting');
     Route::get('/jurnal-mengajar/kelas/{classId}', [TeachingJournalController::class, 'scheduleByKelas'])->name('user.journal.schedulebyclass');
     Route::get('/jurnal-mengajar/jadwal/{schedule_id}/pertemuan', [TeachingJournalController::class, 'meetingBySchedule'])->name('user.journal.meetingBySchedule');
+
+    Route::get('/bank-soal', [QuestionBankController::class, 'index'])->name('user.question-bank.index');
+    Route::get('/bank-soal/{id}/edit', [QuestionBankController::class, 'edit'])->name('user.question-bank.edit');
+    Route::post('/bank-soal', [QuestionBankController::class, 'store'])->name('user.question-bank.store');
+    Route::put('/bank-soal/{id}', [QuestionBankController::class, 'update'])->name('user.question-bank.update');
+    Route::delete('/bank-soal/{id}', [QuestionBankController::class, 'destroy'])->name('user.question-bank.destroy');
 });

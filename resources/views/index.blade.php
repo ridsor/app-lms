@@ -28,6 +28,14 @@
                 </a>
             </div>
             <div class="col-md-3 mb-4">
+                <a href="{{ route('operator.login') }}" class="card text-center shadow h-100 text-decoration-none">
+                    <div class="card-body">
+                        <h5 class="card-title">Login Operator</h5>
+                        <p class="card-text">Masuk sebagai Operator</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 mb-4">
                 <a href="{{ route('vice-principal.login') }}" class="card text-center shadow h-100 text-decoration-none">
                     <div class="card-body">
                         <h5 class="card-title">Login Wakil Kepala Sekolah Bidang Kurikulum</h5>

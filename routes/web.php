@@ -11,6 +11,9 @@ Route::get('/materi/{materi_id}/file', [MaterialController::class, 'getFile'])->
 Route::prefix('wakasek')->group(function () {
     require __DIR__ . '/web/vice-principal/index.php';
 });
+Route::prefix('operator')->group(function () {
+    require __DIR__ . '/web/operator/index.php';
+});
 Route::prefix('orang-tua')->group(function () {
     require __DIR__ . '/web/parent/index.php';
 });

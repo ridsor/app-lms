@@ -19,6 +19,7 @@ class Helper
             'student' => 'Siswa',
             'parent' => 'Orang Tua',
             'admin' => 'Admin',
+            'operator' => 'Operator',
             default => $role
         };
     }
@@ -48,6 +49,7 @@ class Helper
             'parent' => 'parent',
             'admin' => 'admin',
             'vice-principal' => 'vice-principal',
+            'operator' => 'operator',
             default => $role
         };
     }
