@@ -25,6 +25,7 @@ return new class extends Migration
             $table->dateTime('late_submission_time')->nullable();
             $table->boolean('allow_late_submission')->default(false);
             $table->boolean('value_displayed')->default(false);
+            $table->fullText('title');
             $table->timestamps();
         });
     }

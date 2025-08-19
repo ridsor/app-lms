@@ -47,7 +47,7 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Mata Pelajaran</label>
                                 <p class="c-o-light f-w-600">
-                                    {{ $schedule->subject->name }}
+                                    strtoupper({{ $schedule->subject->name }})
                                 </p>
                                 <label class="form-label">Kelas</label>
                                 <p class="c-o-light f-w-600">

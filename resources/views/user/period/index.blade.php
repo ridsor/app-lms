@@ -255,6 +255,6 @@
     <script src="{{ asset('assets/js/datatable/datatables/select.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
-    <script src="{{ asset('assets/js/period-crud.js') }}"></script>
     <script src="{{ asset('assets/js/flat-pickr/flatpickr.js') }}"></script>
+    <script src="{{ asset('assets/js/period-crud.js') }}"></script>
 @endsection

@@ -35,7 +35,7 @@
                                 <label class="form-label">Mata Pelajaran</label>
                                 <p class="c-o-light f-w-600">
                                     <span id="subject">
-                                        {{ $meeting->schedule->subject->name }}
+                                        {{ strtoupper($meeting->schedule->subject->name) }}
                                     </span>
                                 </p>
                             </div>

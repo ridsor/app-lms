@@ -32,3 +32,49 @@ function handleCopyText(text) {
     $("#toast-success #toast-text").text("Link berhasil disalin!");
     toast.show();
 }
+
+const flatpickrLocationID = {
+    firstDayOfWeek: 1, // Mulai dari Senin
+    weekdays: {
+        shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+        longhand: [
+            "Minggu",
+            "Senin",
+            "Selasa",
+            "Rabu",
+            "Kamis",
+            "Jumat",
+            "Sabtu",
+        ],
+    },
+    months: {
+        shorthand: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "Mei",
+            "Jun",
+            "Jul",
+            "Agu",
+            "Sep",
+            "Okt",
+            "Nov",
+            "Des",
+        ],
+        longhand: [
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember",
+        ],
+    },
+};

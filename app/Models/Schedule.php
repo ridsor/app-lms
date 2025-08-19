@@ -79,6 +79,42 @@ class Schedule extends Model
         return Carbon::parse($value)->format('H:i');
     }
 
+    public function scopeMainFilter($query, array $filters)
+    {
+        $query->whereHas('period', function ($q) use ($filters) {
+            if (!empty($filters['periode'])) {
+                $q->where('id', $filters['periode']);
+            } else {
+                $q->where('status', true);
+            }
+        });
+        if (!empty($filters['kelas'])) {
+            $query->whereHas('class', function ($q) use ($filters) {
+                $q->where('name', $filters['kelas']);
+            });
+        }
+        if (!empty($filters['jurusan'])) {
+            $query->whereHas('class.major', function ($q) use ($filters) {
+                $q->where('name', $filters['jurusan']);
+            });
+        }
+        if (!empty($filters['tingkat'])) {
+            $query->whereHas('class', function ($q) use ($filters) {
+                $q->where('level', $filters['tingkat']);
+            });
+        }
+        if (!empty($filters['mata-pelajaran'])) {
+            $query->whereHas('subject', function ($q) use ($filters) {
+                $q->where('name', $filters['mata-pelajaran']);
+            });
+        }
+        if (!empty($filters['hari'])) {
+            $query->whereHas('schedule_times', function ($q) use ($filters) {
+                $q->where('day', Helper::getDayValue($filters['hari']));
+            });
+        }
+    }
+
     public function scopeFilter($query, array $filters)
     {
         if (!empty($filters['search']['value'])) {

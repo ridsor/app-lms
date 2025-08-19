@@ -21,6 +21,7 @@ use App\Jobs\CreateScheduleMeetings;
 use App\Jobs\UpdateScheduleMeetings;
 use App\Models\Meeting;
 use App\Models\ScheduleTime;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -58,11 +59,30 @@ class ScheduleController extends Controller
         },
       ])
       ->filterByPermission($request->user())
+      ->mainFilter($request->all())
       ->orderByRaw("FIELD(first_day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')")
       ->orderBy('first_start_time')
       ->get();
 
-    return view('user.schedule.index', compact('schedules'));
+    $activePeriod = Period::where('status', true)->first();
+    $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
+    $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
+    $majors = Major::with(['classes' => function ($query) {
+      $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
+    }])->select('id', 'name')->orderBy('name', 'asc')->get();
+    $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc')->get();
+    $hasMajors = Major::count() > 0;
+    $subjects = Subject::select('id', 'name', 'curriculum_id')->with(['curriculum:id,name'])->get();
+    $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
+    $days = [
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat'
+    ];
+
+    return view('user.schedule.index', compact('schedules', 'days', 'classes', 'classLevels', 'classNames', 'majors', 'hasMajors', 'subjects', 'periods', 'activePeriod'));
   }
 
   public function classList(Request $request)
@@ -311,7 +331,6 @@ class ScheduleController extends Controller
           $query->whereNull('score');
         }
       ]),
-      'exams'
     ])->findOrFail($meeting_id);
 
     $this->authorize('viewPossession', $meeting);
@@ -385,10 +404,6 @@ class ScheduleController extends Controller
       }))
       ->merge($meeting->tasks->map(function ($item) {
         $item->data_type = 'task';
-        return $item;
-      }))
-      ->merge($meeting->exams->map(function ($item) {
-        $item->data_type = 'exam';
         return $item;
       }))
       ->sortByDesc('created_at')

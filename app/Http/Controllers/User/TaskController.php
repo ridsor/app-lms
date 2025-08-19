@@ -4,6 +4,10 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskRequest;
+use App\Models\Major;
+use App\Models\Period;
+use App\Models\SchoolClass;
+use App\Models\Subject;
 use App\Models\Task;
 use App\Models\TaskSubmission;
 use Illuminate\Http\Request;
@@ -15,10 +19,67 @@ class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        $tasks = Task::all()->filterByPermission($request->user());
-        $this->authorize('viewAny', $tasks);
+        $tasks = Task::with([
+            'meeting:id,schedule_id',
+            'meeting.schedule:id,subject_id,class_id',
+            'meeting.schedule.meetings:id,schedule_id',
+            'meeting.schedule.subject:id,name,code',
+            'meeting.schedule.class:id,name,level,major_id',
+            'meeting.schedule.class.major:id,name',
+            'submissions' => function ($q) use ($request) {
+                if ($request->user()->hasRole('student')) {
+                    $q->select(["id", "task_id"])->where('student_id', $request->user()->student->id);
+                } elseif ($request->user()->hasRole('parent')) {
+                    $q->select(["id", "task_id"])->where('student_id', $request->user()->parent->id);
+                }
+            }
+        ])
+            ->withCount([
+                'submissions as not_yet_rated' => function ($query) {
+                    $query->whereNull('score');
+                }
+            ])
+            ->filter($request->all())
+            ->filterByPermission($request->user())
+            ->orderBy('start_time', 'DESC')
+            ->get() // First get all results
+            ->map(function ($task) { // Modify the collection
+                $index = $task->meeting->schedule->meetings->search(function ($item) use ($task) {
+                    return $item->id == $task->meeting->id;
+                });
+                $task->meeting->meeting_at = $index + 1;
+                return $task;
+            });
 
-        return view('user.task.index', compact('tasks'));
+        // Manually paginate the modified collection
+        $page = request()->get('page', 1);
+        $perPage = 10;
+        $tasks = new \Illuminate\Pagination\LengthAwarePaginator(
+            $tasks->forPage($page, $perPage),
+            $tasks->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url()]
+        );
+
+        $this->authorize('viewAny', Task::class);
+
+        $activePeriod = Period::where('status', true)->first();
+        $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
+        $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
+        $majors = Major::with(['classes' => function ($query) {
+            $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
+        }])->select('id', 'name')->orderBy('name', 'asc')->get();
+        $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc')->get();
+        $hasMajors = Major::count() > 0;
+        $subjects = Subject::select('id', 'name', 'curriculum_id')->with(['curriculum:id,name'])->get();
+        $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
+        $taskTypes = [
+            ['value' => 'individual', 'label' => 'Individu'],
+            ['value' => 'group', 'label' => 'Kelompok'],
+        ];
+
+        return view('user.task.index', compact('tasks', 'classes', 'classLevels', 'classNames', 'majors', 'hasMajors', 'subjects', 'periods', 'taskTypes', 'activePeriod'));
     }
 
     public function show(Request $request, $task_id)

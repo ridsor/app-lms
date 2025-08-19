@@ -68,7 +68,8 @@
                 <div class="col">
                     <div class="card mb-0 rounded-2 p-3 p-md-4"
                         style="background: linear-gradient(103.75deg,#33B1EE -13.9%,var(--theme-default) 79.68%)">
-                        <h3 class="text-white">{{ $schedule->subject->code }} &middot; {{ $schedule->subject->name }}</h3>
+                        <h3 class="text-white">{{ $schedule->subject->code }} &middot;
+                            {{ strtoupper($schedule->subject->name) }}</h3>
                         <p class="text-white fw-medium">
                             {{ $schedule->class->name }}{{ $schedule->class->level }}{{ $schedule->class->major ? ' ' . $schedule->class->major->name : '' }}
                             - {{ Helper::getMeetingMethodLabel($meeting->meeting_method) }}</p>
@@ -104,7 +105,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-lg-9" style="height: 2000px">
+            <div class="col-12 col-lg-9">
                 <div class="card my-0 h-100 rounded-responsive shadow-none">
                     <div class="card-body px-2 py-4 px-sm-3">
                         <div class="d-flex flex-column h-100 gap-3">

@@ -46,28 +46,6 @@
                                             </svg><span>Wali Kelas</span></a>
                                     </li>
                                 @endcan
-                                @can(['exam.edit'])
-                                    <li class="sidebar-list">
-                                        <i class="fa-solid fa-thumbtack"></i>
-                                        <a class="sidebar-link sidebar-title link-nav"
-                                            href="{{ route('user.period.index') }}"><svg class="stroke-icon">
-                                                <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
-                                                </use>
-                                            </svg><svg class="fill-icon">
-                                                <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
-                                            </svg><span class="lan-3">Ujian </span></a>
-                                    </li>
-                                    <li class="sidebar-list">
-                                        <i class="fa-solid fa-thumbtack"></i>
-                                        <a class="sidebar-link sidebar-title link-nav"
-                                            href="{{ route('user.question-bank.index') }}"><svg class="stroke-icon">
-                                                <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
-                                                </use>
-                                            </svg><svg class="fill-icon">
-                                                <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
-                                            </svg><span class="lan-3">Bank Soal </span></a>
-                                    </li>
-                                @endcan
                                 @can('student.*')
                                     <li class="sidebar-list">
                                         <i class="fa-solid fa-thumbtack"></i>
@@ -193,6 +171,43 @@
                                         </li>
                                     @endrole
                                 @endcan
+                                @can('task.view')
+                                    <li class="sidebar-list">
+                                        <i class="fa-solid fa-thumbtack"></i>
+                                        <a class="sidebar-link sidebar-title link-nav"
+                                            href="{{ route('user.task.index') }}"><svg class="stroke-icon">
+                                                <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
+                                                </use>
+                                            </svg><svg class="fill-icon">
+                                                <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
+                                            </svg><span class="lan-3">Tugas </span></a>
+                                    </li>
+                                @endcan
+                                @can(['exam.view'])
+                                    <li class="sidebar-list">
+                                        <i class="fa-solid fa-thumbtack"></i>
+                                        <a class="sidebar-link sidebar-title link-nav"
+                                            href="{{ route('user.period.index') }}"><svg class="stroke-icon">
+                                                <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
+                                                </use>
+                                            </svg><svg class="fill-icon">
+                                                <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
+                                            </svg><span class="lan-3">Ujian </span></a>
+                                    </li>
+                                    @can(['exam.edit', 'exam.delete', 'exam.create'])
+                                        <li class="sidebar-list">
+                                            <i class="fa-solid fa-thumbtack"></i>
+                                            <a class="sidebar-link sidebar-title link-nav"
+                                                href="{{ route('user.question-bank.index') }}"><svg class="stroke-icon">
+                                                    <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
+                                                    </use>
+                                                </svg><svg class="fill-icon">
+                                                    <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
+                                                </svg><span class="lan-3">Bank Soal </span></a>
+                                        </li>
+                                    @endcan
+                                @endcan
+                                
                             </ul>
                         </div>
                     </nav>
