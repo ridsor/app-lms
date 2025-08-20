@@ -44,9 +44,14 @@
                         <li class="breadcrumb-item"><a href="{{ route('user.home') }}"> <svg class="stroke-icon">
                                     <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
                                 </svg></a></li>
-                        <li class="breadcrumb-item active">
+                        <li class="breadcrumb-item">
                             <a href="{{ route('user.schedule.index') }}">
                                 {{ $task->meeting->schedule->subject->code }}
+                            </a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            <a href="{{ route('user.task.collection', ['task_id' => $task->id]) }}">
+                                Tugas
                             </a>
                         </li>
                     </ol>
@@ -322,7 +327,7 @@
                             </div>
                             @if (count($task_submission->group_members) > 0)
                                 <div class="mb-3">
-                                    <label class="form-label">Tag Anggota Kelompok</label>
+                                    <label class="form-label">Anggota Kelompok</label>
                                     <ul class='d-flex flex-column gap-1'>
                                         @foreach ($task_submission->group_members as $item)
                                             <li class="d-flex align-items-center gap-1">

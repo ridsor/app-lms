@@ -40,10 +40,13 @@
                         <li class="breadcrumb-item"><a href="{{ route('user.home') }}"> <svg class="stroke-icon">
                                     <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
                                 </svg></a></li>
-                        <li class="breadcrumb-item active">
+                        <li class="breadcrumb-item">
                             <a href="{{ route('user.schedule.index') }}">
                                 {{ $task->meeting->schedule->subject->code }}
                             </a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            Tugas
                         </li>
                     </ol>
                 </div>

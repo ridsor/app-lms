@@ -432,7 +432,7 @@ $(document).ready(function () {
 
         Swal.fire({
             title: "Apakah Anda yakin ingin?",
-            text: "Data periode yang terpilih akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
+            text: "Data yang memiliki period ini juga akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
             showDenyButton: true,
             showCancelButton: false,
             confirmButtonText: "Hapus",
@@ -509,7 +509,7 @@ $(document).ready(function () {
         if (!id) return;
         Swal.fire({
             title: "Apakah Anda yakin?",
-            text: "Data periode yang terpilih akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
+            text: "Data yang memiliki period ini juga akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
             showDenyButton: true,
             showCancelButton: false,
             confirmButtonText: "Hapus",

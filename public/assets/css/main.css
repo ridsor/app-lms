@@ -1,3 +1,7 @@
+.welcome-card {
+        background-image: url('/assets/images/home-bg.jpg') !important;
+}
+
 .ql-editor * {
     word-break: break-word;
     overflow-wrap: break-word;

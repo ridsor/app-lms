@@ -88,7 +88,8 @@ class DatabaseSeeder extends Seeder
                 ]);
                 $student->update([
                     'user_id' => $studentUser->id,
-                    'parent_id' => $parentUser->id
+                    'parent_id' => $parentUser->id,
+                    'active'
                 ]);
             } else {
                 throw new Exception('No student found to assign user to');

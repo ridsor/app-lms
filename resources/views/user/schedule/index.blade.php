@@ -179,7 +179,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row mb-3">
             <div class="col-12 px-0">
                 <div class="rounded-responsive">
                     <div class="projects-wrapper">
@@ -187,95 +187,97 @@
                             <div class="tab-pane fade show active" id="top-home" role="tabpanel"
                                 aria-labelledby="top-home-tab">
                                 @if (count($schedules) > 0)
-                                <div class="row g-4">
-                                    @foreach ($schedules as $schedule)
-                                        <div class="col-xxl-4 col-md-6 col-lg-6 box-col-6">
-                                            <a
-                                                href="{{ route('user.schedule.showBySchedule', ['code' => $schedule->subject->code]) }}">
-                                                <div class="progress-project-box">
-                                                    <div class="list-box title-line-primary">
-                                                        {{-- <div class="header-top"><span
+                                    <div class="row g-4">
+                                        @foreach ($schedules as $schedule)
+                                            <div class="col-xxl-4 col-md-6 col-lg-6 box-col-6">
+                                                <a
+                                                    href="{{ route('user.schedule.showBySchedule', ['code' => $schedule->subject->code]) }}">
+                                                    <div class="progress-project-box">
+                                                        <div class="list-box title-line-primary">
+                                                            {{-- <div class="header-top"><span
                                                             class="badge badge-light-primary">{{ $schedule->meeting_await ? \Illuminate\Support\Carbon::parse($schedule->meeting_await)->diffForHumans(null, false, false, 2) : '' }}</span>
                                                             </div> --}}
-                                                        <div class="project-body">
-                                                            <div class="common-f-start gap-3">
-                                                                <div>
-                                                                    <h6 class="mb-2">
-                                                                        <span class="text-capitalize">
-                                                                            {{ $schedule->subject->code }} -
-                                                                            {{ strtoupper($schedule->subject->name) }}
-                                                                        </span>
-                                                                    </h6>
-                                                                    <div class="d-flex gap-2 flex-wrap">
-                                                                        <div>
-                                                                            <span class="fw-medium text-nowrap w-fit">
-                                                                                {{ $schedule->class->name }}{{ $schedule->class->level }}{{ $schedule->class->major ? ' ' . $schedule->class->major->name : '' }}
+                                                            <div class="project-body">
+                                                                <div class="common-f-start gap-3">
+                                                                    <div>
+                                                                        <h6 class="mb-2">
+                                                                            <span class="text-capitalize">
+                                                                                {{ $schedule->subject->code }} -
+                                                                                {{ strtoupper($schedule->subject->name) }}
                                                                             </span>
-                                                                        </div>
-                                                                        <div style="max-width: fit-content">&middot;</div>
-                                                                        <div>
-                                                                            <span
-                                                                                class="text-nowrap">{{ $schedule->class->students_count }}
-                                                                                Siswa</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="d-flex flex-column">
-                                                                        @foreach ($schedule->schedule_times as $schedule_time)
-                                                                            {{-- {{ dd($schedule_time) }} --}}
-                                                                            <div class="d-flex gap-2">
-                                                                                <div class="col d-flex align-items-center">
-                                                                                    <i data-feather="calendar"
-                                                                                        witdh="24"></i>
-                                                                                    <span
-                                                                                        class="mb-0 ms-2">{{ Helper::getDayName($schedule_time->day) }}</span>
-                                                                                </div>
-                                                                                <div class="col">&middot;</div>
-                                                                                <span>
-                                                                                    {{ $schedule_time->start_time->translatedFormat('H:i') }}
-                                                                                    -
-                                                                                    {{ $schedule_time->end_time->translatedFormat('H:i') }}
-                                                                                    WIT
+                                                                        </h6>
+                                                                        <div class="d-flex gap-2 flex-wrap">
+                                                                            <div>
+                                                                                <span class="fw-medium text-nowrap w-fit">
+                                                                                    {{ $schedule->class->name }}{{ $schedule->class->level }}{{ $schedule->class->major ? ' ' . $schedule->class->major->name : '' }}
                                                                                 </span>
                                                                             </div>
-                                                                        @endforeach
+                                                                            <div style="max-width: fit-content">&middot;
+                                                                            </div>
+                                                                            <div>
+                                                                                <span
+                                                                                    class="text-nowrap">{{ $schedule->class->students_count }}
+                                                                                    Siswa</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="d-flex flex-column">
+                                                                            @foreach ($schedule->schedule_times as $schedule_time)
+                                                                                {{-- {{ dd($schedule_time) }} --}}
+                                                                                <div class="d-flex gap-2">
+                                                                                    <div
+                                                                                        class="col d-flex align-items-center">
+                                                                                        <i data-feather="calendar"
+                                                                                            witdh="24"></i>
+                                                                                        <span
+                                                                                            class="mb-0 ms-2">{{ Helper::getDayName($schedule_time->day) }}</span>
+                                                                                    </div>
+                                                                                    <div class="col">&middot;</div>
+                                                                                    <span>
+                                                                                        {{ $schedule_time->start_time->translatedFormat('H:i') }}
+                                                                                        -
+                                                                                        {{ $schedule_time->end_time->translatedFormat('H:i') }}
+                                                                                        WIT
+                                                                                    </span>
+                                                                                </div>
+                                                                            @endforeach
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="project-bottom common-space">
-                                                                <div class="d-flex flex-column gap-1">
-                                                                    <p class="mb-0">Pengajar</p>
-                                                                    <p class="mb-0 fw-semibold">
-                                                                        {{ $schedule->teacher->name }}</p>
+                                                                <div class="project-bottom common-space">
+                                                                    <div class="d-flex flex-column gap-1">
+                                                                        <p class="mb-0">Pengajar</p>
+                                                                        <p class="mb-0 fw-semibold">
+                                                                            {{ $schedule->teacher->name }}</p>
+                                                                    </div>
+                                                                    <img class="rounded-circle common-circle"
+                                                                        style="width: 50px; height: 50px; object-fit: cover"
+                                                                        src="{{ optional($schedule->teacher->user)->image ? asset('storage/' . optional($schedule->teacher->user)->image) : asset('assets/svg/user-placeholder.svg') }}"
+                                                                        alt="user">
                                                                 </div>
-                                                                <img class="rounded-circle common-circle"
-                                                                    style="width: 50px; height: 50px; object-fit: cover"
-                                                                    src="{{ optional($schedule->teacher->user)->image ? asset('storage/' . optional($schedule->teacher->user)->image) : asset('assets/svg/user-placeholder.svg') }}"
-                                                                    alt="user">
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    @endforeach
+                                                </a>
+                                            </div>
+                                        @endforeach
                                     @else
-                                    {{-- empty data --}}
-                                    <div class="d-flex justify-content-center mb-3 w-100">
-                                        <div class="px-4 py-5 d-grid" style="justify-items: center">
-                                            <img style="width: 120px; height: 120px"
-                                                src="{{ asset('assets/images/data-empty.png') }}" />
-                                            <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
-                                            <p class="mb-0 text-center">Belum ada jadwal yang tersedia.</p>
+                                        {{-- empty data --}}
+                                        <div class="d-flex justify-content-center mb-3 w-100">
+                                            <div class="px-4 py-5 d-grid" style="justify-items: center">
+                                                <img style="width: 120px; height: 120px"
+                                                    src="{{ asset('assets/images/data-empty.png') }}" />
+                                                <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
+                                                <p class="mb-0 text-center">Belum ada jadwal yang tersedia.</p>
+                                            </div>
                                         </div>
-                                    </div>
                                 @endif
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 @endsection
 

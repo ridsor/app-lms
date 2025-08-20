@@ -141,14 +141,20 @@ class PeriodController extends Controller
             }
 
             $period = Period::findOrFail($id);
-            if ($period->schedules()->count() > 0) {
-                return $this->sendError(
-                    'Periode tidak dapat dihapus karena masih memiliki jadwal.',
-                    [],
-                    400
-                );
+
+            $today = now();
+            if ($period->created_at < $today->subYears(4)) {
+                $period->delete();
+            } else {
+                if ($period->schedules()->count() > 0) {
+                    return $this->sendError(
+                        'Periode dapat dihapus setelah masih 4 tahun.',
+                        [],
+                        400
+                    );
+                }
+                $period->delete();
             }
-            $period->delete();
             return $this->sendResponse('Periode berhasil dihapus.');
         } catch (\Exception $e) {
             return $this->sendError('Silakan coba lagi.', [], 500);
