@@ -37,13 +37,21 @@ class TeachingJournalController extends Controller
 
             $validated = $request->validated();
             $validated['meeting_id'] = $meeting_id;
-            if ($meeting->teaching_journal) {
+
+            $teaching_journal = $meeting->teaching_journal;
+            if ($teaching_journal) {
                 $meeting->teaching_journal->update($validated);
                 return $this->sendResponse('Jurnal berhasil diperbarui.', $meeting->teaching_journal);
             } else {
-                $meeting->teaching_journal()->create($validated);
+                $teaching_journal = $meeting->teaching_journal()->create($validated);
                 return $this->sendResponse('Jurnal berhasil disimpan.', $meeting->teaching_journal, 201);
             }
+
+            activity()
+                ->useLog('Jurnal Mengajar')
+                ->performedOn($teaching_journal)
+                ->causedBy($request->user())
+                ->log('Pengguna mengisi jurnal mengajar');
         } catch (\Exception $e) {
             return $this->sendError(
                 'Silakan coba lagi.',

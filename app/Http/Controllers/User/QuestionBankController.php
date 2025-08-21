@@ -97,7 +97,7 @@ class QuestionBankController extends Controller
                 ->addColumn('', function ($row) {
                     return '
                         <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
-                            <a class="square-white view" data-id="' . $row->id . '"><svg>
+                            <a class="square-white view" href="' . route('user.question-bank.show', $row->id) . '"><svg>
                                 <use href="' . asset('assets/svg/icon-sprite.svg#fill-view') . '">
                                 </use>
                             </svg>
@@ -144,6 +144,17 @@ class QuestionBankController extends Controller
                 500
             );
         }
+    }
+
+    public function show(Request $request, $id)
+    {
+        if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) return abort(403);
+
+        $question_bank = QuestionBank::withCount([
+            'questions'
+        ])->where('id', $id)->firstOrFail();
+
+        return view('user.question-bank.show', compact('question_bank'));
     }
 
     public function store(QuestionBankRequest $request)

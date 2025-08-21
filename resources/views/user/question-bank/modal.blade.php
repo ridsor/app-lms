@@ -20,8 +20,7 @@
                             <div class="col-lg-12">
                                 <label class="form-label" for="addSubject">Mata Pelajaran<span
                                         class="txt-danger">*</span></label>
-                                <select
-                                    class="selectpicker search-picker" data-live-search="true" id="addSubject"
+                                <select class="selectpicker search-picker" data-live-search="true" id="addSubject"
                                     name="subject_id">
                                     <option value="">Pilih Mata Pelajaran</option>
                                     @foreach ($subjects as $subject)
@@ -39,7 +38,11 @@
                                 <div class="invalid-feedback">
                                 </div>
                             </div>
-                            <div class="col-md-12 d-flex justify-content-end">
+                            <div class="col-md-12 d-flex justify-content-end gap-2">
+                                <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                    Batal
+                                </button>
                                 <button class="btn btn-primary" type="submit" id="addStudentSubmitBtn">Tambah
                                     +</button>
                             </div>
@@ -93,7 +96,11 @@
                                 <div class="invalid-feedback">
                                 </div>
                             </div>
-                            <div class="col-md-12 d-flex justify-content-end">
+                            <div class="col-md-12 d-flex justify-content-end gap-2">
+                                <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                                    aria-label="Close">
+                                    Batal
+                                </button>
                                 <button class="btn btn-primary" type="submit" id="editStudentSubmitBtn">Tambah
                                     +</button>
                             </div>

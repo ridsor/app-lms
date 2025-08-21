@@ -240,7 +240,7 @@ class AttendanceController extends Controller
           if ($request->user()->hasRole('student') || $request->user()->hasRole('parent')) {
             return '<button
                         class="bg-transparent border-0 p-0 m-0 text-start"
-                        onclick="handleDetailMeeting(' . $row->id .')">
+                        onclick="handleDetailMeeting(' . $row->id . ')">
                         ' . Helper::getAttendanceLabel(optional($row->attendances)[0]->status ?? null) . '
                     </button>';
           } else {
@@ -398,13 +398,20 @@ class AttendanceController extends Controller
         if ($attendance) {
           $attendance->update(['status' => $x['status'], 'edit_by' => $request->user()->id]);
         } else {
-          Attendance::create([
+          $attendance = Attendance::create([
             'meeting_id' => $meeting_id,
             'user_id' => $x['user_id'],
             'status' => $x['status'],
             'edit_by' => $request->user()->id,
           ]);
         }
+
+        activity()
+          ->useLog('Kehadiran')
+          ->performedOn($attendance)
+          ->causedBy($request->user())
+          ->withProperties(['status' => $attendance->status])
+          ->log('Pengguna mengisi kehadiran');
       }
 
       DB::commit();
@@ -439,13 +446,20 @@ class AttendanceController extends Controller
         if ($attendance) {
           $attendance->update(['status' => $x['status'], 'edit_by' => $request->user()->id]);
         } else {
-          Attendance::create([
+          $attendance = Attendance::create([
             'meeting_id' => $meeting_id,
             'user_id' => $x['user_id'],
             'status' => $x['status'],
             'edit_by' => $request->user()->id,
           ]);
         }
+
+        activity()
+          ->useLog('Kehadiran')
+          ->performedOn($attendance)
+          ->causedBy($request->user())
+          ->withProperties(['status' => $attendance->status])
+          ->log('Pengguna mengisi kehadiran');
       }
 
       DB::commit();

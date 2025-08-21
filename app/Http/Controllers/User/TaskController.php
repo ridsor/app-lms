@@ -149,7 +149,6 @@ class TaskController extends Controller
             if ($request->filled('search') && !empty($request->search['value'])) {
                 $search = $request->search['value'];
                 $data->where(function ($q) use ($search) {
-                    Log::info('here');
                     $q->whereFullText('students.name', $search);
                 });
             }

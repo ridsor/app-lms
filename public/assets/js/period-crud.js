@@ -108,51 +108,7 @@ $(function () {
 $(document).ready(function () {
     const filter_end_date = flatpickr("#end-date-filter", {
         dateFormat: "d/m/Y",
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
+        locale: flatpickrLocationID,
     });
     const filter_start_date = flatpickr("#start-date-filter", {
         dateFormat: "d/m/Y",
@@ -162,101 +118,13 @@ $(document).ready(function () {
                 filter_end_date.set("minDate", selectedDate);
             }
         },
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
+        locale: flatpickrLocationID,
     });
     const add_end_date = flatpickr("#addEndDate", {
         static: true,
         dateFormat: "d/m/Y",
         minDate: new Date(),
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
+        locale: flatpickrLocationID,
     });
     const add_start_date = flatpickr("#addStartDate", {
         defaultDate: new Date(),
@@ -268,100 +136,12 @@ $(document).ready(function () {
                 add_end_date.set("minDate", selectedDate);
             }
         },
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
+        locale: flatpickrLocationID,
     });
     const edit_end_date = flatpickr("#editEndDate", {
         static: true,
         dateFormat: "d/m/Y",
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
+        locale: flatpickrLocationID,
     });
     const edit_start_date = flatpickr("#editStartDate", {
         static: true,
@@ -373,51 +153,7 @@ $(document).ready(function () {
                 edit_end_date.set("minDate", selectedDate);
             }
         },
-        locale: {
-            firstDayOfWeek: 1, // Mulai dari Senin
-            weekdays: {
-                shorthand: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
-                longhand: [
-                    "Minggu",
-                    "Senin",
-                    "Selasa",
-                    "Rabu",
-                    "Kamis",
-                    "Jumat",
-                    "Sabtu",
-                ],
-            },
-            months: {
-                shorthand: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "Mei",
-                    "Jun",
-                    "Jul",
-                    "Agu",
-                    "Sep",
-                    "Okt",
-                    "Nov",
-                    "Des",
-                ],
-                longhand: [
-                    "Januari",
-                    "Februari",
-                    "Maret",
-                    "April",
-                    "Mei",
-                    "Juni",
-                    "Juli",
-                    "Agustus",
-                    "September",
-                    "Oktober",
-                    "November",
-                    "Desember",
-                ],
-            },
-        },
+        locale: flatpickrLocationID,
     });
 
     // Hapus banyak

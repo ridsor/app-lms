@@ -20,6 +20,7 @@ class Helper
             'parent' => 'Orang Tua',
             'admin' => 'Admin',
             'operator' => 'Operator',
+            'admin' => 'Admin',
             default => $role
         };
     }
@@ -50,6 +51,7 @@ class Helper
             'admin' => 'admin',
             'vice-principal' => 'vice-principal',
             'operator' => 'operator',
+            'admin' => 'admin',
             default => $role
         };
     }

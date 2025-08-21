@@ -2,7 +2,8 @@
     use App\Helpers\Helper;
 @endphp
 
-@extends('layouts.user.app')
+@extends(request()->user()->hasRole('admin') ? 'layouts.admin.app' : 'layouts.user.app')
+
 
 @section('title', $user->name)
 
@@ -80,7 +81,8 @@
                                         </div>
                                         <div class="user-designation"><a target="_blank"
                                                 href="">{{ $user->name }}</a>
-                                            <div class="desc">{{ Helper::getRoleLabel($user->getRoleNames()->first()) }}
+                                            <div class="desc">
+                                                {{ Helper::getRoleLabel($user->getRoleNames()->first()) }}
                                             </div>
                                         </div>
                                     </div>
@@ -225,7 +227,8 @@
                                                                     </div>
                                                                 </div>
                                                                 <div class="form-group mb-2">
-                                                                    <label class="col-form-label">Kata Sandi Baru</label>
+                                                                    <label class="col-form-label">Kata Sandi
+                                                                        Baru</label>
                                                                     <div class="form-input position-relative">
                                                                         <input class="form-control password"
                                                                             type="password" name="password">

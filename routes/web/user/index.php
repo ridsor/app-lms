@@ -115,8 +115,9 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/jurnal-mengajar/jadwal/{schedule_id}/pertemuan', [TeachingJournalController::class, 'meetingBySchedule'])->name('user.journal.meetingBySchedule');
 
     Route::get('/bank-soal', [QuestionBankController::class, 'index'])->name('user.question-bank.index');
-    Route::get('/bank-soal/{id}/edit', [QuestionBankController::class, 'edit'])->name('user.question-bank.edit');
     Route::post('/bank-soal', [QuestionBankController::class, 'store'])->name('user.question-bank.store');
+    Route::get('/bank-soal/{id}', [QuestionBankController::class, 'show'])->name('user.question-bank.show');
+    Route::get('/bank-soal/{id}/edit', [QuestionBankController::class, 'edit'])->name('user.question-bank.edit');
     Route::put('/bank-soal/{id}', [QuestionBankController::class, 'update'])->name('user.question-bank.update');
     Route::delete('/bank-soal/{id}', [QuestionBankController::class, 'destroy'])->name('user.question-bank.destroy');
 });
