@@ -1,21 +1,29 @@
             <!-- Page Sidebar Start-->
             <div class="sidebar-wrapper" data-sidebar-layout="stroke-svg">
                 <div>
-                    <div class="logo-wrapper"><a href="{{ route('user.home') }}"><img class="img-fluid for-light"
-                                src="{{ asset('assets/images/logo/logo.png') }}" alt=""><img
-                                class="img-fluid for-dark" src="{{ asset('assets/images/logo/logo_dark.png') }}"
-                                alt=""></a>
+                    <div class="logo-wrapper">
+                        <a href="{{ route('admin.home') }}">
+                            <div class="d-flex d-flex gap-2 flex-column align-items-center">
+                                <img class="img-fluid for-light" src="{{ asset('assets/images/logo_sekolah.png') }}"
+                                    style="width: 40px" alt=""><img class="img-fluid for-dark"
+                                    src="{{ asset('assets/images/logo_sekolah.png') }}" style="width: 40px"
+                                    alt="">
+                                <p class="fw-medium">
+                                    {{ env('SCHOOL_NAME') }}
+                                </p>
+                            </div>
+                        </a>
                         <div class="back-btn"><i class="fa-solid fa-angle-left"></i></div>
                         <div class="toggle-sidebar"><i class="status_toggle middle sidebar-toggle" data-feather="grid">
                             </i></div>
                     </div>
-                    <div class="logo-icon-wrapper"><a href="{{ route('user.home') }}"><img class="img-fluid"
+                    <div class="logo-icon-wrapper"><a href="{{ route('admin.home') }}"><img class="img-fluid"
                                 src="{{ asset('assets/images/logo/logo-icon.png') }}" alt=""></a></div>
                     <nav class="sidebar-main">
                         <div class="left-arrow" id="left-arrow"><i data-feather="arrow-left"></i></div>
                         <div id="sidebar-menu">
                             <ul class="sidebar-links" id="simple-bar">
-                                <li class="back-btn"><a href="{{ route('user.home') }}"><img class="img-fluid"
+                                <li class="back-btn"><a href="{{ route('admin.home') }}"><img class="img-fluid"
                                             src="{{ asset('assets/images/logo/logo-icon.png') }}" alt=""></a>
                                     <div class="mobile-back text-end"><span>Kembali</span><i
                                             class="fa-solid fa-angle-right ps-2" aria-hidden="true"></i></div>

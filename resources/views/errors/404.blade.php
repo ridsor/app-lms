@@ -13,7 +13,7 @@
                 <p class="sub-content">Anda mungkin tidak dapat menemukan halaman yang Anda cari, atau mungkin telah
                     dipindahkan atau diganti namanya.</p>
             </div>
-            <div><a class="btn btn-primary btn-lg mb-4" href="{{ route('user.home') }}">KEMBALI KE HALAMAN UTAMA</a></div>
+            <div><a class="btn btn-primary btn-lg mb-4" href="/">KEMBALI KE HALAMAN UTAMA</a></div>
         </div>
     </div>
 @endsection

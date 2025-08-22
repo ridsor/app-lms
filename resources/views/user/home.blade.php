@@ -7,7 +7,7 @@
 @section('title', 'Beranda')
 
 @section('main_content')
-    <div class="container-fluid dashboard-3 pt-3">
+    <div class="container-fluid dashboard-3 py-3">
         <div class="row g-2">
             <div class="col-12">
                 <div class="row">
@@ -163,7 +163,7 @@
                                                         </span>
                                                     </div>
                                                     <div class="d-flex marks-count">
-                                                        <h5>{{$attendannce_percentage}}%</h5>
+                                                        <h5>{{ $attendannce_percentage }}%</h5>
                                                     </div>
                                                 </div>
                                             </div>
@@ -183,7 +183,7 @@
                                                         </span>
                                                     </div>
                                                     <div class="d-flex marks-count">
-                                                        <h5>{{$journal_percentage}}%</h5>
+                                                        <h5>{{ $journal_percentage }}%</h5>
                                                     </div>
                                                 </div>
                                             </div>
@@ -298,5 +298,6 @@
                 </div>
             @endrole
         </div>
+    </div>
     </div>
 @endsection

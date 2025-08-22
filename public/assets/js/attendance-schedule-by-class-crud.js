@@ -1,4 +1,4 @@
-$(function () {
+ $(function () {
     if ($("#attendance-schedule-by-class-table").length) {
         let columns = [
             {
