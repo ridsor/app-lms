@@ -49,7 +49,7 @@
                                             aria-label="Select period">
                                             <option value="" selected>Pilih Periode</option>
                                             @foreach ($periods as $period)
-                                                @if (empty(request()->input('periode') && $activePeriod->id == $period->id))
+                                                @if (empty(request()->input('periode')) && $activePeriod?->id == $period->id)
                                                     <option value="{{ $period->id }}" selected>
                                                         {{ $period->academic_year }}
                                                         {{ Helper::getSemesterLabel($period->semester) }}

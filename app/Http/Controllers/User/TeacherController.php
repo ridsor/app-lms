@@ -103,7 +103,7 @@ class TeacherController extends Controller
         'birthplace' => $teacher->birthplace,
         'gender' => $teacher->gender,
         'religion' => $teacher->religion,
-        'created_at' => $teacher->created_at ? $teacher->created_at->translatedFormat('d/m/Y H:i') : null,
+        'created_at' => $teacher->created_at ? $teacher->created_at->translatedFormat('d/m/Y H:i') . ' WIT' : null,
       ];
       return $this->sendResponse('Data guru ditemukan', $data);
     } catch (\Exception $e) {

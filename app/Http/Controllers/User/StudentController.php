@@ -127,6 +127,12 @@ class StudentController extends Controller
                             <a class="square-white trash"  data-id="' . $row->id . '" style="cursor: pointer;">
                                 <svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg>
                             </a>
+                            <a class="square-white"  style="cursor: pointer;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" id="reset-password" data-id="' . $row->id . '">Reset Kata Sandi</a></li>
+                            </ul>
                         </div>';
                     }
                     if ($request->user()->can('student.edit.homeroomteacher')) {
@@ -358,6 +364,36 @@ class StudentController extends Controller
             );
         } catch (\Exception $e) {
             DB::rollBack();
+            return $this->sendError(
+                'Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+
+    public function resetPassword(Request $request, $id)
+    {
+        try {
+            $student = Student::findOrFail($id);
+
+            $this->authorize('update', $student);
+
+            if ($student->user) {
+                $student->user->update([
+                    'password' => bcrypt($student->user->username)
+                ]);
+            }
+            if ($student->parent) {
+                $student->parent->update([
+                    'password' => bcrypt($student->parent->username)
+                ]);
+            }
+
+            return $this->sendResponse(
+                'Siswa berhasil direset kata sandi.',
+            );
+        } catch (\Exception $e) {
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],

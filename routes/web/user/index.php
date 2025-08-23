@@ -34,6 +34,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::resource('/kelas', ClassController::class)->except(['create', 'show'])->names('user.class');
 
     Route::delete('siswa/hapus', [StudentController::class, 'bulkDestroy'])->name('user.student.bulkDestroy');
+    Route::patch('siswa/{id}/reset-password', [StudentController::class, 'resetPassword'])->name('user.student.resetPassword');
     Route::patch('siswa/edit', [StudentController::class, 'bulkEdit'])->name('user.student.bulkEdit');
     Route::get('siswa/akun/export', [StudentController::class, 'exportStudentAccount'])->name('user.student.account.export');
     Route::get('siswa/orang-tua/akun/export', [StudentController::class, 'exportParentAccount'])->name('user.student.parent.account.export');

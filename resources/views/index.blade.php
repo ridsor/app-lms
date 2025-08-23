@@ -29,7 +29,7 @@
                 <div class="row g-4 justify-content-center">
                     <div class="col-xxl-3 col-lg-4 col-sm-6">
                         <a href="{{ route('student.login') }}">
-                            <div class="feature-box common-card bg-feature-1 border">
+                            <div class="feature-box common-card bg-feature-2 border">
                                 <div class="d-flex mb-3 justify-content-center">
                                     <div class="feature-icon mb-2 w-100 h-100"> <img style="height:100px"
                                             src="{{ asset('assets/images/student.svg') }}" alt="">
@@ -46,7 +46,7 @@
                     </div>
                     <div class="col-xxl-3 col-lg-4 col-sm-6">
                         <a href="{{ route('teacher.login') }}">
-                            <div class="feature-box common-card bg-feature-2 border">
+                            <div class="feature-box common-card bg-feature-1 border">
                                 <div class="d-flex mb-3 justify-content-center">
                                     <div class="feature-icon mb-2 w-100 h-100"> <img style="height:100px"
                                             src="{{ asset('assets/images/teacher.svg') }}" alt="">
@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-xxl-3 col-lg-4 col-sm-6">
                         <a href="{{ route('parent.login') }}">
-                            <div class="feature-box common-card bg-feature-3 border">
+                            <div class="feature-box common-card bg-feature-4 border">
                                 <div class="d-flex mb-3 justify-content-center">
                                     <div class="feature-icon mb-2 w-100 h-100"> <img style="height:100px"
                                             src="{{ asset('assets/images/parent.svg') }}" alt="">
@@ -80,7 +80,7 @@
                     </div>
                     <div class="col-xxl-3 col-lg-4 col-sm-6">
                         <a href="{{ route('operator.login') }}">
-                            <div class="feature-box common-card bg-feature-4 border">
+                            <div class="feature-box common-card bg-feature-3 border">
                                 <div class="d-flex mb-3 justify-content-center">
                                     <div class="feature-icon mb-2 w-100 h-100"> <img style="height:100px"
                                             src="{{ asset('assets/images/operator.svg') }}" alt="">
