@@ -49,6 +49,10 @@ class RolePermissionSeeder extends Seeder
             'exam.create',
             'exam.edit',
             'exam.delete',
+            'question.view',
+            'question.create',
+            'question.edit',
+            'question.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -99,7 +103,8 @@ class RolePermissionSeeder extends Seeder
             'task_submission.view',
             'task_submission.edit',
             'exam.view',
-            'exam.edit'
+            'exam.edit',
+            'question.view',
         ]);
 
         // Role Parent - No student management access
@@ -112,7 +117,8 @@ class RolePermissionSeeder extends Seeder
             'task.view',
             'meeting_text.view',
             'task_submission.view',
-            'exam.view'
+            'exam.view',
+            'question.view',
         ]);
 
         // Role Student - No student management access
@@ -127,7 +133,8 @@ class RolePermissionSeeder extends Seeder
             'task_submission.view',
             'task_submission.edit',
             'exam.view',
-            'exam.create'
+            'exam.create',
+            'question.view',
         ]);
 
         $admin = User::create([
@@ -150,6 +157,15 @@ class RolePermissionSeeder extends Seeder
             'password' => bcrypt('password')
         ]);
         $operatorExam->assignRole('operator');
-        $operatorExam->givePermissionTo(['exam.view', 'exam.edit', 'exam.create', 'exam.delete']);
+        $operatorExam->givePermissionTo([
+            'exam.view',
+            'exam.edit',
+            'exam.create',
+            'exam.delete',
+            'question.view',
+            'question.create',
+            'question.delete',
+            'question.edit',
+        ]);
     }
 }

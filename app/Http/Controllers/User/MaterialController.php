@@ -90,8 +90,6 @@ class MaterialController extends Controller
                 }
             }
 
-            Log::info('Updating material with data: ', $validated);
-
             $material->update($validated);
 
             return $this->sendResponse('Materi berhasil diperbarui', $material);
@@ -126,14 +124,14 @@ class MaterialController extends Controller
         }
 
         if ($material->file_type === 'Link') {
-            return abort(404, 'File not found');
+            return abort(404, 'File tidak ditemukan.');
         }
 
         if (Storage::exists($material->file_path)) {
             return response()->file(Storage::path($material->file_path));
         }
 
-        return abort(404, 'File not found');
+        return abort(404, 'File tidak ditemukan.');
     }
 
     public function downloadFile($materi_id)
@@ -149,6 +147,6 @@ class MaterialController extends Controller
             return Storage::download($material->file_path, $material->file_name);
         }
 
-        return abort(404, 'File not found');
+        return abort(404, 'File tidak ditemukan.');
     }
 }

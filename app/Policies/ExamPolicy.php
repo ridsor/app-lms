@@ -43,7 +43,7 @@ class ExamPolicy
         return $user->student->class_id == $exam->schedule->class_id;
       } else if ($user->hasRole('parent')) {
         return $user->parent->class_id == $exam->schedule->class_id;
-      } else {
+      } else if ($user->hasRole('operator')) {
         return true;
       }
     }
@@ -58,7 +58,7 @@ class ExamPolicy
     if ($user->can('exam.edit')) {
       if ($user->hasRole('teacher')) {
         return $exam->schedule->teacher_id == $user->teacher->id;
-      } else {
+      } else if ($user->hasRole('operator')) {
         return true;
       }
     }

@@ -107,7 +107,7 @@
         <script src="/assets/js/script1.js"></script>
         <script src="{{ asset('assets/js/toastr.min.js') }}"></script>
         <script src="{{ asset('assets/js/main.js') }}"></script>
-        
+
         @yield('scripts')
 </body>
 

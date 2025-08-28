@@ -8,6 +8,8 @@
 
 @section('styles')
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/glightbox.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
     <style>
         .answer-option {
             display: flex;
@@ -54,7 +56,7 @@
                 </div>
             </div>
         </div>
-        <div class="container-fluid e-category p-0">
+        <div class="container-fluid e-category pb-4">
             <div class="row g-0 mb-4">
                 <div class="col-12 p-0">
                     <div class="card h-100 my-0 rounded-responsive">
@@ -89,7 +91,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row g-3 align-items-center mb-4">
+            <div class="row g-3 align-items-center mb-3">
                 <div class="d-flex align-items-center col gap-2">
                     <i data-feather="search"></i>
                     <input type="search" class="form-control w-100" placeholder="Cari soal"name="cari" id="globalSearch" />
@@ -102,6 +104,25 @@
                     </button>
                 </div>
             </div>
+            <div class="row g-4 flex-column list-question px-md-3">
+                @if (count($questions) > 0)
+                    @foreach ($questions as $question)
+                        @include('user.question.item', $question)
+                    @endforeach
+                    <div class="pagination-wrapper w-100">
+                        {{ $questions->withQueryString()->links('pagination::bootstrap-5') }}
+                    </div>
+                @else
+                    {{-- empty data --}}
+                    <div class="d-flex justify-content-center mb-3 w-100">
+                        <div class="px-4 py-5 d-grid" style="justify-items: center">
+                            <img style="width: 120px; height: 120px" src="{{ asset('assets/images/data-empty.png') }}" />
+                            <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
+                            <p class="mb-0 text-center">Belum ada soal.</p>
+                        </div>
+                    </div>
+                @endif
+            </div>
             @include('user.question-bank.modal-show')
         </div>
     </div>
@@ -109,6 +130,8 @@
 
 @section('scripts')
     <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
+    <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
     <script src="{{ asset('assets/js/custom-file-upload.js') }}"></script>
+    <script src={{ asset('assets/js/glightbox.min.js') }}></script>
     <script src={{ asset('assets/js/question-bank-show.js') }}></script>
 @endsection

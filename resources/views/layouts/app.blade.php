@@ -35,6 +35,7 @@
     <!-- Bootstrap css-->
     <link rel="stylesheet" type="text/css" href="/assets/css/vendors/bootstrap.css" />
     <!-- App css-->
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
     @yield('styles')
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
     <link id="color" rel="stylesheet" href="/assets/css/color-1.css" media="screen" />

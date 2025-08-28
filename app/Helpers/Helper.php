@@ -172,4 +172,29 @@ class Helper
 
         return "fa fa-file";
     }
+
+    public static function getFileType($filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
+        $videoExtensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm'];
+        $audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a'];
+        $documentExtensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'xlsx', 'xls', 'ppt', 'pptx'];
+        $archiveExtensions = ['zip', 'rar', '7z', 'tar', 'gz'];
+
+        if (in_array($extension, $imageExtensions)) {
+            return 'image';
+        } elseif (in_array($extension, $videoExtensions)) {
+            return 'video';
+        } elseif (in_array($extension, $audioExtensions)) {
+            return 'audio';
+        } elseif (in_array($extension, $documentExtensions)) {
+            return 'document';
+        } elseif (in_array($extension, $archiveExtensions)) {
+            return 'archive';
+        } else {
+            return 'other';
+        }
+    }
 }

@@ -5,9 +5,6 @@
 @section('main_content')
     <div class="container-fluid">
         <section class="section-space feature-section">
-            <ul class="decoration">
-                <li class="round-gif"><img src="{{ asset('assets/images/gif/home-decoration.gif') }}" alt=""></li>
-            </ul>
             <div class="container">
                 <div class="row">
                     <div class="col-sm-12 wow pulse">

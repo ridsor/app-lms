@@ -150,11 +150,15 @@ class QuestionBankController extends Controller
     {
         if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) return abort(403);
 
-        $question_bank = QuestionBank::withCount([
+        $question_bank = QuestionBank::with([
+            'questions'
+        ])->withCount([
             'questions'
         ])->where('id', $id)->firstOrFail();
 
-        return view('user.question-bank.show', compact('question_bank'));
+        $questions = $question_bank->questions()->paginate(5);
+
+        return view('user.question-bank.show', compact('question_bank', 'questions'));
     }
 
     public function store(QuestionBankRequest $request)
@@ -205,7 +209,7 @@ class QuestionBankController extends Controller
     public function destroy(Request $request, $id)
     {
         try {
-            if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) return abort(403);
+            if (!$request->user()->can(['exam.delete'])) return abort(403);
 
             $question_bank = QuestionBank::findOrFail($id);
 

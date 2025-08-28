@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->morphs('questionable');
             $table->text('question_text');
-            $table->enum('question_type', ['multiple_choice', 'essay', 'true_false']);
+            $table->enum('question_type', ['multiple_choice', 'essay', 'true_false'])->default('multiple_choice');
             $table->string('option_a_image', 255)->nullable();
             $table->string('option_b_image', 255)->nullable();
             $table->string('option_c_image', 255)->nullable();
