@@ -51,7 +51,9 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('user.home') }}"> <svg class="stroke-icon">
+                        <li class="breadcrumb-item"><a
+                                href="{{ route(request()->user()->hasRole('admin') ? 'admin.home' : 'user.home') }}"> <svg
+                                    class="stroke-icon">
                                     <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
                                 </svg></a></li>
                         <li class="breadcrumb-item active">Akun</li>

@@ -4,12 +4,15 @@
 
 @extends('layouts.user.app')
 
-@section('title', 'Tugas')
+@section('title', 'Ujian')
 
 @section('styles')
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/glightbox.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select/bootstrap-select.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/glightbox.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
     <style>
         .answer-option {
             display: flex;
@@ -40,7 +43,7 @@
         <div class="page-title">
             <div class="row p-2 p-sm-0">
                 <div class="col-sm-6">
-                    <h3>Bank Soal</h3>
+                    <h3>Ujian</h3>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb">
@@ -48,44 +51,42 @@
                                     <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
                                 </svg></a></li>
                         <li class="breadcrumb-item">
-                            <a href="{{ route('user.question-bank.index') }}">
-                                Bank Soal
+                            <a href="{{ route('user.exam.show', ['id' => $exam->id]) }}">
+                                Ujian
                             </a>
+                        </li>
+                        <li class="breadcrumb-item active">
+                            Soal
                         </li>
                     </ol>
                 </div>
             </div>
         </div>
-        <div class="container-fluid e-category pb-4">
-            <div class="row g-0 mb-4">
-                <div class="col-12 p-0">
-                    <div class="card h-100 my-0 rounded-responsive">
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="form-label">Judul</label>
-                                    <p class="c-o-light f-w-600">
-                                        <span>
-                                            {{ $question_bank->title }}
-                                        </span>
-                                    </p>
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="form-label">Deskripsi</label>
-                                    <p class="c-o-light f-w-600">
-                                        <span>
-                                            {{ $question_bank->description }}
-                                        </span>
-                                    </p>
-                                </div>
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="form-label">Jumlah Soal</label>
-                                    <p class="c-o-light f-w-600">
-                                        <span>
-                                            {{ $question_bank->questions_count }}
-                                        </span>
-                                    </p>
-                                </div>
+        @include('user.exam.menu')
+        <div class="container-fluid e-category">
+            <div class="row g-0 mb-3">
+                <div class="col-12">
+                    <h1 class="mb-2">Soal</h1>
+                    <div class="row g-2 align-items-center">
+                        <div class="col">
+                            <div class="border rounded-2 p-3 card mb-0">
+                                <p class="mb-2">Jumlah Soal</p>
+                                <span class="fs-3">{{ $exam->questions_count }}</span>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="border rounded-2 p-3 card mb-0">
+                                <p class="mb-2">Jumlah Poin</p>
+                                <span class="fs-3">{{ $exam->questions_sum_question_points ?? 0 }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex justify-content-end">
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#copyQuestionModal"
+                                    class="btn btn-primary gap-2 px-3 btn-sm d-flex justify-content-center align-items-center">
+                                    <i class="fa-solid fa-copy"></i>
+                                    <span>Salin Bank Soal</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -126,15 +127,20 @@
                     </div>
                 @endif
             </div>
-            @include('user.question-bank.modal-show')
+            @include('user.exam.question.modal')
         </div>
     </div>
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
+    <script src="{{ asset('assets/js/datatable/datatables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/js/datatable/datatables/dataTables.js') }}"></script>
+    <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
     <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
+    <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
+    <script src="{{ asset('assets/js/flat-pickr/flatpickr.js') }}"></script>
+    <script src="{{ asset('assets/js/select/bootstrap-select.min.js') }}"></script>
     <script src="{{ asset('assets/js/custom-file-upload.js') }}"></script>
     <script src={{ asset('assets/js/glightbox.min.js') }}></script>
-    <script src={{ asset('assets/js/question-bank-show.js') }}></script>
+    <script src={{ asset('assets/js/exam-question.js') }}></script>
 @endsection

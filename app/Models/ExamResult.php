@@ -17,8 +17,15 @@ class ExamResult extends Model
         'start_time',
         'end_time',
         'score',
-        'time_spent',
-        'status'
+        'status',
+        'graded_at',
+        'graded_by'
+    ];
+
+    protected $casts = [
+        'start_time' => 'datetime',
+        'end_time' => 'datetime',
+        'graded_at' => 'datetime',
     ];
 
     public function exam(): BelongsTo
@@ -31,8 +38,21 @@ class ExamResult extends Model
         return $this->belongsTo(Student::class);
     }
 
+    public function grader(): BelongsTo
+    {
+        return $this->belongsTo(Teacher::class, 'graded_by');
+    }
+
     public function answers(): HasMany
     {
         return $this->hasMany(ExamAnswer::class);
+    }
+
+    public function getFormattedScoreAttribute()
+    {
+        $value = $this->score;
+        return $value == (int)$value
+            ? (int)$value
+            : rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.');
     }
 }

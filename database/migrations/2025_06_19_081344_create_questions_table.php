@@ -30,6 +30,8 @@ return new class extends Migration
             $table->integer('question_points')->default(0);
             $table->string('question_file', 255)->nullable();
             $table->timestamps();
+
+            $table->index(['question_text']);
         });
     }
 

@@ -281,18 +281,18 @@
                                                     </div>
                                                 </a>
                                             </div>
+                                        @endforeach
                                     </div>
-                                @endforeach
-                            @else
-                                {{-- empty data --}}
-                                <div class="d-flex justify-content-center mb-3 w-100">
-                                    <div class="px-4 py-5 d-grid" style="justify-items: center">
-                                        <img style="width: 120px; height: 120px"
-                                            src="{{ asset('assets/images/data-empty.png') }}" />
-                                        <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
-                                        <p class="mb-0 text-center">Tidak ada jadwal untuk hari ini.</p>
+                                @else
+                                    {{-- empty data --}}
+                                    <div class="d-flex justify-content-center mb-3 w-100">
+                                        <div class="px-4 py-5 d-grid" style="justify-items: center">
+                                            <img style="width: 120px; height: 120px"
+                                                src="{{ asset('assets/images/data-empty.png') }}" />
+                                            <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
+                                            <p class="mb-0 text-center">Tidak ada jadwal untuk hari ini.</p>
+                                        </div>
                                     </div>
-                                </div>
                                 @endif
                             </div>
                         </div>

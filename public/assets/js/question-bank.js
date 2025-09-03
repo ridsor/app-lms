@@ -12,7 +12,7 @@ $(function () {
                 className: "text-center",
             },
             { data: "Judul", name: "title" },
-            { data: "Mata Pelajaran", name: "subject_name", searchable:false },
+            { data: "Mata Pelajaran", name: "subject_name", searchable: false },
             {
                 data: "Soal",
                 name: "question",
@@ -25,9 +25,6 @@ $(function () {
 
         // filter
         const params = new URLSearchParams(window.location.search);
-        if (params.get("jurusan")) {
-            $("#major-filter").val(params.get("jurusan"));
-        }
         if (params.get("mata_pelajaran")) {
             $("#subject-filter").val(params.get("mata_pelajaran"));
         }
@@ -70,8 +67,6 @@ $(document).ready(function () {
         e.preventDefault();
         // Buat query string
         const params = new URLSearchParams();
-        if ($("#major-filter").val())
-            params.append("jurusan", $("#major-filter").val());
         if ($("#subject-filter").val())
             params.append("mata_pelajaran", $("#subject-filter").val());
         // Update URL tanpa reload
@@ -190,7 +185,9 @@ $(document).ready(function () {
                     $("#editQuestionBankForm [name='description']").val(
                         res.data.description
                     );
-                    $("#editQuestionBankForm .selectpicker").selectpicker("refresh");
+                    $("#editQuestionBankForm .selectpicker").selectpicker(
+                        "refresh"
+                    );
                 }
             },
             error: function (xhr) {

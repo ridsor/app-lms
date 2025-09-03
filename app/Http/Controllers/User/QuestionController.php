@@ -13,6 +13,45 @@ use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
+    public function storeForExam(QuestionRequest $request, $id)
+    {
+        try {
+            if (!$request->user()->can(['question.create'])) return abort(403);
+
+            $validated = $request->validated();
+
+            // Upload file
+            if ($request->hasFile('question_file')) {
+                $validated['question_file'] = $request->file('question_file')->store('file/ujian');
+            }
+            if ($request->hasFile('option_a_image')) {
+                $validated['option_a_image'] = $request->file('option_a_image')->store('file/ujian');
+            }
+            if ($request->hasFile('option_b_image')) {
+                $validated['option_b_image'] = $request->file('option_b_image')->store('file/ujian');
+            }
+            if ($request->hasFile('option_c_image')) {
+                $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
+            }
+            if ($request->hasFile('option_d_image')) {
+                $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
+            }
+            if ($request->hasFile('option_e_image')) {
+                $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
+            }
+
+            // Set polymorphic relation
+            $validated['questionable_id'] = $id;
+            $validated['questionable_type'] = Exam::class;
+
+            $question = Question::create($validated);
+
+            return $this->sendResponse('Soal berhasil disimpan', $question, 201);
+        } catch (\Exception $e) {
+            return $this->sendError('Silakan coba lagi.', [], 500);
+        }
+    }
+
     public function storeForQuestionBank(QuestionRequest $request, $id)
     {
         try {

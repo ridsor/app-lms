@@ -1,11 +1,11 @@
 let t;
 
 $(function () {
-    t = $("#task-collection-table").DataTable({
+    t = $("#exam-result-table").DataTable({
         processing: true,
         serverSide: true,
         ajax: $.fn.dataTable.pipeline({
-            url: `/jadwal/pertemuan/tugas/${task_id}/pengumpulan`,
+            url: window.location.pathname,
             pages: 5,
         }),
         columns: [
@@ -34,17 +34,6 @@ $(function () {
                 data: "Nilai",
                 name: "task_submissions.score",
                 searchable: false,
-            },
-            {
-                data: "Penilaian",
-                name: "task_submissions.graded_at",
-                searchable: false,
-            },
-            {
-                data: "Penilai",
-                name: "graded_by",
-                searchable: false,
-                orderable: false,
             },
             {
                 data: null,
@@ -88,28 +77,5 @@ $(function () {
 
     $("#globalSearch").on("keyup", function () {
         t.search(this.value).clearPipeline().draw();
-    });
-
-    $("#displayedValue").on("change", function () {
-        const task_id = $(this).data("id");
-
-        $.ajax({
-            url: `/jadwal/pertemuan/tugas/${task_id}/tampilkan_nilai`,
-            method: "PATCH",
-            processData: false,
-            contentType: false,
-            success: function (res) {
-                if (res.success) {
-                    const toast = new bootstrap.Toast($("#toast-success"));
-                    $("#toast-success #toast-text").text(res.message);
-                    toast.show();
-                }
-            },
-            error: function (xhr) {
-                const toast = new bootstrap.Toast($("#toast-error"));
-                $("#toast-error #toast-text").text(xhr.responseJSON?.message);
-                toast.show();
-            },
-        });
     });
 });

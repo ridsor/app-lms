@@ -4,7 +4,7 @@
 
 @extends('layouts.user.app')
 
-@section('title', 'Pengumpulan Tugas')
+@section('title', 'Hasil Ujian')
 
 @section('styles')
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
@@ -19,7 +19,7 @@
             background: #1d1e26 !important;
         }
 
-        #task-collection-table_wrapper .dt-search {
+        #exam-result-table_wrapper .dt-search {
             display: none !important;
         }
     </style>
@@ -30,7 +30,7 @@
         <div class="page-title">
             <div class="row p-2 p-sm-0">
                 <div class="col-sm-6">
-                    <h3>Tugas</h3>
+                    <h3>Ujian</h3>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb">
@@ -38,72 +38,31 @@
                                     <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
                                 </svg></a></li>
                         <li class="breadcrumb-item">
-                            <a href="{{ route('user.schedule.index') }}">
-                                {{ $task->meeting->schedule->subject->code }}
+                            <a href="{{ route('user.exam.show', ['id' => $exam->id]) }}">
+                                Ujian
                             </a>
                         </li>
                         <li class="breadcrumb-item active">
-                            Tugas
+                            Hasil
                         </li>
                     </ol>
                 </div>
             </div>
         </div>
+        @include('user.exam.menu')
         <div class="container-fluid e-category p-0">
             <div class="row g-0 mb-4">
                 <div class="col-12 p-0">
-                    <div class="card rounded-responsive">
-                        <div class="card-body">
-                            <ul class="d-flex gap-2 row-gap-3 flex-wrap">
-                                <li>
-                                    <a href="{{ !Request::routeIs('user.task.show') ? route('user.task.show', ['task_id' => $task->id]) : '' }}"
-                                        class="py-2 px-2 {{ Request::routeIs('user.task.show') ? 'border-bottom border-primary' : 'text-secondary' }}">Info
-                                        Tugas</a>
-                                </li>
-                                <li>
-                                    <a href="{{ !Request::routeIs('user.task.collection') ? route('user.task.collection', ['task_id' => $task->id]) : '' }}"
-                                        class="py-2 px-2 {{ Request::routeIs('user.task.collection') ? 'border-bottom border-primary' : 'text-secondary' }}">Pengumpulan</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 p-0">
                     <div class="card h-100 my-0 rounded-responsive">
                         <div class="card-body px-3 py-4">
-                            <h3 class="mb-3">Pengumpulan Tugas</h3>
+                            <h3 class="mb-3">Hasil Ujian</h3>
                             <div class="row justify-content-between">
                                 <div class="col-auto row gap-2 align-items-center flex-grow-1">
-                                    @if ($task->not_yet_rated)
-                                        <div class="d-flex flep-wrap align-items-center col-auto">
-                                            <span
-                                                class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum
-                                                dinilai <span
-                                                    class="badge ms-1 badge-danger">{{ $task->not_yet_rated }}</span>
-                                            </span>
-                                        </div>
-                                    @endif
-                                    <div class="d-flex align-items-center w-100 gap-2 col-12" style="max-width:400px">
+                                    <div class="d-flex align-items-center w-100 gap-2 col-12">
                                         <i data-feather="search"></i>
                                         <input type="type" class="form-control w-100" placeholder="Cari nama mahasiswa"
                                             id="globalSearch" />
                                     </div>
-                                </div>
-                                <div class="d-flex flex-wrap align-items-center col-12 justify-content-between col-md-auto">
-                                    <div class="d-flex gap-2 align-items-center h-100">
-                                        <label for="displayedValue" class="mb-0">Nilai ditampilkan</label>
-                                        <div class="form-check form-switch form-check-inline"><input
-                                                class="form-check-input check-size" id="displayedValue" type="checkbox"
-                                                data-id="{{ $task->id }}" style="transform:translateY(2px)"
-                                                role="switch" {{ $task->value_displayed ? 'checked' : '' }}></div>
-                                    </div>
-                                    <a class="btn btn-outline-info d-flex align-items-center gap-2 {{ count($task->submissions) > 0 ?: 'pe-none' }}"
-                                        {{ $task->submissions->first()?->id ? 'href=' . route('user.task.evaluation', ['task_id' => $task->id]) : '' }}>
-                                        <span>
-                                            Penilaian
-                                        </span>
-                                        <i data-feather="edit-2" style="width: 18px; height: 18px"></i>
-                                    </a>
                                 </div>
                             </div>
                             <div class="e-category">
@@ -116,15 +75,13 @@
                                             <div class="card-body px-0 pt-0">
                                                 <div class="list-product list-category">
                                                     <div class="recent-table table-responsive custom-scrollbar">
-                                                        <table class="table table-bordered" id="task-collection-table">
+                                                        <table class="table table-bordered" id="exam-result-table">
                                                             <thead>
                                                                 <tr>
                                                                     <th>No</th>
                                                                     <th>Nama</th>
                                                                     <th>Pengumpulan</th>
                                                                     <th>Nilai</th>
-                                                                    <th>Penilaian</th>
-                                                                    <th>Penilai</th>
                                                                     <th></th>
                                                                 </tr>
                                                             </thead>
@@ -150,7 +107,7 @@
     <script src="{{ asset('assets/js/datatable/datatables/dataTables.select.js') }}"></script>
     <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
     <script>
-        const task_id = @json($task->id)
+        const task_id = @json($exam->id)
     </script>
-    <script src={{ asset('assets/js/task-collection.js') }}></script>
+    <script src={{ asset('assets/js/exam-result.js') }}></script>
 @endsection

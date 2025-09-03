@@ -77,8 +77,7 @@
                             <div class="col-lg-12">
                                 <label class="form-label" for="editSubject">Mata Pelajaran<span
                                         class="txt-danger">*</span></label>
-                                <select @if ($hasMajors) disabled @endif
-                                    class="selectpicker search-picker" data-live-search="true" id="editSubject"
+                                <select class="selectpicker search-picker" data-live-search="true" id="editSubject"
                                     name="subject_id">
                                     <option value="">Pilih Mata Pelajaran</option>
                                     @foreach ($subjects as $subject)

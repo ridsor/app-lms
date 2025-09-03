@@ -17,11 +17,10 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->enum('type', ['Midterm', 'Final']);
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
+            $table->dateTime('start_time');
+            $table->dateTime('end_time');
             $table->integer('duration')->nullable();
-            $table->enum('exam_mode', ['Closed Book', 'Open Book']);
-            $table->enum('display_status', ['Visible', 'Hidden']);
+            $table->enum('exam_mode', ['Closed Book', 'Open Book'])->default('Closed Book');
             $table->boolean('is_shuffle_questions')->default(false);
             $table->timestamps();
         });

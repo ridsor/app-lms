@@ -12,6 +12,7 @@ use App\Http\Controllers\User\CurriculumController;
 use App\Http\Controllers\User\SubjectController;
 use App\Http\Controllers\User\ScheduleController;
 use App\Http\Controllers\User\AttendanceController;
+use App\Http\Controllers\User\ExamController;
 use App\Http\Controllers\User\MeetingController;
 use App\Http\Controllers\User\MeetingTextController;
 use App\Http\Controllers\User\QuestionBankController;
@@ -117,6 +118,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/jurnal-mengajar/jadwal/{schedule_id}/pertemuan', [TeachingJournalController::class, 'meetingBySchedule'])->name('user.journal.meetingBySchedule');
 
     Route::get('/bank-soal', [QuestionBankController::class, 'index'])->name('user.question-bank.index');
+    Route::get('/bank-soal/copy', [QuestionBankController::class, 'copy'])->name('user.question-bank.copy');
     Route::post('/bank-soal', [QuestionBankController::class, 'store'])->name('user.question-bank.store');
     Route::get('/bank-soal/{id}', [QuestionBankController::class, 'show'])->name('user.question-bank.show');
     Route::get('/bank-soal/{id}/edit', [QuestionBankController::class, 'edit'])->name('user.question-bank.edit');
@@ -126,9 +128,19 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/soal/{id}/edit', [QuestionController::class, 'edit'])->name('user.question.edit');
     Route::put('/soal/{id}', [QuestionController::class, 'update'])->name('user.question.update');
     Route::delete('/soal/{id}', [QuestionController::class, 'destroy'])->name('user.question.destroy');
-    Route::post('/soal/{id}/bank-soal', [QuestionController::class, 'storeForQuestionBank'])->name('user.question.store');
-    Route::post('/soal/{id}/ujian', [QuestionController::class, 'storeForExam'])->name('user.question.store');
+    Route::post('/soal/{id}/bank-soal', [QuestionController::class, 'storeForQuestionBank'])->name('user.question.storeForQuestionBank');
+    Route::post('/soal/{id}/ujian', [QuestionController::class, 'storeForExam'])->name('user.question.storeForExam');
     Route::get('/soal/{id}/file', [QuestionController::class, 'getFile'])->name('user.question.file.get');
     Route::get('/soal/{id}/{option}/file', [QuestionController::class, 'getFileOption'])->name('user.question.option.file.get');
     Route::get('/soal/{id}/file/download', [QuestionController::class, 'downloadFile'])->name('user.question.file.download');
+
+    Route::get('/ujian', [ExamController::class, 'index'])->name('user.exam.index');
+    Route::post('/ujian', [ExamController::class, 'store'])->name('user.exam.store');
+    Route::put('/ujian/{id}', [ExamController::class, 'update'])->name('user.exam.update');
+    Route::get('/ujian/{id}', [ExamController::class, 'show'])->name('user.exam.show');
+    Route::get('/ujian/{id}/edit', [ExamController::class, 'edit'])->name('user.exam.edit');
+    Route::delete('/ujian/{id}', [ExamController::class, 'destroy'])->name('user.exam.destroy');
+    Route::get('/ujian/{id}/soal', [ExamController::class, 'showQuestion'])->name('user.exam.question.show');
+    Route::post('/ujian/{exam_id}/copy/{id}', [ExamController::class, 'copyQuestions'])->name('user.exam.copyQuestions');
+    Route::get('/ujian/{id}/hasil', [ExamController::class, 'showResult'])->name('user.exam.result.show');
 });

@@ -143,6 +143,34 @@ class Helper
         };
     }
 
+    public static function getExamTypeLabel($type)
+    {
+        return match ($type) {
+            'Midterm' => 'UTS',
+            'Final' => 'UAS',
+            'Quiz' => 'Kuis',
+            default => $type
+        };
+    }
+
+    public static function getExamModeLabel($type)
+    {
+        return match ($type) {
+            'Closed Book' => 'Tutup Buku',
+            'Open Book' => 'Buku Terbuka',
+            default => $type
+        };
+    }
+
+    public static function getExamDisplayStatusLabel($type)
+    {
+        return match ($type) {
+            'Visible' => 'Tutup Buku',
+            'Hiddem' => 'Buku Terbuka',
+            default => $type
+        };
+    }
+
     public static function isValidUrl($value)
     {
         // Simple URL check - you might want a more robust validation

@@ -43,12 +43,6 @@ class QuestionBankController extends Controller
                 $data->whereFullText('title', $search);
             }
 
-            if ($request->filled('jurusan')) {
-                $data->whereHas('subject.major', function ($q) use ($request) {
-                    $q->where('name', $request->jurusan);
-                });
-            }
-
             if ($request->filled('mata_pelajaran')) {
                 $data->where('subjects.name', $request->mata_pelajaran);
             }
@@ -112,13 +106,92 @@ class QuestionBankController extends Controller
                 })
                 ->rawColumns(['id', 'Waktu', 'Judul', 'Mata Pelajaran', 'Soal', ''])->make(true);
         } else {
-            $hasMajors = Major::count() > 0;
             $majors = Major::with(['classes' => function ($query) {
                 $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
             }])->select('id', 'name')->orderBy('name', 'asc')->get();
             $subjects = Subject::select('id', 'name', 'curriculum_id')->with(['curriculum:id,name'])->get();
-            return view('user.question-bank.index', compact('majors', 'hasMajors', 'subjects'));
+            return view('user.question-bank.index', compact('majors', 'subjects'));
         }
+    }
+
+    public function copy(Request $request)
+    {
+        $data = QuestionBank::join('subjects', 'subject_id', '=', 'subjects.id')
+            ->select([
+                'question_banks.id',
+                'subject_id',
+                'title',
+                'question_banks.created_at',
+                'subjects.name as subject_name',
+            ])
+            ->with([
+                'subject:id,curriculum_id',
+                'subject.curriculum:id,name'
+            ])
+            ->withCount([
+                'questions'
+            ]);
+
+        // filter
+        if ($request->filled('search') && !empty($request->search['value'])) {
+            $search = $request->search['value'];
+            $data->whereFullText('title', $search);
+        }
+
+        if ($request->filled('mata_pelajaran')) {
+            $data->where('subjects.name', $request->mata_pelajaran);
+        }
+
+        $data->get();
+
+        return DataTables::of($data)
+            ->addColumn('id', function ($row) {
+                $html = '
+                        <div class="checkbox-checked">
+                            <div class="form-check d-flex justify-content-center align-items-center">
+                            <input class="form-check-input select-row" type="checkbox"
+                                    style="width: 12px; height: 12px;" value="' . $row->id . '" name="selected_ids[]" id="select-row-' . $row->id . '">
+                            </div>
+                        </div>
+                        ';
+                return $html;
+            })
+            ->addColumn('Judul', function ($row) {
+                $html = '
+                        <div class="product-names">
+                        <p>' . $row->title . '</p>
+                        </div>
+                        ';
+                return $html;
+            })
+            ->addColumn('Mata Pelajaran', function ($row) {
+                $html = '
+                        <div class="product-names">
+                        <p>' . $row->subject_name . ' - ' . $row->subject->curriculum->name . '</p>
+                        </div> 
+                        ';
+                return $html;
+            })
+            ->addColumn('Soal', function ($row) {
+                $html = '
+                        <div>
+                        <span class="badge badge-light-primary">' . $row->questions_count . '</span>
+                        </div>
+                        ';
+                return $html;
+            })
+            ->addColumn('Waktu', function ($row) {
+                return $row->created_at->translatedFormat('d/m/Y H:i');
+            })
+            ->addColumn('', function ($row) {
+                return '
+                        <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
+                            <a class="square-white copy-question" data-id="' . $row->id . '">
+                                <i class="fa-solid fa-copy"></i>
+                            </a>
+                        </div>';
+            })
+            ->rawColumns(['id', 'Waktu', 'Judul', 'Mata Pelajaran', 'Soal', ''])->make(true);
     }
 
     public function edit(Request $request, $id)
@@ -130,7 +203,7 @@ class QuestionBankController extends Controller
 
             if (!$question_bank) {
                 return $this->sendError(
-                    'Data siswa tidak ditemukan.',
+                    'Bank Soal tidak ditemukan.',
                     [],
                     404
                 );
@@ -148,18 +221,25 @@ class QuestionBankController extends Controller
 
     public function show(Request $request, $id)
     {
-        if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) return abort(403);
+        if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
+            abort(403);
+        }
 
-        $question_bank = QuestionBank::with([
-            'questions'
-        ])->withCount([
-            'questions'
-        ])->where('id', $id)->firstOrFail();
+        $question_bank = QuestionBank::withCount(['questions'])
+            ->findOrFail($id);
 
-        $questions = $question_bank->questions()->paginate(5);
+        $questionsQuery = $question_bank->questions();
+
+        if ($request->filled('search')) {
+            $search = $request->query('search');
+            $questionsQuery->where('question_text', 'like', "%{$search}%");
+        }
+
+        $questions = $questionsQuery->paginate(5);
 
         return view('user.question-bank.show', compact('question_bank', 'questions'));
     }
+
 
     public function store(QuestionBankRequest $request)
     {

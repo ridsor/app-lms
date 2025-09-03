@@ -76,7 +76,7 @@ $(document).ready(function () {
         if (file) {
             let reader = new FileReader();
             reader.onload = (e) => {
-            $preview.attr("src", e.target.result).show();
+                $preview.attr("src", e.target.result).show();
                 $fileIcon.hide();
             };
             reader.readAsDataURL(file);
@@ -154,7 +154,7 @@ $(document).ready(function () {
         const formData = new FormData(this);
 
         $.ajax({
-            url: `/soal/${id}/bank-soal`,
+            url: `/soal/${id}/ujian`,
             method: "POST",
             data: formData,
             processData: false,
@@ -254,7 +254,6 @@ $(document).ready(function () {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     const options_errors = [];
-                    console.log(errors);
                     for (const key in errors) {
                         if (
                             $(
@@ -443,3 +442,141 @@ function handleDeleteQuestion(e, id) {
         }
     });
 }
+
+// question bank
+let t;
+
+$(function () {
+    if ($("#question-bank-table").length) {
+        let columns = [
+            { data: "Judul", name: "title" },
+            { data: "Mata Pelajaran", name: "subject_name", searchable: false },
+            {
+                data: "Soal",
+                name: "question",
+                searchable: false,
+                orderable: false,
+            },
+            { data: "Waktu", name: "created_at", searchable: false },
+            { data: "", name: "", orderable: false, searchable: false },
+        ];
+
+        // filter
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("jurusan")) {
+            $("#major-filter").val(params.get("jurusan"));
+        }
+        if (params.get("mata_pelajaran")) {
+            $("#subject-filter").val(params.get("mata_pelajaran"));
+        }
+
+        t = $("#question-bank-table").DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: $.fn.dataTable.pipeline({
+                url: `/bank-soal/copy`,
+                pages: 5,
+                data: function (d) {
+                    let filterParams = getQueryParams();
+                    $.extend(d, filterParams);
+                },
+            }),
+            columns: columns,
+            language: {
+                sProcessing: "Sedang memproses...",
+                sZeroRecords: "Tidak ditemukan data yang sesuai",
+                sInfo: "Menampilkan _START_ sampai _END_ dari _TOTAL_ entri",
+                sInfoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
+                sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
+                sEmptyTable: "Tidak ada data di tabel",
+                sSearch: "Cari:",
+            },
+            pageLength: 10,
+            lengthMenu: [10, 25, 50, 100],
+            responsive: true,
+            autoWidth: false,
+            searchable: true,
+            searching: true,
+            searchDelay: 300,
+            order: [],
+        });
+    }
+    $("#filter-btn").click(function (e) {
+        e.preventDefault();
+        // Buat query string
+        const params = new URLSearchParams();
+        if ($("#major-filter").val())
+            params.append("jurusan", $("#major-filter").val());
+        if ($("#subject-filter").val())
+            params.append("mata_pelajaran", $("#subject-filter").val());
+        // Update URL tanpa reload
+        const newUrl =
+            window.location.pathname +
+            (params.toString() ? "?" + params.toString() : "");
+        window.history.replaceState({}, "", newUrl);
+        // Refresh datatable
+        t.clearPipeline().draw();
+    });
+
+    $("#question-bank-table").on("click", ".copy-question", function (e) {
+        e.preventDefault();
+        const trashBtn = $(this);
+        var id = trashBtn.data("id");
+        var exam_id = $("#question-bank-table").data("exam-id");
+        if (!id || !exam_id) return;
+
+        Swal.fire({
+            title: "Apakah Anda yakin?",
+            text: "Anda akan menyalin soal dari bank soal ini.",
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: "Salin",
+            denyButtonText: `Batal`,
+            confirmButtonColor: "#FC4438",
+            cancelButtonColor: "#16C7F9",
+            imageUrl: "/assets/images/copy.png",
+            imageWidth: 120,
+            imageHeight: 120,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const originalHtml = trashBtn.html();
+                trashBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+                    );
+                $.ajax({
+                    url: `/ujian/${exam_id}/copy/${id}`,
+                    method: "POST",
+                    success: function (res) {
+                        if (res.success) {
+                            t.clearPipeline().draw();
+                            const toast = new bootstrap.Toast(
+                                $("#toast-success")
+                            );
+                            $("#toast-success #toast-text").text(res.message);
+                            toast.show();
+                            location.reload();
+                        } else {
+                            const toast = new bootstrap.Toast(
+                                $("#toast-error")
+                            );
+                            $("#toast-error #toast-text").text(res.message);
+                            toast.show();
+                        }
+                    },
+                    error: function (xhr) {
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON.message
+                        );
+                        toast.show();
+                    },
+                    complete: function () {
+                        trashBtn.prop("disabled", false).html(originalHtml);
+                    },
+                });
+            }
+        });
+    });
+});

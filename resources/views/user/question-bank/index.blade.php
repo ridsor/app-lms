@@ -52,18 +52,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                @if ($hasMajors)
-                                    <div class="col-md-4 col-xl">
-                                        <label class="form-label" for="major-filter">Jurusan</label>
-                                        <select class="selectpicker search-picker filter" data-live-search="true"
-                                            id="major-filter">
-                                            <option value="">Pilih Jurusan</option>
-                                            @foreach ($majors as $major)
-                                                <option value="{{ $major->name }}">{{ $major->name }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endif
                                 <div class="col-auto d-flex justify-content-start align-items-end">
                                     <a class="btn btn-primary f-w-500 w-100" id="filter-btn">Terapkan</a>
                                 </div>

@@ -197,7 +197,7 @@
                                     <li class="sidebar-list">
                                         <i class="fa-solid fa-thumbtack"></i>
                                         <a class="sidebar-link sidebar-title link-nav"
-                                            href="{{ route('user.period.index') }}"><svg class="stroke-icon">
+                                            href="{{ route('user.exam.index') }}"><svg class="stroke-icon">
                                                 <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
                                                 </use>
                                             </svg><svg class="fill-icon">
