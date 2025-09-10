@@ -3,14 +3,11 @@
                 <div>
                     <div class="logo-wrapper">
                         <a href="{{ route('admin.home') }}">
-                            <div class="d-flex d-flex gap-2 flex-column align-items-center">
+                            <div class="d-flex d-flex gap-2 flex-column align-items-start">
                                 <img class="img-fluid for-light" src="{{ asset('assets/images/logo_sekolah.png') }}"
                                     style="width: 40px" alt=""><img class="img-fluid for-dark"
                                     src="{{ asset('assets/images/logo_sekolah.png') }}" style="width: 40px"
                                     alt="">
-                                <p class="fw-medium">
-                                    {{ env('SCHOOL_NAME') }}
-                                </p>
                             </div>
                         </a>
                         <div class="back-btn"><i class="fa-solid fa-angle-left"></i></div>

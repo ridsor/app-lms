@@ -20,6 +20,7 @@ use App\Http\Controllers\User\QuestionController;
 use App\Http\Controllers\User\TaskController;
 use App\Http\Controllers\User\TaskSubmissionController;
 use App\Http\Controllers\User\TeachingJournalController;
+use App\Http\Middleware\CheckExamTime;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"])->group(function () {
@@ -91,6 +92,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/jadwal/pertemuan/tugas/{task_id}/penilaian/{page?}', [TaskSubmissionController::class, 'evaluation'])->name('user.task.evaluation');
     Route::post('/jadwal/pertemuan/tugas/penilaian/{task_submissio_id}', [TaskSubmissionController::class, 'postEvaluation'])->name('user.task.evaluation.post');
     Route::get('/jadwal/pertemuan/tugas/penilaian/{task_submission_id}/{id}/file', [TaskSubmissionController::class, 'downloadFile'])->name('user.task.evaluation.file.download');
+    Route::get('/jadwal/pertemuan/tugas/{id}/hasil/export', [TaskController::class, 'exportResult'])->name('user.task.result.export');
 
     Route::post('/jadwal/pertemuan/{meeting_id}/text', [MeetingTextController::class, 'store'])->name('user.meeting_text.store');
     Route::get('/jadwal/pertemuan/text/{meeting_text_id}', [MeetingTextController::class, 'index'])->name('user.meeting_text.index');
@@ -143,4 +145,16 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/ujian/{id}/soal', [ExamController::class, 'showQuestion'])->name('user.exam.question.show');
     Route::post('/ujian/{exam_id}/copy/{id}', [ExamController::class, 'copyQuestions'])->name('user.exam.copyQuestions');
     Route::get('/ujian/{id}/hasil', [ExamController::class, 'showResult'])->name('user.exam.result.show');
+    Route::patch('/ujian/{id}/hasil/reset', [ExamController::class, 'resetResult'])->name('user.exam.result.reset');
+    Route::patch('/ujian/{id}/hasil/{exam_result_id}/reset', [ExamController::class, 'resetResultById'])->name('user.exam.result.reset.byId');
+    Route::get('/ujian/{id}/hasil/export', [ExamController::class, 'exportResult'])->name('user.exam.result.export');
+
+    Route::get('/ujian/{id}/info', [ExamController::class, 'info'])->name('user.exam.info');
+    Route::get('/ujian/{id}/pengerjaan', [ExamController::class, 'workmanship'])->middleware(CheckExamTime::class)->name('user.exam.workmanship');
+    Route::post('/ujian/{id}/pengerjaan/answer', [ExamController::class, 'setAnswerByExamResult'])->name('user.exam.workmanship.answer');
+    Route::post('/ujian/{id}/pengerjaan', [ExamController::class, 'workmanshipSubmit'])->name('user.exam.workmanship.submit');
+    Route::post('/ujian/{id}/mulai', [ExamController::class, 'examStart'])->name('user.exam.start');
+    Route::get('/ujian/{id}/pengerjaan/hasil', [ExamController::class, 'workmanshipResult'])->name('user.exam.workmanship.result');
+
+    Route::get('/ujian/{id}/pengerjaan/soal', [ExamController::class, 'getRandomQuestions'])->name('user.exam.workmanship.soal');
 });

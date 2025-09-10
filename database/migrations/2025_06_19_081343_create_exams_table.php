@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->enum('type', ['Midterm', 'Final']);
             $table->dateTime('start_time');
-            $table->dateTime('end_time');
+            $table->dateTime('end_time')->nullable();
             $table->integer('duration')->nullable();
             $table->enum('exam_mode', ['Closed Book', 'Open Book'])->default('Closed Book');
             $table->boolean('is_shuffle_questions')->default(false);

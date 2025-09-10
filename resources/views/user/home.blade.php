@@ -63,9 +63,10 @@
                                                 src="{{ asset('assets/icons/exam.png') }}" />
                                         </div>
                                         <div>
-                                            <h4 class="mb-0"> <span class="counter" data-target="80">0</span>
+                                            <h4 class="mb-0"> <span class="counter"
+                                                    data-target="100">{{ $countExams }}</span>
                                             </h4><span class="f-light">Belum dikerjakan</span><a
-                                                href="{{ route('user.task.index') }}" class="btn btn-light f-light">Lihat
+                                                href="{{ route('user.exam.index') }}" class="btn btn-light f-light">Lihat
                                                 Ujian<span class="ms-2"> <svg class="fill-icon f-light">
                                                         <use href="{{ asset('assets/svg/icon-sprite.svg#arrowright') }}">
                                                         </use>
@@ -147,7 +148,7 @@
                         <div class="col-12 px-0">
                             <div class="card widget-hover rounded-responsive overflow-hidden">
                                 <div class="card-body">
-                                    <div class="row g-2">
+                                    <div class="row g-2 align-items-center">
                                         <div class="col-md-6">
                                             <div class="light-card attendance-card widget-hover">
                                                 <div class="left-overview-content">

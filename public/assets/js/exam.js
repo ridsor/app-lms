@@ -37,7 +37,6 @@ const add_start_time = flatpickr("#addExamStartTime", {
 
 const add_end_time = flatpickr("#addExamEndTime", {
     defaultDate: new Date(),
-    minDate: "today",
     minTime: formatTime(new Date()),
     enableTime: true,
     dateFormat: "Y-m-d H:i",
@@ -49,7 +48,6 @@ const edit_start_time = flatpickr("#editExamStartTime", {
     enableTime: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
-    minDate: "today",
     minTime: formatTime(new Date()),
     locale: flatpickrLocationID,
     onChange: function (selectedDates) {
@@ -287,7 +285,6 @@ function handleEditExam(e, id) {
                         res.data.description
                     )
                 );
-
                 $("#editExamForm [name='type']").val(res.data.type);
                 edit_start_time.setDate(new Date(res.data.start_time));
                 edit_end_time.setDate(new Date(res.data.end_time));

@@ -102,17 +102,17 @@ class Exam extends Model
             }
 
             if ($user->hasRole('teacher')) {
-                return $query->whereHas('meeting.schedule', function ($q) use ($user) {
+                return $query->whereHas('schedule', function ($q) use ($user) {
                     $q->where('teacher_id', $user->teacher->id);
                 });
             }
             if ($user->hasRole('student')) {
-                return $query->whereHas('meeting.schedule', function ($q) use ($user) {
+                return $query->whereHas('schedule', function ($q) use ($user) {
                     $q->where('class_id', $user->student->class_id);
                 });
             }
             if ($user->hasRole('parent')) {
-                return $query->whereHas('meeting.schedule', function ($q) use ($user) {
+                return $query->whereHas('schedule', function ($q) use ($user) {
                     $q->where('class_id', $user->parent->class_id);
                 });
             }

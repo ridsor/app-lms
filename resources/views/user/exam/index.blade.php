@@ -11,6 +11,15 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/select/bootstrap-select.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
+    <style>
+        button.dropdown-toggle[data-id='editSchedule'] .filter-option-inner-inner {
+            text-transform: uppercase !important;
+        }
+
+        button.dropdown-toggle[data-id='addSchedule'] .filter-option-inner-inner {
+            text-transform: uppercase !important;
+        }
+    </style>
 @endsection
 
 @section('main_content')
@@ -285,7 +294,7 @@
                                                         </button>
                                                     @endrole
                                                     <a @role(['student', 'parent'])
-                                                        {{-- href="{{ route('user.tasksubmission.show', $exam->id) }}" --}}
+                                                        href="{{ route('user.exam.info', $exam->id) }}"
                                                         @endrole
                                                         @role(['teacher', 'operator'])
                                                         href="{{ route('user.exam.show', $exam->id) }}"
@@ -318,7 +327,6 @@
                 </div>
             </div>
         </div>
-    </div>
     </div>
 @endsection
 

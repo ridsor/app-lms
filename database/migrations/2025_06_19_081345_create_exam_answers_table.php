@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('exam_result_id')->constrained('exam_results')->onDelete('cascade');
             $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
             $table->text('answer');
+            $table->unique(['exam_result_id', 'question_id'], 'unique_answer');
             $table->timestamp('answered_at')->useCurrent();
-            $table->timestamps();
         });
     }
 

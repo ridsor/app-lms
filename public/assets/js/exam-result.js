@@ -26,7 +26,7 @@ $(function () {
                 searchable: false,
             },
             {
-                data: "Pengumpulan",
+                data: "Pengerjaan",
                 name: "task_submissions.submitted_at",
                 searchable: false,
             },
@@ -36,25 +36,10 @@ $(function () {
                 searchable: false,
             },
             {
-                data: null,
+                data: "",
                 name: "",
                 orderable: false,
                 searchable: false,
-                render: function (data, type, row, meta) {
-                    const html = `
-                    <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
-                        <a class="square-white view rounded-2" href=${
-                            "/jadwal/pertemuan/tugas/1/penilaian/" +
-                            (meta.row + meta.settings._iDisplayStart + 1)
-                        }>
-                            <i class="fa-solid fa-pen"></i>
-                        </a>
-                    </div>
-                    `;
-                    return html;
-                },
-                className: "text-center",
-                width: "40px",
             },
         ],
         language: {
@@ -77,5 +62,105 @@ $(function () {
 
     $("#globalSearch").on("keyup", function () {
         t.search(this.value).clearPipeline().draw();
+    });
+});
+
+$(document).ready(function () {
+    $("#reset-all").on("click", function () {
+        let examId = $(this).data("id");
+        const originalHtml = $(this).html();
+        const btnSubmit = $(this);
+
+        Swal.fire({
+            title: "Reset Semua Hasil Ujian",
+            text: "Apakah Anda yakin ingin mereset semua hasil ujian?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya, Reset Semua!",
+            cancelButtonText: "Batal",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                btnSubmit
+                    .prop("disabled", true)
+                    .html(
+                        '<i class="fa-solid fa-arrows-rotate fa-spin"></i> Loading...'
+                    );
+                $.ajax({
+                    url: `/ujian/${examId}/hasil/reset`,
+                    method: "PATCH",
+                    success: function (response) {
+                        showToast("success", response.message);
+                        t.clearPipeline().draw();
+                    },
+                    error: function (xhr) {
+                        showToast(
+                            "error",
+                            xhr.responseJSON?.message || "Terjadi kesalahan."
+                        );
+                    },
+                    complete: function () {
+                        btnSubmit.prop("disabled", false).html(originalHtml);
+                    },
+                });
+            }
+        });
+    });
+
+    $("#export-excel").on("submit", function (e) {
+        e.preventDefault();
+
+        const btnSubmit = $(this).find("button[type='submit']");
+        const originalHtml = btnSubmit.html();
+
+        btnSubmit
+            .prop("disabled", true)
+            .html(
+                '<i class="fa-solid fa-arrows-rotate fa-spin"></i> Loading...'
+            );
+
+        this.submit();
+
+        setTimeout(function () {
+            btnSubmit.prop("disabled", false).html(originalHtml);
+        }, 3000);
+    });
+
+    $("#exam-result-table").on("click", ".reset-result", function () {
+        let id = $(this).data("id");
+        let exam_id = $(this).data("exam-id");
+        const originalHtml = $(this).html();
+        const btnSubmit = $(this);
+
+        Swal.fire({
+            title: "Reset Hasil Ujian",
+            text: "Apakah Anda yakin ingin mereset hasil ujian?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya, Reset!",
+            cancelButtonText: "Batal",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                btnSubmit
+                    .prop("disabled", true)
+                    .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
+                $.ajax({
+                    url: `/ujian/${exam_id}/hasil/${id}/reset`,
+                    method: "PATCH",
+                    success: function (response) {
+                        showToast("success", response.message);
+                        t.clearPipeline().draw();
+                    },
+                    error: function (xhr) {
+                        showToast(
+                            "error",
+                            xhr.responseJSON?.message || "Terjadi kesalahan."
+                        );
+                    },
+                    complete: function () {
+                        btnSubmit.prop("disabled", false).html(originalHtml);
+                    },
+                });
+            }
+        });
     });
 });

@@ -94,12 +94,26 @@ class Helper
         };
     }
 
-    public static function getGenderLabel(string $gender): string
+    public static function getGenderLabel($gender): string
     {
         return match ($gender) {
             'M' => 'Laki-laki',
             'F' => 'Perempuan',
             default => $gender
+        };
+    }
+
+    public static function getExamStatusLabel($status): string
+    {
+        return match ($status) {
+            'not_done' => '<span
+                                    class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum Dikerjakan</span>',
+            'in_progress' => '<span
+                                    class="badge m-0 badge-light-warning px-2 py-1 d-flex align-items-center">Sedang Dikerjakan</span>',
+            'completed' => '<span
+                                    class="badge m-0 badge-light-success px-2 py-1 d-flex align-items-center">Selesai</span>',
+            default => '<span
+                                    class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum Dikerjakan</span>'
         };
     }
 

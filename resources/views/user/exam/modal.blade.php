@@ -62,6 +62,8 @@
                                                 @foreach ($schedules as $schedule)
                                                     <option value="{{ $schedule->id }}" class="text-uppercase">
                                                         {{ $schedule->subject->code }} - {{ $schedule->subject->name }}
+                                                        -
+                                                        {{ $schedule->class->name }}{{ $schedule->class->level }}{{ ' ' . $schedule->class->major?->name ?? '' }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -233,8 +235,9 @@
                                                 <label class="form-label" for="endDate">Waktu Selesai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" autocomplete="off"
-                                                    id="editExamEndTime" type="date" placeholder="Pilih waktu selesai"
-                                                    name="end_time" data-language="id">
+                                                    id="editExamEndTime" type="date"
+                                                    placeholder="Pilih waktu selesai" name="end_time"
+                                                    data-language="id">
                                                 <div class="invalid-feedback"></div>
                                             </div>
                                         </div>
@@ -246,7 +249,10 @@
                                                 <option value="">Pilih Jadwal</option>
                                                 @foreach ($schedules as $schedule)
                                                     <option value="{{ $schedule->id }}" class="text-uppercase">
-                                                        {{ $schedule->subject->code }} - {{ $schedule->subject->name }}
+                                                        {{ $schedule->subject->code }} -
+                                                        {{ $schedule->subject->name }}
+                                                        -
+                                                        {{ $schedule->class->name }}{{ $schedule->class->level }}{{ ' ' . $schedule->class->major?->name ?? '' }}
                                                     </option>
                                                 @endforeach
                                             </select>

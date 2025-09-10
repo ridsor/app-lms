@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Exam;
 use App\Models\Schedule;
 use App\Models\ScheduleTime;
 use App\Models\SchoolClass;
@@ -55,7 +56,6 @@ class HomeController extends Controller
                 ->get();
 
             $countTasks = 0;
-
             if ($request->user()->hasRole('teacher')) {
                 $countTasks = Task::filterByPermission($request->user())->whereHas('submissions', function ($query) {
                     $query->whereNull('score');
@@ -70,7 +70,22 @@ class HomeController extends Controller
                 })->count();
             }
 
-            return view('user.home', compact('schedules', 'countTasks'));
+            $countExams = 0;
+            if ($request->user()->hasRole('teacher')) {
+                $countExams = Exam::filterByPermission($request->user())->whereHas('results', function ($query) {
+                    $query->whereNull('score');
+                })->count();
+            } elseif ($request->user()->hasRole('student')) {
+                $countExams = Exam::filterByPermission($request->user())->whereDoesntHave('results', function ($query) use ($request) {
+                    $query->where('student_id', $request->user()->student->id);
+                })->count();
+            } elseif ($request->user()->hasRole('parent')) {
+                $countExams = Exam::filterByPermission($request->user())->whereDoesntHave('results', function ($query) use ($request) {
+                    $query->where('student_id', $request->user()->parent->id);
+                })->count();
+            }
+
+            return view('user.home', compact('schedules', 'countTasks', 'countExams'));
         } elseif ($request->user()->hasRole('vice-principal')) {
             $teacherCount = Teacher::count();
             $studentCount = Student::where('status', 'active')->count();

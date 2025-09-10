@@ -72,7 +72,7 @@
                     <div class="card h-100 my-0 rounded-responsive">
                         <div class="card-body px-3 py-4">
                             <h3 class="mb-3">Pengumpulan Tugas</h3>
-                            <div class="row justify-content-between">
+                            <div class="row justify-content-between gap-2">
                                 <div class="col-auto row gap-2 align-items-center flex-grow-1">
                                     @if ($task->not_yet_rated)
                                         <div class="d-flex flep-wrap align-items-center col-auto">
@@ -89,14 +89,24 @@
                                             id="globalSearch" />
                                     </div>
                                 </div>
-                                <div class="d-flex flex-wrap align-items-center col-12 justify-content-between col-md-auto">
+                                <div class="d-flex flex-wrap align-items-center gap-2 col-12 justify-content-between col-md-auto">
                                     <div class="d-flex gap-2 align-items-center h-100">
                                         <label for="displayedValue" class="mb-0">Nilai ditampilkan</label>
-                                        <div class="form-check form-switch form-check-inline"><input
+                                        <div class="form-check form-switch form-check-inline m-0"><input
                                                 class="form-check-input check-size" id="displayedValue" type="checkbox"
                                                 data-id="{{ $task->id }}" style="transform:translateY(2px)"
                                                 role="switch" {{ $task->value_displayed ? 'checked' : '' }}></div>
                                     </div>
+                                    <form action="{{ route('user.task.result.export', ['id' => $task->id]) }}"
+                                        method="GET" class="d-inline" id="export-excel">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span>
+                                                Export Excel
+                                            </span>
+                                        </button>
+                                    </form>
                                     <a class="btn btn-outline-info d-flex align-items-center gap-2 {{ count($task->submissions) > 0 ?: 'pe-none' }}"
                                         {{ $task->submissions->first()?->id ? 'href=' . route('user.task.evaluation', ['task_id' => $task->id]) : '' }}>
                                         <span>

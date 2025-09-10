@@ -6,6 +6,13 @@
     background-image: none !important;
 }
 
+.position-center {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+}
+
 .ql-editor * {
     word-break: break-word;
     overflow-wrap: break-word;

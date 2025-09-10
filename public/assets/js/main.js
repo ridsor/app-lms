@@ -26,6 +26,12 @@ function getDayName(day) {
     return days[day] || day;
 }
 
+function showToast(type, message) {
+    const toastEl = $(`#toast-${type}`);
+    toastEl.find("#toast-text").text(message);
+    new bootstrap.Toast(toastEl).show();
+}
+
 function handleCopyText(text) {
     navigator.clipboard.writeText(text);
     const toast = new bootstrap.Toast($("#toast-success"));
@@ -78,3 +84,42 @@ const flatpickrLocationID = {
         ],
     },
 };
+
+function getFileType(filename) {
+    const extension = filename.toLowerCase().split(".").pop();
+
+    const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"];
+    const videoExtensions = ["mp4", "avi", "mov", "wmv", "flv", "mkv", "webm"];
+    const audioExtensions = ["mp3", "wav", "ogg", "aac", "flac", "m4a"];
+    const documentExtensions = [
+        "pdf",
+        "doc",
+        "docx",
+        "txt",
+        "rtf",
+        "xlsx",
+        "xls",
+        "ppt",
+        "pptx",
+    ];
+    const archiveExtensions = ["zip", "rar", "7z", "tar", "gz"];
+
+    if (imageExtensions.includes(extension)) {
+        return "image";
+    } else if (videoExtensions.includes(extension)) {
+        return "video";
+    } else if (audioExtensions.includes(extension)) {
+        return "audio";
+    } else if (documentExtensions.includes(extension)) {
+        return "document";
+    } else if (archiveExtensions.includes(extension)) {
+        return "archive";
+    } else {
+        return "other";
+    }
+}
+
+function getFileExtension(filename) {
+    if (!filename) return "";
+    return filename.split(".").pop().toLowerCase();
+}

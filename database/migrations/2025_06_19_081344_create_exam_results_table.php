@@ -16,11 +16,11 @@ return new class extends Migration
             $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');
             $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
             $table->dateTime('start_time');
-            $table->dateTime('end_time');
+            $table->dateTime('end_time')->nullable();
             $table->decimal('score')->nullable();
             $table->dateTime('graded_at')->nullable();
             $table->foreignId('graded_by')->nullable()->constrained('teachers')->onDelete('set null');
-            $table->enum('status', ['not_done', 'in_progress', 'completed', 'timeout'])->default('not_done');
+            $table->enum('status', ['not_done', 'in_progress', 'completed'])->default('not_done');
             $table->unique(['exam_id', 'student_id']);
             $table->timestamps();
         });

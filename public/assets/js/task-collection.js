@@ -112,4 +112,23 @@ $(function () {
             },
         });
     });
+
+    $("#export-excel").on("submit", function (e) {
+        e.preventDefault();
+
+        const btnSubmit = $(this).find("button[type='submit']");
+        const originalHtml = btnSubmit.html();
+
+        btnSubmit
+            .prop("disabled", true)
+            .html(
+                '<i class="fa-solid fa-arrows-rotate fa-spin"></i> Loading...'
+            );
+
+        this.submit();
+
+        setTimeout(function () {
+            btnSubmit.prop("disabled", false).html(originalHtml);
+        }, 3000);
+    });
 });

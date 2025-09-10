@@ -8,11 +8,16 @@
                                 alt="">
                             <img class="img-fluid for-dark" src="{{ asset('assets/images/logo/logo_dark.png') }}"
                                 alt="">
-                        </a>
+                        </a>S
                     </div>
                     <div class="toggle-sidebar">
                         <i class="status_toggle middle sidebar-toggle" data-feather="align-center"></i>
                     </div>
+                </div>
+                <div class="left-header col-xxl-5 col-xl-6 col-lg-5 col-md-4 col-sm-3 p-0">
+                    <p class="fw-medium mb-0">
+                        {{ env('SCHOOL_NAME') }}
+                    </p>
                 </div>
                 <div class="nav-right col-xxl-7 col-xl-6 col-md-7 col-8 pull-right right-header p-0 ms-auto">
                     <ul class="nav-menus">

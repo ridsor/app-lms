@@ -214,6 +214,13 @@ class TeacherController extends Controller
       }
       $query = Teacher::query()->select('id', 'name', 'nip', 'specialization', 'date_of_birth', 'birthplace', 'religion', 'user_id');
       $teachers = $query->get();
+
+      $headerRows = [
+        ['Akun Guru' => ''],
+        [],
+        ['No' => 'No', 'Nama' => 'Nama', 'NIP' => 'NIP', 'Spesialisasi' => 'Spesialisasi', 'Username' => 'Username', 'Password' => 'Password'],
+      ];
+
       $exportData = $teachers->map(function ($teacher, $index) {
         return [
           'No' => $index + 1,
@@ -223,8 +230,11 @@ class TeacherController extends Controller
           'Username' => $teacher->user ? $teacher->user->username : '-',
           'Password' => $teacher->user ? $teacher->user->username : '-',
         ];
-      });
+      })->toArray();
       $filename = 'akun-guru.xlsx';
+
+      $exportData = array_merge($headerRows, $exportData);
+
       return (new FastExcel($exportData))->download($filename);
     } catch (\Exception $e) {
       Log::info($e->getMessage());

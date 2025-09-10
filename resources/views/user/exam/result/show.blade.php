@@ -7,6 +7,7 @@
 @section('title', 'Hasil Ujian')
 
 @section('styles')
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/jquery.dataTables.css') }}">
     <style>
         .view_file_path .Archive,
@@ -56,13 +57,33 @@
                     <div class="card h-100 my-0 rounded-responsive">
                         <div class="card-body px-3 py-4">
                             <h3 class="mb-3">Hasil Ujian</h3>
-                            <div class="row justify-content-between">
-                                <div class="col-auto row gap-2 align-items-center flex-grow-1">
-                                    <div class="d-flex align-items-center w-100 gap-2 col-12">
+                            <div class="row justify-content-between gap-2">
+                                <div class="col-auto row g-2 align-items-center flex-grow-1">
+                                    <div class="d-flex align-items-center w-100 gap-2 col-12" style="max-width:400px">
                                         <i data-feather="search"></i>
                                         <input type="type" class="form-control w-100" placeholder="Cari nama mahasiswa"
                                             id="globalSearch" />
                                     </div>
+                                </div>
+                                <div
+                                    class="d-flex flex-wrap gap-2 align-items-center col-12 justify-content-between col-md-auto">
+                                    <form action="{{ route('user.exam.result.export', ['id' => $exam->id]) }}"
+                                        method="GET" class="d-inline" id="export-excel">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-file"></i>
+                                            <span>
+                                                Export Excel
+                                            </span>
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-outline-danger d-flex align-items-center gap-2"
+                                        id="reset-all" data-id="{{ $exam->id }}">
+                                        <i class="fa-solid fa-rotate-right"></i>
+                                        <span>
+                                            Reset Semua
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
                             <div class="e-category">
@@ -80,7 +101,7 @@
                                                                 <tr>
                                                                     <th>No</th>
                                                                     <th>Nama</th>
-                                                                    <th>Pengumpulan</th>
+                                                                    <th>Pengerjaan</th>
                                                                     <th>Nilai</th>
                                                                     <th></th>
                                                                 </tr>
@@ -106,6 +127,7 @@
     <script src="{{ asset('assets/js/datatable/datatables/dataTables.js') }}"></script>
     <script src="{{ asset('assets/js/datatable/datatables/dataTables.select.js') }}"></script>
     <script src="{{ asset('assets/js/datatable-pipeline.js') }}"></script>
+    <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
     <script>
         const task_id = @json($exam->id)
     </script>

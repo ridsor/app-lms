@@ -8,6 +8,7 @@ use App\Models\Student;
 use App\Models\ExamAnswer;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Log;
 
 class ExamResult extends Model
 {
@@ -54,5 +55,17 @@ class ExamResult extends Model
         return $value == (int)$value
             ? (int)$value
             : rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.');
+    }
+
+    public function getRemainingDurationAttribute()
+    {
+        $now = now();
+        $this->end_time;
+
+        if ($this->end_time) {
+            return $now->diffInMinutes($this->end_time);
+        }
+
+        return 0;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
+use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskRequest;
 use App\Models\Major;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
+use Rap2hpoutre\FastExcel\FastExcel;
 
 class TaskController extends Controller
 {
@@ -192,6 +194,58 @@ class TaskController extends Controller
                 ->make(true);
         } else {
             return view('user.task.show-collection', compact('task'));
+        }
+    }
+
+    public function exportResult(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->hasRole('teacher') && !$request->user()->hasRole('operator')) {
+                return abort(403);
+            }
+
+            $task = Task::with([
+                'meeting:id,schedule_id',
+                'meeting.schedule:id,subject_id,teacher_id,class_id,period_id',
+                'meeting.schedule.subject:id,name,code',
+                'meeting.schedule.class:id,name,level,major_id',
+                'meeting.schedule.class.major:id,name',
+                'meeting.schedule.period:id,academic_year,semester',
+                'submissions',
+                'submissions.student:id,name,nis',
+            ])->findOrFail($id);
+
+            $this->authorize('update', $task);
+
+            $headerRows = [
+                ['HASIL TUGAS' => ''],
+                ['Periode', 'Periode' => $task->meeting->schedule->period ? $task->meeting->schedule->period->academic_year . ' ' . Helper::getSemesterLabel($task->meeting->schedule->period->semester) : '-'],
+                ['Mata Pelajaran', 'Mata Pelajaran' => $task->meeting->schedule->subject ? $task->meeting->schedule->subject->code . ' - ' . strtoupper($task->meeting->schedule->subject->name) : '-'],
+                ['Kelas', 'Kelas' => $task->meeting->schedule->class ? $task->meeting->schedule->class->name . $task->meeting->schedule->class->level . ($task->meeting->schedule->class->major ? ' ' . $task->meeting->schedule->class->major->name : '') : '-'],
+                ['Guru', 'Guru' => $task->meeting->schedule->teacher ? $task->meeting->schedule->teacher->name . ' (' . $task->meeting->schedule->teacher->nip . ')' : '-'],
+                ['Jenis Tugas', 'Jenis Tugas' => Helper::getTaskTypeLabel($task->type) ?: '-'],
+                ['Waktu Tugas', 'Waktu Tugas' => $task->start_time && $task->end_time ? $task->start_time->translatedFormat('j F Y H:i') . ' - ' . $task->end_time->translatedFormat('j F Y H:i') : '-'],
+                [],
+                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
+            ];
+
+            $exportData = $task->submissions->map(function ($result, $index) {
+                return [
+                    'No' => $index + 1,
+                    'Nama' => $result->student ? $result->student->name : '-',
+                    'NIS' => $result->student ? $result->student->nis : '-',
+                    'Nilai' => $result->formatted_score ? $result->formatted_score : '-',
+                ];
+            })->toArray();
+
+            $filename = 'Nilai Tugas ' . now()->format('Y-m-d') . '.xlsx';
+
+            $exportData = array_merge($headerRows, $exportData);
+
+            return (new FastExcel($exportData))->download($filename);
+        } catch (\Exception $e) {
+            Log::info($e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
         }
     }
 
