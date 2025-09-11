@@ -339,6 +339,8 @@ $(document).ready(function () {
                                 .text(res.data.status);
 
                             $("#fillRealizationModal").modal("show");
+
+                            button.prop("disabled", true).html(originalHtml);
                         }
                     },
                     error: function (xhr) {
@@ -348,9 +350,6 @@ $(document).ready(function () {
                                 "Gagal menyimpan kehadiran"
                         );
                         toast.show();
-                        button.prop("disabled", false).html(originalHtml);
-                    },
-                    complete: function () {
                         button.prop("disabled", false).html(originalHtml);
                     },
                 });
