@@ -179,16 +179,32 @@
                     </div>
                 </div>
                 <div class="col-12 col-lg-5 col-xl-4 order-1 order-lg-2">
+                    @php
+                        $now = now();
+                        $is_exam_available =
+                            $exam->start_time <= $now &&
+                            $exam->end_time >= $now &&
+                            $exam_result?->status != 'completed' &&
+                            $exam->questions_count > 0;
+                    @endphp
                     <div class="p-3">
                         <div class="mb-2">
                             {!! Helper::getExamStatusLabel($exam_result?->status) !!}
                         </div>
+
+                        @if (!$is_exam_available)
+                            <div class="mb-3">
+                                <a href="{{ route('user.exam.workmanship.result', $exam->id) }}"
+                                    class="btn btn-primary w-100">Lihat Hasil</a>
+                            </div>
+                        @endif
 
                         <div class="d-flex mb-3 justify-content-between align-items-center">
                             <p class="mb-0 fw-semibold fs-6">Nilai</p>
                             <input class="form-control text-center" type="number" style="width: 70px" disabled
                                 value="{{ $exam_result?->formatted_score }}" name="score" step="0.1" />
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Waktu Pengerjaan</label>
                             <div class="c-o-light f-w-600">
@@ -214,15 +230,8 @@
                                 aria-label="Close">
                                 Kembali
                             </a>
-                            @php
-                                $now = now();
-                                $is_exam_available =
-                                    $exam->start_time <= $now &&
-                                    $exam->end_time >= $now &&
-                                    $exam_result?->status != 'completed' &&
-                                    $exam->questions_count > 0;
-                            @endphp
-                            <button data-href="{{ route('user.exam.workmanship', $exam->id) }}" type="button""
+
+                            <button data-href="{{ route('user.exam.workmanship', $exam->id) }}" type="button"
                                 id="start-exam-btn" data-id="{{ $exam->id }}" class="btn btn-primary"
                                 {{ $is_exam_available ?: 'disabled' }}>Mulai</button>
                         </div>
