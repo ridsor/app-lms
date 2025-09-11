@@ -225,7 +225,7 @@
                                 <label class="form-label">Ruangan</label>
                                 <p class="c-o-light f-w-600">
                                     <span>
-                                        {{  $schedule->room->name }}
+                                        {{ $schedule->room->name }}
                                     </span>
                                 </p>
                             </div>
@@ -382,8 +382,8 @@
                     </div>
                     <div class="col-md-12">
                         <div class="d-flex justify-content-end gap-2 p-3">
-                            <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
-                                aria-label="Close">
+                            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal"
+                                data-bs-target="#fillRealizationModal">
                                 Batal
                             </button>
                             <button class="btn btn-primary" type="submit" id="save_attendance"
