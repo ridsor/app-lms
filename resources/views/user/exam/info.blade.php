@@ -192,7 +192,7 @@
                             {!! Helper::getExamStatusLabel($exam_result?->status) !!}
                         </div>
 
-                        @if (!$is_exam_available)
+                        @if ($exam_result?->status == 'completed')
                             <div class="mb-3">
                                 <a href="{{ route('user.exam.workmanship.result', $exam->id) }}"
                                     class="btn btn-primary w-100">Lihat Hasil</a>
