@@ -12,6 +12,7 @@
     <meta name="author" content="X3-TECH" />
     <link rel="icon" href="/assets/images/favicon.png" type="image/x-icon" />
     <link rel="shortcut icon" href="/assets/images/favicon.png" type="image/x-icon" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title') | {{ config('app.name') }}</title>
 
@@ -35,8 +36,10 @@
     <!-- Bootstrap css-->
     <link rel="stylesheet" type="text/css" href="/assets/css/vendors/bootstrap.css" />
     <!-- App css-->
+    @vite(['public/assets/scss/style.scss'])
+    {{-- <link rel="stylesheet" type="text/css" href="/assets/css/style.css" /> --}}
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/main.css') }}">
     @yield('styles')
-    <link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
     <link id="color" rel="stylesheet" href="/assets/css/color-1.css" media="screen" />
     <!-- Responsive css-->
     <link rel="stylesheet" type="text/css" href="/assets/css/responsive.css" />
@@ -68,6 +71,7 @@
     <div class="page-wrapper compact-wrapper" id="pageWrapper">
         @yield('main_content')
     </div>
+    @include('components.alerts')
     <!-- latest jquery-->
     <script src="/assets/js/jquery.min.js"></script>
     <!-- Bootstrap js-->
@@ -77,6 +81,7 @@
     <script src="/assets/js/icons/feather-icon.js"></script>
     <!-- scrollbar js--><!-- Sidebar jquery-->
     <script src="/assets/js/config.js"></script>
+    <script src="{{ asset('assets/js/main.js') }}"></script>
 
     @yield('scripts')
     <!-- Plugins JS start--><!-- Plugins JS Ends--><!-- Theme js-->

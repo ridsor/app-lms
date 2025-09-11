@@ -21,6 +21,7 @@ class ProfileController extends Controller
 
         $user = User::where('username', $username)->first();
         $image = $request->image;
+        Log::info($request->all());
 
         if ($request->hasFile('image')) {
             // Hanya hapus gambar lama jika BUKAN dari Google Avatar

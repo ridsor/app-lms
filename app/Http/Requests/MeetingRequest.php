@@ -26,7 +26,7 @@ class MeetingRequest extends FormRequest
             'title' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'meeting_method' => 'required|in:Online,Offline,Hybrid',
-            'type' => 'required|in:Learning,Midterm,Final',
+            'type' => 'required|in:Learning,Midterm,Final,Holiday',
         ];
     }
 

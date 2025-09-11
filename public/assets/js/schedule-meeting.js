@@ -54,10 +54,10 @@ $(function () {
 
 $(document).ready(function () {
     statuses.forEach(function (value) {
-        $(`.status-all-${value}`).on("click", function () {
-            $(`.status-input`).each(function () {
+        $(`#fill_attendance .status-all-${value}`).on("click", function () {
+            $(`#fill_attendance .status-input`).each(function () {
                 $(this)
-                    .find(`.status-value[value="${value}"]`)
+                    .find(`input.status-value[value="${value}"]`)
                     .prop("checked", true);
             });
         });
@@ -227,7 +227,8 @@ $(document).ready(function () {
                     );
                     toast.show();
                 }
-
+            },
+            complete: function () {
                 submitBtn.prop("disabled", false).html(originalHtml);
             },
         });
@@ -327,10 +328,7 @@ $(document).ready(function () {
                             toast.show();
 
                             $("#fillRealizationModal #date").text(
-                                res.data.date
-                            );
-                            $("#fillRealizationModal #start_time").text(
-                                res.data.formatted_started_at
+                                res.data.formatted_date
                             );
                             $("#btn_fill_realization").attr("disabled", false);
 
@@ -339,8 +337,6 @@ $(document).ready(function () {
                             )
                                 .find("#status")
                                 .text(res.data.status);
-
-                            button.prop("disabled", true).html(originalHtml);
 
                             $("#fillRealizationModal").modal("show");
                         }
@@ -352,6 +348,9 @@ $(document).ready(function () {
                                 "Gagal menyimpan kehadiran"
                         );
                         toast.show();
+                        button.prop("disabled", false).html(originalHtml);
+                    },
+                    complete: function () {
                         button.prop("disabled", false).html(originalHtml);
                     },
                 });

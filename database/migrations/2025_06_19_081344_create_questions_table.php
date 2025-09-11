@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('exam_id')->constrained('exams')->onDelete('cascade');
+            $table->morphs('questionable');
             $table->text('question_text');
-            $table->enum('question_type', ['multiple_choice', 'essay', 'true_false']);
+            $table->enum('question_type', ['multiple_choice', 'essay', 'true_false'])->default('multiple_choice');
             $table->string('option_a_image', 255)->nullable();
             $table->string('option_b_image', 255)->nullable();
             $table->string('option_c_image', 255)->nullable();
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->string('option_d', 255)->nullable();
             $table->string('option_e', 255)->nullable();
             $table->string('correct_answer', 255);
-            $table->integer('question_points')->default(0);
+            $table->integer('question_points');
             $table->string('question_file', 255)->nullable();
             $table->timestamps();
         });

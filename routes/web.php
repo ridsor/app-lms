@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/materi/{materi_id}/file', [MaterialController::class, 'getFile'])->name('user.material.file.get');
-Route::get('/materi/{materi_id}/file/download', [MaterialController::class, 'downloadFile'])->name('user.material.file.download');
 
 Route::prefix('wakasek')->group(function () {
     require __DIR__ . '/web/vice-principal/index.php';
+});
+Route::prefix('operator')->group(function () {
+    require __DIR__ . '/web/operator/index.php';
 });
 Route::prefix('orang-tua')->group(function () {
     require __DIR__ . '/web/parent/index.php';

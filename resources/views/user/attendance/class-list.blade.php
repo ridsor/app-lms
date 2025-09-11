@@ -11,7 +11,7 @@
     <div class="page-title">
       <div class="row">
         <div class="col-sm-6">
-          <h3>Pilih Kelas</h3>
+          <h3>Kehadiran</h3>
         </div>
       </div>
     </div>
@@ -79,7 +79,7 @@
                         @endif
                         <th><span class="c-o-light f-w-600">Kelas</span></th>
                         <th><span class="c-o-light f-w-600">Tingkat</span></th>
-                        <th><span class="c-o-light f-w-600">Aksi</span> </th>
+                        <th><span class="c-o-light f-w-600"></span> </th>
                       </tr>
                     </thead>
                   </table>

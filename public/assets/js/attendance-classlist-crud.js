@@ -22,7 +22,7 @@ $(function () {
     columns = columns.concat([
         { data: "name", name: "name" },
         { data: "level", name: "level" },
-        { data: "Aksi", name: "Aksi", orderable: false, searchable: false },
+        { data: '', name: "", orderable: false, searchable: false },
     ]);
 
     // filter

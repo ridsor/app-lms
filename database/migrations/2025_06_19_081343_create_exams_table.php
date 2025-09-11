@@ -15,13 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('title', 200);
             $table->text('description')->nullable();
-            $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
-            $table->enum('type', ['Quiz', 'Midterm', 'Final', 'Remedial']);
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
+            $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
+            $table->enum('type', ['Midterm', 'Final']);
+            $table->dateTime('start_time');
+            $table->dateTime('end_time')->nullable();
             $table->integer('duration')->nullable();
-            $table->enum('exam_mode', ['Closed Book', 'Open Book']);
-            $table->enum('display_status', ['Visible', 'Hidden']);
+            $table->enum('exam_mode', ['Closed Book', 'Open Book'])->default('Closed Book');
             $table->boolean('is_shuffle_questions')->default(false);
             $table->timestamps();
         });

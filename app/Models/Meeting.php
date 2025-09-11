@@ -24,16 +24,19 @@ class Meeting extends Model
         'title',
         'description',
         'meeting_method',
+        'date',
+        'holiday',
         'type',
         'started_at'
     ];
 
     protected $casts = [
+        'date' => 'date',
         'started_at' => 'datetime',
         'description' => CleanHtml::class . ':strip_nl,strip_nbsp',
     ];
 
-    protected $appends = ['date', 'status', 'formatted_started_at'];
+    protected $appends = ['status', 'formatted_date', 'formatted_started_at'];
 
     public function schedule(): BelongsTo
     {
@@ -80,10 +83,10 @@ class Meeting extends Model
         return $this->hasMany(MeetingText::class);
     }
 
-    public function getDateAttribute()
+    public function getFormattedDateAttribute()
     {
-        if ($this->started_at) {
-            return $this->started_at->translatedFormat('j M Y');
+        if ($this->date) {
+            return $this->date->translatedFormat('j M Y');
         }
         return null;
     }
@@ -91,7 +94,7 @@ class Meeting extends Model
     public function getFormattedStartedAtAttribute()
     {
         if ($this->started_at) {
-            return $this->started_at->translatedFormat('H:i');
+            return $this->started_at->translatedFormat('j M Y  H:i');
         }
         return null;
     }

@@ -13,15 +13,19 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 200);
+            $table->string('title');
             $table->text('description')->nullable();
             $table->foreignId('meeting_id')->constrained('meetings')->onDelete('cascade');
             $table->enum('type', ['individual', 'group'])->default('individual');
             $table->string('file_path', 255)->nullable();
-            $table->dateTime('start_date');
-            $table->dateTime('deadline_date');
-            $table->dateTime('late_submission_date')->nullable();
+            $table->string('file_name')->nullable();
+            $table->unsignedBigInteger('file_size')->nullable();
+            $table->dateTime('start_time');
+            $table->dateTime('end_time');
+            $table->dateTime('late_submission_time')->nullable();
             $table->boolean('allow_late_submission')->default(false);
+            $table->boolean('value_displayed')->default(false);
+            $table->fullText('title');
             $table->timestamps();
         });
     }

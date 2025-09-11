@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class MaterialController extends Controller
 {
-    public function index($materi_id)
+    public function show($materi_id)
     {
         try {
             $material = Material::findOrFail($materi_id);
@@ -37,7 +37,7 @@ class MaterialController extends Controller
             if ($fileType === 'Link') {
                 $validated['file_path'] = $validated['material_link'];
             } else {
-                $filePath = $request->file('file_path')->store('materi');
+                $filePath = $request->file('file_path')->store('file/materi');
                 $validated['file_path'] = $filePath;
                 $file = $request->file('file_path');
                 $file_name = $file->getClientOriginalName();
@@ -63,13 +63,12 @@ class MaterialController extends Controller
             $this->authorize('update', $material);
 
             $validated = $request->validated();
-            Log::info('Validated data: ', $validated);
 
             if ($validated['file_type'] === 'Link') {
                 $validated['file_path'] = $validated['material_link'];
             } else {
                 if ($validated['deletedFile']) {
-                    if (Storage::exists($material->file_path)) {
+                    if (!empty($material->file_path) && Storage::exists($material->file_path)) {
                         Storage::delete($material->file_path);
                     }
                     $validated['file_path'] = null;
@@ -78,10 +77,10 @@ class MaterialController extends Controller
                 }
 
                 if ($request->hasFile('file_path')) {
-                    if (Storage::exists($material->file_path)) {
+                    if (!empty($material->file_path) && Storage::exists($material->file_path)) {
                         Storage::delete($material->file_path);
                     }
-                    $filePath = $request->file('file_path')->store('materi');
+                    $filePath = $request->file('file_path')->store('file/materi');
                     $validated['file_path'] = $filePath;
                     $file = $request->file('file_path');
                     $file_name = $file->getClientOriginalName();
@@ -105,7 +104,7 @@ class MaterialController extends Controller
             $material = Material::findOrFail($materi_id);
             $this->authorize('delete', $material);
 
-            if (Storage::exists($material->file_path)) {
+            if (!empty($task->file_path) && Storage::exists($material->file_path)) {
                 Storage::delete($material->file_path);
             }
 
@@ -125,19 +124,18 @@ class MaterialController extends Controller
         }
 
         if ($material->file_type === 'Link') {
-            return abort(404, 'File not found');
+            return abort(404, 'File tidak ditemukan.');
         }
 
         if (Storage::exists($material->file_path)) {
             return response()->file(Storage::path($material->file_path));
         }
 
-        return abort(404, 'File not found');
+        return abort(404, 'File tidak ditemukan.');
     }
 
     public function downloadFile($materi_id)
     {
-        log::info('Downloading file for material ID: ' . $materi_id);
         $material = Material::findOrFail($materi_id);
         $this->authorize('view', $material);
 
@@ -149,6 +147,6 @@ class MaterialController extends Controller
             return Storage::download($material->file_path, $material->file_name);
         }
 
-        return abort(404, 'File not found');
+        return abort(404, 'File tidak ditemukan.');
     }
 }

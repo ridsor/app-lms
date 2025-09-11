@@ -13,7 +13,7 @@ class AccountController extends Controller
         if ($username !== $request->user()->username) {
             abort(404);
         }
-        $user = $request->user();
+    $user = $request->user();
         return view('account.index', compact('user'));
     }
 }

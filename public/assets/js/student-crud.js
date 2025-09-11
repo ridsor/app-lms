@@ -1,3 +1,5 @@
+let t;
+
 $(function () {
     // filter
     const params = getQueryParams();
@@ -18,7 +20,7 @@ $(function () {
     }
     $(".filter").selectpicker("refresh");
 
-    const t = $("#student-table").DataTable({
+    t = $("#student-table").DataTable({
         processing: true,
         serverSide: true,
         ajax: $.fn.dataTable.pipeline({
@@ -174,21 +176,24 @@ $(function () {
     });
 
     // Event handler untuk filter
-    $("#filter-btn").click(function (e) {
-        e.preventDefault();
+    // 🔹 Fungsi untuk generate query string & update URL
 
-        // Buat query string
+    function applyFilters() {
         const params = new URLSearchParams();
-        if ($("#major-filter").val())
-            params.append("major", $("#major-filter").val());
-        if ($("#class-filter").val())
-            params.append("class", $("#class-filter").val());
-        if ($("#level-filter").val())
-            params.append("level", $("#level-filter").val());
-        if ($("#teacher-filter").val())
-            params.append("homeroom_teacher", $("#teacher-filter").val());
-        if ($("#status-filter").val())
-            params.append("status", $("#status-filter").val());
+
+        const filters = {
+            major: "#major-filter",
+            class: "#class-filter",
+            level: "#level-filter",
+            homeroom_teacher: "#teacher-filter",
+            status: "#status-filter",
+        };
+
+        // Loop semua filter
+        $.each(filters, function (key, selector) {
+            const value = $(selector).val();
+            if (value) params.append(key, value);
+        });
 
         // Update URL tanpa reload
         const newUrl =
@@ -198,8 +203,32 @@ $(function () {
 
         // Refresh datatable
         t.clearPipeline().draw();
+
+        $("#filter").offcanvas("hide");
+    }
+
+    // 🔹 Event tombol filter
+    $("#filter-btn").click(function (e) {
+        e.preventDefault();
+        applyFilters();
     });
 
+    // 🔹 Event tombol reset
+    $("#filter-reset-btn").click(function (e) {
+        e.preventDefault();
+
+        // Reset semua filter
+        $(
+            "#major-filter, #class-filter, #level-filter, #teacher-filter, #status-filter"
+        )
+            .val("")
+            .trigger("change");
+
+        applyFilters();
+    });
+});
+
+$(document).ready(function () {
     $("#student-table").on("click", ".trash", function (e) {
         e.preventDefault();
         const trashBtn = $(this);
@@ -253,6 +282,59 @@ $(function () {
                     },
                     complete: function () {
                         trashBtn.prop("disabled", false).html(originalHtml);
+                    },
+                });
+            }
+        });
+    });
+
+    $("#student-table").on("click", "#reset-password", function (e) {
+        e.preventDefault();
+        const btn = $(this);
+        var id = btn.attr("data-id");
+        if (!id) return;
+        Swal.fire({
+            title: "Apakah Anda yakin?",
+            text: "Data siswa yang terpilih akan direset kata sandi. Tindakan ini tidak dapat dibatalkan.",
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: "Ya",
+            denyButtonText: `Batal`,
+            confirmButtonColor: "#FC4438",
+            cancelButtonColor: "#16C7F9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const originalHtml = btn.html();
+                btn.prop("disabled", true).html(
+                    '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+                );
+                $.ajax({
+                    url: `/siswa/${id}/reset-password`,
+                    method: "PATCH",
+                    success: function (res) {
+                        if (res.success) {
+                            const toast = new bootstrap.Toast(
+                                $("#toast-success")
+                            );
+                            $("#toast-success #toast-text").text(res.message);
+                            toast.show();
+                        } else {
+                            const toast = new bootstrap.Toast(
+                                $("#toast-error")
+                            );
+                            $("#toast-error #toast-text").text(res.message);
+                            toast.show();
+                        }
+                    },
+                    error: function (xhr) {
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON.message
+                        );
+                        toast.show();
+                    },
+                    complete: function () {
+                        btn.prop("disabled", false).html(originalHtml);
                     },
                 });
             }
@@ -474,10 +556,7 @@ $(function () {
             },
         });
     });
-});
 
-$(document).ready(function () {
-    // Event handler tombol edit
     $("#student-table").on("click", ".edit", function (e) {
         e.preventDefault();
         var id = $(this).data("id");
@@ -578,7 +657,6 @@ $(document).ready(function () {
         });
     });
 
-    // Event handler tombol view
     $("#student-table").on("click", ".view", function (e) {
         e.preventDefault();
         var id = $(this).data("id");
@@ -656,7 +734,9 @@ $(document).ready(function () {
                             break;
                     }
                     $("#viewStudentStatus").text(statusLabel);
-                    $("#viewStudentCreatedAt").text(res.data.created_at || "-");
+                    $("#viewStudentCreatedAt").text(
+                        res.data.created_at + " WIT" || "-"
+                    );
                 }
             },
             error: function (xhr) {
@@ -727,7 +807,6 @@ $(document).ready(function () {
         $(".selectpicker").selectpicker("refresh");
     });
 
-    // Export akun siswa
     $("#export-student-account-form").on("submit", function (e) {
         e.preventDefault();
 
@@ -769,7 +848,6 @@ $(document).ready(function () {
         }, 3000);
     });
 
-    // Export akun orang tua siswa
     $("#export-parent-account-form").on("submit", function (e) {
         e.preventDefault();
 
@@ -811,7 +889,6 @@ $(document).ready(function () {
         }, 3000);
     });
 
-    // Bulk Edit
     $("#bulk-edit-selected").on("click", function () {
         var selectedIds = [];
         $(

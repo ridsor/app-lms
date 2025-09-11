@@ -21,6 +21,7 @@ use App\Jobs\CreateScheduleMeetings;
 use App\Jobs\UpdateScheduleMeetings;
 use App\Models\Meeting;
 use App\Models\ScheduleTime;
+use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -58,11 +59,30 @@ class ScheduleController extends Controller
         },
       ])
       ->filterByPermission($request->user())
+      ->mainFilter($request->all())
       ->orderByRaw("FIELD(first_day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')")
       ->orderBy('first_start_time')
       ->get();
 
-    return view('user.schedule.index', compact('schedules'));
+    $activePeriod = Period::where('status', true)->first();
+    $classLevels = SchoolClass::select('level')->distinct()->orderBy('level', 'asc')->get();
+    $classNames = SchoolClass::select('name')->distinct()->orderBy('name', 'asc')->get();
+    $majors = Major::with(['classes' => function ($query) {
+      $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
+    }])->select('id', 'name')->orderBy('name', 'asc')->get();
+    $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc')->get();
+    $hasMajors = Major::count() > 0;
+    $subjects = Subject::select('id', 'name', 'curriculum_id')->with(['curriculum:id,name'])->get();
+    $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
+    $days = [
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat'
+    ];
+
+    return view('user.schedule.index', compact('schedules', 'days', 'classes', 'classLevels', 'classNames', 'majors', 'hasMajors', 'subjects', 'periods', 'activePeriod'));
   }
 
   public function classList(Request $request)
@@ -271,7 +291,7 @@ class ScheduleController extends Controller
     $schedule = Schedule::with([
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
       'class.major' => fn($query) => $query->select('id', 'name'),
-      'class.students:class_id,user_id,name,nisn',
+      'class.students:class_id,user_id,name,nis',
       'class.students.user:id,image,username',
       'subject' => fn($query) => $query->select('id', 'name', 'code'),
       'teacher' => fn($query) => $query->select('id', 'name', 'user_id'),
@@ -292,6 +312,7 @@ class ScheduleController extends Controller
     $meeting = Meeting::with([
       'schedule' => fn($query) => $query->select('id', 'class_id', 'subject_id', 'teacher_id', 'room_id', 'period_id'),
       'schedule.class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+      'schedule.class.students:class_id,user_id,name,nis',
       'schedule.class.major' => fn($query) => $query->select('id', 'name'),
       'schedule.subject' => fn($query) => $query->select('id', 'name', 'code'),
       'schedule.teacher' => fn($query) => $query->select('id', 'name', 'user_id'),
@@ -305,8 +326,11 @@ class ScheduleController extends Controller
       'attendances:id,meeting_id,user_id,status',
       'materials',
       'meeting_texts',
-      'tasks',
-      'exams'
+      'tasks' => fn($query) => $query->withCount([
+        'submissions as not_yet_rated' => function ($query) {
+          $query->whereNull('score');
+        }
+      ]),
     ])->findOrFail($meeting_id);
 
     $this->authorize('viewPossession', $meeting);
@@ -341,26 +365,32 @@ class ScheduleController extends Controller
     $meetingTypes = [
       ['value' => 'Learning', 'label' => 'Belajar'],
       ['value' => 'Midterm', 'label' => 'UTS'],
-      ['value' => 'Final', 'label' => 'UAS']
+      ['value' => 'Final', 'label' => 'UAS'],
+      ['value' => 'Holiday', 'label' => 'Libur'],
     ];
     $materialType = [
       ['value' => 'eBook', 'label' => 'eBook'],
       ['value' => 'Archive', 'label' => 'Arsip'],
       ['value' => 'Link', 'label' => 'Link']
     ];
+    $taskType = [
+      ['value' => 'individual', 'label' => 'Individu'],
+      ['value' => 'group', 'label' => 'Kelompok'],
+    ];
 
     $today = Carbon::now();
     $scheduleTime = $meeting->schedule_time;
 
-    $isStartedAt = !$meeting->started_at && $today->format('l') == $scheduleTime->day && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time;
-    $isRealization = $meeting->started_at && $today->format('l') == $scheduleTime->day && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time->addHours(2);
+    $isToday = $today->isSameDay(Carbon::parse($meeting->date));
+    $isStartedAt = !$meeting->started_at && $isToday && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time;
+    $isRealization = $meeting->started_at && $isToday && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time->addHours(2);
 
     $attendancePercentage = 0.0;
     $totalStudents = $meeting->schedule->class->students->count();
     $totalAttendances = $meeting->attendances->where('status', 'H')->count();
 
     if ($totalStudents > 0) {
-      $attendancePercentage = round(($totalAttendances / $totalStudents) * 100, 1);
+      $attendancePercentage = round(($totalAttendances / $totalStudents) * 100, 2);
     }
 
     $contents = collect()
@@ -376,14 +406,10 @@ class ScheduleController extends Controller
         $item->data_type = 'task';
         return $item;
       }))
-      ->merge($meeting->exams->map(function ($item) {
-        $item->data_type = 'exam';
-        return $item;
-      }))
       ->sortByDesc('created_at')
       ->values();
 
-    return view('user.schedule.meeting.show', compact('meeting', 'schedule', 'meetingTypes', 'rooms', 'meetingMethods', 'attendances', 'attendanceValue', 'isStartedAt', 'isRealization', 'attendancePercentage', 'materialType', 'contents'));
+    return view('user.schedule.meeting.show', compact('meeting', 'schedule', 'meetingTypes', 'rooms', 'meetingMethods', 'attendances', 'attendanceValue', 'isStartedAt', 'isRealization', 'attendancePercentage', 'materialType', 'taskType', 'contents'));
   }
 
   public function show($id)

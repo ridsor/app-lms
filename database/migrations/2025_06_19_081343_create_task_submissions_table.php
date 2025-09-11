@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('task_id')->constrained('tasks')->onDelete('cascade');
             $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
-            $table->string('file', 255)->nullable();
-            $table->string('link', 255)->nullable();
+            $table->json('contents')->nullable();
+            $table->json('group_members')->nullable();
             $table->dateTime('submitted_at')->useCurrent();
-            $table->boolean('is_late')->default(false);
-            $table->integer('score')->nullable();
+            $table->dateTime('graded_at')->nullable();
+            $table->decimal('score')->nullable();
             $table->text('feedback')->nullable();
             $table->foreignId('graded_by')->nullable()->constrained('teachers')->onDelete('set null');
             $table->unique(['task_id', 'student_id'], 'unique_submission');

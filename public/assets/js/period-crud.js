@@ -1,3 +1,5 @@
+let t;
+
 $(function () {
     // filter
     const params = getQueryParams();
@@ -11,7 +13,7 @@ $(function () {
         $("#end-date-filter").val(params.end_date);
     }
 
-    var t = $("#period-table").DataTable({
+    t = $("#period-table").DataTable({
         processing: true,
         serverSide: true,
         ajax: $.fn.dataTable.pipeline({
@@ -101,6 +103,58 @@ $(function () {
         $("#delete-selected").prop("disabled", true);
         $("#delete-selected").parent().css("display", "none");
     });
+});
+
+$(document).ready(function () {
+    const filter_end_date = flatpickr("#end-date-filter", {
+        dateFormat: "d/m/Y",
+        locale: flatpickrLocationID,
+    });
+    const filter_start_date = flatpickr("#start-date-filter", {
+        dateFormat: "d/m/Y",
+        onChange: function (selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                const selectedDate = selectedDates[0];
+                filter_end_date.set("minDate", selectedDate);
+            }
+        },
+        locale: flatpickrLocationID,
+    });
+    const add_end_date = flatpickr("#addEndDate", {
+        static: true,
+        dateFormat: "d/m/Y",
+        minDate: new Date(),
+        locale: flatpickrLocationID,
+    });
+    const add_start_date = flatpickr("#addStartDate", {
+        defaultDate: new Date(),
+        static: true,
+        dateFormat: "d/m/Y",
+        onChange: function (selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                const selectedDate = selectedDates[0];
+                add_end_date.set("minDate", selectedDate);
+            }
+        },
+        locale: flatpickrLocationID,
+    });
+    const edit_end_date = flatpickr("#editEndDate", {
+        static: true,
+        dateFormat: "d/m/Y",
+        locale: flatpickrLocationID,
+    });
+    const edit_start_date = flatpickr("#editStartDate", {
+        static: true,
+        dateFormat: "d/m/Y",
+        onChange: function (selectedDates, dateStr, instance) {
+            console.log("here");
+            if (selectedDates.length > 0) {
+                const selectedDate = selectedDates[0];
+                edit_end_date.set("minDate", selectedDate);
+            }
+        },
+        locale: flatpickrLocationID,
+    });
 
     // Hapus banyak
     $("#delete-selected").on("click", function () {
@@ -114,7 +168,7 @@ $(function () {
 
         Swal.fire({
             title: "Apakah Anda yakin ingin?",
-            text: "Data periode yang terpilih akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
+            text: "Data yang memiliki period ini juga akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
             showDenyButton: true,
             showCancelButton: false,
             confirmButtonText: "Hapus",
@@ -191,7 +245,7 @@ $(function () {
         if (!id) return;
         Swal.fire({
             title: "Apakah Anda yakin?",
-            text: "Data periode yang terpilih akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
+            text: "Data yang memiliki period ini juga akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
             showDenyButton: true,
             showCancelButton: false,
             confirmButtonText: "Hapus",
@@ -336,10 +390,10 @@ $(function () {
                     $("#editPeriodForm #editAcademicYear").val(
                         res.data.academic_year
                     );
-                    $("#editPeriodForm #editStartDate").val(
-                        res.data.start_date
-                    );
-                    $("#editPeriodForm #editEndDate").val(res.data.end_date);
+                    edit_start_date.setDate(res.data.start_date);
+                    edit_end_date.setDate(res.data.end_date);
+                    edit_end_date.set("minDate", res.data.start_date);
+
                     $("#editPeriodModal").modal("show");
                 }
             },
@@ -493,7 +547,62 @@ $(function () {
             confirmButtonText: "Aktifkan",
             confirmButtonColor: "#16C7F9",
             cancelButtonColor: "#FC4438",
-            confirmButtonText: "Aktifkan",
+            imageUrl: "../assets/images/gif/dashboard-8/successful.gif",
+            imageWidth: 120,
+            imageHeight: 120,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const activeBtn = $(this);
+                activeBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
+                    );
+
+                $.ajax({
+                    url: `/periode/active/${periodId}`,
+                    method: "POST",
+                    success: async function (response) {
+                        if (response.success) {
+                            const toast = new bootstrap.Toast(
+                                $("#toast-success")
+                            );
+                            $("#toast-success #toast-text").text(
+                                response.message
+                            );
+                            toast.show();
+                            t.clearPipeline().draw();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON.message
+                        );
+                        toast.show();
+                    },
+                    complete: function () {
+                        activeBtn.prop("disabled", false);
+                    },
+                });
+            } else if (result.isDenied) {
+            }
+        });
+    });
+    $(document).on("click", ".period-active", function (e) {
+        e.preventDefault();
+        const periodId = $(this).data("id");
+        const periodName = $(this).data("name");
+
+        Swal.fire({
+            title: "Apakah anda yakin menjadikan periode ini tidak aktif?",
+            text: `Periode: ${periodName}`,
+            showDenyButton: true,
+            showCancelButton: false,
+            denyButtonText: `Batal`,
+            confirmButtonColor: "#16C7F9",
+            cancelButtonColor: "#FC4438",
+            confirmButtonText: "Non Aktifkan",
             imageUrl: "../assets/images/gif/dashboard-8/successful.gif",
             imageWidth: 120,
             imageHeight: 120,

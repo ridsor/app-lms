@@ -13,7 +13,7 @@
                 <p class="sub-content">Server tidak dapat menyelesaikan pemrosesan permintaan Anda karena terjadi kesalahan.
                 </p>
             </div>
-            <div><a class="btn btn-primary btn-lg" href="{{ route('user.home') }}">KEMBALI KE HALAMAN UTAMAv</a>
+            <div><a class="btn btn-primary btn-lg" href="/">KEMBALI KE HALAMAN UTAMA</a>
             </div>
         </div>
     </div>

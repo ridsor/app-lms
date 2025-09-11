@@ -12,6 +12,65 @@ $(function () {
         $("#level-filter").val(params.level);
     }
 
+    // Definisikan columns berdasarkan role
+    let columns = [
+        {
+            data: null,
+            name: "No",
+            orderable: false,
+            searchable: false,
+            render: function (data, type, row, meta) {
+                return meta.row + meta.settings._iDisplayStart + 1;
+            },
+            className: "text-center",
+            width: "40px",
+        },
+        {
+            data: "Mata Pelajaran",
+            name: "subjects.name",
+            searchable: true, // Ubah menjadi true agar bisa dicari
+        },
+    ];
+
+    // Tambahkan kolom berdasarkan role
+    if (role == "teacher") {
+        columns.push({
+            data: "Kelas",
+            name: "class_name",
+            searchable: false,
+            orderable: false,
+        });
+    }
+
+    if (role == "student" || role == "parent") {
+        columns.push({
+            data: "Guru",
+            name: "teachers.name",
+            searchable: false,
+            orderable: false,
+        });
+    }
+
+    // Tambahkan kolom tetap
+    columns.push(
+        {
+            data: "Rekap",
+            name: "attendance_percentage", // Ganti dengan nama yang sesuai
+            orderable: false,
+            searchable: false,
+        },
+        {
+            data: "Aksi", // Beri nama yang jelas
+            name: "action",
+            orderable: false,
+            searchable: false,
+            render: function (data, type, row) {
+                // Render action buttons jika needed
+                return data; // Biarkan server yang menghandle
+            },
+        }
+    );
+
     // Halaman index: daftar jadwal (schedule)
     if ($("#attendance-schedule-table").length) {
         var t = $("#attendance-schedule-table").DataTable({
@@ -23,46 +82,12 @@ $(function () {
                 data: function (d) {
                     let filterParams = getQueryParams();
                     $.extend(d, filterParams);
+
+                    // Tambahkan role ke request agar server tahu
+                    d.role = role;
                 },
             }),
-            columns: [
-                {
-                    data: null,
-                    name: "No",
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart + 1;
-                    },
-                    className: "text-center",
-                    width: "40px",
-                },
-                { data: "Mata Pelajaran", name: "subjects.name" },
-                role == "teacher"
-                    ? {
-                          data: "Kelas",
-                          name: "class_name",
-                          searchable: false,
-                          orderable: false,
-                      }
-                    : null,
-                role == "student" || role == "parent"
-                    ? {
-                          data: "Guru",
-                          name: "teachers.name",
-                          searchable: false,
-                          orderable: false,
-                      }
-                    : null,
-                {
-                    data: "Rekap",
-                    orderable: false,
-                    searchable: false,
-                },
-            ].filter(Boolean),
-            fixedColumns: {
-                leftColumns: 2,
-            },
+            columns: columns,
             language: {
                 sProcessing: "Sedang memproses...",
                 sZeroRecords: "Tidak ditemukan data yang sesuai",
@@ -70,17 +95,8 @@ $(function () {
                 sInfoEmpty: "Menampilkan 0 sampai 0 dari 0 entri",
                 sInfoFiltered: "(disaring dari _MAX_ entri keseluruhan)",
                 sEmptyTable: "Tidak ada data di tabel",
-                sInfoPostFix: "",
                 sSearch: "Cari:",
-                sUrl: "",
-                select: {
-                    rows: {
-                        _: "%d baris terpilih",
-                        0: "",
-                    },
-                },
             },
-            scrollCollapse: true,
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100],
             responsive: true,
@@ -115,3 +131,13 @@ $(function () {
         });
     }
 });
+
+// Helper function untuk debug
+function debugDataTable(table) {
+    table.on("xhr", function (e, settings, json, xhr) {
+        console.log("Server response:", json);
+        if (json && json.data && json.data.length > 0) {
+            console.log("First row data:", json.data[0]);
+        }
+    });
+}

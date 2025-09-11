@@ -53,6 +53,25 @@ $(document).ready(function () {
         });
 });
 
+function getElementFile(fileName, fileSize, fileIcon, idx = 0) {
+    return `
+    <div class="d-flex align-items-center gap-1 justify-content-between file border w-100 rounded-2 p-3 mb-2 file-preview-item" data-idx="${idx}">
+        <div class="d-flex align-items-center">
+            <div  style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;margin-right:5px;">
+                <i class="${fileIcon}" style="color:#1976d2;font-size:18px;"></i>
+            </div>
+            <div>
+                <div class="fw-bold text-break">${fileName}</div>
+                <div style="font-size:12px;color:#888;">${fileSize}</div>
+            </div>
+        </div>
+        <div>
+            <button type="button" class="btn btn-link text-danger p-0 btn-remove-file" style="width:32px;height:32px;" title="Hapus" data-idx="${idx}"><i class="fa fa-trash"></i></button>
+        </div>
+    </div>
+    `;
+}
+
 function showFilePreview(files, preview, fileInput, dropArea) {
     var html = "";
 
@@ -61,22 +80,7 @@ function showFilePreview(files, preview, fileInput, dropArea) {
         var fileName = file.name;
         var fileIcon = getFileIcon(fileName);
 
-        html += `
-            <div class="d-flex align-items-center gap-1 justify-content-between file border w-100 rounded-2 p-3 mb-2 file-preview-item" data-idx="${idx}">
-                <div class="d-flex align-items-center">
-                    <div  style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;margin-right:5px;">
-                        <i class="${fileIcon}" style="color:#1976d2;font-size:18px;"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold">${fileName}</div>
-                        <div style="font-size:12px;color:#888;">${fileSize}</div>
-                    </div>
-                </div>
-                <div>
-                    <button type="button" class="btn btn-link text-danger p-0 btn-remove-file" style="width:32px;height:32px;" title="Hapus" data-idx="${idx}"><i class="fa fa-trash"></i></button>
-                </div>
-            </div>
-        `;
+        html += getElementFile(fileName, fileSize, fileIcon, idx);
     });
     if (files.length === 0) {
         preview.html("");
@@ -88,7 +92,6 @@ function showFilePreview(files, preview, fileInput, dropArea) {
 
     // Hapus file (khusus multiple)
     preview.find(".btn-remove-file").on("click", function () {
-        console.log("Hapus file");
         var idx = $(this).data("idx");
         var dt = new DataTransfer();
         Array.from(fileInput[0].files).forEach(function (file, i) {

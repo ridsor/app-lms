@@ -65,7 +65,8 @@
                         <th><span class="c-o-light f-w-600">No</span></th>
                         <th><span class="c-o-light f-w-600">Mata Pelajaran</span></th>
                         <th><span class="c-o-light f-w-600">Pengajar</span></th>
-                        <th><span class="c-o-light f-w-600">Aksi</span></th>
+                        <th><span class="c-o-light f-w-600">Rekap</span></th>
+                        <th><span class="c-o-light f-w-600"></span></th>
                       </tr>
                     </thead>
                   </table>

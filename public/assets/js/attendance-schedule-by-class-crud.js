@@ -1,4 +1,4 @@
-$(function () {
+ $(function () {
     if ($("#attendance-schedule-by-class-table").length) {
         let columns = [
             {
@@ -14,7 +14,13 @@ $(function () {
             },
             { data: "Mata Pelajaran", name: "subject_name" },
             { data: "Pengajar", name: "teacher_name", searchable: false },
-            { data: "Aksi", name: "Aksi", orderable: false, searchable: false },
+            {
+                data: "Rekap",
+                name: "Rekap",
+                orderable: false,
+                searchable: false,
+            },
+            { data: "", name: "", orderable: false, searchable: false },
         ];
 
         // filter

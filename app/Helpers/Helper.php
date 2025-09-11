@@ -19,6 +19,8 @@ class Helper
             'student' => 'Siswa',
             'parent' => 'Orang Tua',
             'admin' => 'Admin',
+            'operator' => 'Operator',
+            'admin' => 'Admin',
             default => $role
         };
     }
@@ -48,6 +50,8 @@ class Helper
             'parent' => 'parent',
             'admin' => 'admin',
             'vice-principal' => 'vice-principal',
+            'operator' => 'operator',
+            'admin' => 'admin',
             default => $role
         };
     }
@@ -90,12 +94,26 @@ class Helper
         };
     }
 
-    public static function getGenderLabel(string $gender): string
+    public static function getGenderLabel($gender): string
     {
         return match ($gender) {
             'M' => 'Laki-laki',
             'F' => 'Perempuan',
             default => $gender
+        };
+    }
+
+    public static function getExamStatusLabel($status): string
+    {
+        return match ($status) {
+            'not_done' => '<span
+                                    class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum Dikerjakan</span>',
+            'in_progress' => '<span
+                                    class="badge m-0 badge-light-warning px-2 py-1 d-flex align-items-center">Sedang Dikerjakan</span>',
+            'completed' => '<span
+                                    class="badge m-0 badge-light-success px-2 py-1 d-flex align-items-center">Selesai</span>',
+            default => '<span
+                                    class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum Dikerjakan</span>'
         };
     }
 
@@ -122,10 +140,103 @@ class Helper
     public static function getMeetingTypeLabel($type)
     {
         return match ($type) {
-            'Learning' => 'Belajar',
-            'Midterm' => 'UTS',
-            'Final' => 'UAS',
+            'Learning' => '<span class="badge px-2 py-1 badge-light-info">Belajar</span>',
+            'Midterm' => '<span class="badge px-2 py-1 badge-light-warning">UTS</span>',
+            'Final' => '<span class="badge px-2 py-1 badge-light-warning">UAS</span>',
+            'Holiday' => '<span class="badge px-2 py-1 badge-light-danger">Libur</span>',
             default => $type
         };
+    }
+
+    public static function getTaskTypeLabel($type)
+    {
+        return match ($type) {
+            'individual' => 'Individu',
+            'group' => 'Kelompok',
+            default => $type
+        };
+    }
+
+    public static function getExamTypeLabel($type)
+    {
+        return match ($type) {
+            'Midterm' => 'UTS',
+            'Final' => 'UAS',
+            'Quiz' => 'Kuis',
+            default => $type
+        };
+    }
+
+    public static function getExamModeLabel($type)
+    {
+        return match ($type) {
+            'Closed Book' => 'Tutup Buku',
+            'Open Book' => 'Buku Terbuka',
+            default => $type
+        };
+    }
+
+    public static function getExamDisplayStatusLabel($type)
+    {
+        return match ($type) {
+            'Visible' => 'Tutup Buku',
+            'Hiddem' => 'Buku Terbuka',
+            default => $type
+        };
+    }
+
+    public static function isValidUrl($value)
+    {
+        // Simple URL check - you might want a more robust validation
+        return filter_var($value, FILTER_VALIDATE_URL) !== false;
+    }
+
+    public static function getContentIcon($value)
+    {
+        $parts = explode('.', $value);
+        $ext = strtolower(end($parts));
+
+        if (in_array($ext, ['doc', 'docx'])) {
+            return "fa fa-file-word text-primary";
+        }
+        if (in_array($ext, ['pdf'])) {
+            return "fa fa-file-pdf text-danger";
+        }
+        if (in_array($ext, ['xls', 'xlsx'])) {
+            return "fa fa-file-excel text-success";
+        }
+        if (in_array($ext, ['ppt', 'pptx'])) {
+            return "fa fa-file-powerpoint text-warning";
+        }
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
+            return "fa fa-file-image text-info";
+        }
+
+        return "fa fa-file";
+    }
+
+    public static function getFileType($filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'];
+        $videoExtensions = ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm'];
+        $audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a'];
+        $documentExtensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'xlsx', 'xls', 'ppt', 'pptx'];
+        $archiveExtensions = ['zip', 'rar', '7z', 'tar', 'gz'];
+
+        if (in_array($extension, $imageExtensions)) {
+            return 'image';
+        } elseif (in_array($extension, $videoExtensions)) {
+            return 'video';
+        } elseif (in_array($extension, $audioExtensions)) {
+            return 'audio';
+        } elseif (in_array($extension, $documentExtensions)) {
+            return 'document';
+        } elseif (in_array($extension, $archiveExtensions)) {
+            return 'archive';
+        } else {
+            return 'other';
+        }
     }
 }

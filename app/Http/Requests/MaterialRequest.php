@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class MaterialRequest extends FormRequest
 {
@@ -39,7 +40,7 @@ class MaterialRequest extends FormRequest
                 ? 'required|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120'
                 : 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120';
         }
-
+        
         return $rules;
     }
 

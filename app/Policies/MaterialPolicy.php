@@ -7,22 +7,14 @@ use Illuminate\Support\Facades\Log;
 
 class MaterialPolicy
 {
-    /**
-     * Create a new policy instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
     public function viewAny(User $user)
     {
-        return $user->can('material.view') || $user->can('material.*');
+        return $user->can('material.view');
     }
 
     public function view(User $user, $material)
     {
-        if ($user->can('material.view') || $user->can('material.*')) {
+        if ($user->can('material.view')) {
             if ($user->hasRole('teacher')) {
                 return $user->teacher->id === $material->meeting->schedule->teacher_id;
             } elseif ($user->hasRole('student')) {

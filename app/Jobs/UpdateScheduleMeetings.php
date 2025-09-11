@@ -50,15 +50,13 @@ class UpdateScheduleMeetings implements ShouldQueue
 
       // Buat meeting baru berdasarkan jadwal yang diupdate
       $meetings = [];
-      $maxMeeting = 16;
       for ($tanggal = $schedule->period->start_date; $tanggal <= $schedule->period->end_date; $tanggal->addDay()) {
-        if (count($meetings) >= $maxMeeting) break;
-
         if ($tanggal->format('l') == $this->schedule_time->day) {
           $isWeekend = $tanggal->isWeekend();
 
           if (!$isWeekend) {
             $meetings[] = [
+              'date' => $tanggal->format('Y-m-d'),
               'schedule_id' => $schedule->id,
               'schedule_time_id' => $this->schedule_time->id,
               'meeting_method' => $this->schedule_time->meeting_method,

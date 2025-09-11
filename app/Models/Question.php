@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Question extends Model
 {
     protected $fillable = [
-        'exam_id',
         'question_text',
         'question_type',
         'option_a_image',
@@ -26,12 +25,14 @@ class Question extends Model
         'option_e',
         'correct_answer',
         'question_points',
-        'question_file'
+        'question_file',
+        'questionable_id',
+        'questionable_type'
     ];
 
-    public function exam(): BelongsTo
+    public function questionable()
     {
-        return $this->belongsTo(Exam::class);
+        return $this->morphTo();
     }
 
     public function answers(): HasMany

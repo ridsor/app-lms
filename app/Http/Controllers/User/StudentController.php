@@ -127,6 +127,12 @@ class StudentController extends Controller
                             <a class="square-white trash"  data-id="' . $row->id . '" style="cursor: pointer;">
                                 <svg><use href="' . asset('assets/svg/icon-sprite.svg#trash1') . '"></use></svg>
                             </a>
+                            <a class="square-white"  style="cursor: pointer;" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" id="reset-password" data-id="' . $row->id . '">Reset Kata Sandi</a></li>
+                            </ul>
                         </div>';
                     }
                     if ($request->user()->can('student.edit.homeroomteacher')) {
@@ -366,6 +372,36 @@ class StudentController extends Controller
         }
     }
 
+    public function resetPassword(Request $request, $id)
+    {
+        try {
+            $student = Student::findOrFail($id);
+
+            $this->authorize('update', $student);
+
+            if ($student->user) {
+                $student->user->update([
+                    'password' => bcrypt($student->user->username)
+                ]);
+            }
+            if ($student->parent) {
+                $student->parent->update([
+                    'password' => bcrypt($student->parent->username)
+                ]);
+            }
+
+            return $this->sendResponse(
+                'Siswa berhasil direset kata sandi.',
+            );
+        } catch (\Exception $e) {
+            return $this->sendError(
+                'Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+
     public function bulkDestroy(Request $request)
     {
         try {
@@ -502,10 +538,19 @@ class StudentController extends Controller
 
             $students = $query->get();
 
+            $headerRows = [
+                ['Akun Siswa' => ''],
+                ['Jurusan', 'Jurusan' => $request->filled('major') ? $request->major : 'Semua Jurusan'],
+                ['Kelas', 'Kelas' => $request->filled('class') ? $request->class : 'Semua Kelas'],
+                ['Tingkat', 'Tingkat' => $request->filled('level') ? $request->level : 'Semua Tingkat'],
+                [],
+                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'NISN' => 'NISN', 'Jurusan' => 'Jurusan', 'Kelas' => 'Kelas', 'Tingkat' => 'Tingkat', 'Username' => 'Username', 'Password' => 'Password'],
+            ];
 
-            $exportData = [];
+
+            $dataRows = [];
             if (Major::count() > 0) {
-                $exportData = $students->map(function ($student, $index) {
+                $dataRows = $students->map(function ($student, $index) {
                     return [
                         'No' => $index + 1,
                         'Nama' => $student->name,
@@ -517,9 +562,9 @@ class StudentController extends Controller
                         'Username' => $student->user ? $student->user->username : '-',
                         'Password' => $student->user ? $student->user->username : '-',
                     ];
-                });
+                })->toArray();
             } else {
-                $exportData = $students->map(function ($student, $index) {
+                $dataRows = $students->map(function ($student, $index) {
                     return [
                         'No' => $index + 1,
                         'Nama' => $student->name,
@@ -530,7 +575,7 @@ class StudentController extends Controller
                         'Username' => $student->user ? $student->user->username : '-',
                         'Password' => $student->user ? $student->user->username : '-',
                     ];
-                });
+                })->toArray();
             }
 
             $filename = 'akun-siswa';
@@ -545,6 +590,8 @@ class StudentController extends Controller
             }
 
             $filename .= '.xlsx';
+
+            $exportData = array_merge($headerRows, $dataRows);
 
             // Export data
             return (new FastExcel($exportData))->download($filename);
@@ -590,6 +637,15 @@ class StudentController extends Controller
 
             $students = $query->get();
 
+            $headerRows = [
+                ['Akun Orang Tua' => ''],
+                ['Jurusan', 'Jurusan' => $request->filled('major') ? $request->major : 'Semua Jurusan'],
+                ['Kelas', 'Kelas' => $request->filled('class') ? $request->class : 'Semua Kelas'],
+                ['Tingkat', 'Tingkat' => $request->filled('level') ? $request->level : 'Semua Tingkat'],
+                [],
+                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'NISN' => 'NISN', 'Jurusan' => 'Jurusan', 'Kelas' => 'Kelas', 'Username' => 'Username', 'Password' => 'Password'],
+            ];
+
             $exportData = [];
             if (Major::count() > 0) {
                 $exportData = $students->map(function ($student, $index) {
@@ -598,12 +654,12 @@ class StudentController extends Controller
                         'Nama' => $student->name,
                         'NIS' => $student->nis,
                         'NISN' => $student->nisn,
-                        'Kelas' => $student->class ? $student->class->name : '-',
+                        'Kelas' => $student->class ? $student->class->name . $student->class->level . ($student->class->major ? ' ' . $student->class->major->name : '') : '-',
                         'Tingkat' => $student->class ? $student->class->level : '-',
                         'Username' => $student->parent ? $student->parent->username : '-',
                         'Password' => $student->parent ? $student->parent->username : '-',
                     ];
-                });
+                })->toArray();
             } else {
                 $exportData = $students->map(function ($student, $index) {
                     return [
@@ -611,12 +667,12 @@ class StudentController extends Controller
                         'Nama' => $student->name,
                         'NIS' => $student->nis,
                         'NISN' => $student->nisn,
-                        'Kelas' => $student->class ? $student->class->name : '-',
+                        'Kelas' => $student->class ? $student->class->name . $student->class->level . ($student->class->major ? ' ' . $student->class->major->name : '') : '-',
                         'Tingkat' => $student->class ? $student->class->level : '-',
                         'Username' => $student->parent ? $student->parent->username : '-',
                         'Password' => $student->parent ? $student->parent->username : '-',
                     ];
-                });
+                })->toArray();
             }
 
             $filename = 'akun-wali-siswa';
@@ -630,6 +686,8 @@ class StudentController extends Controller
                 $filename .= '-' . $request->level;
             }
             $filename .= '.xlsx';
+
+            $exportData = array_merge($headerRows, $exportData);
 
             return (new FastExcel($exportData))->download($filename);
         } catch (\Exception $e) {

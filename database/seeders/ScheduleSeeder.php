@@ -18,16 +18,14 @@ class ScheduleSeeder extends Seeder
             ]);
 
             $meetings = [];
-            $maxMeeting = 16;
             for ($tanggal = $schedule->period->start_date; $tanggal <= $schedule->period->end_date; $tanggal->addDay()) {
-                if (count($meetings) >= $maxMeeting) break;
-
                 if ($tanggal->format('l') == $schedule_time->day) {
                     $isWeekend = $tanggal->isWeekend();
 
                     if (!$isWeekend) {
                         $meetings[] = [
                             'schedule_id' => $schedule->id,
+                            'date' => $tanggal->format('Y-m-d'),
                             'schedule_time_id' => $schedule_time->id,
                             'meeting_method' => $schedule_time->meeting_method,
                             'type' => 'Learning',

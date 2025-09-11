@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\MeetingRequest;
 use App\Models\Meeting;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -36,11 +37,13 @@ class MeetingController extends Controller
             $meeting = Meeting::select('id', 'started_at', 'schedule_id', 'schedule_time_id')->with('schedule_time')->findOrFail($meeting_id);
             $this->authorize('update', $meeting);
 
-            $isDuringSchedule = $meeting->schedule_time->start_time <= now()
+            $today = Carbon::now();
+            $isToday = $today->isSameDay(Carbon::parse($meeting->date));
+            $isDuringSchedule = $isToday && $meeting->schedule_time->start_time <= now()
                 && now() <= $meeting->schedule_time->end_time;
 
             if (! $isDuringSchedule) {
-            return $this->sendError('Waktu mulai hanya dapat dilakukan saat waktu pertemuan.', [], 400);
+                return $this->sendError('Waktu mulai hanya dapat dilakukan saat waktu pertemuan.', [], 400);
             }
 
             if ($meeting->started_at) {

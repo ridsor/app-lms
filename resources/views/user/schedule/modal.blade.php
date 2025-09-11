@@ -71,14 +71,14 @@
                 <div class="invalid-feedback"></div>
               </div>
               <div class="col-lg-3">
-                <label class="form-label" for="scheduleStart">Jam Mulai<span class="txt-danger">*</span></label>
-                <input class="form-control flatpickr-input twenty-four-hour" value="00:00" id="scheduleStart"
+                <label class="form-label" for="addScheduleStart">Jam Mulai<span class="txt-danger">*</span></label>
+                <input class="form-control flatpickr-input start-time twenty-four-hour" value="00:00" id="addScheduleStart"
                   name="start_time" type="time" autocomplete="off">
                 <div class="invalid-feedback"></div>
               </div>
               <div class="col-lg-3">
-                <label class="form-label" for="scheduleEnd">Jam Selesai<span class="txt-danger">*</span></label>
-                <input class="form-control flatpickr-input twenty-four-hour" value="00:00" id="scheduleEnd"
+                <label class="form-label" for="editScheduleEnd">Jam Selesai<span class="txt-danger">*</span></label>
+                <input class="form-control flatpickr-input end-time twenty-four-hour" value="00:00" id="addScheduleEnd"
                   name="end_time" type="time" autocomplete="off">
                 <div class="invalid-feedback"></div>
               </div>
@@ -176,13 +176,13 @@
               </div>
               <div class="col-lg-3">
                 <label class="form-label" for="editScheduleStart">Jam Mulai<span class="txt-danger">*</span></label>
-                <input class="form-control flatpickr-input twenty-four-hour" value="00:00" id="editScheduleStart"
+                <input class="form-control flatpickr start-time twenty-four-hour" id="editScheduleStart"
                   name="start_time" type="time" autocomplete="off">
                 <div class="invalid-feedback"></div>
               </div>
               <div class="col-lg-3">
                 <label class="form-label" for="editScheduleEnd">Jam Selesai<span class="txt-danger">*</span></label>
-                <input class="form-control flatpickr-input twenty-four-hour" value="00:00" id="editScheduleEnd"
+                <input class="form-control flatpickr end-time twenty-four-hour" id="editScheduleEnd"
                   name="end_time" type="time" autocomplete="off">
                 <div class="invalid-feedback"></div>
               </div>

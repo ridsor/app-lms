@@ -16,6 +16,8 @@ class ExamAnswer extends Model
         'answered_at'
     ];
 
+    public $timestamps = false;
+
     public function examResult(): BelongsTo
     {
         return $this->belongsTo(ExamResult::class);

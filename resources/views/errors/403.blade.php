@@ -13,8 +13,7 @@
                 <p class="sub-content">Jika Anda menerima kesalahan 403 Forbidden, verifikasi hak akses Anda atau hubungi
                     administrator server untuk mendapatkan otorisasi yang diperlukan.</p>
             </div>
-            <div><a class="btn btn-primary btn-lg" href="{{ route('user.home') }}">KEMBALI KE HALAMAN UTAMABACK
-                    TO HOME PAGE</a></div>
+            <div><a class="btn btn-primary btn-lg" href="/">KEMBALI KE HALAMAN UTAMA</a></div>
         </div>
     </div>
 @endsection
