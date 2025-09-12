@@ -88,7 +88,7 @@ class ExamController extends Controller
         }
 
         $exam = Exam::with([
-            'schedule:id,subject_id,class_id',
+            'schedule:id,subject_id,class_id,teacher_id',
             'schedule.meetings:id,schedule_id',
             'schedule.subject:id,name,code',
             'schedule.class:id,name,level,major_id',
@@ -176,7 +176,8 @@ class ExamController extends Controller
             return abort(403);
         }
 
-        $exam = Exam::select('id')
+        $exam = Exam::select('id','schedule_id')
+            ->with('schedule:id,teacher_id')
             ->withCount([
                 'questions'
             ])
