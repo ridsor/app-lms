@@ -1,4 +1,4 @@
-@props(['question'])
+@props(['question', 'number'])
 @php
     use App\Helpers\Helper;
 @endphp
@@ -7,7 +7,7 @@
 
     <div class="row g-2">
         <span class="question-number fw-bold col-auto order-2 order-md-1">
-            1.
+            {{ $number }}.
         </span>
         <div class="question-content col order-3 order-md-2">
             <div class="d-flex flex-column">

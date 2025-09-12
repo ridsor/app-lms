@@ -192,7 +192,7 @@ $(document).ready(function () {
                     const toast = new bootstrap.Toast($("#toast-success"));
                     $("#toast-success #toast-text").text(response.message);
                     toast.show();
-                    $("#fillRealizationModal").modal("hide");
+                    location.reload();
                 }
             },
             error: function (xhr) {

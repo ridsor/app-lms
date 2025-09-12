@@ -35,14 +35,14 @@
 
         <div class="row g-2 p-0">
             <div class="col-md-9 mb-3">
-                <div id="question-loading">
-                    <div class="p-3 d-flex justify-content-center">
-                        <i class="fa-solid fa-arrows-rotate fa-spin fs-3"></i>
-                    </div>
-                </div>
                 <div id="question-area" data-id="">
                     <div class="card mb-3 rounded-responsive">
                         <div class="card-body">
+                            <div id="question-loading">
+                                <div class="p-3 d-flex justify-content-center">
+                                    <i class="fa-solid fa-arrows-rotate fa-spin fs-3"></i>
+                                </div>
+                            </div>
                             <div class="question-content col order-3 order-md-2">
                                 <div class="d-flex flex-column">
                                     <div class="mb-2">
@@ -73,10 +73,10 @@
                         </div>
                     </div>
                     <div class="card-body d-flex flex-wrap gap-2 justify-content-center">
-                        @foreach ($exam->questions as $i => $question)
+                        @foreach ($questions as $i => $question)
                             <button type="button" style="font-size: 14px; padding: .5rem .8rem"
-                                class="btn btn-outline-secondary question-nav" data-q="{{ ++$i }}"
-                                id="nav-q{{ $question->id }}">
+                                class="btn btn-outline-secondary question-nav nav-q{{ ++$i }}"
+                                data-q="{{ $i }}" id="nav-q{{ $question['id'] }}">
                                 {{ $i }}
                             </button>
                         @endforeach
