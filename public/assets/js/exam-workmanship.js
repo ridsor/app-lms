@@ -343,6 +343,25 @@ $(document).ready(function () {
             }
         });
     });
+
+    // ===== Deteksi tab pindah =====
+    let warningCount = 0;
+    const maxWarnings = 3;
+
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) return;
+
+        warningCount++;
+
+        showToast(
+            "error",
+            `⚠️ Anda meninggalkan tab ujian! (${warningCount}/${maxWarnings}) - Batas pelanggaran ${maxWarnings} kali`
+        );
+
+        if (warningCount >= maxWarnings) {
+            submitExam();
+        }
+    });
 });
 
 // =================== GLightbox Init ===================

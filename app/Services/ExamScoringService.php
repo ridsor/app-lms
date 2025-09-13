@@ -12,7 +12,7 @@ class ExamScoringService
   /**
    * Hitung nilai dan simpan ke exam_results.
    */
-  public function autoScoreAndSave(ExamResult $examResult, int $studentId): ?ExamResult
+  public function saveScore(ExamResult $examResult, int $studentId): ?ExamResult
   {
     // Ambil jawaban & soal sekaligus
     $answers = ExamAnswer::where('exam_result_id', $examResult->id)

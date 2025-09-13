@@ -631,7 +631,7 @@ class ExamController extends Controller
                 ['answer']
             );
 
-            app(ExamScoringService::class)->autoScoreAndSave($examResult, $student->id);
+            app(ExamScoringService::class)->saveScore($examResult, $student->id);
 
             return $this->sendResponse('Ujian selesai. Terima kasih!', $examResult);
         } catch (\Exception $e) {
@@ -673,7 +673,7 @@ class ExamController extends Controller
         }
 
         if (now()->gt($examResult->end_time) && $examResult->status !== 'completed') {
-            app(ExamScoringService::class)->autoScoreAndSave($examResult, $student->id);
+            app(ExamScoringService::class)->saveScore($examResult, $student->id);
             return $this->sendError('Waktu ujian telah berakhir.', [], 403);
         }
 
