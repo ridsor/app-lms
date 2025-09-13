@@ -41,10 +41,8 @@ class TeachingJournalController extends Controller
             $teaching_journal = $meeting->teaching_journal;
             if ($teaching_journal) {
                 $meeting->teaching_journal->update($validated);
-                return $this->sendResponse('Jurnal berhasil diperbarui.', $meeting->teaching_journal);
             } else {
                 $teaching_journal = $meeting->teaching_journal()->create($validated);
-                return $this->sendResponse('Jurnal berhasil disimpan.', $meeting->teaching_journal, 201);
             }
 
             activity()
@@ -52,6 +50,8 @@ class TeachingJournalController extends Controller
                 ->performedOn($teaching_journal)
                 ->causedBy($request->user())
                 ->log('Pengguna mengisi jurnal mengajar');
+
+            return $this->sendResponse('Jurnal berhasil disimpan.', $meeting->teaching_journal, 201);
         } catch (\Exception $e) {
             return $this->sendError(
                 'Silakan coba lagi.',
