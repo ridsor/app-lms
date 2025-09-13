@@ -22,6 +22,7 @@ class QuestionRequest extends FormRequest
      */
     public function rules(): array
     {
+        Log::info($this);
         return [
             'question_text'     => ['required', 'string'],
             'question_type'     => ['nullable', 'in:multiple_choice,essay,true_false'],

@@ -242,6 +242,7 @@
                 </div>
             </div>
         </div>
+        @can(['exam.edit', 'exam.delete'])
         <div class="d-flex justify-content-end col-12 order-1 order-md-3 col-md-auto">
             <div class="d-flex gap-2 align-items-center">
                 <div class="bg-white">
@@ -269,5 +270,6 @@
                 </div>
             </div>
         </div>
+        @endcan
     </div>
 </div>
