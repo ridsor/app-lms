@@ -21,7 +21,7 @@ class CheckExamTime
 
         Log::info($examResult);
         if ($examResult && (now()->gt($examResult->end_time) || is_null($examResult->end_time))) {
-            app(ExamScoringService::class)->autoScoreAndSave($examResult, $student->id);
+            app(ExamScoringService::class)->saveScore($examResult, $student->id);
 
             return redirect()->route('user.exam.workmanship.result', $exam_id)
                 ->with('warning', 'Waktu habis, jawaban otomatis dikirim.');
