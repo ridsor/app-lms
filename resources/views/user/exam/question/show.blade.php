@@ -80,15 +80,17 @@
                                 <span class="fs-3">{{ $exam->questions_sum_question_points ?? 0 }}</span>
                             </div>
                         </div>
-                        <div class="col-12">
-                            <div class="d-flex justify-content-end">
-                                <button type="button" data-bs-toggle="modal" data-bs-target="#copyQuestionModal"
-                                    class="btn btn-primary gap-2 px-3 btn-sm d-flex justify-content-center align-items-center">
-                                    <i class="fa-solid fa-copy"></i>
-                                    <span>Salin Bank Soal</span>
-                                </button>
+                        @can('exam.create')
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" data-bs-toggle="modal" data-bs-target="#copyQuestionModal"
+                                        class="btn btn-primary gap-2 px-3 btn-sm d-flex justify-content-center align-items-center">
+                                        <i class="fa-solid fa-copy"></i>
+                                        <span>Salin Bank Soal</span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        @endcan
                     </div>
                 </div>
             </div>
@@ -100,15 +102,17 @@
                         <i data-feather="search" style="width:18px; height:18px"></i>
                     </button>
                 </form>
-                <div class="col-12 col-md-auto d-flex justify-content-end">
-                    <button type="button" data-bs-toggle="modal" data-bs-target="#addQuestionkModal"
-                        class="btn btn-primary gap-1 px-3 btn-sm d-flex justify-content-center align-items-center">
-                        <i data-feather="plus" style="width:18px; height:18px"></i>
-                        <span>Tambah Soal</span>
-                    </button>
-                </div>
+                @can('exam.create')
+                    <div class="col-12 col-md-auto d-flex justify-content-end">
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#addQuestionkModal"
+                            class="btn btn-primary gap-1 px-3 btn-sm d-flex justify-content-center align-items-center">
+                            <i data-feather="plus" style="width:18px; height:18px"></i>
+                            <span>Tambah Soal</span>
+                        </button>
+                    </div>
+                @endcan
             </div>
-            <div class="row g-4 flex-column list-question px-md-3">
+            <div class="row g-4 flex-column list-question px-md-3 mb-3">
                 @if (count($questions) > 0)
                     @foreach ($questions as $index => $question)
                         @include('user.question.item', [

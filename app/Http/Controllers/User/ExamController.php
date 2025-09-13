@@ -218,7 +218,7 @@ class ExamController extends Controller
                 );
             }
 
-            $this->authorize('update', $exam);
+            $this->authorize('create', $exam);
 
             $questions = Question::where('questionable_id', $id)
                 ->where('questionable_type', QuestionBank::class)
@@ -637,7 +637,7 @@ class ExamController extends Controller
 
     public function workmanshipResult(Request $request, $id)
     {
-        if (!$request->user()->hasRole('student')) {
+        if (!$request->user()->hasRole('student') || !$request->user()->hasRole('parent')) {
             return abort(403);
         }
 
