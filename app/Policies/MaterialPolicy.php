@@ -20,7 +20,7 @@ class MaterialPolicy
             } elseif ($user->hasRole('student')) {
                 return $user->student->class_id === $material->meeting->schedule->class_id;
             } elseif ($user->hasRole('parent')) {
-                return $user->student->class_id === $material->meeting->schedule->class_id;
+                return $user->parent->class_id === $material->meeting->schedule->class_id;
             }
         }
         return false;

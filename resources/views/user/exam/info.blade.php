@@ -230,10 +230,11 @@
                                 aria-label="Close">
                                 Kembali
                             </a>
-
-                            <button data-href="{{ route('user.exam.workmanship', $exam->id) }}" type="button"
-                                id="start-exam-btn" data-id="{{ $exam->id }}" class="btn btn-primary"
-                                {{ $is_exam_available ?: 'disabled' }}>Mulai</button>
+                            @role('student')
+                                <button data-href="{{ route('user.exam.workmanship', $exam->id) }}" type="button"
+                                    id="start-exam-btn" data-id="{{ $exam->id }}" class="btn btn-primary"
+                                    {{ $is_exam_available ?: 'disabled' }}>Mulai</button>
+                            @endrole
                         </div>
                     </div>
                 </div>
