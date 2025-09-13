@@ -112,7 +112,7 @@
                     </div>
                 @endcan
             </div>
-            <div class="row g-4 flex-column list-question px-md-3">
+            <div class="row g-4 flex-column list-question px-md-3 mb-3">
                 @if (count($questions) > 0)
                     @foreach ($questions as $index => $question)
                         @include('user.question.item', [
