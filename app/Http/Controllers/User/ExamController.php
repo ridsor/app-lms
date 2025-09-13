@@ -15,7 +15,7 @@ use App\Models\Question;
 use App\Models\Schedule;
 use App\Models\SchoolClass;
 use App\Models\Subject;
-use App\Models\TaskSubmission;
+use App\Models\ExamAnswer;
 use App\Services\ExamScoringService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -176,7 +176,7 @@ class ExamController extends Controller
             return abort(403);
         }
 
-        $exam = Exam::select('id','schedule_id')
+        $exam = Exam::select('id', 'schedule_id')
             ->with('schedule:id,teacher_id')
             ->withCount([
                 'questions'
@@ -374,9 +374,16 @@ class ExamController extends Controller
                 ->with('error', 'Waktu ujian telah berakhir.');
         }
 
-        session()->forget("exam_order_{$exam->id}");
+        $order = session("exam_order_{$exam->id}");
 
-        return view('user.exam.workmanship', compact('exam', 'examResult'));
+        if (!$order) {
+            $order = $exam->questions->shuffle()->toArray();
+            session(["exam_order_{$exam->id}" => $order]);
+        }
+
+        $questions = $order;
+
+        return view('user.exam.workmanship', compact('exam', 'examResult', 'questions'));
     }
 
     public function setAnswerByExamResult(ExamAnswerRequest $request, $id)
@@ -426,24 +433,25 @@ class ExamController extends Controller
             $order = session("exam_order_{$exam->id}");
 
             if (!$order) {
-                $order = $exam->questions->pluck('id')->shuffle()->toArray();
+                $order = $exam->questions->shuffle()->toArray();
                 session(["exam_order_{$exam->id}" => $order]);
             }
 
             $index = $request->query('q', 1);
-            $questionId = $order[$index - 1] ?? null;
+            $question = $order[$index - 1] ?? null;
 
-            if (!$questionId) {
+            if (!$question) {
                 return $this->sendError('Soal tidak ditemukan.', [], 404);
             }
 
-            $question = Question::findOrFail($questionId);
+            $answer = ExamAnswer::where('question_id', $question['id'])->first();
 
             $response = [
                 'exam' => $exam,
                 'question' => $question,
                 'index' => $index,
                 'total' => count($order),
+                'answer' => $answer,
             ];
 
             return $this->sendResponse('Soal ditemukan.', $response);
@@ -505,6 +513,8 @@ class ExamController extends Controller
                 'end_time' => $exam->duration ? $now->copy()->addMinutes($exam->duration) : null,
                 'status' => 'in_progress',
             ]);
+
+            session()->forget("exam_order_{$exam->id}");
 
             return $this->sendResponse('Ujian dimulai. Semoga sukses!', $examResult, 201);
         } catch (\Exception $e) {
