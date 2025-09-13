@@ -218,7 +218,7 @@ class ExamController extends Controller
                 );
             }
 
-            $this->authorize('update', $exam);
+            $this->authorize('create', $exam);
 
             $questions = Question::where('questionable_id', $id)
                 ->where('questionable_type', QuestionBank::class)
