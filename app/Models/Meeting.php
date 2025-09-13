@@ -101,37 +101,23 @@ class Meeting extends Model
 
     public function getStatusAttribute()
     {
-        // Jika belum ada waktu mulai, status belum dimulai
-        if (!$this->started_at) {
-            return 'Belum Dimulai';
-        }
-
         $now = now();
         $start = $this->started_at;
 
-        if (!$this->relationLoaded('schedule_time')) {
-            $this->load('schedule_time');
+        if (!$start) {
+            return $now > $this->date ? "Telah Berakhir" : 'Belum Dimulai';
         }
 
-        if (!$this->schedule_time || empty($this->schedule_time->end_time)) {
+        // Gunakan null coalescing untuk efisiensi
+        $endTime = $this->schedule_time->formatted_end_time ??
+            optional($this->relationLoaded('schedule_time') ?: $this->load('schedule_time'))->schedule_time->formatted_end_time;
+
+        if (empty($endTime)) {
             return 'Tidak Diketahui';
         }
 
-        $endTime = $this->schedule_time->end_time;
-        $end = $this->started_at->copy()->setTimeFromTimeString($endTime);
 
-        if ($now->lt($start)) {
-            return 'Belum Dimulai';
-        }
-
-        if ($now->gte($start) && $now->lte($end)) {
-            return 'Sedang Berlangsung';
-        }
-
-        if ($now->gt($end)) {
-            return 'Telah Berakhir';
-        }
-
-        return 'Tidak Diketahui';
+        // Gabungkan pengecekan dan return dalam ternary tunggal
+        return $now < $start ? 'Belum Dimulai' : ($now > $start->copy()->setTimeFromTimeString($endTime) ? 'Telah Berakhir' : 'Sedang Berlangsung');
     }
 }

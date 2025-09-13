@@ -109,8 +109,11 @@
             </div>
             <div class="row g-4 flex-column list-question px-md-3">
                 @if (count($questions) > 0)
-                    @foreach ($questions as $question)
-                        @include('user.question.item', $question)
+                    @foreach ($questions as $index => $question)
+                        @include('user.question.item', [
+                            'question' => $question,
+                            'number' => ($questions->currentPage() - 1) * $questions->perPage() + $index + 1,
+                        ])
                     @endforeach
                     <div class="pagination-wrapper w-100">
                         {{ $questions->withQueryString()->links('pagination::bootstrap-5') }}
