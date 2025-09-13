@@ -433,7 +433,11 @@ class ExamController extends Controller
         $order = session("exam_order_{$exam->id}");
 
         if (!$order) {
-            $order = $exam->questions->shuffle()->toArray();
+            if ($exam->is_shuffle_questions) {
+                $order = $exam->questions->shuffle()->toArray();
+            } else {
+                $order = $exam->questions->toArray();
+            }
             session(["exam_order_{$exam->id}" => $order]);
         }
 
@@ -489,7 +493,12 @@ class ExamController extends Controller
             $order = session("exam_order_{$exam->id}");
 
             if (!$order) {
-                $order = $exam->questions->shuffle()->toArray();
+                if ($exam->is_shuffle_questions) {
+                    $order = $exam->questions->shuffle()->toArray();
+                } else {
+                    $order = $exam->questions->toArray();
+                }
+
                 session(["exam_order_{$exam->id}" => $order]);
             }
 
