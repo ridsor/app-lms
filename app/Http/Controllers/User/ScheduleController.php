@@ -299,7 +299,7 @@ class ScheduleController extends Controller
       'room' => fn($query) => $query->select('id', 'name'),
       'period' => fn($query) => $query->select('id', 'academic_year', 'semester'),
       'schedule_times',
-      'meetings' => fn($query) => $query->select('id', 'schedule_id', 'schedule_time_id', 'started_at', 'type'),
+      'meetings' => fn($query) => $query->select('id', 'schedule_id', 'schedule_time_id', 'started_at', 'type', 'date'),
       'meetings.schedule_time:id,meeting_method,start_time,end_time'
     ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
 
@@ -320,7 +320,7 @@ class ScheduleController extends Controller
       'schedule.room' => fn($query) => $query->select('id', 'name'),
       'schedule.period' => fn($query) => $query->select('id', 'academic_year', 'semester'),
       'schedule_time',
-      'schedule.meetings' => fn($query) => $query->select('id', 'schedule_id', 'schedule_time_id', 'started_at', 'type'),
+      'schedule.meetings' => fn($query) => $query->select('id', 'schedule_id', 'schedule_time_id', 'started_at', 'type', 'date'),
       'schedule.meetings.schedule_time:id,meeting_method,start_time,end_time',
       'teaching_journal',
       'attendances:id,meeting_id,user_id,status',

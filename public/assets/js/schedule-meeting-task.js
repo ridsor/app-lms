@@ -114,7 +114,6 @@ const edit_start_time = flatpickr("#editTaskStartTime", {
     enableTime: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
-    minDate: "today",
     minTime: formatTime(new Date()),
     locale: indonesianLocale,
     onChange: function (selectedDates) {

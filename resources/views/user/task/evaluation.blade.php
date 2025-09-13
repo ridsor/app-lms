@@ -300,7 +300,7 @@
                                             @break
 
                                             @case('link')
-                                                <button onclick="handleCopyText('{{ $content['url'] }}')"
+                                                <a href="{{ $content['url'] }}" target="_blank"
                                                     class="btn p-0 border-0 bg-transparent w-100" type="button">
                                                     <div
                                                         class="content-item d-flex align-items-center gap-1 justify-content-between file border w-100 rounded-2 p-3 file-preview-item">
@@ -317,7 +317,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </button>
+                                                </a>
                                             @break
 
                                             @default

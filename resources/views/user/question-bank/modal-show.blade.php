@@ -260,7 +260,8 @@
                                     aria-label="Close">
                                     Batal
                                 </button>
-                                <button class="btn btn-primary" type="submit" id="editStudentSubmitBtn">Simpan</button>
+                                <button class="btn btn-primary" type="submit"
+                                    id="editStudentSubmitBtn">Simpan</button>
                             </div>
                         </form>
                     </div>

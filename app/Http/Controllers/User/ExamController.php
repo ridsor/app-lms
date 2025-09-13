@@ -16,12 +16,15 @@ use App\Models\Schedule;
 use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\ExamAnswer;
+use App\Models\QuestionBank;
 use App\Services\ExamScoringService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
 
 class ExamController extends Controller
 {
@@ -206,7 +209,6 @@ class ExamController extends Controller
     {
         try {
             $exam = Exam::find($exam_id);
-            $this->authorize('update', $exam);
 
             if (!$exam) {
                 return $this->sendError(
@@ -216,14 +218,68 @@ class ExamController extends Controller
                 );
             }
 
-            $questions = Question::where('questionable_id', $id)->get();
+            $this->authorize('update', $exam);
 
-            $exam->questions()->createMany($questions->toArray());
+            $questions = Question::where('questionable_id', $id)
+                ->where('questionable_type', QuestionBank::class)
+                ->get();
+
+            if ($questions->isEmpty()) {
+                return $this->sendError(
+                    'Tidak ada soal yang disalin.',
+                    [],
+                    404
+                );
+            }
+
+            DB::beginTransaction();
+
+            foreach ($questions as $question) {
+                $fileFields = [
+                    'question_file',
+                    'option_a_image',
+                    'option_b_image',
+                    'option_c_image',
+                    'option_d_image',
+                    'option_e_image'
+                ];
+
+                $newQuestionData = $question->toArray();
+
+                // Process each file field
+                foreach ($fileFields as $field) {
+                    if (!empty($question->$field) && Storage::exists($question->$field)) {
+                        $originalPath = $question->$field;
+                        $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
+                        $newFilename = 'file/ujian/' . Str::random(44) . '.' . $extension;
+
+                        if (Storage::copy($originalPath, $newFilename)) {
+                            $newQuestionData[$field] = $newFilename;
+                        } else {
+                            $newQuestionData[$field] = null;
+                        }
+                    } else {
+                        $newQuestionData[$field] = null;
+                    }
+                }
+
+                $exam->questions()->create($newQuestionData);
+            }
+
+            DB::commit();
 
             return $this->sendResponse('Soal berhasil disalin.', $exam);
-        } catch (\Exception $e) {
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             return $this->sendError(
-                'Silakan coba lagi.',
+                'Anda tidak memiliki izin untuk mengubah ujian ini.',
+                [],
+                403
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return $this->sendError(
+                'Terjadi kesalahan: ' . $e->getMessage(),
                 [],
                 500
             );

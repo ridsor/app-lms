@@ -293,12 +293,18 @@ class QuestionBankController extends Controller
 
             $question_bank = QuestionBank::findOrFail($id);
 
+            DB::beginTransaction();
+
+            $question_bank->questions()->delete();
             $question_bank->delete();
+
+            DB::commit();
 
             return $this->sendResponse(
                 'Bank Soal berhasil dihapus.',
             );
         } catch (\Exception $e) {
+            DB::rollback();
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],

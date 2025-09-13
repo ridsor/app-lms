@@ -120,7 +120,7 @@ class Task extends Model
         $now = now();
         if ($this->start_time && $now < $this->start_time) {
             return 'Belum Dimulai';
-        } elseif (($this->allow_late_submission && $now > $this->end_time) || ($this->allow_late_submission && $this->late_submission_time && $now < $this->late_submission_time)) {
+        } elseif (($this->allow_late_submission && $now > $this->end_time) || ($now > $this->end_time && $this->allow_late_submission && $this->late_submission_time && $now < $this->late_submission_time)) {
             return 'Terlambat';
         } elseif ($this->end_time && $now > $this->end_time) {
             return 'Telah Berakhir';
