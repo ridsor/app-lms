@@ -637,7 +637,7 @@ class ExamController extends Controller
 
     public function workmanshipResult(Request $request, $id)
     {
-        if (!$request->user()->hasRole('student')) {
+        if (!$request->user()->hasRole('student') || !$request->user()->hasRole('parent')) {
             return abort(403);
         }
 
