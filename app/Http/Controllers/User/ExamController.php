@@ -644,7 +644,12 @@ class ExamController extends Controller
         $exam = Exam::withCount('questions')->findOrFail($id);
         $this->authorize('view', $exam);
 
-        $student = auth()->user()->student;
+        $student = null;
+        if ($request->user()->hasRole('student')) {
+            $student = auth()->user()->student;
+        } elseif ($request->user()->hasRole('parent')) {
+            $student = auth()->user()->parent;
+        }
 
         $examResult = ExamResult::withCount([
             'answers as correct_answers_count' => fn($q) => $q->join('questions', 'exam_answers.question_id', '=', 'questions.id')
