@@ -148,6 +148,18 @@ class QuestionController extends Controller
                 }
                 $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
             }
+            if ($request->hasFile('option_d_image')) {
+                if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
+                    Storage::delete($question->option_d_image);
+                }
+                $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
+            }
+            if ($request->hasFile('option_e_image')) {
+                if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
+                    Storage::delete($question->option_e_image);
+                }
+                $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
+            }
 
             if (!$request->has('option_d')) {
                 $validated['option_d'] = null;

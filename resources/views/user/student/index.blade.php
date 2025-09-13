@@ -235,7 +235,7 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            <div class="col-md-4 col-xl">
+                                            <div class="col-12">
                                                 <label class="form-label" for="teacher-filter">Wali Kelas</label>
                                                 <select class="selectpicker search-picker filter" data-live-search="true"
                                                     id="teacher-filter" @cannot('student.*') disabled @endcannot>
