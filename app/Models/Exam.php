@@ -109,13 +109,13 @@ class Exam extends Model
             if ($user->hasRole('student')) {
                 return $query->whereHas('schedule', function ($q) use ($user) {
                     $student = $user->student;
-                    $q->whereIn('schedules.id', $student->schedules->schedule_ids);
+                    $q->whereIn('schedules.id', optional($student->schedules)->schedule_ids ?? []);
                 });
             }
             if ($user->hasRole('parent')) {
                 return $query->whereHas('schedule', function ($q) use ($user) {
                     $student = $user->parent;
-                    $q->whereIn('schedules.id', $student->schedules->schedule_ids);
+                    $q->whereIn('schedules.id', optional($student->schedules)->schedule_ids ?? []);
                 });
             }
         }

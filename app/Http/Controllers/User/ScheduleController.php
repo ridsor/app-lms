@@ -510,7 +510,7 @@ class ScheduleController extends Controller
       foreach ($schedule->class->students as $student) {
         if ($student->schedules) {
           $student->schedules()->update([
-            'schedule_ids' => array_merge([$schedule->id], $student->schedules->schedule_ids)
+            'schedule_ids' => array_merge([$schedule->id], optional($student->schedules)->schedule_ids ?? [])
           ]);
         } else {
           $student->schedules()->create([
@@ -612,7 +612,7 @@ class ScheduleController extends Controller
 
       foreach ($schedule->class->students as $student) {
         if ($student->schedules) {
-          $mergedIds = array_unique(array_merge([$schedule->id], $student->schedules->schedule_ids));
+          $mergedIds = array_unique(array_merge([$schedule->id], optional($student->schedules)->schedule_ids ?? []));
           $student->schedules()->update([
             'schedule_ids' => array_values($mergedIds)
           ]);
@@ -669,7 +669,7 @@ class ScheduleController extends Controller
 
       foreach ($schedule->class->students as $student) {
         if ($student->schedules) {
-          $updatedIds = array_filter($student->schedules->schedule_ids, function ($id) use ($schedule) {
+          $updatedIds = array_filter(optional($student->schedules)->schedule_ids ?? [], function ($id) use ($schedule) {
             return $id !== $schedule->id;
           });
           $student->schedules()->update([
@@ -710,7 +710,7 @@ class ScheduleController extends Controller
 
             foreach ($schedule->class->students as $student) {
               if ($student->schedules) {
-                $updatedIds = array_filter($student->schedules->schedule_ids, function ($id) use ($schedule) {
+                $updatedIds = array_filter(optional($student->schedules)->schedule_ids ?? [], function ($id) use ($schedule) {
                   return $id !== $schedule->id;
                 });
                 $student->schedules()->update([
