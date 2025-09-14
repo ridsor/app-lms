@@ -26,9 +26,11 @@ class MeetingTextPolicy
             if ($user->hasRole('teacher')) {
                 return $user->teacher->id === $meeting_text->meeting->schedule->teacher_id;
             } elseif ($user->hasRole('student')) {
-                return $user->student->class_id === $meeting_text->meeting->schedule->class_id;
+                $student = $user->student;
+                return in_array($meeting_text->meeting->schedule->id, $student->schedules->schedule_ids);
             } elseif ($user->hasRole('parent')) {
-                return $user->student->class_id === $meeting_text->meeting->schedule->class_id;
+                $student = $user->parent;
+                return in_array($meeting_text->meeting->schedule->id, $student->schedules->schedule_ids);
             }
         }
         return false;

@@ -11,6 +11,9 @@ $(function () {
     if (params.level) {
         $("#level-filter").val(params.level);
     }
+    if (params.level) {
+        $("#level-filter").val(params.level);
+    }
 
     // Definisikan columns berdasarkan role
     let columns = [
@@ -82,8 +85,6 @@ $(function () {
                 data: function (d) {
                     let filterParams = getQueryParams();
                     $.extend(d, filterParams);
-
-                    // Tambahkan role ke request agar server tahu
                     d.role = role;
                 },
             }),
@@ -119,6 +120,8 @@ $(function () {
                 params.append("class", $("#class-filter").val());
             if ($("#level-filter").val())
                 params.append("level", $("#level-filter").val());
+            if ($("#period-filter").val())
+                params.append("periode", $("#period-filter").val());
 
             // Update URL tanpa reload
             const newUrl =
@@ -131,13 +134,3 @@ $(function () {
         });
     }
 });
-
-// Helper function untuk debug
-function debugDataTable(table) {
-    table.on("xhr", function (e, settings, json, xhr) {
-        console.log("Server response:", json);
-        if (json && json.data && json.data.length > 0) {
-            console.log("First row data:", json.data[0]);
-        }
-    });
-}

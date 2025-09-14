@@ -65,6 +65,8 @@ $(function () {
                 params.append("guru", $("#teacher-filter").val());
             if ($("#subject-filter").val())
                 params.append("mata_pelajaran", $("#subject-filter").val());
+            if ($("#period-filter").val())
+                params.append("periode", $("#period-filter").val());
             // Update URL tanpa reload
             const newUrl =
                 window.location.pathname +

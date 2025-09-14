@@ -64,7 +64,7 @@ class ExamController extends Controller
             ['value' => 'Midterm', 'label' => 'UTS'],
             ['value' => 'Final', 'label' => 'UAS'],
         ];
-        $schedules = Schedule::select('id', 'subject_id', 'class_id',)->with(['subject:id,code,name', 'class:id,name,level,major_id', 'class.major:id,name'])->get();
+        $schedules = Schedule::select('id', 'subject_id', 'class_id')->with(['subject:id,code,name', 'class:id,name,level,major_id', 'class.major:id,name'])->where('period_id', $activePeriod->id ?? 0)->get();
 
         return view('user.exam.index', compact('exams', 'schedules', 'classes', 'classLevels', 'classNames', 'majors', 'hasMajors', 'subjects', 'periods', 'examTypes', 'activePeriod'));
     }
@@ -103,7 +103,8 @@ class ExamController extends Controller
             ->findOrFail($id);
         $this->authorize('view', $exam);
 
-        $schedules = Schedule::select('id', 'subject_id', 'class_id')->with(['subject:id,code,name', 'class:id,name,level,major_id', 'class.major:id,name'])->get();
+        $activePeriod = Period::where('status', true)->first();
+        $schedules = Schedule::select('id', 'subject_id', 'class_id')->with(['subject:id,code,name', 'class:id,name,level,major_id', 'class.major:id,name'])->where('period_id', $activePeriod->id ?? 0)->get();
         $examTypes = [
             ['value' => 'Midterm', 'label' => 'UTS'],
             ['value' => 'Final', 'label' => 'UAS'],
