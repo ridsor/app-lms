@@ -19,10 +19,10 @@ class MaterialPolicy
                 return $user->teacher->id === $material->meeting->schedule->teacher_id;
             } elseif ($user->hasRole('student')) {
                 $student = $user->student;
-                return in_array($material->meeting->schedule->id, $student->schedules->schedule_ids);
+                return in_array($material->meeting->schedule->id, optional($student->schedules)->schedule_ids ?? []);
             } elseif ($user->hasRole('parent')) {
                 $student = $user->parent;
-                return in_array($material->meeting->schedule->id, $student->schedules->schedule_ids);
+                return in_array($material->meeting->schedule->id, optional($student->schedules)->schedule_ids ?? []);
             }
         }
         return false;

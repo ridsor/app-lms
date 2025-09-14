@@ -147,11 +147,11 @@ class Schedule extends Model
             }
             if ($user->hasRole('student')) {
                 $student = $user->student;
-                return $query->whereIn('schedules.id', $student->schedules->schedule_ids);
+                return $query->whereIn('schedules.id', optional($student->schedules)->schedule_ids ?? []);
             }
             if ($user->hasRole('parent')) {
                 $student = $user->parent;
-                return $query->whereIn('schedules.id', $student->schedules->schedule_ids);
+                return $query->whereIn('schedules.id', optional($student->schedules)->schedule_ids ?? []);
             }
         }
 

@@ -26,10 +26,10 @@ class MeetingPolicy
         return $meeting->schedule->teacher_id == $user->teacher->id;
       } else if ($user->hasRole('student')) {
         $student = $user->student;
-        return in_array($meeting->schedule->id, $student->schedules->schedule_ids);
+        return in_array($meeting->schedule->id, optional($student->schedules)->schedule_ids ?? []);
       } else if ($user->hasRole('parent')) {
         $student = $user->parent;
-        return in_array($meeting->schedule->id, $student->schedules->schedule_ids);
+        return in_array($meeting->schedule->id, optional($student->schedules)->schedule_ids ?? []);
       }
     }
     return false;
@@ -42,10 +42,10 @@ class MeetingPolicy
         return $meeting->schedule->teacher_id == $user->teacher->id;
       } else if ($user->hasRole('student')) {
         $student = $user->student;
-        return in_array($meeting->schedule->id, $student->schedules->schedule_ids);
+        return in_array($meeting->schedule->id, optional($student->schedules)->schedule_ids ?? []);
       } else if ($user->hasRole('parent')) {
         $student = $user->parent;
-        return in_array($meeting->schedule->id, $student->schedules->schedule_ids);
+        return in_array($meeting->schedule->id, optional($student->schedules)->schedule_ids ?? []);
       } else {
         return true;
       }
