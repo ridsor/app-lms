@@ -30,8 +30,9 @@ class AttendanceController extends Controller
 
     if ($request->ajax()) {
       $data = Schedule::select([
-        'schedules.id',
+        'schedules.id as id',
         'schedules.class_id',
+        'schedules.period_id',
         'subjects.name as subject_name',
         'teachers.name as teacher_name',
         'classes.name as class_name',
@@ -41,10 +42,8 @@ class AttendanceController extends Controller
         ->join('subjects', 'schedules.subject_id', '=', 'subjects.id')
         ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')
         ->join('classes', 'schedules.class_id', '=', 'classes.id')
-        ->leftJoin('majors', 'classes.major_id', '=', 'majors.id')
-        ->where('schedules.period_id', $activePeriod->id ?? 0);
+        ->leftJoin('majors', 'classes.major_id', '=', 'majors.id');
 
-      // Filter by permission
       $data->filterByPermission($request->user());
 
       // Handle search
@@ -69,6 +68,12 @@ class AttendanceController extends Controller
 
       if ($request->filled('class')) {
         $data->where('classes.name', 'like', '%' . $request->class . '%');
+      }
+
+      if ($request->filled('periode')) {
+        $data->where('schedules.period_id', $request->periode);
+      } else {
+        $data->where('schedules.period_id', $activePeriod->id ?? 0);
       }
 
       // Gunakan DataTables langsung tanpa get()
@@ -108,7 +113,6 @@ class AttendanceController extends Controller
           return '';
         })
         ->addColumn('Rekap', function ($row) use ($request) {
-          // Hitung attendance percentage di sini
           $attendancePercentage = $this->calculateAttendancePercentage($row, $request);
 
           $url = route('user.attendance.showAttendancRecap', ['id' => $row->id]);
@@ -130,16 +134,19 @@ class AttendanceController extends Controller
         ->rawColumns(['Mata Pelajaran', 'Kelas', 'Guru', 'Rekap', 'Aksi'])
         ->make(true);
     }
+
     $majors = Major::select('id', 'name')->orderBy('name')->get();
     $classLevels = SchoolClass::select('level')->distinct()->orderBy('level')->get();
     $classNames = SchoolClass::select('name')->distinct()->orderBy('name')->get();
-    return view('user.attendance.index', compact('majors', 'classLevels', 'classNames'));
+    $activePeriod = Period::where('status', true)->first();
+    $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
+
+    return view('user.attendance.index', compact('majors', 'classLevels', 'classNames', 'activePeriod', 'periods'));
   }
 
   public function meetingBySchedule(Request $request, $schedule_id)
   {
-    $activePeriod = Period::where('status', true)->first();
-    $schedule = Schedule::with(['subject:id,code', 'class' => fn($q) => $q->withCount(['students'])])->where('period_id', $activePeriod->id ?? 0)->findOrFail($schedule_id);
+    $schedule = Schedule::with(['subject:id,code', 'class' => fn($q) => $q->withCount(['students'])])->findOrFail($schedule_id);
     $this->authorize('view', $schedule);
 
     if ($request->ajax()) {
@@ -223,7 +230,6 @@ class AttendanceController extends Controller
   {
     $this->authorize('viewAny', Attendance::class);
 
-    $activePeriod = Period::where('status', true)->first();
     $schedule = Schedule::with([
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
       'class.major' => fn($query) => $query->select('id', 'name'),
@@ -244,7 +250,6 @@ class AttendanceController extends Controller
       },
       'meetings.attendances:id,status,user_id,meeting_id',
     ])->filterByPermission($request->user())
-      ->where('period_id', $activePeriod->id ?? 0)
       ->findOrFail($id);
 
     $meetings = $schedule->meetings;
@@ -430,6 +435,7 @@ class AttendanceController extends Controller
   {
     if (!$request->user()->hasRole('vice-principal')) abort(403);
 
+    $activePeriod = Period::where('status', true)->first();
     $hasMajor = Major::count() > 0;
     if ($request->ajax()) {
       $data = SchoolClass::query();
@@ -456,7 +462,14 @@ class AttendanceController extends Controller
 
       // Eager load relationships with optimized queries
       $data->with([
-        'schedules:id,class_id',
+        'schedules' => function ($q) use ($request, $activePeriod) {
+          $q->select(['id', 'class_id']);
+          if ($request->filled('periode')) {
+            $q->where('schedules.period_id', $request->periode);
+          } else {
+            $q->where('schedules.period_id', $activePeriod->id ?? 0);
+          }
+        },
         'schedules.meetings' => function ($query) {
           $query->select(['id', 'schedule_id', 'type', 'date'])
             ->withCount([
@@ -553,16 +566,18 @@ class AttendanceController extends Controller
     $majors = Major::select('id', 'name')->orderBy('name')->get();
     $classLevels = SchoolClass::select('level')->distinct()->orderBy('level')->get();
     $classNames = SchoolClass::select('name')->distinct()->orderBy('name')->get();
-    return view('user.attendance.class-list', compact('majors', 'classLevels', 'classNames', 'hasMajor'));
+
+    $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
+    return view('user.attendance.class-list', compact('majors', 'classLevels', 'classNames', 'hasMajor', 'periods', 'activePeriod'));
   }
 
   public function scheduleByKelas(Request $request, $classId)
   {
     if (!$request->user()->hasRole('vice-principal')) abort(403);
 
-    $activePeriod = Period::where('status', true)->first();
     $class = SchoolClass::with('major:id,name')->findOrFail($classId);
 
+    $activePeriod = Period::where('status', true)->first();
     if ($request->ajax()) {
       $data = Schedule::join('subjects', 'schedules.subject_id', '=', 'subjects.id')
         ->join('teachers', 'schedules.teacher_id', '=', 'teachers.id')
@@ -572,8 +587,7 @@ class AttendanceController extends Controller
           'subjects.name as subject_name',
           'teachers.name as teacher_name'
         ])
-        ->where('schedules.class_id', $classId)
-        ->where('schedules.period_id', $activePeriod->id ?? 0);
+        ->where('schedules.class_id', $classId);
 
       // filter
       if ($request->filled('search')) {
@@ -587,6 +601,12 @@ class AttendanceController extends Controller
 
       if ($request->filled('mata_pelajaran')) {
         $data->where('subjects.name', 'like', '%' . $request->mata_pelajaran . '%');
+      }
+
+      if ($request->filled('periode')) {
+        $data->where('schedules.period_id', $request->periode);
+      } else {
+        $data->where('schedules.period_id', $activePeriod->id ?? 0);
       }
 
       $data = $data->with([
@@ -628,18 +648,18 @@ class AttendanceController extends Controller
       return DataTables::of($data)
         ->addColumn('Mata Pelajaran', function ($row) {
           $html = '
-          <div class="product-names">
-          <p>' . $row->subject_name . '</p>
-          </div>
-          ';
+        <div class="product-names">
+        <p>' . $row->subject_name . '</p>
+        </div>
+        ';
           return $html;
         })
         ->addColumn('Pengajar', function ($row) {
           $html = '
-          <div class="product-names">
-          <p>' . $row->teacher_name . '</p>
-          </div>
-          ';
+        <div class="product-names">
+        <p>' . $row->teacher_name . '</p>
+        </div>
+        ';
           return $html;
         })
         ->addColumn('Rekap', function ($row) {
@@ -647,27 +667,29 @@ class AttendanceController extends Controller
             'id' => $row->id,
           ]);
           return '
-          <div>
-          <a href="' . $url . '" class="badge badge-light-primary fs-6">' . $row->attendance_percentage . '%</a>
-          </div>
-          ';
+        <div>
+        <a href="' . $url . '" class="badge badge-light-primary fs-6">' . $row->attendance_percentage . '%</a>
+        </div>
+        ';
         })
         ->addColumn('', function ($row) {
           $url = route('user.attendance.meetingBySchedule', [
             'schedule_id' => $row->id,
           ]);
           return '
-          <div>
-          <a href="' . $url . '" class="badge badge-light-info">Lihat Pertemuan</a>
-          </div>
-          ';
+        <div>
+        <a href="' . $url . '" class="badge badge-light-info">Lihat Pertemuan</a>
+        </div>
+        ';
         })
         ->rawColumns(['Mata Pelajaran', 'Pengajar', 'Rekap', ''])->make(true);
     }
 
     $teachers = Teacher::select('id', 'name')->get();
     $subjects = Subject::select('id', 'name')->get();
-    return view('user.attendance.schedule-by-class', compact('class', 'teachers', 'subjects'));
+    $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
+
+    return view('user.attendance.schedule-by-class', compact('class', 'teachers', 'subjects', 'periods', 'activePeriod'));
   }
 
   public function showMeeting($meeting_id)

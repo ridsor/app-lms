@@ -92,6 +92,7 @@ class ScheduleController extends Controller
     }
 
     if ($request->ajax()) {
+      $activePeriod = Period::where('status', true)->first();
       $majorsExist = Major::count() > 0;
 
       $data = SchoolClass::query();
@@ -110,7 +111,12 @@ class ScheduleController extends Controller
           'classes.level',
         ]);
       }
-      $data->filterSchedule($request->all())->withCount('schedules');
+      $data->filterSchedule($request->all())
+        ->withCount(['schedules as schedule_times_count' => function ($q) use ($activePeriod) {
+          $q->select(DB::raw('COUNT(schedule_times.id)'))
+            ->join('schedule_times', 'schedules.id', '=', 'schedule_times.schedule_id')
+            ->where('schedules.period_id', $activePeriod->id);
+        }]);
 
       $dataTable = DataTables::of($data);
 
@@ -138,7 +144,7 @@ class ScheduleController extends Controller
         })
         ->addColumn('Jumlah Jadwal', function ($row) {
           $html = '
-              <span class="badge badge-light-primary">' . ($row->schedules_count ?? 0) . '</span>
+              <span class="badge badge-light-primary">' . ($row->schedule_times_count ?? 0) . '</span>
           ';
           return $html;
         })
@@ -198,10 +204,16 @@ class ScheduleController extends Controller
         ])
         ->filter($request->all())
         ->where('class_id', $classId)
-        ->where('period_id', $activePeriod->id ?? 0)
         ->orderBy('schedule_times.day', 'asc')
-        ->orderBy('schedule_times.start_time', 'asc')
-        ->get();
+        ->orderBy('schedule_times.start_time', 'asc');
+
+      if ($request->filled('periode')) {
+        $data->where('schedules.period_id', $request->periode);
+      } else {
+        $data->where('schedules.period_id', $activePeriod->id ?? 0);
+      }
+
+      $data->get();
 
       return Datatables::of($data)
         ->addColumn('id', function ($row) {
@@ -481,6 +493,8 @@ class ScheduleController extends Controller
 
       $scheduleExist = Schedule::where('subject_id', $validated['subject_id'])
         ->where('teacher_id', $validated['teacher_id'])
+        ->where('period_id', $activePeriod->id)
+        ->where('class_id', $validated['class_id'])
         ->first();
 
       if ($scheduleExist) {
@@ -491,8 +505,20 @@ class ScheduleController extends Controller
 
       $schedule_time = $schedule->schedule_times()->create($validated);
 
-      // Menggunakan Queue untuk memproses pembuatan meeting secara asynchronous
       Queue::push(new CreateScheduleMeetings($schedule, $schedule_time));
+
+      foreach ($schedule->class->students as $student) {
+        if ($student->schedules) {
+          $student->schedules()->update([
+            'schedule_ids' => array_merge([$schedule->id], $student->schedules->schedule_ids)
+          ]);
+        } else {
+          $student->schedules()->create([
+            'student_id' => $student->id,
+            'schedule_ids' => [$schedule->id]
+          ]);
+        }
+      }
 
       DB::commit();
 
@@ -507,7 +533,6 @@ class ScheduleController extends Controller
   public function update(ScheduleRequest $formRequest, $id, $schedule_time_id)
   {
     try {
-      DB::beginTransaction();
       $this->authorize('update', Schedule::class);
 
       $activePeriod = Period::where('status', true)->first();
@@ -515,7 +540,7 @@ class ScheduleController extends Controller
         return $this->sendError('Tidak ada periode aktif.', [], 400);
       }
 
-      $schedule = Schedule::with(['schedule_times' => fn($query) => $query->select('schedule_id', 'day', 'start_time', 'end_time', 'meeting_method')->where('id', $schedule_time_id)->limit(1)])->findOrFail($id);
+      $schedule = Schedule::with(['schedule_times'])->findOrFail($id);
       // Simpan data lama untuk perbandingan
       $oldScheduleData = [
         'day' => $schedule->schedule_times[0]->day,
@@ -550,21 +575,53 @@ class ScheduleController extends Controller
 
       $scheduleExist = Schedule::where('subject_id', $validated['subject_id'])
         ->where('teacher_id', $validated['teacher_id'])
+        ->where('class_id', $validated['class_id'])
+        ->where('period_id', $activePeriod->id)
         ->first();
 
       if ($scheduleExist) {
         $schedule = $scheduleExist;
       }
 
-      $schedule->update($validated);
-      $schedule_time = $schedule->schedule_times()->where('id', $schedule_time_id)->first();
-      $schedule_time->update($validated);
 
-      // Cek apakah ada perubahan yang mempengaruhi meeting
+      DB::beginTransaction();
+
+      $schedule->update([
+        'class_id' => $validated['class_id'],
+        'subject_id' => $validated['subject_id'],
+        'teacher_id' => $validated['teacher_id'],
+        'room_id' => $validated['room_id'],
+        'period_id' => $validated['period_id'],
+      ]);
+
+      $schedule_time = $schedule->schedule_times()
+        ->where('id', $schedule_time_id)
+        ->firstOrFail();
+
+      $schedule_time->update([
+        'day' => $validated['day'],
+        'start_time' => $validated['start_time'],
+        'end_time' => $validated['end_time'],
+        'meeting_method' => $validated['meeting_method'],
+      ]);
+
       $meetingAffectingChanges = $this->hasMeetingAffectingChanges($oldScheduleData, $validated, $schedule_time);
       if ($meetingAffectingChanges) {
-        // Queue job untuk update meetings
         Queue::push(new UpdateScheduleMeetings($schedule, $schedule_time));
+      }
+
+      foreach ($schedule->class->students as $student) {
+        if ($student->schedules) {
+          $mergedIds = array_unique(array_merge([$schedule->id], $student->schedules->schedule_ids));
+          $student->schedules()->update([
+            'schedule_ids' => array_values($mergedIds)
+          ]);
+        } else {
+          $student->schedules()->create([
+            'student_id' => $student->id,
+            'schedule_ids' => [$schedule->id]
+          ]);
+        }
       }
 
       DB::commit();
@@ -610,6 +667,17 @@ class ScheduleController extends Controller
         $schedule->delete();
       }
 
+      foreach ($schedule->class->students as $student) {
+        if ($student->schedules) {
+          $updatedIds = array_filter($student->schedules->schedule_ids, function ($id) use ($schedule) {
+            return $id !== $schedule->id;
+          });
+          $student->schedules()->update([
+            'schedule_ids' => array_values($updatedIds)
+          ]);
+        }
+      }
+
       DB::commit();
 
       return $this->sendResponse('Jadwal berhasil dihapus.');
@@ -639,6 +707,18 @@ class ScheduleController extends Controller
           $scheduleTime = ScheduleTime::find($scheduleTimeId);
           if ($scheduleTime) {
             $schedule = $scheduleTime->schedule;
+
+            foreach ($schedule->class->students as $student) {
+              if ($student->schedules) {
+                $updatedIds = array_filter($student->schedules->schedule_ids, function ($id) use ($schedule) {
+                  return $id !== $schedule->id;
+                });
+                $student->schedules()->update([
+                  'schedule_ids' => array_values($updatedIds)
+                ]);
+              }
+            }
+
             if ($schedule->schedule_times()->count() > 1) {
               $scheduleTime->delete();
               $deletedScheduleTime++;

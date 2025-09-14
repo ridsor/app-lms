@@ -66,6 +66,7 @@ class TeachingJournalController extends Controller
         if (!$request->user()->hasRole('vice-principal')) abort(403);
 
         $hasMajor = Major::count() > 0;
+        $activePeriod = Period::where('status', true)->first();
         if ($request->ajax()) {
             $data = SchoolClass::query();
 
@@ -91,14 +92,21 @@ class TeachingJournalController extends Controller
 
             // Eager load relationships with optimized queries
             $data->with([
-                'schedules' => fn($q) => $q->select(['id', 'class_id'])->withCount([
-                    'meetings as present_count' => function ($query) {
-                        $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now())->has('teaching_journal');
-                    },
-                    'meetings as meeting_count' => function ($query) {
-                        $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now());
+                'schedules' => function ($q) use ($activePeriod, $request) {
+                    $q->select(['id', 'class_id'])->withCount([
+                        'meetings as present_count' => function ($query) {
+                            $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now())->has('teaching_journal');
+                        },
+                        'meetings as meeting_count' => function ($query) {
+                            $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now());
+                        }
+                    ]);
+                    if ($request->filled('periode')) {
+                        $q->where('schedules.period_id', $request->periode);
+                    } else {
+                        $q->where('schedules.period_id', $activePeriod->id ?? 0);
                     }
-                ]),
+                },
             ]);
 
             // Execute the query and process results
@@ -126,8 +134,8 @@ class TeachingJournalController extends Controller
             if ($hasMajor) {
                 $dataTable = $dataTable->addColumn('Jurusan', function ($row) {
                     $html = '
-          <span class="badge badge-light-primary">' . ($row->major_name) . '</span>
-          ';
+                    <span class="badge badge-light-primary">' . ($row->major_name) . '</span>
+                    ';
                     return $html;
                 });
             }
@@ -135,23 +143,23 @@ class TeachingJournalController extends Controller
             $dataTable = $dataTable
                 ->addColumn('Kelas', function ($row) {
                     $html = '
-          <span class="badge badge-light-primary">' . ($row->name) . '</span>
-          ';
+                <span class="badge badge-light-primary">' . ($row->name) . '</span>
+                ';
                     return $html;
                 })
                 ->addColumn('Tingkat', function ($row) {
                     $html = '
-          <span class="badge badge-light-primary">' . ($row->level) . '</span>
-          ';
+                <span class="badge badge-light-primary">' . ($row->level) . '</span>
+                ';
                     return $html;
                 })
                 ->addColumn('', function ($row) {
                     $url = route('user.journal.schedulebyclass', $row->id);
                     return '
-                        <div>
-                        <a href="' . $url . '" class="badge badge-light-primary fs-6">' . $row->journal_percentage . '%</a>
-                        </div>
-                    ';
+                <div>
+                <a href="' . $url . '" class="badge badge-light-primary fs-6">' . $row->journal_percentage . '%</a>
+                </div>
+                ';
                 });
 
             $rawColumns = [];
@@ -167,7 +175,9 @@ class TeachingJournalController extends Controller
         $majors = Major::select('id', 'name')->orderBy('name')->get();
         $classLevels = SchoolClass::select('level')->distinct()->orderBy('level')->get();
         $classNames = SchoolClass::select('name')->distinct()->orderBy('name')->get();
-        return view('user.teaching_journal.class-list', compact('majors', 'classLevels', 'classNames', 'hasMajor'));
+        $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
+
+        return view('user.teaching_journal.class-list', compact('majors', 'classLevels', 'classNames', 'hasMajor', 'activePeriod', 'periods'));
     }
 
     public function showJournal($meeting_id)
@@ -215,10 +225,14 @@ class TeachingJournalController extends Controller
                     'subjects.name as subject_name',
                     'teachers.name as teacher_name'
                 ])
-                ->where('schedules.class_id', $classId)
-                ->where('schedules.period_id', $activePeriod->id ?? 0);
+                ->where('schedules.class_id', $classId);
 
             // filter
+            if ($request->filled('periode')) {
+                $data->where('schedules.period_id', $request->periode);
+            } else {
+                $data->where('schedules.period_id', $activePeriod->id ?? 0);
+            }
             if ($request->filled('search')) {
                 $search = $request->search['value'];
                 $data->where('subjects.name', 'like', '%' . $search . '%');
@@ -281,20 +295,21 @@ class TeachingJournalController extends Controller
                 ->rawColumns(['Mata Pelajaran', 'Pengajar', ''])->make(true);
         }
 
+        $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
         $teachers = Teacher::select('id', 'name')->get();
         $subjects = Subject::select('id', 'name')->get();
-        return view('user.teaching_journal.schedule-by-class', compact('class', 'teachers', 'subjects'));
+
+        return view('user.teaching_journal.schedule-by-class', compact('class', 'teachers', 'subjects', 'activePeriod', 'periods'));
     }
 
     public function meetingBySchedule(Request $request, $schedule_id)
     {
-        $activePeriod = Period::where('status', true)->first();
         $schedule = Schedule::with([
             'subject:id,code,name',
             'class:id,name,major_id',
             'class.major:id,name',
             'room:id,name'
-        ])->where('period_id', $activePeriod->id ?? 0)->findOrFail($schedule_id);
+        ])->findOrFail($schedule_id);
         $this->authorize('view', $schedule);
 
         if ($request->ajax()) {

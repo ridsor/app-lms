@@ -1,3 +1,7 @@
+@php
+    use App\Helpers\Helper;
+@endphp
+
 @extends('layouts.user.app')
 
 @section('title', 'Jurnal Mengajar')
@@ -26,6 +30,31 @@
                         </div>
                         <div class="card-body pt-0">
                             <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label" for="period-filter">Periode</label>
+                                    <select class="form-select" id="period-filter" name="periode"
+                                        aria-label="Select period">
+                                        <option value="" selected>Pilih Periode</option>
+                                        @foreach ($periods as $period)
+                                            @if (empty(request()->input('periode')) && $activePeriod?->id == $period->id)
+                                                <option value="{{ $period->id }}" selected>
+                                                    {{ $period->academic_year }}
+                                                    {{ Helper::getSemesterLabel($period->semester) }}
+                                                </option>
+                                            @elseif($period->id == request()->input('periode'))
+                                                <option value="{{ $period->id }}" selected>
+                                                    {{ $period->academic_year }}
+                                                    {{ Helper::getSemesterLabel($period->semester) }}
+                                                </option>
+                                            @else
+                                                <option value="{{ $period->id }}">
+                                                    {{ $period->academic_year }}
+                                                    {{ Helper::getSemesterLabel($period->semester) }}
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                </div>
                                 @if (isset($majors) && count($majors) > 0)
                                     <div class="col-md-4 col-xl">
                                         <label class="form-label" for="major-filter">Jurusan</label>

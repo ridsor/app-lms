@@ -1,4 +1,4 @@
- $(function () {
+$(function () {
     if ($("#attendance-schedule-by-class-table").length) {
         let columns = [
             {
@@ -67,6 +67,8 @@
             e.preventDefault();
             // Buat query string
             const params = new URLSearchParams();
+            if ($("#period-filter").val())
+                params.append("periode", $("#period-filter").val());
             if ($("#teacher-filter").val())
                 params.append("guru", $("#teacher-filter").val());
             if ($("#subject-filter").val())

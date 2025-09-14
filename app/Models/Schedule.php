@@ -146,11 +146,15 @@ class Schedule extends Model
                 return $query->where('teacher_id', $user->teacher->id);
             }
             if ($user->hasRole('student')) {
-                return $query->where('class_id', $user->student->class_id)->whereHas('class.students', fn($q) => $q->where('status', 'active'));
+                $student = $user->student;
+                return $query->whereIn('schedules.id', $student->schedules->schedule_ids);
             }
             if ($user->hasRole('parent')) {
-                return $query->where('class_id', $user->parent->class_id)->whereHas('class.students', fn($q) => $q->where('status', 'active'));
+                $student = $user->parent;
+                return $query->whereIn('schedules.id', $student->schedules->schedule_ids);
             }
         }
+
+        return $query->where('schedules.id', 0);
     }
 }

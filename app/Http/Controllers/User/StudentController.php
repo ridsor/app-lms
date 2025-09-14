@@ -15,6 +15,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Student\BulkEditStudentRequest;
+use App\Models\Period;
 use App\Models\Teacher;
 use Rap2hpoutre\FastExcel\FastExcel;
 
@@ -195,6 +196,7 @@ class StudentController extends Controller
             $validated['date_of_birth'] = Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
 
             DB::beginTransaction();
+
             $student = User::create([
                 'name' => $validated['name'],
             ]);
@@ -206,7 +208,7 @@ class StudentController extends Controller
 
             $validated['user_id'] = $student->id;
             $validated['parent_id'] = $parent->id;
-            Student::create($validated);
+            $student = Student::create($validated);
 
             DB::commit();
 
@@ -453,52 +455,42 @@ class StudentController extends Controller
             $validated = $request->validated();
             $ids = $validated['ids'];
 
-            $data = [];
-            if (!empty($validated['class_id'])) {
-                $data['class_id'] = $validated['class_id'];
-            } else {
-                if ($validated['class_id'] === 'nothing') {
-                    $data['class_id'] = null;
+            $data = collect([
+                'class_id'            => $validated['class_id'] ?? null,
+                'homeroom_teacher_id' => $validated['homeroom_teacher_id'] ?? null,
+                'status'              => $validated['status'] ?? null,
+            ])->filter(function ($value, $key) use ($validated) {
+                if (($validated[$key] ?? null) === 'nothing') {
+                    return true;
                 }
-            }
-            Log::info($validated);
-            if (!empty($validated['homeroom_teacher_id'])) {
-                $data['homeroom_teacher_id'] = $validated['homeroom_teacher_id'];
-            } else {
-                if ($validated['homeroom_teacher_id'] === 'nothing') {
-                    $data['homeroom_teacher_id'] = null;
-                }
-            }
-            if (!empty($validated['status'])) {
-                $data['status'] = $validated['status'];
-            }
+                return !empty($value);
+            })->map(function ($value, $key) use ($validated) {
+                return ($validated[$key] ?? null) === 'nothing' ? null : $value;
+            })->toArray();
 
-
-            if (!empty($data)) {
-                Student::whereIn('id', $ids)->get()->each(function ($student) use ($data, $request) {
-                    if (!$request->user()->can('update', $student)) {
-                        return abort(403);
-                    }
-
-                    $student->update($data);
-                });
-                return $this->sendResponse(
-                    'Data yang dipilih berhasil diedit.'
-                );
-            } else {
+            if (empty($data)) {
                 return $this->sendError(
                     'Tidak ada data yang valid untuk diupdate.',
                     [],
                     400
                 );
             }
+
+            DB::beginTransaction();
+
+            Student::whereIn('id', $ids)->get()->each(function ($student) use ($data, $request) {
+                if (!$request->user()->can('update', $student)) {
+                    abort(403);
+                }
+
+                $student->update($data);
+            });
+
+            DB::commit();
+            return $this->sendResponse('Data yang dipilih berhasil diedit.');
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
-            return $this->sendError(
-                'Silakan coba lagi.',
-                [],
-                500
-            );
+            DB::rollBack();
+            return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }
 
@@ -691,7 +683,6 @@ class StudentController extends Controller
 
             return (new FastExcel($exportData))->download($filename);
         } catch (\Exception $e) {
-            Log::info($e->getMessage());
             return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
         }
     }

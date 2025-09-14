@@ -44,13 +44,7 @@ $(function () {
             url: window.location.pathname,
             pages: 5,
             data: function (d) {
-                let filterParams = {};
-                if ($("#major-filter").val())
-                    filterParams.major = $("#major-filter").val();
-                if ($("#level-filter").val())
-                    filterParams.level = $("#level-filter").val();
-                if ($("#class-filter").val())
-                    filterParams.class = $("#class-filter").val();
+                let filterParams = getQueryParams();
                 $.extend(d, filterParams);
             },
         }),
@@ -82,6 +76,8 @@ $(function () {
         e.preventDefault();
         // Buat query string
         const params = new URLSearchParams();
+        if ($("#period-filter").val())
+            params.append("periode", $("#period-filter").val());
         if ($("#major-filter").val())
             params.append("major", $("#major-filter").val());
         if ($("#level-filter").val())
