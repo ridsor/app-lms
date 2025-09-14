@@ -108,7 +108,6 @@ class Meeting extends Model
             return $now->startOfDay() > $this->date->startOfDay() ? "Telah Berakhir" : 'Belum Dimulai';
         }
 
-        // Gunakan null coalescing untuk efisiensi
         $endTime = $this->schedule_time->formatted_end_time ??
             optional($this->relationLoaded('schedule_time') ?: $this->load('schedule_time'))->schedule_time->formatted_end_time;
 
@@ -117,7 +116,6 @@ class Meeting extends Model
         }
 
 
-        // Gabungkan pengecekan dan return dalam ternary tunggal
-        return $now < $start ? 'Belum Dimulai' : ($now > $start->copy()->setTimeFromTimeString($endTime) ? 'Telah Berakhir' : 'Sedang Berlangsung');
+        return $now->startOfDay() < $start->startOfDay() ? 'Belum Dimulai' : ($now->startOfDay() > $start->copy()->setTimeFromTimeString($endTime)->startOfDay() ? 'Telah Berakhir' : 'Sedang Berlangsung');
     }
 }
