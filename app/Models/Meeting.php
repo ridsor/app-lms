@@ -105,7 +105,7 @@ class Meeting extends Model
         $start = $this->started_at;
 
         if (!$start) {
-            return $now > $this->date ? "Telah Berakhir" : 'Belum Dimulai';
+            return $now->startOfDay() > $this->date->startOfDay() ? "Telah Berakhir" : 'Belum Dimulai';
         }
 
         // Gunakan null coalescing untuk efisiensi
