@@ -55,6 +55,11 @@ class Student extends Model
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
+    public function schedules()
+    {
+        return $this->hasOne(ScheduleStudent::class);
+    }
+
     public function grades(): HasMany
     {
         return $this->hasMany(Grade::class);

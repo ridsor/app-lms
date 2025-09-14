@@ -41,9 +41,11 @@ class ExamPolicy
       if ($user->hasRole('teacher')) {
         return $exam->schedule->teacher_id == $user->teacher->id;
       } else if ($user->hasRole('student')) {
-        return $user->student->class_id == $exam->schedule->class_id;
+        $student = $user->student;
+        return in_array($exam->schedule->id, $student->schedules->schedule_ids);
       } else if ($user->hasRole('parent')) {
-        return $user->parent->class_id == $exam->schedule->class_id;
+        $student = $user->parent;
+        return in_array($exam->schedule->id, $student->schedules->schedule_ids);
       } else if ($user->hasRole('operator')) {
         return true;
       }

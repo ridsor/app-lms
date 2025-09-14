@@ -22,7 +22,7 @@ $(function () {
     columns = columns.concat([
         { data: "name", name: "name" },
         { data: "level", name: "level" },
-        { data: '', name: "", orderable: false, searchable: false },
+        { data: "", name: "", orderable: false, searchable: false },
     ]);
 
     // filter
@@ -44,13 +44,8 @@ $(function () {
             url: window.location.pathname,
             pages: 5,
             data: function (d) {
-                let filterParams = {};
-                if ($("#major-filter").val())
-                    filterParams.major = $("#major-filter").val();
-                if ($("#level-filter").val())
-                    filterParams.level = $("#level-filter").val();
-                if ($("#class-filter").val())
-                    filterParams.class = $("#class-filter").val();
+                let filterParams = getQueryParams();
+                $.extend(d, filterParams);
                 $.extend(d, filterParams);
             },
         }),
@@ -88,6 +83,8 @@ $(function () {
             params.append("level", $("#level-filter").val());
         if ($("#class-filter").val())
             params.append("class", $("#class-filter").val());
+        if ($("#period-filter").val())
+            params.append("periode", $("#period-filter").val());
         // Update URL tanpa reload
         const newUrl =
             window.location.pathname +

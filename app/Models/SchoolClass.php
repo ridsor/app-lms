@@ -7,6 +7,7 @@ use App\Models\Student;
 use App\Models\Schedule;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 
 class SchoolClass extends Model
 {
@@ -53,19 +54,17 @@ class SchoolClass extends Model
         });
     }
 
-    public function scopeFilterSchedule($query, $class)
+    public function scopeFilterSchedule($query, $filters)
     {
-        // Filter berdasarkan Class
-        $query->when($filters['level'] ?? false, function ($query, $level) {
-            $query->where('classes.name', $level);
+        Log::info($filters);
+        $query->when($filters['class'] ?? false, function ($query, $class) {
+            $query->where('classes.name', $class);
         });
 
-        // Filter berdasarkan level
         $query->when($filters['level'] ?? false, function ($query, $level) {
-            $query->where('level', $level);
+            $query->where('classes.level', $level);
         });
 
-        // Filter berdasarkan major
         $query->when($filters['major'] ?? false, function ($query, $major) {
             $query->where('majors.name', $major);
         });

@@ -63,13 +63,6 @@ class User extends Authenticatable
                 $user->password = bcrypt($user->username);
             }
         });
-
-        static::updating(function ($user) {
-            if ($user->isDirty('name')) {
-                $user->username = self::generateUsername($user->name);
-                $user->password = bcrypt($user->username);
-            }
-        });
     }
 
     public function teacher()

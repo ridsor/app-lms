@@ -104,12 +104,14 @@ class Task extends Model
             }
             if ($user->hasRole('student')) {
                 return $query->whereHas('meeting.schedule', function ($q) use ($user) {
-                    $q->where('class_id', $user->student->class_id);
+                    $student = $user->student;
+                    $q->whereIn('schedules.id', $student->schedules->schedule_ids);
                 });
             }
             if ($user->hasRole('parent')) {
                 return $query->whereHas('meeting.schedule', function ($q) use ($user) {
-                    $q->where('class_id', $user->parent->class_id);
+                    $student = $user->parent;
+                    $q->whereIn('schedules.id', $student->schedules->schedule_ids);
                 });
             }
         }

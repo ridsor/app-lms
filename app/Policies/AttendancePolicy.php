@@ -40,9 +40,11 @@ class AttendancePolicy
       if ($user->hasRole('teacher')) {
         return $attendance->schedule->teacher_id == $user->teacher->id;
       } else if ($user->hasRole('student')) {
-        return $user->student->class_id == $attendance->schedule->class_id;
+        $student = $user->student;
+        return in_array($attendance->schedule->id, $student->schedules->schedule_ids);
       } else if ($user->hasRole('parent')) {
-        return $user->parent->class_id == $attendance->schedule->class_id;
+        $student = $user->parent;
+        return in_array($attendance->schedule->id, $student->schedules->schedule_ids);
       } else {
         return true;
       }
