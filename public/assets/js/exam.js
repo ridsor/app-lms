@@ -20,6 +20,7 @@ const add_start_time = flatpickr("#addExamStartTime", {
     minDate: "today",
     minTime: formatTime(new Date()),
     enableTime: true,
+    static: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
     locale: flatpickrLocationID,
@@ -39,6 +40,7 @@ const add_end_time = flatpickr("#addExamEndTime", {
     defaultDate: new Date(),
     minTime: formatTime(new Date()),
     enableTime: true,
+    static: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
     locale: flatpickrLocationID,
@@ -46,6 +48,7 @@ const add_end_time = flatpickr("#addExamEndTime", {
 
 const edit_start_time = flatpickr("#editExamStartTime", {
     enableTime: true,
+    static: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
     minTime: formatTime(new Date()),
@@ -64,6 +67,7 @@ const edit_start_time = flatpickr("#editExamStartTime", {
 
 const edit_end_time = flatpickr("#editExamEndTime", {
     enableTime: true,
+    static: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
     locale: flatpickrLocationID,
