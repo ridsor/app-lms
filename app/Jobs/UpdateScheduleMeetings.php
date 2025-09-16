@@ -46,7 +46,6 @@ class UpdateScheduleMeetings implements ShouldQueue
 
       // Hapus semua meeting yang ada untuk jadwal ini
       $deletedCount = $schedule->meetings()->delete();
-      Log::info("Menghapus {$deletedCount} meeting lama untuk schedule ID: " . $schedule->id);
 
       // Buat meeting baru berdasarkan jadwal yang diupdate
       $meetings = [];
@@ -70,9 +69,6 @@ class UpdateScheduleMeetings implements ShouldQueue
       if (!empty($meetings)) {
         // Perbaikan: createMany adalah method pada relasi, bukan pada model langsung
         $schedule->meetings()->createMany($meetings);
-        Log::info("Berhasil membuat " . count($meetings) . " meeting baru untuk schedule ID: " . $schedule->id);
-      } else {
-        Log::info("Tidak ada meeting yang perlu dibuat untuk schedule ID: " . $schedule->id);
       }
     } catch (\Exception $e) {
       Log::error("Error updating meetings for schedule ID: " . $this->schedule->id, [

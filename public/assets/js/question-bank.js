@@ -122,7 +122,6 @@ $(document).ready(function () {
             error: function (xhr, status, error) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    console.log(errors);
                     for (const key in errors) {
                         if (
                             $(

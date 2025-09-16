@@ -235,7 +235,6 @@
       );
       if (currentPosition == sliderLimit) {
         $(this).addClass("disabled");
-        console.log("sliderLimit", sliderLimit);
       }
     }
   });

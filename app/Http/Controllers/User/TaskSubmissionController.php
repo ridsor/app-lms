@@ -67,6 +67,7 @@ class TaskSubmissionController extends Controller
                 return $this->sendResponse('Tugas berhasil diserahkan.', [], 201);
             }
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }

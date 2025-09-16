@@ -34,8 +34,6 @@ class AutoScoreExam extends Command
         foreach ($examResults as $examResult) {
             $studentId = $examResult->student_id;
 
-            Log::info("Auto scoring untuk ExamResult ID: {$examResult->id}");
-
             $scoringService->saveScore($examResult, $studentId);
         }
 

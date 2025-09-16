@@ -60,12 +60,11 @@ $(document).ready(function () {
             return i != idx;
         });
         showContentPreview(taskSubmissioncontents, preview, checkSubmitTask);
-        console.log(deleteContent);
     };
     preview.on("click", ".btn-remove-file", handleRemoveContent);
 
     function checkSubmitTask() {
-        if (taskSubmissioncontents.length > 0) {
+        if (taskSubmissioncontents.length >= 0) {
             $("#submit-task").attr("disabled", false);
         } else {
             $("#submit-task").attr("disabled", true);

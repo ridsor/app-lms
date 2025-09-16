@@ -19,7 +19,6 @@ class CheckExamTime
             ->where('student_id', $student->id)
             ->first();
 
-        Log::info($examResult);
         if ($examResult && (now()->gt($examResult->end_time) || is_null($examResult->end_time))) {
             app(ExamScoringService::class)->saveScore($examResult, $student->id);
 
