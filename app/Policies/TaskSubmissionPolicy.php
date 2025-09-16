@@ -34,7 +34,7 @@ class TaskSubmissionPolicy
             if ($user->hasRole('teacher')) {
                 return $user->teacher->id === $task_submission->task->meeting->schedule->teacher_id;
             } elseif ($user->hasRole('student')) {
-                $student = $user->parent;
+                $student = $user->student;
                 return in_array($task_submission->task->meeting->schedule->id, optional($student->schedules)->schedule_ids ?? []);
             }
         };

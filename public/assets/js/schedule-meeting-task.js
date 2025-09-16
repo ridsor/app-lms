@@ -339,7 +339,6 @@ $(document).ready(function () {
             value = "";
         }
         $("#editTaskForm [name='description']").val(value);
-        console.log(value);
     });
     addTaskDescriptionQuill.on("text-change", function () {
         var value = addTaskDescriptionQuill.root.innerHTML;

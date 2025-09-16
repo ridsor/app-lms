@@ -147,7 +147,6 @@ $(document).ready(function () {
         static: true,
         dateFormat: "d/m/Y",
         onChange: function (selectedDates, dateStr, instance) {
-            console.log("here");
             if (selectedDates.length > 0) {
                 const selectedDate = selectedDates[0];
                 edit_end_date.set("minDate", selectedDate);

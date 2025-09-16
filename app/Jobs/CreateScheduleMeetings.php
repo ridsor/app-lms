@@ -64,7 +64,6 @@ class CreateScheduleMeetings implements ShouldQueue
       // Insert batch untuk performa yang lebih baik
       if (!empty($meetings)) {
         $schedule->meetings()->createMany($meetings);
-        Log::info("Berhasil membuat " . count($meetings) . " meeting untuk schedule ID: " . $schedule->id);
       }
     } catch (\Exception $e) {
       Log::error("Error creating meetings for schedule ID: " . $this->schedule->id, [

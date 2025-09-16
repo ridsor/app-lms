@@ -31,7 +31,6 @@
     });
 
     if ($("#pageWrapper").hasClass("horizontal-wrapper")) {
-        console.log("hover is active");
 
         $(".sidebar-list").hover(
             function () {
@@ -120,7 +119,6 @@
         }
     });
     $(".search-full input").keyup(function (e) {
-        console.log(e.target.value);
         if (e.target.value) {
             $("body").addClass("offcanvas");
         } else {

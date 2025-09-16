@@ -254,7 +254,6 @@ $(document).ready(function () {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
                     const options_errors = [];
-                    console.log(errors);
                     for (const key in errors) {
                         if (
                             $(
@@ -377,7 +376,6 @@ function handleEditQuestion(e, id) {
                 if (res.data.option_e) {
                     $container.append(elementOption("e", res.data.option_e));
                 } else {
-                    console.log($("#editQuestionForm [name='option_e']"));
                     if ($("#editQuestionForm [name='option_e']").length > 0)
                         $("#editQuestionForm [name='option_e']")
                             .closest(".answer-option")
