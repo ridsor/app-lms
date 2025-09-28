@@ -118,6 +118,8 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/jurnal-mengajar/pertemuan/{meeting_id}', [TeachingJournalController::class, 'showJournal'])->name('user.journal.showMeeting');
     Route::get('/jurnal-mengajar/kelas/{classId}', [TeachingJournalController::class, 'scheduleByKelas'])->name('user.journal.schedulebyclass');
     Route::get('/jurnal-mengajar/jadwal/{schedule_id}/pertemuan', [TeachingJournalController::class, 'meetingBySchedule'])->name('user.journal.meetingBySchedule');
+    Route::get('/jurnal-mengajar/{code}/export', [TeachingJournalController::class, 'export'])->name('user.journal.export');
+    // Route::get('/jurnal-mengajar/{code}/export/tes', [TeachingJournalController::class, 'exporttes'])->name('user.jurnal.export');
 
     Route::get('/bank-soal', [QuestionBankController::class, 'index'])->name('user.question-bank.index');
     Route::get('/bank-soal/copy', [QuestionBankController::class, 'copy'])->name('user.question-bank.copy');

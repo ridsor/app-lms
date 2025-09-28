@@ -58,11 +58,6 @@ class Meeting extends Model
         return $this->hasMany(Task::class);
     }
 
-    public function exams(): HasMany
-    {
-        return $this->hasMany(Exam::class);
-    }
-
     public function discussionForums(): HasMany
     {
         return $this->hasMany(DiscussionForum::class);

@@ -136,7 +136,17 @@ class Helper
         };
     }
 
-    // getMeetingTypeLabel
+    public static function getMeetingType($type)
+    {
+        return match ($type) {
+            'Learning' => 'Belajar',
+            'Midterm' => 'UTS',
+            'Final' => 'UAS',
+            'Holiday' => 'Libur',
+            default => $type
+        };
+    }
+
     public static function getMeetingTypeLabel($type)
     {
         return match ($type) {
