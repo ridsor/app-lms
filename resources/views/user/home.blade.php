@@ -178,7 +178,7 @@
                                                 </div>
                                                 <div class="right-overview-content">
                                                     <div>
-                                                        <h6>Jurnal Mengahar</h6>
+                                                        <h6>Jurnal Mengajar</h6>
                                                         <span class="text-muted text-ellipsis">
                                                             Ketidakhadiran guru berkurang bahkan yang terbaik...
                                                         </span>
