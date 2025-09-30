@@ -116,16 +116,18 @@
                                         @endforeach
                                     </div>
                                 </div>
-                                <div class="col-12 mt-4">
-                                    <h6 class="mb-3">Jurnal Mengajar</h6>
-                                    <a href="{{ route('user.journal.export', ['code' => $schedule->subject->code]) }}"
-                                        class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
-                                        <span class="icon d-inline-flex justify-content-center align-items-center">
-                                            <i data-feather="download" style="width:18px; height: 18px"></i>
-                                        </span>
-                                        <span>Export Jurnal Mengajar</span>
-                                    </a>
-                                </div>
+                                @role('teacher')
+                                    <div class="col-12 mt-4">
+                                        <h6 class="mb-3">Jurnal Mengajar</h6>
+                                        <a href="{{ route('user.journal.export', ['code' => $schedule->subject->code]) }}"
+                                            class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
+                                            <span class="icon d-inline-flex justify-content-center align-items-center">
+                                                <i data-feather="download" style="width:18px; height: 18px"></i>
+                                            </span>
+                                            <span>Export Jurnal Mengajar</span>
+                                        </a>
+                                    </div>
+                                @endrole
                                 <div class="col-12 mt-4">
                                     <h6 class="mb-3">Pengajar</h6>
                                     <div class="d-flex align-items-center gap-3">
