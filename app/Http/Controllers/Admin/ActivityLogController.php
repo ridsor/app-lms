@@ -60,14 +60,14 @@ class ActivityLogController extends Controller
             $dataTable = $dataTable
                 ->addColumn('Nama Aktifitas', function ($row) {
                     $html = '
-          <p class="f-light">' . ($row->log_name) . '</p>
-          ';
+                        <p class="f-light">' . ($row->log_name) . '</p>
+                        ';
                     return $html;
                 })
                 ->addColumn('Informasi', function ($row) {
                     $html = '
                     <p class="f-light">' . ($row->description) . '</p>
-          ';
+                    ';
                     return $html;
                 })
                 ->addColumn('Pengguna', function ($row) {
@@ -78,7 +78,7 @@ class ActivityLogController extends Controller
                 })
                 ->addColumn('Subjek', function ($row) {
                     $html = '
-                            <span class="badge badge-light-primary">ID ' . ($row->subject->id) . '</span>
+                            <span class="badge badge-light-primary">ID ' . ($row->subject_id) . '</span>
                         ';
                     return $html;
                 })
