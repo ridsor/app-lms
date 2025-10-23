@@ -412,7 +412,6 @@ $(function () {
                     toast.show();
                     $("#editClassModal").modal("hide");
                     $("#editClassForm")[0].reset();
-                    $("#editClassForm .selectpicker").selectpicker("refresh");
                     t.clearPipeline().draw();
                 }
             },

@@ -733,8 +733,7 @@ class AttendanceController extends Controller
     $schedule->load([
       'class.students',
       'meetings' => function ($query) {
-        $query->where('type', '!=', 'Holiday')
-          ->whereDate('date', '<=', now());
+        $query->where('type', '!=', 'Holiday');
       },
       'meetings.attendances' => function ($query) use ($request) {
         $query->where('status', 'H');

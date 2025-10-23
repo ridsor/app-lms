@@ -216,6 +216,9 @@ class ScheduleController extends Controller
       $data->get();
 
       return Datatables::of($data)
+        ->filterColumn('subject_name', function ($query, $keyword) {
+          $query->where('subjects.name', 'like', "%{$keyword}%");
+        })
         ->addColumn('id', function ($row) {
           $html = '
               <div class="checkbox-checked">
