@@ -496,8 +496,7 @@ class AttendanceController extends Controller
 
         foreach ($class->schedules as $schedule) {
           $validMeetings = $schedule->meetings->filter(function ($meeting) {
-            return $meeting->type != "Holiday" &&
-              Carbon::parse($meeting->date)->lte(Carbon::today());
+            return $meeting->type != "Holiday";
           });
 
           if ($validMeetings->isEmpty()) {
@@ -626,7 +625,7 @@ class AttendanceController extends Controller
         $totalAttendancePercentage = 0.0;
         $totalMeetings = 0;
         foreach ($schedule->meetings as $meeting) {
-          if ($meeting->type != "Holiday" && Carbon::parse($meeting->date)->lte(Carbon::today())) {
+          if ($meeting->type != "Holiday") {
             $totalMeetings++;
             $attendancePercentage = 0.0;
             if ($totalStudents > 0) {

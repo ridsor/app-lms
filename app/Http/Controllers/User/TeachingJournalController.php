@@ -96,10 +96,10 @@ class TeachingJournalController extends Controller
                 'schedules' => function ($q) use ($activePeriod, $request) {
                     $q->select(['id', 'class_id'])->withCount([
                         'meetings as present_count' => function ($query) {
-                            $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now())->has('teaching_journal');
+                            $query->where('type', '!=', 'Holiday')->has('teaching_journal');
                         },
                         'meetings as meeting_count' => function ($query) {
-                            $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now());
+                            $query->where('type', '!=', 'Holiday');
                         }
                     ]);
                     if ($request->filled('periode')) {
@@ -249,10 +249,10 @@ class TeachingJournalController extends Controller
 
             $data = $data->withCount([
                 'meetings as present_count' => function ($query) {
-                    $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now())->has('teaching_journal');
+                    $query->where('type', '!=', 'Holiday')->has('teaching_journal');
                 },
                 'meetings as meeting_count' => function ($query) {
-                    $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now());
+                    $query->where('type', '!=', 'Holiday');
                 }
             ]);
 
