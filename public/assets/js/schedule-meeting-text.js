@@ -56,11 +56,7 @@ $(document).ready(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    console.log(errors);
                     for (const key in errors) {
-                        console.log(
-                            $("#addMeetingTextForm [name='" + key + "']")
-                        );
                         if (
                             $(
                                 "#addMeetingTextForm [name='" + key + "']"
@@ -127,11 +123,7 @@ $(document).ready(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    console.log(errors);
                     for (const key in errors) {
-                        console.log(
-                            $("#editMeetingTextForm [name='" + key + "']")
-                        );
                         if (
                             $(
                                 "#editMeetingTextForm [name='" + key + "']"

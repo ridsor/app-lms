@@ -88,9 +88,7 @@ $(document).ready(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    console.log(errors);
                     for (const key in errors) {
-                        console.log($("#addMaterialForm [name='" + key + "']"));
                         if (
                             $("#addMaterialForm [name='" + key + "']").hasClass(
                                 "file_path"

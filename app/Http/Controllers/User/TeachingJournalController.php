@@ -12,6 +12,7 @@ use App\Models\SchoolClass;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeachingJournal;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -348,5 +349,60 @@ class TeachingJournalController extends Controller
         }
 
         return view('user.teaching_journal.meeting-by-schedule', compact('schedule'));
+    }
+
+    public function export(Request $request, $code)
+    {
+        if (!$request->user()->hasRole('teacher')) return abort(403);
+
+        $schedule = Schedule::with([
+            'subject:id,code,name',
+            'class:id,name,level,major_id',
+            'class.major:id,name',
+            'teacher:id,name,nip',
+            'period:id,academic_year,semester',
+            'meetings' => function ($q) {
+                $q->orderBy('date', 'asc');
+            },
+            'meetings.teaching_journal',
+            'meetings.materials:id,meeting_id,title,description',
+            'meetings.tasks:id,meeting_id,title,description'
+        ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
+        $this->authorize('view', $schedule);
+
+        $pdf = Pdf::loadView('pdf.journal', $schedule->toArray())->setPaper('A4', 'portrait');
+
+        $filename = "Jurnal Mengajar - "
+            . ($schedule->period->semester == 'odd' ? 'Ganjil' : 'Genap')
+            . " TA "
+            . str_replace(['/', '\\'], '-', $schedule->period->academic_year)
+            . " "
+            . $schedule->subject->code
+            . ".pdf";
+
+
+        return $pdf->download($filename);
+    }
+    public function exporttes(Request $request, $code)
+    {
+        if (!$request->user()->hasRole('teacher')) return abort(403);
+
+        $schedule = Schedule::with([
+            'subject:id,code,name',
+            'class:id,name,level,major_id',
+            'class.major:id,name',
+            'teacher:id,name,nip',
+            'period:id,academic_year,semester',
+            'meetings' => function ($q) {
+                $q->orderBy('date', 'asc');
+            },
+            'meetings.teaching_journal',
+            'meetings.materials:id,meeting_id,title,description',
+            'meetings.tasks:id,meeting_id,title,description'
+        ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
+        $this->authorize('view', $schedule);
+
+
+        return view('pdf.journal', $schedule->toArray());
     }
 }

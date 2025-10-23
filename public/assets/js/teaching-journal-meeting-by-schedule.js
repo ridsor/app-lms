@@ -109,7 +109,6 @@ function handleDetailMeeting(id) {
                 $("#journalModal #end_time").html(
                     res.data.schedule_time.end_time
                 );
-                console.log(res.data.schedule_time);
                 $("#journalModal #date").html(
                     res.data.formatted_date
                         ? `${res.data.formatted_date} WIT`

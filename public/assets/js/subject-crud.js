@@ -131,7 +131,6 @@ $(function () {
             method: "GET",
             success: function (res) {
                 if (res.success && res.data) {
-                    console.log(res.data.name);
                     $("#editSubjectForm [name='name']").val(res.data.name);
                     $("#editSubjectForm").attr("data-id", id);
                     $("#editSubjectModal").modal("show");

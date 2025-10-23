@@ -45,4 +45,29 @@ class TaskSubmissionRequest extends FormRequest
             'files.*.file' => 'File tugas harus berupa file.',
         ];
     }
+
+    public function attributes()
+    {
+        $attributeNames = [];
+
+        if ($this->has('files')) {
+            foreach ($this->file('files', []) as $i => $file) {
+                $attributeNames["files.$i.file"] = "File " . ($i + 1);
+            }
+        }
+
+        if ($this->has('group_members')) {
+            foreach ($this->input('group_members', []) as $i => $value) {
+                $attributeNames["group_members.$i"] = "Anggota " . ($i + 1);
+            }
+        }
+
+        if ($this->has('links')) {
+            foreach ($this->input('links', []) as $i => $link) {
+                $attributeNames["links.$i.url"] = "Link " . ($i + 1);
+            }
+        }
+
+        return $attributeNames;
+    }
 }

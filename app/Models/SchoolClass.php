@@ -56,7 +56,6 @@ class SchoolClass extends Model
 
     public function scopeFilterSchedule($query, $filters)
     {
-        Log::info($filters);
         $query->when($filters['class'] ?? false, function ($query, $class) {
             $query->where('classes.name', $class);
         });
