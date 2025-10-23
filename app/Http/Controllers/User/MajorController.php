@@ -55,7 +55,7 @@ class MajorController extends Controller
         }
     }
 
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         try {
             if (!$request->user()->can('major.*')) {
@@ -68,6 +68,7 @@ class MajorController extends Controller
             }
             return $this->sendResponse('Data jurusan ditemukan', $major);
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }
