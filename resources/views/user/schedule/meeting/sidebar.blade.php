@@ -5,7 +5,7 @@
 
 <div class="d-flex flex-column" id="meeting-sidebar">
     @foreach ($schedule->meetings as $key => $value)
-        <a href="{{ route('user.schedule.showByMeeting', ['code' => $schedule->subject->code, 'meeting_id' => $value->id]) }}"
+        <a href="{{ route('user.schedule.showByMeeting', ['id' => $schedule->id, 'meeting_id' => $value->id]) }}"
             data-meeting-id="{{ $value->id }}"
             class="p-3 w-100 border-bottom selected-item  {{ isset($meeting) ? ($meeting->id == $value->id ? 'active' : '') : '' }}">
             <p class="fw-medium mb-2">Pertemuan {{ $key + 1 }} </p>

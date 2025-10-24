@@ -65,12 +65,12 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::delete('jadwal/hapus', [ScheduleController::class, 'bulkDestroy'])->name('user.schedule.bulkDestroy');
     Route::get('/jadwal/kelas', [ScheduleController::class, 'classList'])->name('user.schedule.classlist');
     Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
-    Route::get('/jadwal/{code}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
-    Route::put('/jadwal/{code}/{schedule_time_id}', [ScheduleController::class, 'update'])->name('user.schedule.update');
+    Route::get('/jadwal/{id}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
+    Route::put('/jadwal/{id}/{schedule_time_id}', [ScheduleController::class, 'update'])->name('user.schedule.update');
     Route::delete('/jadwal/{schedule_time_id}', [ScheduleController::class, 'destroy'])->name('user.schedule.destroy');
     Route::get('/jadwal/{id}/{schedule_time_id}/edit', [ScheduleController::class, 'edit'])->name('user.schedule.edit');
-    Route::get('/jadwal/{code}/pertemuan/{meeting_id}', [ScheduleController::class, 'showByMeeting'])->name('user.schedule.showByMeeting');
-    Route::put('/jadwal/{code}/pertemuan/{meeting_id}', [MeetingController::class, 'update'])->name('user.schedule.update');
+    Route::get('/jadwal/{id}/pertemuan/{meeting_id}', [ScheduleController::class, 'showByMeeting'])->name('user.schedule.showByMeeting');
+    Route::put('/jadwal/{id}/pertemuan/{meeting_id}', [MeetingController::class, 'update'])->name('user.schedule.update');
 
     Route::post('/jadwal/pertemuan/{meeting_id}/jurnal', [TeachingJournalController::class, 'store'])->name('user.teaching_journal.store');
     Route::patch('/jadwal/pertemuan/{meeting_id}/mulai-belajar', [MeetingController::class, 'startLearning'])->name('user.schedule.startLearning');
@@ -118,8 +118,8 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/jurnal-mengajar/pertemuan/{meeting_id}', [TeachingJournalController::class, 'showJournal'])->name('user.journal.showMeeting');
     Route::get('/jurnal-mengajar/kelas/{classId}', [TeachingJournalController::class, 'scheduleByKelas'])->name('user.journal.schedulebyclass');
     Route::get('/jurnal-mengajar/jadwal/{schedule_id}/pertemuan', [TeachingJournalController::class, 'meetingBySchedule'])->name('user.journal.meetingBySchedule');
-    Route::get('/jurnal-mengajar/{code}/export', [TeachingJournalController::class, 'export'])->name('user.journal.export');
-    // Route::get('/jurnal-mengajar/{code}/export/tes', [TeachingJournalController::class, 'exporttes'])->name('user.jurnal.export');
+    Route::get('/jurnal-mengajar/{id}/export', [TeachingJournalController::class, 'export'])->name('user.journal.export');
+    // Route::get('/jurnal-mengajar/{id}/export/tes', [TeachingJournalController::class, 'exporttes'])->name('user.jurnal.export');
 
     Route::get('/bank-soal', [QuestionBankController::class, 'index'])->name('user.question-bank.index');
     Route::get('/bank-soal/copy', [QuestionBankController::class, 'copy'])->name('user.question-bank.copy');

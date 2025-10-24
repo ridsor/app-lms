@@ -351,7 +351,7 @@ class TeachingJournalController extends Controller
         return view('user.teaching_journal.meeting-by-schedule', compact('schedule'));
     }
 
-    public function export(Request $request, $code)
+    public function export(Request $request, $id)
     {
         if (!$request->user()->hasRole('teacher')) return abort(403);
 
@@ -367,7 +367,7 @@ class TeachingJournalController extends Controller
             'meetings.teaching_journal',
             'meetings.materials:id,meeting_id,title,description',
             'meetings.tasks:id,meeting_id,title,description'
-        ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
+        ])->find($id);
         $this->authorize('view', $schedule);
 
         $pdf = Pdf::loadView('pdf.journal', $schedule->toArray())->setPaper('A4', 'portrait');
@@ -383,7 +383,7 @@ class TeachingJournalController extends Controller
 
         return $pdf->download($filename);
     }
-    public function exporttes(Request $request, $code)
+    public function exporttes(Request $request, $id)
     {
         if (!$request->user()->hasRole('teacher')) return abort(403);
 
@@ -399,7 +399,7 @@ class TeachingJournalController extends Controller
             'meetings.teaching_journal',
             'meetings.materials:id,meeting_id,title,description',
             'meetings.tasks:id,meeting_id,title,description'
-        ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
+        ])->find($id);
         $this->authorize('view', $schedule);
 
 

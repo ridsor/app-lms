@@ -301,7 +301,7 @@ class ScheduleController extends Controller
     }
   }
 
-  public function showBySchedule($code)
+  public function showBySchedule($id)
   {
     $schedule = Schedule::with([
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
@@ -316,13 +316,13 @@ class ScheduleController extends Controller
       'schedule_times',
       'meetings' => fn($query) => $query->select('id', 'schedule_id', 'schedule_time_id', 'started_at', 'type', 'date'),
       'meetings.schedule_time:id,meeting_method,start_time,end_time'
-    ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
+    ])->find($id);
 
     $this->authorize('view', $schedule);
 
     return view('user.schedule.show', compact('schedule'));
   }
-  public function showByMeeting($code, $meeting_id)
+  public function showByMeeting($id, $meeting_id)
   {
     $meeting = Meeting::with([
       'schedule' => fn($query) => $query->select('id', 'class_id', 'subject_id', 'teacher_id', 'room_id', 'period_id'),
