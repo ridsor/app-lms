@@ -136,6 +136,7 @@ class TaskController extends Controller
 
         if ($request->ajax()) {
             $data = TaskSubmission::select([
+                'task_id',
                 'task_submissions.id',
                 'students.name',
                 'students.nis',

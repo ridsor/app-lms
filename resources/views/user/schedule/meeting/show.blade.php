@@ -56,7 +56,7 @@
                         </li>
                         <li class="breadcrumb-item active">
                             <a
-                                href="{{ route('user.schedule.showBySchedule', ['code' => $meeting->schedule->subject->code]) }}">
+                                href="{{ route('user.schedule.showBySchedule', ['id' => $meeting->schedule->id]) }}">
                                 {{ $meeting->schedule->subject->code }}
                             </a>
                         </li>
@@ -299,6 +299,7 @@
 
 @section('scripts')
     <script>
+        const schedule_id = {{ $schedule->id }};
         const statuses = @json($attendanceValue);
         const defaultDescription = `{!! addslashes($meeting->description) !!}`;
         const defaultSubSubjectMatter = `{!! addslashes($meeting->teaching_journal?->sub_subject_matter) !!}`;

@@ -56,7 +56,7 @@ $(function () {
                     <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
                         <a class="square-white view rounded-2" href=${
                             "/jadwal/pertemuan/tugas/" +
-                            data.id +
+                            data.task_id +
                             "/penilaian/" +
                             (meta.row + meta.settings._iDisplayStart + 1)
                         }>

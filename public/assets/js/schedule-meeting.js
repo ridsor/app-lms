@@ -110,7 +110,7 @@ $(document).ready(function () {
         const formData = new FormData(this);
 
         $.ajax({
-            url: `/jadwal/${code}/pertemuan/${meeting_id}`,
+            url: `/jadwal/${schedule_id}/pertemuan/${meeting_id}`,
             method: "POST",
             data: formData,
             processData: false,

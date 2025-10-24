@@ -191,7 +191,7 @@
                                         @foreach ($schedules as $schedule)
                                             <div class="col-xxl-4 col-md-6 col-lg-6 box-col-6">
                                                 <a
-                                                    href="{{ route('user.schedule.showBySchedule', ['code' => $schedule->subject->code]) }}">
+                                                    href="{{ route('user.schedule.showBySchedule', ['id' => $schedule->id]) }}">
                                                     <div class="progress-project-box">
                                                         <div class="list-box title-line-primary">
                                                             {{-- <div class="header-top"><span
@@ -201,14 +201,14 @@
                                                                 <div class="common-f-start gap-3">
                                                                     <div>
                                                                         <h6 class="mb-2">
-                                                                            <span class="text-capitalize">
+                                                                            <span class="text-capitalize" style="word-break: break-all;">
                                                                                 {{ $schedule->subject->code }} -
                                                                                 {{ strtoupper($schedule->subject->name) }}
                                                                             </span>
                                                                         </h6>
                                                                         <div class="d-flex gap-2 flex-wrap">
                                                                             <div>
-                                                                                <span class="fw-medium text-nowrap w-fit">
+                                                                                <span class="fw-medium text-nowrap w-fit" style="word-break: break-all;">
                                                                                     {{ $schedule->class->name }}{{ $schedule->class->level }}{{ $schedule->class->major ? ' ' . $schedule->class->major->name : '' }}
                                                                                 </span>
                                                                             </div>
