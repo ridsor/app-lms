@@ -66,6 +66,13 @@
                                     {{ $schedule->period->academic_year }}
                                 </p>
                             </div>
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end">
+                                    <a href="{{ route('user.attendance.reportAttendancRecap', [$schedule->id]) }}"
+                                        class="btn text-nowrap btn-primary btn-sm"><i class="fa fa-file"></i>
+                                        Export</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card-body px-0 py-0">
@@ -201,7 +208,8 @@
                                         <th rowspan="2"> <span class="c-o-light f-w-600">No</span></th>
                                         <th rowspan="2"> <span class="c-o-light f-w-600">Nama</span></th>
                                         @if (count($schedule->meetings->toArray()) > 0)
-                                            <th class="text-center" colspan="{{ count($schedule->meetings->toArray()) }}">
+                                            <th class="text-center"
+                                                colspan="{{ count($schedule->meetings->toArray()) }}">
                                                 <span class="c-o-light f-w-600">Pertemuan</span>
                                             </th>
                                         @endif

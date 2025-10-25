@@ -268,7 +268,7 @@
                                             <i data-feather="calendar" style="width:18px; height: 18px"></i>
                                         </span>
                                         <span class="mb-0 ms-2"
-                                            id="date">{{ optional($task?->late_submission_time)->translatedFormat('j M Y H:i') . ' WIT' ?? '-' }}</span>
+                                            id="date">{{ optional($task_submission?->submitted_at)->translatedFormat('j M Y H:i') . ' WIT' ?? '-' }}</span>
                                     </div>
                                 </div>
                             </div>
