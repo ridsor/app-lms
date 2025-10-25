@@ -93,6 +93,16 @@ class Helper
             default => '<span style="font-size: 11px" class="px-2 badge badge-light-secondary">-</span>'
         };
     }
+    public static function getShortAttendanceLabel($value): string
+    {
+        return match ($value) {
+            'H' => '<span style="font-size: 11px" class="px-2 badge badge-light-success">H</span>',
+            'I' => '<span style="font-size: 11px" class="px-2 badge badge-light-info">I</span>',
+            'S' => '<span style="font-size: 11px" class="px-2 badge badge-light-warning">S</span>',
+            'A' => '<span style="font-size: 11px" class="px-2 badge badge-light-danger">A</span>',
+            default => '<span style="font-size: 11px" class="px-2 badge badge-light-secondary">-</span>'
+        };
+    }
 
     public static function getGenderLabel($gender): string
     {

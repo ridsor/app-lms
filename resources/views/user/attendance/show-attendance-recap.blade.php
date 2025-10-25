@@ -51,9 +51,8 @@
                                 </p>
                                 <label class="form-label">Kelas</label>
                                 <p class="c-o-light f-w-600">
-                                    {{ $schedule->class?->major ? $schedule->class?->major?->name . ' - ' : '' }}
-                                    {{ $schedule->class->name }} -
-                                    {{ $schedule->class->level }}
+                                    {{ $schedule->class->name }} {{ $schedule->class->level }}
+                                    {{ $schedule->class?->major ? $schedule->class?->major?->name : '' }}
                                 </p>
                             </div>
                             <div class="col-12 col-md-6">

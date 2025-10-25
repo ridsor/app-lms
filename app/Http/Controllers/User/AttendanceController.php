@@ -15,6 +15,7 @@ use App\Models\Subject;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Period;
 use App\Models\Teacher;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -290,6 +291,86 @@ class AttendanceController extends Controller
     }
 
     return view('user.attendance.show-attendance-recap', compact('schedule', 'attendances'));
+  }
+
+  public function reportAttendancRecap(Request $request, $id)
+  {
+    $this->authorize('viewAny', Attendance::class);
+
+    $schedule = Schedule::with([
+      'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+      'class.major' => fn($query) => $query->select('id', 'name'),
+      'class.students' => function ($query) use ($request) {
+        $query->select('id', 'name', 'nis', 'user_id', 'class_id', 'parent_id');
+        if ($request->user()->hasRole('parent')) {
+          $query->where('parent_id', $request->user()->id);
+        } elseif ($request->user()->hasRole('student')) {
+          $query->where('user_id', $request->user()->id);
+        }
+      },
+      'class.students.user' => fn($query) => $query->select('id', 'name'),
+      'period' => fn($query) => $query->select('id', 'semester', 'academic_year'),
+      'subject' => fn($query) => $query->select('id', 'name'),
+      'teacher' => fn($query) => $query->select('id', 'name'),
+      'meetings' => function ($query) {
+        $query->select('id', 'schedule_id', 'started_at', 'schedule_time_id', 'date')->orderBy('date', 'asc');
+      },
+      'meetings.attendances:id,status,user_id,meeting_id',
+    ])
+      ->withCount('meetings')
+      ->filterByPermission($request->user())
+      ->findOrFail($id);
+
+    $meetings = $schedule->meetings;
+    $students = $schedule->class->students;
+    $attendances = [];
+
+    foreach ($students as $student) {
+      $studentAttendance = [];
+      $totalAttendance = 0;
+      $totalSick = 0;
+      $totalPermission = 0;
+      $totalAbsence = 0;
+      foreach ($meetings as $meeting) {
+        $attendance = $meeting->attendances->firstWhere('user_id', $student->user_id);
+        $status = $attendance ? $attendance->status : null;
+        $studentAttendance[] = $status;
+        if ($status === 'H') {
+          $totalAttendance++;
+        }
+        if ($status === 'S') {
+          $totalSick++;
+        }
+        if ($status === 'I') {
+          $totalPermission++;
+        }
+        if ($status === 'A') {
+          $totalAbsence++;
+        }
+      }
+      $attendances[] = [
+        'student' => $student,
+        'attendances' => $studentAttendance,
+        'total_attendance' => $totalAttendance,
+        'total_sick' => $totalSick,
+        'total_permission' => $totalPermission,
+        'total_absence' => $totalAbsence,
+      ];
+    }
+
+    $data = [
+      'subject' => $schedule->subject->name,
+      'class' => '' . $schedule->class->name . ' ' . $schedule->class->level . ' ' . ($schedule->class->major?->name ?? ''),
+      'teacher' => $schedule->teacher->name,
+      'period' => '' . Helper::getSemesterLabel($schedule->period->semester) . ' TA ' . $schedule->period->academic_year,
+      'attendances' => $attendances,
+      'total_meetings' => $schedule->meetings_count,
+    ];
+
+    $pdf = Pdf::loadView('pdf.attendance', $data)
+      ->setPaper('a4', 'landscape');
+
+    return $pdf->download('Laporan_Absensi.pdf');
   }
 
   public function edit(Request $request, $schedule_id, $meeting_id)

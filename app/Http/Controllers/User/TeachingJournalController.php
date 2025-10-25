@@ -383,26 +383,4 @@ class TeachingJournalController extends Controller
 
         return $pdf->download($filename);
     }
-    public function exporttes(Request $request, $id)
-    {
-        if (!$request->user()->hasRole('teacher')) return abort(403);
-
-        $schedule = Schedule::with([
-            'subject:id,code,name',
-            'class:id,name,level,major_id',
-            'class.major:id,name',
-            'teacher:id,name,nip',
-            'period:id,academic_year,semester',
-            'meetings' => function ($q) {
-                $q->orderBy('date', 'asc');
-            },
-            'meetings.teaching_journal',
-            'meetings.materials:id,meeting_id,title,description',
-            'meetings.tasks:id,meeting_id,title,description'
-        ])->find($id);
-        $this->authorize('view', $schedule);
-
-
-        return view('pdf.journal', $schedule->toArray());
-    }
 }

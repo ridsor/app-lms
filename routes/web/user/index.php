@@ -107,6 +107,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/kehadiran/kelas/{classId}', [AttendanceController::class, 'scheduleByKelas'])->name('user.attendance.schedulebyclass');
     Route::get('/kehadiran/jadwal/{schedule_id}/pertemuan', [AttendanceController::class, 'meetingBySchedule'])->name('user.attendance.meetingBySchedule');
     Route::get('/kehadiran/jadwal/{id}', [AttendanceController::class, 'showAttendancRecap'])->name('user.attendance.showAttendancRecap');
+    Route::get('/kehadiran/jadwal/{id}/report', [AttendanceController::class, 'reportAttendancRecap'])->name('user.attendance.reportAttendancRecap');
 
     Route::get('/tugas', [TaskController::class, 'index'])->name('user.task.index');
     Route::get('/tugas/{task_id}/file', [TaskController::class, 'getFile'])->name('user.task.file.get');
@@ -119,7 +120,6 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/jurnal-mengajar/kelas/{classId}', [TeachingJournalController::class, 'scheduleByKelas'])->name('user.journal.schedulebyclass');
     Route::get('/jurnal-mengajar/jadwal/{schedule_id}/pertemuan', [TeachingJournalController::class, 'meetingBySchedule'])->name('user.journal.meetingBySchedule');
     Route::get('/jurnal-mengajar/{id}/export', [TeachingJournalController::class, 'export'])->name('user.journal.export');
-    // Route::get('/jurnal-mengajar/{id}/export/tes', [TeachingJournalController::class, 'exporttes'])->name('user.jurnal.export');
 
     Route::get('/bank-soal', [QuestionBankController::class, 'index'])->name('user.question-bank.index');
     Route::get('/bank-soal/copy', [QuestionBankController::class, 'copy'])->name('user.question-bank.copy');

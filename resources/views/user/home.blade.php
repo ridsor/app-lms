@@ -223,7 +223,7 @@
                                                             </div> --}}
                                                             <div class="project-body">
                                                                 <div class="common-f-start gap-3">
-                                                                    <div>
+                                                                    <div class="w-100">
                                                                         <h6 class="mb-2">
                                                                             <span class="text-capitalize"
                                                                                 style="word-break: break-all;">
@@ -233,7 +233,8 @@
                                                                         </h6>
                                                                         <div class="d-flex gap-2 flex-wrap">
                                                                             <div>
-                                                                                <span class="fw-medium text-nowrap w-fit" style="word-break: break-all;">
+                                                                                <span class="fw-medium w-fit"
+                                                                                    style="word-break: break-all;">
                                                                                     {{ $schedule->class->name }}{{ $schedule->class->level }}{{ $schedule->class->major ? ' ' . $schedule->class->major->name : '' }}
                                                                                 </span>
                                                                             </div>
