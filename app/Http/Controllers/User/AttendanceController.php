@@ -370,7 +370,17 @@ class AttendanceController extends Controller
     $pdf = Pdf::loadView('pdf.attendance', $data)
       ->setPaper('a4', 'landscape');
 
-    return $pdf->download('Laporan_Absensi.pdf');
+    $filename = "Absensi - "
+      . (strtoupper($schedule->subject->name))
+      . " "
+      . ($schedule->period->semester == 'odd' ? 'Ganjil' : 'Genap')
+      . " TA "
+      . str_replace(['/', '\\'], '-', $schedule->period->academic_year)
+      . " "
+      . $schedule->subject->code
+      . ".pdf";
+
+    return $pdf->stream($filename);
   }
 
   public function edit(Request $request, $schedule_id, $meeting_id)

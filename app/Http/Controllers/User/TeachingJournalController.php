@@ -362,15 +362,55 @@ class TeachingJournalController extends Controller
             'teacher:id,name,nip',
             'period:id,academic_year,semester',
             'meetings' => function ($q) {
-                $q->orderBy('date', 'asc');
+                $q->orderBy('date', 'asc')->where('type', '!=', 'Holiday');
             },
+            'class.students' => function ($query) use ($request) {
+                $query->select('id', 'name', 'nis', 'user_id', 'class_id', 'parent_id');
+            },
+            'meetings.attendances:id,status,user_id,meeting_id',
             'meetings.teaching_journal',
             'meetings.materials:id,meeting_id,title,description',
             'meetings.tasks:id,meeting_id,title,description'
         ])->find($id);
         $this->authorize('view', $schedule);
 
-        $pdf = Pdf::loadView('pdf.journal', $schedule->toArray())->setPaper('A4', 'portrait');
+        $data = $schedule->toArray();
+
+        $meeting_summaries = [];
+        $students = $schedule->class->students ?? collect();
+        foreach ($schedule->meetings as $meeting) {
+            $totalAttendance = 0;
+            $totalSick = 0;
+            $totalPermission = 0;
+            $totalAbsence = 0;
+            foreach ($students as $student) {
+
+                $attendance = $meeting->attendances->firstWhere('user_id', $student->user_id);
+                $status = $attendance ? $attendance->status : null;
+                if ($status === 'H') {
+                    $totalAttendance++;
+                }
+                if ($status === 'S') {
+                    $totalSick++;
+                }
+                if ($status === 'I') {
+                    $totalPermission++;
+                }
+                if ($status === 'A') {
+                    $totalAbsence++;
+                }
+            }
+            $meeting_summaries[] = [
+                'total_attendance' => $totalAttendance,
+                'total_sick' => $totalSick,
+                'total_permission' => $totalPermission,
+                'total_absence' => $totalAbsence,
+            ];
+        }
+
+        $data['meeting_summaries'] = $meeting_summaries;
+
+        $pdf = Pdf::loadView('pdf.journal', $data)->setPaper('a4', 'landscape');
 
         $filename = "Jurnal Mengajar - "
             . ($schedule->period->semester == 'odd' ? 'Ganjil' : 'Genap')
@@ -381,6 +421,6 @@ class TeachingJournalController extends Controller
             . ".pdf";
 
 
-        return $pdf->download($filename);
+        return $pdf->stream($filename);
     }
 }
