@@ -55,8 +55,7 @@
                             </a>
                         </li>
                         <li class="breadcrumb-item active">
-                            <a
-                                href="{{ route('user.schedule.showBySchedule', ['id' => $meeting->schedule->id]) }}">
+                            <a href="{{ route('user.schedule.showBySchedule', ['id' => $meeting->schedule->id]) }}">
                                 {{ $meeting->schedule->subject->code }}
                             </a>
                         </li>

@@ -495,7 +495,8 @@ class ExamController extends Controller
 
             if (!$order) {
                 if ($exam->is_shuffle_questions) {
-                    $order = $exam->questions->shuffle()->toArray();
+                    // $order = $exam->questions->shuffle()->toArray();
+                    $order = Helper::fisherYatesShuffle($exam->questions->toArray());
                 } else {
                     $order = $exam->questions->toArray();
                 }
