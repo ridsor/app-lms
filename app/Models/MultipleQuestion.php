@@ -3,16 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Exam;
-use App\Models\ExamAnswer;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Question extends Model
+class MultipleQuestion extends Model
 {
     protected $fillable = [
         'question_text',
-        'question_type',
         'option_a_image',
         'option_b_image',
         'option_c_image',
@@ -33,10 +28,5 @@ class Question extends Model
     public function questionable()
     {
         return $this->morphTo();
-    }
-
-    public function answers(): HasMany
-    {
-        return $this->hasMany(ExamAnswer::class);
     }
 }

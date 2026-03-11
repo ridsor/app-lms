@@ -35,9 +35,14 @@ class Exam extends Model
         return $this->belongsTo(Schedule::class);
     }
 
-    public function questions()
+    public function multipleQuestions()
     {
-        return $this->morphMany(Question::class, 'questionable');
+        return $this->morphMany(MultipleQuestion::class, 'questionable');
+    }
+
+    public function essayQuestions()
+    {
+        return $this->morphMany(EssayQuestion::class, 'questionable');
     }
 
     public function results(): HasMany

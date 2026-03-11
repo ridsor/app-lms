@@ -11,7 +11,7 @@ use App\Models\Exam;
 use App\Models\ExamResult;
 use App\Models\Major;
 use App\Models\Period;
-use App\Models\Question;
+use App\Models\MultipleQuestion;
 use App\Models\Schedule;
 use App\Models\SchoolClass;
 use App\Models\Subject;
@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Storage;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ExamController extends Controller
 {
@@ -97,9 +98,6 @@ class ExamController extends Controller
             'schedule.class:id,name,level,major_id',
             'schedule.class.major:id,name',
         ])
-            ->withCount([
-                'questions'
-            ])
             ->findOrFail($id);
         $this->authorize('view', $exam);
 
@@ -182,28 +180,55 @@ class ExamController extends Controller
 
         $exam = Exam::select('id', 'schedule_id')
             ->with('schedule:id,teacher_id')
-            ->withCount([
-                'questions'
-            ])
-            ->withSum('questions', 'question_points')
             ->findOrFail($id);
+
         $this->authorize('view', $exam);
 
-        $questionsQuery = $exam->questions();
+        $multipleQuestions = $exam->multipleQuestions()->get();
+        $essayQuestions = $exam->essayQuestions()->get();
 
         if ($request->filled('search')) {
             $search = $request->query('search');
-            $questionsQuery->where('question_text', 'like', "%{$search}%");
+
+            $multipleQuestions = $multipleQuestions->filter(function ($q) use ($search) {
+                return str_contains(strtolower($q->question_text), strtolower($search));
+            });
+
+            $essayQuestions = $essayQuestions->filter(function ($q) use ($search) {
+                return str_contains(strtolower($q->question_text), strtolower($search));
+            });
         }
 
-        $questions = $questionsQuery->paginate(5);
+        $questions = $multipleQuestions
+            ->concat($essayQuestions)
+            ->sortByDesc('created_at')
+            ->values();
+
+        $perPage = 5;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+        $paginatedQuestions = new LengthAwarePaginator(
+            $questions->forPage($currentPage, $perPage),
+            $questions->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         $majors = Major::with(['classes' => function ($query) {
             $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
         }])->select('id', 'name')->orderBy('name', 'asc')->get();
-        $subjects = Subject::select('id', 'name', 'curriculum_id')->with(['curriculum:id,name'])->get();
 
-        return view('user.exam.question.show', compact('exam', 'questions', 'majors', 'subjects'));
+        $subjects = Subject::select('id', 'name', 'curriculum_id')
+            ->with(['curriculum:id,name'])
+            ->get();
+
+        return view('user.exam.question.show', [
+            'exam' => $exam,
+            'questions' => $paginatedQuestions,
+            'majors' => $majors,
+            'subjects' => $subjects
+        ]);
     }
 
     public function copyQuestions(Request $request, $exam_id, $id)
@@ -221,7 +246,7 @@ class ExamController extends Controller
 
             $this->authorize('create', $exam);
 
-            $questions = Question::where('questionable_id', $id)
+            $questions = MultipleQuestion::where('questionable_id', $id)
                 ->where('questionable_type', QuestionBank::class)
                 ->get();
 

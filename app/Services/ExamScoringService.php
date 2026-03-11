@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\ExamResult;
 use App\Models\ExamAnswer;
-use App\Models\Question;
+use App\Models\MultipleQuestion;
 use Illuminate\Support\Facades\Log;
 
 class ExamScoringService
@@ -19,10 +19,10 @@ class ExamScoringService
       ->get()
       ->keyBy('question_id'); // supaya lookup lebih cepat
 
-    $questions = Question::where('questionable_id', $examResult->exam_id)->get();
+    $questions = MultipleQuestion::where('questionable_id', $examResult->exam_id)->get();
 
     // Hitung skor
-    $score = $questions->sum(function (Question $question) use ($answers) {
+    $score = $questions->sum(function (MultipleQuestion $question) use ($answers) {
       $answer = $answers->get($question->id);
       return ($answer && $this->isCorrect($question, $answer))
         ? (int) $question->question_points
@@ -41,7 +41,7 @@ class ExamScoringService
   /**
    * Cek apakah jawaban benar.
    */
-  protected function isCorrect(Question $question, ExamAnswer $answer): bool
+  protected function isCorrect(MultipleQuestion $question, ExamAnswer $answer): bool
   {
     return trim((string) $question->correct_answer) === trim((string) $answer->answer);
   }

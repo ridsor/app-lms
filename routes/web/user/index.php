@@ -130,10 +130,10 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::delete('/bank-soal/{id}', [QuestionBankController::class, 'destroy'])->name('user.question-bank.destroy');
 
     Route::get('/soal/{id}/edit', [QuestionController::class, 'edit'])->name('user.question.edit');
+    Route::post('/soal/{id}', [QuestionController::class, 'store'])->name('user.question.store');
     Route::put('/soal/{id}', [QuestionController::class, 'update'])->name('user.question.update');
     Route::delete('/soal/{id}', [QuestionController::class, 'destroy'])->name('user.question.destroy');
     Route::post('/soal/{id}/bank-soal', [QuestionController::class, 'storeForQuestionBank'])->name('user.question.storeForQuestionBank');
-    Route::post('/soal/{id}/ujian', [QuestionController::class, 'storeForExam'])->name('user.question.storeForExam');
     Route::get('/soal/{id}/file', [QuestionController::class, 'getFile'])->name('user.question.file.get');
     Route::get('/soal/{id}/{option}/file', [QuestionController::class, 'getFileOption'])->name('user.question.option.file.get');
     Route::get('/soal/{id}/file/download', [QuestionController::class, 'downloadFile'])->name('user.question.file.download');

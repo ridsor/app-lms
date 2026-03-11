@@ -4,8 +4,9 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QuestionRequest;
+use App\Models\EssayQuestion;
 use App\Models\Exam;
-use App\Models\Question;
+use App\Models\MultipleQuestion;
 use App\Models\QuestionBank;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,41 +14,51 @@ use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
-    public function storeForExam(QuestionRequest $request, $id)
+    public function store(QuestionRequest $request, $id)
     {
         try {
             if (!$request->user()->can(['question.create'])) return abort(403);
 
             $validated = $request->validated();
 
+            // Set polymorphic relation
+            $validated['questionable_id'] = $id;
+            if ($request->input('model') === 'exam') {
+                $validated['questionable_type'] = Exam::class;
+            } else if ($request->input('model') === 'question_bank') {
+                $validated['questionable_type'] = QuestionBank::class;
+            }
+
             // Upload file
             if ($request->hasFile('question_file')) {
                 $validated['question_file'] = $request->file('question_file')->store('file/ujian');
             }
-            if ($request->hasFile('option_a_image')) {
-                $validated['option_a_image'] = $request->file('option_a_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_b_image')) {
-                $validated['option_b_image'] = $request->file('option_b_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_c_image')) {
-                $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_d_image')) {
-                $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_e_image')) {
-                $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
-            }
 
-            // Set polymorphic relation
-            $validated['questionable_id'] = $id;
-            $validated['questionable_type'] = Exam::class;
+            if ($request->input('question_type') === 'multiple_choice') {
+                if ($request->hasFile('option_a_image')) {
+                    $validated['option_a_image'] = $request->file('option_a_image')->store('file/ujian');
+                }
+                if ($request->hasFile('option_b_image')) {
+                    $validated['option_b_image'] = $request->file('option_b_image')->store('file/ujian');
+                }
+                if ($request->hasFile('option_c_image')) {
+                    $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
+                }
+                if ($request->hasFile('option_d_image')) {
+                    $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
+                }
+                if ($request->hasFile('option_e_image')) {
+                    $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
+                }
 
-            $question = Question::create($validated);
+                $question = MultipleQuestion::create($validated);
+            } else if ($request->input('question_type') === 'essay') {
+                $question = EssayQuestion::create($validated);
+            }
 
             return $this->sendResponse('Soal berhasil disimpan', $question, 201);
         } catch (\Exception $e) {
+            Log::error('Error creating question:', ['error' => $e->getMessage()]);
             return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }
@@ -83,7 +94,7 @@ class QuestionController extends Controller
             $validated['questionable_id'] = $id;
             $validated['questionable_type'] = QuestionBank::class;
 
-            $question = Question::create($validated);
+            $question = MultipleQuestion::create($validated);
 
             return $this->sendResponse('Soal berhasil disimpan', $question, 201);
         } catch (\Exception $e) {
@@ -96,7 +107,7 @@ class QuestionController extends Controller
         try {
             if (!$request->user()->can(['question.edit'])) return abort(403);
 
-            $question = Question::find($id);
+            $question = MultipleQuestion::find($id);
 
             if (!$question) {
                 return $this->sendError(
@@ -119,7 +130,7 @@ class QuestionController extends Controller
     public function update(QuestionRequest $request, $id)
     {
         try {
-            $question = Question::findOrFail($id);
+            $question = MultipleQuestion::findOrFail($id);
             if (!$request->user()->can(['question.edit'])) return abort(403);
 
             $validated = $request->validated();
@@ -187,7 +198,7 @@ class QuestionController extends Controller
         try {
             if (!$request->user()->can(['question.delete'])) return abort(403);
 
-            $question = Question::find($id);
+            $question = MultipleQuestion::find($id);
 
             if (!$question) {
                 return $this->sendError(
@@ -235,7 +246,7 @@ class QuestionController extends Controller
 
     public function getFile(Request $request, $id)
     {
-        $question = Question::findOrFail($id);
+        $question = MultipleQuestion::findOrFail($id);
 
         if ($question->questionable_type == QuestionBank::class) {
             if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) return abort(403);
@@ -252,7 +263,7 @@ class QuestionController extends Controller
 
     public function getFileOption(Request $request, $id, $option)
     {
-        $question = Question::findOrFail($id);
+        $question = MultipleQuestion::findOrFail($id);
 
         if ($question->questionable_type == QuestionBank::class) {
             if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) return abort(403);
@@ -282,7 +293,7 @@ class QuestionController extends Controller
 
     public function downloadFile(Request $request, $id)
     {
-        $question = Question::findOrFail($id);
+        $question = MultipleQuestion::findOrFail($id);
 
         if ($question->questionable_type == QuestionBank::class) {
             if (!$request->user()->can(['question.create', 'question.view', 'question.edit', 'question.delete'])) return abort(403);

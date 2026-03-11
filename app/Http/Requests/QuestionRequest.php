@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\MultipleQuestionRequest;
+use App\Http\Requests\EssayQuestionRequest;
 
 class QuestionRequest extends FormRequest
 {
@@ -20,38 +22,28 @@ class QuestionRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
+        $type = $this->input('question_type');
+
+        if ($type === 'multiple_choice') {
+            return (new MultipleQuestionRequest())->rules();
+        }
+
+        if ($type === 'essay') {
+            return (new EssayQuestionRequest())->rules();
+        }
+
         return [
-            'question_text'     => ['required', 'string'],
-            'question_type'     => ['nullable', 'in:multiple_choice,essay,true_false'],
-            'option_a'          => ['required', 'string', 'max:255', 'different:option_b,option_c,option_d,option_e'],
-            'option_b'          => ['required', 'string', 'max:255', 'different:option_a,option_c,option_d,option_e'],
-            'option_c'          => ['required', 'string', 'max:255', 'different:option_b,option_a,option_d,option_e'],
-            'option_d'          => ['nullable', 'string', 'max:255', 'different:option_b,option_c,option_a,option_e'],
-            'option_e'          => ['nullable', 'string', 'max:255', 'different:option_b,option_c,option_d,option_a'],
-
-            'option_a_image'    => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'option_b_image'    => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'option_c_image'    => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'option_d_image'    => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-            'option_e_image'    => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
-
-            'correct_answer'    => ['required', 'string', 'in:a,b,c,d,e'],
-
-            'question_points'   => ['required', 'integer'],
-
-            'question_file'     => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,png,jpg,jpeg,mp3,wav,mp4,webm', 'max:5120'],
-
-            'deleteData' => 'nullable|array'
+            'question_type' => 'required|in:multiple_choice,essay',
+            'model' => 'required|in:exam,question_bank',
         ];
     }
 
-    public function attributes(): array
+    public function attributes()
     {
         return [
             'question_text'     => 'Teks Pertanyaan',
-            'question_type'     => 'Tipe Pertanyaan',
             'option_a'          => 'Opsi A',
             'option_b'          => 'Opsi B',
             'option_c'          => 'Opsi C',

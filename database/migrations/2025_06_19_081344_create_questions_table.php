@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('questions', function (Blueprint $table) {
+        Schema::create('multiple_questions', function (Blueprint $table) {
             $table->id();
-            $table->morphs('questionable');
+            $table->string('questionable_type');
+            $table->unsignedBigInteger('questionable_id');
+            $table->index(['questionable_type', 'questionable_id'], 'q_idx');
             $table->text('question_text');
-            $table->enum('question_type', ['multiple_choice', 'essay', 'true_false'])->default('multiple_choice');
             $table->string('option_a_image', 255)->nullable();
             $table->string('option_b_image', 255)->nullable();
             $table->string('option_c_image', 255)->nullable();
@@ -38,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('questions');
+        Schema::dropIfExists('multiple_choice_questions');
     }
 };
