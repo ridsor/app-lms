@@ -51,10 +51,16 @@ class ExamResult extends Model
 
     public function getFormattedScoreAttribute()
     {
-        $value = $this->score;
+        if ($this->answers->isEmpty()) {
+            return ' - ';
+        }
+
+        $value = $this->answers->sum('score');
+
         if (is_null($value)) {
             return ' - ';
         }
+
         return $value == (int)$value
             ? (int)$value
             : rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.');

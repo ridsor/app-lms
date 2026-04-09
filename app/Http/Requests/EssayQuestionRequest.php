@@ -25,7 +25,7 @@ class EssayQuestionRequest extends FormRequest
         return [
             'question_text'     => ['required', 'string'],
             'question_points'   => ['required', 'integer'],
-            'question_file'     => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,png,jpg,jpeg,mp3,wav,mp4,webm', 'max:5120'],
+            'question_file'     => ['nullable', 'file', 'mimes:png,jpg,jpeg,mp3,wav,mp4,webm', 'max:5120'],
         ];
     }
 

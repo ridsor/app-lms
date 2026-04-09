@@ -19,7 +19,7 @@ class CheckExamTime
             ->where('student_id', $student->id)
             ->first();
 
-        if ($examResult && (now()->gt($examResult->end_time) || is_null($examResult->end_time))) {
+        if ($examResult && ($examResult->end_time && (now()->gt($examResult->end_time) || is_null($examResult->end_time)))) {
             app(ExamScoringService::class)->saveScore($examResult, $student->id);
 
             return redirect()->route('user.exam.workmanship.result', $exam_id)

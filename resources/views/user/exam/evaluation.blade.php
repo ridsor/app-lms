@@ -9,6 +9,8 @@
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/flatpickr/flatpickr.min.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/glightbox.min.css') }}">
   <style>
     .view_file_path .Archive,
     .view_file_path .Link {
@@ -43,10 +45,13 @@
             <li class="breadcrumb-item"><a href="{{ route('user.home') }}"> <svg class="stroke-icon">
                   <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-home') }}"></use>
                 </svg></a></li>
-            <li class="breadcrumb-item active">
-              <a href="{{ route('user.exam.index') }}">
+            <li class="breadcrumb-item">
+              <a href="{{ route('user.exam.show', ['id' => $exam->id]) }}">
                 Ujian
               </a>
+            </li>
+            <li class="breadcrumb-item active">
+              Hasil
             </li>
           </ol>
         </div>
@@ -60,6 +65,14 @@
               <div class="row g-3">
                 <div class="col-12 col-md-6">
                   <div class="row ">
+                    <div class="col-12">
+                      <label class="form-label">Judul</label>
+                      <p class="c-o-light f-w-600">
+                        <span>
+                          {{ $exam->title }}
+                        </span>
+                      </p>
+                    </div>
                     <div class="col-12">
                       <label class="form-label">Mata Pelajaran</label>
                       <p class="c-o-light f-w-600">
@@ -94,10 +107,6 @@
                         </p>
                       </div>
                     @endif
-                  </div>
-                </div>
-                <div class="col-12 col-md-6">
-                  <div class="row g-2">
                     <div class="col-12">
                       <label class="form-label">Tipe Ujian</label>
                       <p class="c-o-light f-w-600">
@@ -106,11 +115,39 @@
                         </span>
                       </p>
                     </div>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6">
+                  <div class="row g-2">
+                    <div class="col-12">
+                      <label class="form-label">Durasi</label>
+                      <p class="c-o-light f-w-600">
+                        <span>
+                          {{ $exam?->duration ?: '-' }}
+                        </span>
+                      </p>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Jumlah Soal</label>
+                      <p class="c-o-light f-w-600">
+                        <span>
+                          {{ $exam?->multipleQuestions->count() + $exam?->essayQuestions->count() ?: '-' }}
+                        </span>
+                      </p>
+                    </div>
                     <div class="col-12">
                       <label class="form-label">Sifat</label>
                       <p class="c-o-light f-w-600">
                         <span>
                           {{ Helper::getExamModeLabel($exam->exam_mode) }}
+                        </span>
+                      </p>
+                    </div>
+                    <div class="col-12">
+                      <label class="form-label">Acak Soal</label>
+                      <p class="c-o-light f-w-600">
+                        <span>
+                          {{ $exam->is_shuffle_questions ? 'Ya' : 'Tidak' }}
                         </span>
                       </p>
                     </div>
@@ -140,26 +177,6 @@
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row g-2 mb-4">
-        <div class="col-12 col-lg-7 col-xl-8 p-0 order-2 order-lg-1">
-          <div class="card h-100 my-0 rounded-responsive">
-            <div class="card-body">
-              <div class="row g-3">
-                <div class="col-12">
-                  <div class="col-12">
-                    <label class="form-label">Judul</label>
-                    <p class="c-o-light f-w-600">
-                      <span>
-                        {{ $exam->title }}
-                      </span>
-                    </p>
-                  </div>
-                </div>
                 <div class="col-12">
                   <div>
                     <label class="form-label">Deskripsi</label>
@@ -176,66 +193,57 @@
             </div>
           </div>
         </div>
-        <div class="col-12 col-lg-5 col-xl-4 order-1 order-lg-2">
-          @php
-            $now = now();
-            $is_exam_available =
-                $exam->start_time <= $now &&
-                $exam->end_time >= $now &&
-                $exam_result?->status != 'completed' &&
-                $exam?->multipleQuestions->count() + $exam?->essayQuestions->count() > 0;
-          @endphp
-          <div class="p-3">
-            <div class="mb-2">
-              {!! Helper::getExamStatusLabel($exam_result?->status) !!}
-            </div>
-
-            @if ($exam_result?->status == 'completed')
-              <div class="mb-3">
-                <a href="{{ route('user.exam.workmanship.result', $exam->id) }}" class="btn btn-primary w-100">Lihat
-                  Hasil</a>
-              </div>
-            @endif
-
-            <div class="d-flex mb-3 justify-content-between align-items-center">
-              <p class="mb-0 fw-semibold fs-6">Nilai</p>
-              <input class="form-control text-center" type="number" style="width: 70px" disabled
-                value="{{ $exam_result?->formatted_score }}" name="score" step="0.1" />
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label">Waktu Pengerjaan</label>
-              <div class="c-o-light f-w-600">
-                <div class="d-flex align-items-center">
-                  <span class="icon d-inline-flex justify-content-center align-items-center">
-                    <i data-feather="calendar" style="width:18px; height: 18px"></i>
-                  </span>
-                  @if ($exam_result?->start_time && $exam_result?->end_time)
-                    <div class="d-flex flex-column">
-                      <span class="mb-0 ms-2" id="date">Mulai
-                        {{ $exam_result?->start_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
-                      <span class="mb-0 ms-2" id="date">Selesai
-                        {{ $exam_result?->end_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
-                    </div>
-                  @else
-                    <span class="mb-0 ms-2" id="date">-</span>
-                  @endif
-                </div>
-              </div>
-            </div>
-            <div class="d-flex justify-content-end gap-2">
-              <a href="{{ route('user.exam.index') }}" class="btn btn-outline-secondary" type="button"
-                aria-label="Close">
-                Kembali
-              </a>
-              @role('student')
-                <button data-href="{{ route('user.exam.workmanship', $exam->id) }}" type="button" id="start-exam-btn"
-                  data-id="{{ $exam->id }}" class="btn btn-primary"
-                  {{ $is_exam_available ?: 'disabled' }}>Mulai</button>
-              @endrole
+      </div>
+      <div class="mb-3 px-3">
+        <div class="d-flex justify-content-between align-items-center gap-2">
+          <a {{ $exam_results->onFirstPage() ? 'aria-disabled="true"' : '' }} role="button"
+            {{ $exam_results->onFirstPage() ? '' : 'href=' . route('user.exam.evaluation', ['exam_id' => $exam->id, 'page' => $exam_results->currentPage() - 1]) }}
+            class="btn btn-primary px-3 py-2 d-flex justify-content-center align-items-center {{ $exam_results->onFirstPage() ? 'disabled' : '' }}">
+            <i data-feather="chevron-left" style="width:18px; height: 18px"></i>
+          </a>
+          <div class="d-flex flex-column align-items-center justify-content-center px-2">
+            <p class="mb-0 fw-medium text-break">
+              {{ $exam_result->student->name }}
+            </p>
+            <p class="f-light mb-0 text-break">{{ $exam_result->student->nis }}</p>
+          </div>
+          <a {{ $exam_results->hasMorePages() ? 'href=' . route('user.exam.evaluation', ['exam_id' => $exam->id, 'page' => $exam_results->currentPage() + 1]) : '' }}
+            role="button" {{ !$exam_results->hasMorePages() ? 'aria-disabled="true"' : '' }}
+            class="btn btn-primary px-3 py-2 d-flex justify-content-center align-items-center {{ !$exam_results->hasMorePages() ? 'disabled' : '' }}">
+            <i data-feather="chevron-right" style="width:18px; height: 18px"></i>
+          </a>
+        </div>
+      </div>
+      <div class="row g-3 align-items-center mb-3">
+        <form action="" class="d-flex align-items-center col gap-2">
+          <input type="search" class="form-control w-100" value="{{ request()->query('search') }}"
+            placeholder="Cari soal" name="search" id="globalSearch" />
+          <button class="btn btn-primary gap-1 px-3 btn-sm d-flex justify-content-center align-items-center">
+            <i data-feather="search" style="width:18px; height:18px"></i>
+          </button>
+        </form>
+      </div>
+      <div class="row g-4 flex-column list-question px-md-3 mb-3">
+        @if (count($questions) > 0)
+          @foreach ($questions as $index => $question)
+            @include('user.question.evaluation-item', [
+                'question' => $question,
+                'number' => $questions->firstItem() + $loop->index,
+            ])
+          @endforeach
+          <div class="pagination-wrapper w-100">
+            {{ $questions->withQueryString()->links('pagination::bootstrap-5') }}
+          </div>
+        @else
+          {{-- empty data --}}
+          <div class="d-flex justify-content-center mb-3 w-100">
+            <div class="px-4 py-5 d-grid" style="justify-items: center">
+              <img style="width: 120px; height: 120px" src="{{ asset('assets/images/data-empty.png') }}" />
+              <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
+              <p class="mb-0 text-center">Belum ada soal.</p>
             </div>
           </div>
-        </div>
+        @endif
       </div>
     </div>
   </div>
@@ -244,5 +252,8 @@
 @section('scripts')
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
-  <script src="{{ asset('assets/js/exam-info.js') }}"></script>
+  <script src="{{ asset('assets/js/flat-pickr/flatpickr.js') }}"></script>
+  <script src="{{ asset('assets/js/custom-file-upload.js') }}"></script>
+  <script src={{ asset('assets/js/glightbox.min.js') }}></script>
+  <script src="{{ asset('assets/js/exam-evaluation.js') }}"></script>
 @endsection

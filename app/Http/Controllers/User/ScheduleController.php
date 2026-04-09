@@ -22,7 +22,6 @@ use App\Jobs\UpdateScheduleMeetings;
 use App\Models\Meeting;
 use App\Models\ScheduleTime;
 use App\Models\Subject;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ScheduleController extends Controller
@@ -613,6 +612,7 @@ class ScheduleController extends Controller
         Queue::push(new UpdateScheduleMeetings($schedule, $schedule_time));
       }
 
+      Log::info($schedule->class->students);
       foreach ($schedule->class->students as $student) {
         if ($student->schedules) {
           $mergedIds = array_unique(array_merge([$schedule->id], optional($student->schedules)->schedule_ids ?? []));
@@ -642,12 +642,44 @@ class ScheduleController extends Controller
    */
   private function hasMeetingAffectingChanges($oldData, $newData, $newDataScheduleTime)
   {
-    // Perubahan yang mempengaruhi meeting
+    // Pastikan semua data berupa array
+    $newData = is_string($newData) ? json_decode($newData, true) : (array) $newData;
+    $newDataScheduleTime = is_string($newDataScheduleTime) ? json_decode($newDataScheduleTime, true) : (array) $newDataScheduleTime;
+    $oldData = is_string($oldData) ? json_decode($oldData, true) : (array) $oldData;
+
     $meetingAffectingFields = ['day', 'start_time', 'end_time', 'meeting_method'];
 
     foreach ($meetingAffectingFields as $field) {
-      if (isset($oldData[$field]) && (isset($newData[$field]) && $oldData[$field] !== $newData[$field] || isset($newDataScheduleTime[$field]) && $newDataScheduleTime[$field] !== $newDataScheduleTime[$field])) {
-        return true;
+      if (isset($oldData[$field])) {
+
+        // Ambil nilainya
+        $oldVal = $oldData[$field];
+        $newVal = $newData[$field] ?? null;
+        $newScheduleVal = $newDataScheduleTime[$field] ?? null;
+
+        // --- NORMALISASI WAKTU (Object Carbon ke String 'H:i') ---
+        // Jika field adalah start_time / end_time dan datanya berupa Object Tanggal
+        if (in_array($field, ['start_time', 'end_time'])) {
+          if ($oldVal instanceof \DateTimeInterface) {
+            $oldVal = $oldVal->format('H:i');
+          }
+          if ($newVal instanceof \DateTimeInterface) {
+            $newVal = $newVal->format('H:i');
+          }
+          if ($newScheduleVal instanceof \DateTimeInterface) {
+            $newScheduleVal = $newScheduleVal->format('H:i');
+          }
+        }
+
+        // --- CEK PERUBAHAN ---
+        // Bandingkan nilainya. Jika newVal ada (tidak null) dan berbeda dengan oldVal
+        $isChangedInNewData = $newVal !== null && $newVal !== $oldVal;
+        $isChangedInSchedule = $newScheduleVal !== null && $newScheduleVal !== $oldVal;
+
+        if ($isChangedInNewData || $isChangedInSchedule) {
+          // Kamu bisa menambahkan Log::info("Berubah di field: $field", ['old' => $oldVal, 'new' => $newVal]) disini untuk debugging
+          return true;
+        }
       }
     }
 

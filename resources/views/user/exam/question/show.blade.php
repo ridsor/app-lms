@@ -124,7 +124,7 @@
           @foreach ($questions as $index => $question)
             @include('user.question.item', [
                 'question' => $question,
-                'number' => ($questions->currentPage() - 1) * $questions->perPage() + $index + 1,
+                'number' => $questions->firstItem() + $loop->index,
             ])
           @endforeach
           <div class="pagination-wrapper w-100">

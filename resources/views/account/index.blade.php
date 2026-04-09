@@ -221,6 +221,7 @@
                                                                         Ini</label>
                                                                     <div class="form-input position-relative">
                                                                         <input class="form-control password" type="password"
+                                                                        autocomplete="off"
                                                                             name="current_password">
                                                                         <div class="show-hide-change-password"><span
                                                                                 class="show"></span></div>
@@ -233,7 +234,7 @@
                                                                         Baru</label>
                                                                     <div class="form-input position-relative">
                                                                         <input class="form-control password"
-                                                                            type="password" name="password">
+                                                                            type="password" name="password" autocomplete="off">
                                                                         <div class="show-hide-change-password"><span
                                                                                 class="show"></span></div>
                                                                     </div>
@@ -245,7 +246,7 @@
                                                                         Sandi</label>
                                                                     <div class="form-input position-relative">
                                                                         <input class="form-control password"
-                                                                            type="password" name="password_confirmation">
+                                                                            type="password" name="password_confirmation" autocomplete="off">
                                                                         <div class="show-hide-change-password"><span
                                                                                 class="show"></span></div>
                                                                     </div>

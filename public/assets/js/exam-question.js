@@ -400,12 +400,12 @@ $(document).ready(function () {
         });
     });
 
-    $("#editEssayQuestionForm").on("submit", function (e) { 
+    $("#editEssayQuestionForm").on("submit", function (e) {
         e.preventDefault();
         const id = $(this).data("id");
 
-        $("#editQuestionForm").find("input, select").removeClass("is-invalid");
-        $("#editQuestionForm").find(".invalid-feedback").text("");
+        $("#editEssayQuestionForm").find("input, select").removeClass("is-invalid");
+        $("#editEssayQuestionForm").find(".invalid-feedback").text("");
         const submitBtn = $(this).find("button[type='submit']");
         const originalHtml = submitBtn.html();
         submitBtn
@@ -414,7 +414,7 @@ $(document).ready(function () {
                 '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
             );
         const formData = new FormData(this);
-        formData.append('question_type', 'multiple_choice');
+        formData.append('question_type', 'essay');
         formData.append('model', 'exam');
 
         $.ajax({
@@ -439,25 +439,25 @@ $(document).ready(function () {
                     for (const key in errors) {
                         if (
                             $(
-                                "#editQuestionForm [name='" + key + "']"
+                                "#editEssayQuestionForm [name='" + key + "']"
                             ).hasClass("file_path") ||
                             $(
-                                "#editQuestionForm [name='" + key + "']"
+                                "#editEssayQuestionForm [name='" + key + "']"
                             ).hasClass("quill")
                         ) {
-                            $("#editQuestionForm [name='" + key + "']")
+                            $("#editEssayQuestionForm [name='" + key + "']")
                                 .parent()
                                 .addClass("is-invalid")
                                 .next(".invalid-feedback")
                                 .text(errors[key][0]);
                         } else if (
-                            $("#editQuestionForm [name='" + key + "']")
+                            $("#editEssayQuestionForm [name='" + key + "']")
                                 .parent()
                                 .hasClass("answer-option")
                         ) {
                             options_errors.push(errors[key]);
                         } else {
-                            $("#editQuestionForm [name='" + key + "']")
+                            $("#editEssayQuestionForm [name='" + key + "']")
                                 .addClass("is-invalid")
                                 .next(".invalid-feedback")
                                 .text(errors[key][0]);
@@ -514,7 +514,7 @@ $(function () {
     });
 });
 
-function handleEditQuestion(e, id) {
+function handleEditQuestion(e, id, type) {
     e.preventDefault();
 
     const editBtn = $(e.currentTarget);
@@ -524,47 +524,61 @@ function handleEditQuestion(e, id) {
         .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
     $.ajax({
-        url: `/soal/${id}/edit`,
+        url: `/soal/${id}/edit/?question_type=${type}`,
         method: "GET",
         success: function (res) {
             if (res.success && res.data) {
-                $("#editQuestionForm").data("id", id);
-                editQuestionTextQuill.setContents(
-                    editQuestionTextQuill.clipboard.convert(
-                        res.data.question_text
-                    )
-                );
-                $("#editQuestionForm [name='question_points']").val(
-                    res.data.question_points
-                );
-                $(
-                    `#editQuestionForm [name='correct_answer'][value='${res.data.correct_answer}']`
-                ).prop("checked", true);
-                $("#editQuestionForm [name='option_a']").val(res.data.option_a);
-                $("#editQuestionForm [name='option_b']").val(res.data.option_b);
-                $("#editQuestionForm [name='option_c']").val(res.data.option_c);
+                if (res.data.question_type === 'multiple') {
+                    $("#editQuestionForm").data("id", id);
+                    editQuestionTextQuill.setContents(
+                        editQuestionTextQuill.clipboard.convert(
+                            res.data.question_text
+                        )
+                    );
+                    $("#editQuestionForm [name='question_points']").val(
+                        res.data.question_points
+                    );
+                    $(
+                        `#editQuestionForm [name='correct_answer'][value='${res.data.correct_answer}']`
+                    ).prop("checked", true);
+                    $("#editQuestionForm [name='option_a']").val(res.data.option_a);
+                    $("#editQuestionForm [name='option_b']").val(res.data.option_b);
+                    $("#editQuestionForm [name='option_c']").val(res.data.option_c);
 
-                let $container =
-                    $("#editQuestionForm").find("#optionsContainer");
+                    let $container =
+                        $("#editQuestionForm").find("#optionsContainer");
 
-                if (res.data.option_d) {
-                    $container.append(elementOption("d", res.data.option_d));
-                } else {
-                    if ($("#editQuestionForm [name='option_d']").length > 0)
-                        $("#editQuestionForm [name='option_d']")
-                            .closest(".answer-option")
-                            .remove();
+                    if (res.data.option_d) {
+                        $container.append(elementOption("d", res.data.option_d));
+                    } else {
+                        if ($("#editQuestionForm [name='option_d']").length > 0)
+                            $("#editQuestionForm [name='option_d']")
+                                .closest(".answer-option")
+                                .remove();
+                    }
+                    if (res.data.option_e) {
+                        $container.append(elementOption("e", res.data.option_e));
+                    } else {
+                        if ($("#editQuestionForm [name='option_e']").length > 0)
+                            $("#editQuestionForm [name='option_e']")
+                                .closest(".answer-option")
+                                .remove();
+                    }
+                    $("#editQuestionModal").modal("show");
+                } else if (res.data.question_type === 'essay') {
+                    $("#editEssayQuestionForm").data("id", id);
+                    editEssayQuestionTextQuill.setContents(
+                        editEssayQuestionTextQuill.clipboard.convert(
+                            res.data.question_text
+                        )
+                    );
+                    $("#editEssayQuestionForm [name='question_points']").val(
+                        res.data.question_points
+                    );
+
+                    $("#editEssayQuestionModal").modal("show");
                 }
-                if (res.data.option_e) {
-                    $container.append(elementOption("e", res.data.option_e));
-                } else {
-                    if ($("#editQuestionForm [name='option_e']").length > 0)
-                        $("#editQuestionForm [name='option_e']")
-                            .closest(".answer-option")
-                            .remove();
-                }
 
-                $("#editQuestionModal").modal("show");
             }
         },
         error: function (xhr) {
@@ -578,7 +592,7 @@ function handleEditQuestion(e, id) {
     });
 }
 
-function handleDeleteQuestion(e, id) {
+function handleDeleteQuestion(e, id, type) {
     e.preventDefault();
     const deleteBtn = $(e.currentTarget);
     const originalHtml = deleteBtn.html();
@@ -601,7 +615,7 @@ function handleDeleteQuestion(e, id) {
                 .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
             $.ajax({
-                url: `/soal/${id}`,
+                url: `/soal/${id}/?question_type=${type}`,
                 method: "DELETE",
                 success: function (response) {
                     if (response.success) {

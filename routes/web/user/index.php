@@ -133,7 +133,6 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::post('/soal/{id}', [QuestionController::class, 'store'])->name('user.question.store');
     Route::put('/soal/{id}', [QuestionController::class, 'update'])->name('user.question.update');
     Route::delete('/soal/{id}', [QuestionController::class, 'destroy'])->name('user.question.destroy');
-    Route::post('/soal/{id}/bank-soal', [QuestionController::class, 'storeForQuestionBank'])->name('user.question.storeForQuestionBank');
     Route::get('/soal/{id}/file', [QuestionController::class, 'getFile'])->name('user.question.file.get');
     Route::get('/soal/{id}/{option}/file', [QuestionController::class, 'getFileOption'])->name('user.question.option.file.get');
     Route::get('/soal/{id}/file/download', [QuestionController::class, 'downloadFile'])->name('user.question.file.download');
@@ -157,6 +156,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::post('/ujian/{id}/pengerjaan', [ExamController::class, 'workmanshipSubmit'])->name('user.exam.workmanship.submit');
     Route::post('/ujian/{id}/mulai', [ExamController::class, 'examStart'])->name('user.exam.start');
     Route::get('/ujian/{id}/pengerjaan/hasil', [ExamController::class, 'workmanshipResult'])->name('user.exam.workmanship.result');
-
+    Route::get('/ujian/{exam_id}/penilaian/{page?}', [ExamController::class, 'evaluation'])->name('user.exam.evaluation');
     Route::get('/ujian/{id}/pengerjaan/soal', [ExamController::class, 'getRandomQuestions'])->name('user.exam.workmanship.soal');
+    Route::post('/ujian/{id}/score/{answer_id}', [ExamController::class, 'updateAnswerScore'])->name('user.exam.update-answer-score');
 });

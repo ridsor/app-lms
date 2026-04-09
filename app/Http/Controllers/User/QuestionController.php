@@ -63,51 +63,18 @@ class QuestionController extends Controller
         }
     }
 
-    public function storeForQuestionBank(QuestionRequest $request, $id)
-    {
-        try {
-            if (!$request->user()->can(['question.create'])) return abort(403);
-
-            $validated = $request->validated();
-
-            // Upload file
-            if ($request->hasFile('question_file')) {
-                $validated['question_file'] = $request->file('question_file')->store('file/ujian');
-            }
-            if ($request->hasFile('option_a_image')) {
-                $validated['option_a_image'] = $request->file('option_a_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_b_image')) {
-                $validated['option_b_image'] = $request->file('option_b_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_c_image')) {
-                $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_d_image')) {
-                $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_e_image')) {
-                $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
-            }
-
-            // Set polymorphic relation
-            $validated['questionable_id'] = $id;
-            $validated['questionable_type'] = QuestionBank::class;
-
-            $question = MultipleQuestion::create($validated);
-
-            return $this->sendResponse('Soal berhasil disimpan', $question, 201);
-        } catch (\Exception $e) {
-            return $this->sendError('Silakan coba lagi.', [], 500);
-        }
-    }
-
     public function edit(Request $request, $id)
     {
         try {
             if (!$request->user()->can(['question.edit'])) return abort(403);
 
-            $question = MultipleQuestion::find($id);
+            if ($request->input('question_type') === 'multiple') {
+                $question = MultipleQuestion::find($id);
+                $question->question_type = 'multiple';
+            } else if ($request->input('question_type') === 'essay') {
+                $question = EssayQuestion::find($id);
+                $question->question_type = 'essay';
+            }
 
             if (!$question) {
                 return $this->sendError(
@@ -130,8 +97,14 @@ class QuestionController extends Controller
     public function update(QuestionRequest $request, $id)
     {
         try {
-            $question = MultipleQuestion::findOrFail($id);
             if (!$request->user()->can(['question.edit'])) return abort(403);
+
+            $question = null;
+            if ($request->input('question_type') === 'multiple_choice') {
+                $question = MultipleQuestion::find($id);
+            } else if ($request->input('question_type') === 'essay') {
+                $question = EssayQuestion::find($id);
+            }
 
             $validated = $request->validated();
 
@@ -141,47 +114,50 @@ class QuestionController extends Controller
                 }
                 $validated['question_file'] = $request->file('question_file')->store('file/ujian');
             }
-            if ($request->hasFile('option_a_image')) {
-                if (!empty($question->option_a_image) && Storage::exists($question->option_a_image)) {
-                    Storage::delete($question->option_a_image);
-                }
-                $validated['option_a_image'] = $request->file('option_a_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_b_image')) {
-                if (!empty($question->option_b_image) && Storage::exists($question->option_b_image)) {
-                    Storage::delete($question->option_b_image);
-                }
-                $validated['option_b_image'] = $request->file('option_b_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_c_image')) {
-                if (!empty($question->option_c_image) && Storage::exists($question->option_c_image)) {
-                    Storage::delete($question->option_c_image);
-                }
-                $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_d_image')) {
-                if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
-                    Storage::delete($question->option_d_image);
-                }
-                $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
-            }
-            if ($request->hasFile('option_e_image')) {
-                if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
-                    Storage::delete($question->option_e_image);
-                }
-                $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
-            }
 
-            if (!$request->has('option_d')) {
-                $validated['option_d'] = null;
-                if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
-                    Storage::delete($question->option_d_image);
+            if ($request->input('question_type') === 'multiple_choice') {
+                if ($request->hasFile('option_a_image')) {
+                    if (!empty($question->option_a_image) && Storage::exists($question->option_a_image)) {
+                        Storage::delete($question->option_a_image);
+                    }
+                    $validated['option_a_image'] = $request->file('option_a_image')->store('file/ujian');
                 }
-            }
-            if (!$request->has('option_e')) {
-                $validated['option_e'] = null;
-                if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
-                    Storage::delete($question->option_e_image);
+                if ($request->hasFile('option_b_image')) {
+                    if (!empty($question->option_b_image) && Storage::exists($question->option_b_image)) {
+                        Storage::delete($question->option_b_image);
+                    }
+                    $validated['option_b_image'] = $request->file('option_b_image')->store('file/ujian');
+                }
+                if ($request->hasFile('option_c_image')) {
+                    if (!empty($question->option_c_image) && Storage::exists($question->option_c_image)) {
+                        Storage::delete($question->option_c_image);
+                    }
+                    $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
+                }
+                if ($request->hasFile('option_d_image')) {
+                    if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
+                        Storage::delete($question->option_d_image);
+                    }
+                    $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
+                }
+                if ($request->hasFile('option_e_image')) {
+                    if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
+                        Storage::delete($question->option_e_image);
+                    }
+                    $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
+                }
+
+                if (!$request->has('option_d')) {
+                    $validated['option_d'] = null;
+                    if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
+                        Storage::delete($question->option_d_image);
+                    }
+                }
+                if (!$request->has('option_e')) {
+                    $validated['option_e'] = null;
+                    if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
+                        Storage::delete($question->option_e_image);
+                    }
                 }
             }
 
@@ -198,7 +174,12 @@ class QuestionController extends Controller
         try {
             if (!$request->user()->can(['question.delete'])) return abort(403);
 
-            $question = MultipleQuestion::find($id);
+            $question = null;
+            if ($request->input('question_type') === 'multiple') {
+                $question = MultipleQuestion::find($id);
+            } else if ($request->input('question_type') === 'essay') {
+                $question = EssayQuestion::find($id);
+            }
 
             if (!$question) {
                 return $this->sendError(
@@ -246,44 +227,69 @@ class QuestionController extends Controller
 
     public function getFile(Request $request, $id)
     {
-        $question = MultipleQuestion::findOrFail($id);
+        // 1. Tangkap parameter 'type' (contoh URL: /file/1?type=essay)
+        // Default disetel ke 'multiple' agar kode lama Anda yang tidak memakai parameter ini tidak error.
+        $type = $request->input('type', 'multiple');
 
+        // 2. Tentukan model mana yang dipanggil berdasarkan 'type'
+        if ($type === 'essay') {
+            $question = EssayQuestion::findOrFail($id);
+        } else {
+            $question = MultipleQuestion::findOrFail($id);
+        }
+
+        // 3. Logika otorisasi bawaan Anda (tetap sama)
         if ($question->questionable_type == QuestionBank::class) {
-            if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) return abort(403);
+            if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
+                return abort(403);
+            }
         } else if ($question->questionable_type == Exam::class) {
             $this->authorize('view', $question->questionable);
         }
 
-        if (Storage::exists($question->question_file)) {
+        // 4. Logika pengambilan file (tetap sama)
+        if ($question->question_file && Storage::exists($question->question_file)) {
             return response()->file(Storage::path($question->question_file));
         }
 
         return abort(404, 'File tidak ditemukan.');
     }
 
+
     public function getFileOption(Request $request, $id, $option)
     {
+        // 1. Tangkap parameter type
+        $type = $request->input('type', 'multiple');
+
+        // 2. Cegah pencarian jika tipenya essay (karena essay tidak punya opsi A-E)
+        if ($type === 'essay') {
+            return abort(404, 'Soal essay tidak memiliki file opsi jawaban.');
+        }
+
+        // 3. Cari berdasarkan model MultipleQuestion
         $question = MultipleQuestion::findOrFail($id);
 
+        // 4. Logika otorisasi (tetap sama)
         if ($question->questionable_type == QuestionBank::class) {
-            if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) return abort(403);
+            if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
+                return abort(403);
+            }
         } else if ($question->questionable_type == Exam::class) {
             $this->authorize('view', $question->questionable);
         }
 
-        $file = null;
-        if ($option == "a") {
-            $file = $question->option_a_image;
-        } else if ($option == "b") {
-            $file = $question->option_b_image;
-        } else if ($option == "c") {
-            $file = $question->option_c_image;
-        } else if ($option == "d") {
-            $file = $question->option_d_image;
-        } else if ($option == "e") {
-            $file = $question->option_e_image;
+        // 5. Validasi opsi agar hanya menerima a, b, c, d, atau e
+        $validOptions = ['a', 'b', 'c', 'd', 'e'];
+        if (!in_array($option, $validOptions)) {
+            return abort(404, 'Opsi tidak valid.');
         }
 
+        // 6. Ambil nama file secara dinamis (menggantikan if-else yang panjang)
+        // Contoh: jika $option "a", maka akan memanggil $question->option_a_image
+        $columnName = "option_{$option}_image";
+        $file = $question->$columnName;
+
+        // 7. Cek dan kembalikan file
         if ($file && Storage::exists($file)) {
             return response()->file(Storage::path($file));
         }
@@ -293,14 +299,26 @@ class QuestionController extends Controller
 
     public function downloadFile(Request $request, $id)
     {
-        $question = MultipleQuestion::findOrFail($id);
+        // 1. Tangkap parameter 'type' dari URL (default ke 'multiple')
+        $type = $request->input('type', 'multiple');
 
+        // 2. Tentukan model mana yang dicari berdasarkan 'type'
+        if ($type === 'essay') {
+            $question = EssayQuestion::findOrFail($id);
+        } else {
+            $question = MultipleQuestion::findOrFail($id);
+        }
+
+        // 3. Logika otorisasi (tetap sama sesuai kode asli Anda)
         if ($question->questionable_type == QuestionBank::class) {
-            if (!$request->user()->can(['question.create', 'question.view', 'question.edit', 'question.delete'])) return abort(403);
+            if (!$request->user()->can(['question.create', 'question.view', 'question.edit', 'question.delete'])) {
+                return abort(403);
+            }
         } else if ($question->questionable_type == Exam::class) {
             $this->authorize('view', $question->questionable);
         }
 
+        // 4. Logika download file (tetap sama)
         if (!empty($question->question_file) && Storage::exists($question->question_file)) {
             return Storage::download($question->question_file);
         }

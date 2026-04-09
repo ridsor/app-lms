@@ -46,6 +46,14 @@
           <div class="card h-100 my-0 rounded-responsive">
             <div class="card h-100 my-0 rounded-responsive">
               <div class="card-body">
+                @if ($exam->not_yet_rated)
+                  <div class="d-flex justify-content-between align-items-center  mb-3">
+                    <span class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum
+                      dinilai <span class="badge ms-1 badge-danger">{{ $exam->not_yet_rated }}</span>
+                    </span>
+                  </div>
+                @endif
+
                 @role('operator')
                   <div class="d-flex justify-content-between align-items-center  mb-3">
                     <div class="d-flex justify-content-end flex-grow-1 align-items-center gap-2">
@@ -298,18 +306,6 @@
                           </span>
                         </p>
                       </div>
-                      <div class="col-12">
-                        <div>
-                          <label class="form-label">Deskripsi</label>
-                        </div>
-                        @if ($exam?->description)
-                          <div class="ql-editor text-wrap h-auto p-0">
-                            {!! $exam?->description !!}
-                          </div>
-                        @else
-                          <span>-</span>
-                        @endif
-                      </div>
                     </div>
                   </div>
                   <div class="col-12 col-md-6">
@@ -371,6 +367,18 @@
                         </div>
                       </div>
                     </div>
+                  </div>
+                  <div class="col-12">
+                    <div>
+                      <label class="form-label">Deskripsi</label>
+                    </div>
+                    @if ($exam?->description)
+                      <div class="ql-editor text-wrap h-auto p-0">
+                        {!! $exam?->description !!}
+                      </div>
+                    @else
+                      <span>-</span>
+                    @endif
                   </div>
                 </div>
               </div>

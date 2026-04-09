@@ -16,22 +16,38 @@ class ExamScoringService
   {
     // Ambil jawaban & soal sekaligus
     $answers = ExamAnswer::where('exam_result_id', $examResult->id)
+      ->where('questionable_type', MultipleQuestion::class)
       ->get()
-      ->keyBy('question_id'); // supaya lookup lebih cepat
+      ->keyBy('questionable_id');
 
-    $questions = MultipleQuestion::where('questionable_id', $examResult->exam_id)->get();
+    $questions = $examResult->exam->multipleQuestions;
 
-    // Hitung skor
-    $score = $questions->sum(function (MultipleQuestion $question) use ($answers) {
+    $totalScore = 0;
+
+    // Gunakan foreach agar kita bisa mengupdate setiap baris jawaban
+    foreach ($questions as $question) {
       $answer = $answers->get($question->id);
-      return ($answer && $this->isCorrect($question, $answer))
-        ? (int) $question->question_points
-        : 0;
-    });
 
-    // Update exam_result
+      // Pastikan student menjawab soal tersebut
+      if ($answer) {
+        // Tentukan poin: jika benar ambil dari question_points, jika salah 0
+        $points = $this->isCorrect($question, $answer)
+          ? (int) $question->question_points
+          : 0;
+
+        // Update kolom score di tabel exam_answers
+        $answer->update([
+          'score' => $points
+        ]);
+
+        // Tambahkan ke total skor keseluruhan
+        $totalScore += $points;
+      }
+    }
+
+    // Update tabel exam_results dengan total skor
     $examResult->update([
-      'score'  => $score,
+      'score'  => $totalScore,
       'status' => 'completed',
     ]);
 

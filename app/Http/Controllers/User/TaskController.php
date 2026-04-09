@@ -124,7 +124,7 @@ class TaskController extends Controller
             'meeting.schedule.subject:id,name,code',
             'meeting.schedule.class:id,name,level,major_id',
             'meeting.schedule.class.major:id,name',
-            'submissions:id,task_id'
+            'submissions:id,task_id,submitted_at'
         ])
             ->withCount([
                 'submissions as not_yet_rated' => function ($query) {
@@ -148,6 +148,7 @@ class TaskController extends Controller
             ])
                 ->leftJoin('students', 'student_id', '=', 'students.id')
                 ->with('grader:id,name')
+                ->orderBy('submitted_at', 'asc')
                 ->where('task_id', $task->id);
 
             if ($request->filled('search') && !empty($request->search['value'])) {

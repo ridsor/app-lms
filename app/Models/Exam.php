@@ -24,6 +24,11 @@ class Exam extends Model
         'is_shuffle_questions',
     ];
 
+    protected $with = [
+        'multipleQuestions',
+        'essayQuestions',
+    ];
+
     protected $casts = [
         'description' => CleanHtml::class . ':strip_nl,strip_nbsp',
         'start_time' => 'datetime',
@@ -43,6 +48,23 @@ class Exam extends Model
     public function essayQuestions()
     {
         return $this->morphMany(EssayQuestion::class, 'questionable');
+    }
+
+    public function getQuestionsAttribute()
+    {
+        // 1. Ambil soal multiple dan sisipkan penanda tipe
+        $multiple = $this->multipleQuestions->map(function ($question) {
+            $question->setAttribute('question_type', 'multiple');
+            return $question;
+        });
+
+        // 2. Ambil soal essay dan sisipkan penanda tipe
+        $essay = $this->essayQuestions->map(function ($question) {
+            $question->setAttribute('question_type', 'essay');
+            return $question;
+        });
+
+        return $multiple->concat($essay)->sortBy('created_at')->values();
     }
 
     public function results(): HasMany

@@ -29,7 +29,7 @@
                 <div class="taskFile">
                   <label class="form-label">File</label>
                   <div class="info text-danger mb-1" style="font-size: 12px;">
-                    Format file PDF / DOC / DOCX / XLS / XLSX / PPT / PPTX / ZIP / RAR / PNG / JPG /
+                    Format file PNG / JPG /
                     JPEG / MP3 / WAV / MP4 / WEBM
                     <br />
                     Ukuran maksimal 5MB
@@ -44,7 +44,7 @@
                     </label>
                   </div>
                   <input type="file" class="form-control file_path" id="addQuestionFile" name="question_file" hidden
-                    accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp3,.wav,.mp4,.webm">
+                    accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
                   <div id="file-preview" class="d-flex flex-column gap-1"></div>
                 </div>
                 <div class="invalid-feedback"></div>
@@ -156,7 +156,7 @@
                 <div class="taskFile">
                   <label class="form-label">File</label>
                   <div class="info text-danger mb-1" style="font-size: 12px;">
-                    Format file PDF / DOC / DOCX / XLS / XLSX / PPT / PPTX / ZIP / RAR / PNG / JPG /
+                    Format file PNG / JPG /
                     JPEG / MP3 / WAV / MP4 / WEBM
                     <br />
                     Ukuran maksimal 5MB
@@ -173,7 +173,7 @@
                   </div>
                   <input type="file" class="form-control file_path" id="addEssayQuestionFile"
                     name="question_file" hidden
-                    accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp3,.wav,.mp4,.webm">
+                    accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
                   <div id="file-preview" class="d-flex flex-column gap-1"></div>
                 </div>
                 <div class="invalid-feedback"></div>
@@ -226,8 +226,7 @@
                 <div class="taskFile">
                   <label class="form-label">File</label>
                   <div class="info text-danger mb-1" style="font-size: 12px;">
-                    Format file PDF / DOC / DOCX / XLS / XLSX / PPT / PPTX / ZIP / RAR / PNG / JPG /
-                    JPEG / MP3 / WAV / MP4 / WEBM
+                    Format file PNG / JPG /   JPEG / MP3 / WAV / MP4 / WEBM
                     <br />
                     Ukuran maksimal 5MB
                   </div>
@@ -243,7 +242,7 @@
                   </div>
                   <input type="file" class="form-control file_path" id="editQuestionFile" name="question_file"
                     hidden
-                    accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp3,.wav,.mp4,.webm">
+                    accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
                   <div id="file-preview" class="d-flex flex-column gap-1"></div>
                 </div>
                 <div class="invalid-feedback"></div>
@@ -373,71 +372,10 @@
                   </div>
                   <input type="file" class="form-control file_path" id="editEssayQuestionFile"
                     name="question_file" hidden
-                    accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp3,.wav,.mp4,.webm">
+                    accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
                   <div id="file-preview" class="d-flex flex-column gap-1"></div>
                 </div>
                 <div class="invalid-feedback"></div>
-              </div>
-              <div class="col-12">
-                <p class="text-warning">Pilih untuk tetapkan kunci jawaban</p>
-                <div id="optionsForm">
-                  <div id="optionsContainer">
-                    <!-- Opsi A -->
-                    <div class="answer-option d-flex align-items-center checkbox-checked">
-                      <input type="radio" name="correct_answer" value="a" class="me-2 form-check-input">
-                      <span class="fw-bold text-uppercase">a.</span>
-                      <input type="text" class="form-control" name="option_a"
-                        placeholder="Tulis pilihan jawaban">
-                      <label class="p-2 h-100 mb-0 me-2" style="aspect-ratio: 1/1">
-                        <div class="file-icon">
-                          <i class="fa fa-image"></i>
-                        </div>
-                        <input type="file" hidden name="option_a_image"
-                          class="form-control form-control-sm option-image" accept="image/*">
-                        <img class="img-preview"
-                          style="height: 40px; width:40px; object-fit:cover; object-position: center; display: none;">
-                      </label>
-                      <span class="remove-option">&times;</span>
-                    </div>
-                    <!-- Opsi B -->
-                    <div class="answer-option d-flex align-items-center checkbox-checked">
-                      <input type="radio" name="correct_answer" value="b" class="me-2 form-check-input">
-                      <span class="fw-bold text-uppercase">b.</span>
-                      <input type="text" class="form-control" name="option_b"
-                        placeholder="Tulis pilihan jawaban">
-                      <label class="p-2 h-100 mb-0 me-2" style="aspect-ratio: 1/1">
-                        <div class="file-icon">
-                          <i class="fa fa-image"></i>
-                        </div>
-                        <input type="file" hidden name="option_b_image"
-                          class="form-control form-control-sm option-image" accept="image/*">
-                        <img class="img-preview"
-                          style="height: 40px; width:40px; object-fit:cover; object-position: center; display: none;">
-                      </label>
-                      <span class="remove-option">&times;</span>
-                    </div>
-                    <!-- Opsi C -->
-                    <div class="answer-option d-flex align-items-center checkbox-checked">
-                      <input type="radio" name="correct_answer" value="c" class="me-2 form-check-input">
-                      <span class="fw-bold text-uppercase">c.</span>
-                      <input type="text" class="form-control" placeholder="Tulis pilihan jawaban"
-                        name="option_c">
-                      <label class="p-2 h-100 mb-0 me-2" style="aspect-ratio: 1/1">
-                        <div class="file-icon">
-                          <i class="fa fa-image"></i>
-                        </div>
-                        <input type="file" hidden name="option_c_image"
-                          class="form-control form-control-sm option-image" accept="image/*">
-                        <img class="img-preview"
-                          style="height: 40px; width:40px; object-fit:cover; object-position: center; display: none;">
-                      </label>
-                      <span class="remove-option">&times;</span>
-                    </div>
-                  </div>
-                  <div class="invalid-feedback"></div>
-                  <button class="addOption text-primary p-0 bg-transparent border-0">Tambahkan
-                    Opsi</button>
-                </div>
               </div>
               <div class="col-md-12 d-flex justify-content-end gap-2">
                 <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal" aria-label="Close">
