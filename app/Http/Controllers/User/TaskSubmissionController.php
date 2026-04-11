@@ -177,8 +177,8 @@ class TaskSubmissionController extends Controller
     public function evaluation(Request $request, $task_id, $page = 1)
     {
         $query = TaskSubmission::where('task_id', $task_id)
-            ->with(['grader', 'student'])
-            ->orderBy('submitted_at', 'desc');
+            ->with(['student', 'task'])
+            ->orderBy('submitted_at', 'asc');
 
         $submission = $query->simplePaginate(1, ['*'], 'page', $page);
         $task_submission = $query->simplePaginate(1, ['*'], 'page', $page)->first();

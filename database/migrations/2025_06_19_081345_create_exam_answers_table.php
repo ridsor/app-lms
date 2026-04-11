@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('exam_answers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('exam_result_id')->constrained('exam_results')->onDelete('cascade');
-            $table->foreignId('question_id')->constrained('questions')->onDelete('cascade');
+            $table->unsignedBigInteger('question_id');
             $table->text('answer');
             $table->unique(['exam_result_id', 'question_id'], 'unique_answer');
             $table->timestamp('answered_at')->useCurrent();

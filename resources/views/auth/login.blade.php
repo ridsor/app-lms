@@ -49,7 +49,7 @@
                                     <label class="col-form-label" for="password">Password</label>
                                     <div class="form-input">
                                         <div class="position-relative @error('password') is-invalid @enderror">
-                                            <input class="form-control" type="password" name="password" id="password"
+                                            <input class="form-control" type="password" name="password" id="password" autocomplete="off"
                                                 placeholder="*********" />
                                             <div class="show-hide"><span class="show"> </span></div>
                                         </div>

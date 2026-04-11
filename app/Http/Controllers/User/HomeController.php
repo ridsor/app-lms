@@ -73,7 +73,9 @@ class HomeController extends Controller
             $countExams = 0;
             if ($request->user()->hasRole('teacher')) {
                 $countExams = Exam::filterByPermission($request->user())->whereHas('results', function ($query) {
-                    $query->whereNull('score');
+                    $query->whereHas('answers', function ($subQuery) {
+                        $subQuery->whereNull('score');
+                    });
                 })->count();
             } elseif ($request->user()->hasRole('student')) {
                 $countExams = Exam::filterByPermission($request->user())->whereDoesntHave('results', function ($query) use ($request) {

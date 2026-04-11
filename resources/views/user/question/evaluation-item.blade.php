@@ -97,16 +97,16 @@
             @endswitch
           </div>
         @endif
+        <div class="text-warning mb-2">
+          Jawaban
+        </div>
         @if ($qType === 'multiple')
           <div class="question-options">
-            <div class="text-warning mb-2">
-              Kunci Jawaban
-            </div>
             <div class="option-list d-flex flex-column gap-2">
               <div class="option-item checkbox-checked">
                 <div class="d-flex align-items-center gap-2">
                   <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                    <input type="radio" @if ($question->correct_answer == 'a') checked @endif value="a" disabled
+                    <input type="radio" @if ($question?->student_answer?->answer == 'a') checked @endif value="a" disabled
                       class="me-2 form-check-input" style="transform: translateY(-2px)">
                     <span class="fw-bold text-uppercase">a.</span>
                   </label>
@@ -234,36 +234,26 @@
               @endif
             </div>
           </div>
-
+        @else
+          <div class="essay-answer border rounded-2 p-3 w-100">
+            <p class="mb-0">
+              {{ $question->student_answer->answer ?? '-' }}
+            </p>
+          </div>
         @endif
       </div>
     </div>
     <div class="d-flex justify-content-end col-12 order-1 order-md-3 col-md-auto">
       <div class="d-flex gap-2 align-items-center">
-        @can(['exam.edit', 'exam.delete'])
-          <div class="bg-white">
-            <button onclick="handleEditQuestion(event, {{ $question->id }}, '{{ $qType }}')"
-              class="edit btn d-flex align-items-center bg-20-warning border justify-content-center text-warning p-2"
-              style="width: 38px; height: 38px;">
-              <i data-feather="edit-2" style="width: 20px; height: 20px"></i>
-            </button>
+        <div class="border rounded-3 d-flex align-items-center p-1 position-relative">
+          <img src="{{ asset('assets/svg/star.svg') }}" alt="star" class="px-2 py-2 " />
+          <input class="mb-0 form-control answer-score py-2 text-center" style="width: 60px"
+            {{ $qType === 'multiple' ? 'disabled' : '' }} name="score[{{ $question?->student_answer?->id }}]"
+            type="number" value="{{ $question?->student_answer->score ?? '' }}"
+            maxlength="{{ $question?->question_points }}" exam-id="{{ $exam_result->exam_id }}" />
+          <div class="invalid-tooltip" style="max-width: 400px; width: max-content; right: 0;">
+            Please provide a valid city.
           </div>
-          <div class="bg-white">
-            <button onclick="handleDeleteQuestion(event, {{ $question->id }}, '{{ $qType }}')"
-              style="width: 38px; height: 38px;"
-              class="btn d-flex align-items-center bg-20-danger border justify-content-center text-danger p-2">
-              <i data-feather="trash-2" style="width: 20px; height: 20px"></i>
-            </button>
-          </div>
-        @endcan
-        <div class="border rounded-3 d-flex px-3 py-2 align-items-center gap-2">
-          <img src="{{ asset('assets/svg/star.svg') }}" alt="star" />
-          <p class="mb-0">
-            <span class="question-poin">
-              {{ $question->question_points }}
-            </span>
-            Poin
-          </p>
         </div>
       </div>
     </div>
