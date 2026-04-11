@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UKKController;
 use App\Http\Controllers\User\MaterialController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\RoomController;
@@ -159,4 +160,6 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/ujian/{exam_id}/penilaian/{page?}', [ExamController::class, 'evaluation'])->name('user.exam.evaluation');
     Route::get('/ujian/{id}/pengerjaan/soal', [ExamController::class, 'getRandomQuestions'])->name('user.exam.workmanship.soal');
     Route::post('/ujian/{id}/score/{answer_id}', [ExamController::class, 'updateAnswerScore'])->name('user.exam.update-answer-score');
+
+    Route::get('/ukk', [UKKController::class, 'index'])->name('user.ukk.index');
 });

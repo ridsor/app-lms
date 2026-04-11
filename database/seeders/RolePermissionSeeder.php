@@ -53,6 +53,10 @@ class RolePermissionSeeder extends Seeder
             'question.create',
             'question.edit',
             'question.delete',
+            'ukk.view',
+            'ukk.create',
+            'ukk.edit',
+            'ukk.delete'
         ];
 
         foreach ($permissions as $permission) {
@@ -119,6 +123,7 @@ class RolePermissionSeeder extends Seeder
             'task_submission.view',
             'exam.view',
             'question.view',
+            'ukk.view',
         ]);
 
         // Role Student - No student management access
@@ -135,6 +140,7 @@ class RolePermissionSeeder extends Seeder
             'exam.view',
             'exam.create',
             'question.view',
+            'ukk.view',
         ]);
 
         $admin = User::create([
@@ -151,13 +157,13 @@ class RolePermissionSeeder extends Seeder
         ]);
         $wakasek->assignRole('vice-principal');
 
-        $operatorExam = User::create([
+        $operator = User::create([
             'name' => 'Operator Ujian',
             'username' => 'operator',
             'password' => bcrypt('password')
         ]);
-        $operatorExam->assignRole('operator');
-        $operatorExam->givePermissionTo([
+        $operator->assignRole('operator');
+        $operator->givePermissionTo([
             'exam.view',
             'exam.edit',
             'exam.create',
@@ -166,6 +172,10 @@ class RolePermissionSeeder extends Seeder
             'question.create',
             'question.delete',
             'question.edit',
+            'ukk.view',
+            'ukk.create',
+            'ukk.edit',
+            'ukk.delete'
         ]);
     }
 }
