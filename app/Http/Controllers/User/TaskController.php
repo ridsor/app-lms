@@ -360,10 +360,16 @@ class TaskController extends Controller
     public function getFile(Request $request, $task_id)
     {
         $task = Task::findOrFail($task_id);
-        $this->authorize('view', $task);
+        if (!$request->hasValidSignature()) {
+            $this->authorize('view', $task);
+        }
 
         if (!empty($task->file_path) && Storage::exists($task->file_path)) {
-            return response()->file(Storage::path($task->file_path));
+            $path = storage_path('app/' . $task->file_path);
+            return response()->file($path, [
+                'Content-Type' => Storage::mimeType($task->file_path),
+                'Content-Disposition' => 'inline; filename="' . $task->file_name . '"'
+            ]);
         }
 
         return abort(404, 'File tidak ditemukan.');

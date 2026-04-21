@@ -163,8 +163,8 @@
                         {{ $ukk?->file_name . ' (' . number_format($ukk?->file_size / (1024 * 1024), 2) . 'mb)' ?? '-' }}
                       </div>
                       <div class="d-flex gap-2">
-                        <a href="{{ route('user.ukk.file.get', $ukk->id) }}" target="_blank"
-                          style="width: 38px; height: 38px;"
+                        <a href="{{ URL::temporarySignedRoute('user.ukk.file.get', now()->addMinutes(60), ['id' => $ukk->id]) }}"
+                          target="_blank" style="width: 38px; height: 38px;"
                           class="btn d-flex align-items-center bg-20-primary border justify-content-center text-primary p-2">
                           <i data-feather="eye" style="width: 20px; height: 20px"></i>
                         </a>
@@ -178,14 +178,28 @@
                   @if ($ukk->file_path)
                     <div class="col-12 mt-3 view_file_path">
                       @if (Helper::isPreviewable($ukk->file_name))
-                        <div class="mt-4 border rounded-2 overflow-hidden" style="height: 600px;">
+                        <div class="mt-4 border rounded-2 overflow-hidden bg-light"
+                          style="min-height: 400px; max-height: 800px;">
                           @php
-                            $fileUrl = route('user.ukk.file.get', $ukk->id);
-                            $previewUrl = Helper::isGooglePreviewable($ukk->file_name)
-                                ? 'https://docs.google.com/viewer?url=' . urlencode($fileUrl) . '&embedded=true'
-                                : $fileUrl;
+                            $fileUrl = URL::temporarySignedRoute(
+                                'user.ukk.file.get', // nama route
+                                now()->addMinutes(60), // masa berlaku
+                                ['id' => $ukk->id],
+                            );
+                            $fileType = Helper::getFileType($ukk->file_name);
                           @endphp
-                          <iframe src="{{ $previewUrl }}" width="100%" height="100%" frameborder="0"></iframe>
+
+                          @if ($fileType == 'image')
+                            <div class="d-flex justify-content-center align-items-center p-3 h-100">
+                              <img src="{{ $fileUrl }}" alt="{{ $ukk->file_name }}"
+                                style="max-width: 100%; height: auto; object-fit: contain;">
+                            </div>
+                          @elseif (Helper::isGooglePreviewable($ukk->file_name))
+                            <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true"
+                              width="100%" height="600px" frameborder="0"></iframe>
+                          @else
+                            <iframe src="{{ $fileUrl }}" width="100%" height="600px" frameborder="0"></iframe>
+                          @endif
                         </div>
                       @else
                         <div
@@ -202,77 +216,77 @@
                             <i data-feather="download" style="width: 20px; height: 20px"></i>
                           </a>
                         </div>
+                      @endif
                     </div>
                   @endif
                 </div>
-                @endif
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="col-12 col-lg-5 col-xl-4 order-1 order-lg-2">
-        @php
-          $now = now();
-          $is_ukk_available =
-              $ukk->start_time <= $now &&
-              $ukk->end_time >= $now &&
-              $ukk_result?->status != 'completed' &&
-              $ukk?->multipleQuestions->count() + $ukk?->essayQuestions->count() > 0;
-        @endphp
-        <div class="p-3">
-          <div class="mb-2">
-            {!! Helper::getExamStatusLabel($ukk_result?->status) !!}
-          </div>
-
-          @if ($ukk_result?->status == 'completed')
-            <div class="mb-3">
-              <a href="{{ route('user.ukk.teori.workmanship.result', $ukk->id) }}" class="btn btn-primary w-100">Lihat
-                Hasil</a>
+        <div class="col-12 col-lg-5 col-xl-4 order-1 order-lg-2">
+          @php
+            $now = now();
+            $is_ukk_available =
+                $ukk->start_time <= $now &&
+                $ukk->end_time >= $now &&
+                $ukk_result?->status != 'completed' &&
+                $ukk?->multipleQuestions->count() + $ukk?->essayQuestions->count() > 0;
+          @endphp
+          <div class="p-3">
+            <div class="mb-2">
+              {!! Helper::getExamStatusLabel($ukk_result?->status) !!}
             </div>
-          @endif
 
-          <div class="d-flex mb-3 justify-content-between align-items-center">
-            <p class="mb-0 fw-semibold fs-6">Nilai</p>
-            <input class="form-control text-center" type="number" style="width: 70px" disabled
-              value="{{ $ukk_result?->formatted_score }}" name="score" step="0.1" />
-          </div>
+            @if ($ukk_result?->status == 'completed')
+              <div class="mb-3">
+                <a href="{{ route('user.ukk.teori.workmanship.result', $ukk->id) }}"
+                  class="btn btn-primary w-100">Lihat
+                  Hasil</a>
+              </div>
+            @endif
 
-          <div class="mb-3">
-            <label class="form-label">Waktu Pengerjaan</label>
-            <div class="c-o-light f-w-600">
-              <div class="d-flex align-items-center">
-                <span class="icon d-inline-flex justify-content-center align-items-center">
-                  <i data-feather="calendar" style="width:18px; height: 18px"></i>
-                </span>
-                @if ($ukk_result?->start_time && $ukk_result?->end_time)
-                  <div class="d-flex flex-column">
-                    <span class="mb-0 ms-2" id="date">Mulai
-                      {{ $ukk_result?->start_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
-                    <span class="mb-0 ms-2" id="date">Selesai
-                      {{ $ukk_result?->end_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
-                  </div>
-                @else
-                  <span class="mb-0 ms-2" id="date">-</span>
-                @endif
+            <div class="d-flex mb-3 justify-content-between align-items-center">
+              <p class="mb-0 fw-semibold fs-6">Nilai</p>
+              <input class="form-control text-center" type="number" style="width: 70px" disabled
+                value="{{ $ukk_result?->formatted_score }}" name="score" step="0.1" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Waktu Pengerjaan</label>
+              <div class="c-o-light f-w-600">
+                <div class="d-flex align-items-center">
+                  <span class="icon d-inline-flex justify-content-center align-items-center">
+                    <i data-feather="calendar" style="width:18px; height: 18px"></i>
+                  </span>
+                  @if ($ukk_result?->start_time && $ukk_result?->end_time)
+                    <div class="d-flex flex-column">
+                      <span class="mb-0 ms-2" id="date">Mulai
+                        {{ $ukk_result?->start_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
+                      <span class="mb-0 ms-2" id="date">Selesai
+                        {{ $ukk_result?->end_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
+                    </div>
+                  @else
+                    <span class="mb-0 ms-2" id="date">-</span>
+                  @endif
+                </div>
               </div>
             </div>
-          </div>
-          <div class="d-flex justify-content-end gap-2">
-            <a href="{{ route('user.ukk.index') }}" class="btn btn-outline-secondary" type="button"
-              aria-label="Close">
-              Kembali
-            </a>
-            @role('student')
-              {{-- <button data-href="{{ route('user.ukk.workmanship', $ukk->id) }}" type="button" id="start-exam-btn" --}}
-              <button type="button" id="start-ukk-btn" data-id="{{ $ukk->id }}" class="btn btn-primary"
-                {{ $is_ukk_available ? '' : 'disabled' }}>Mulai</button>
-            @endrole
+            <div class="d-flex justify-content-end gap-2">
+              <a href="{{ route('user.ukk.index') }}" class="btn btn-outline-secondary" type="button"
+                aria-label="Close">
+                Kembali
+              </a>
+              @role('student')
+                {{-- <button data-href="{{ route('user.ukk.workmanship', $ukk->id) }}" type="button" id="start-exam-btn" --}}
+                <button type="button" id="start-ukk-btn" data-id="{{ $ukk->id }}" class="btn btn-primary"
+                  {{ $is_ukk_available ? '' : 'disabled' }}>Mulai</button>
+              @endrole
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
   </div>
 @endsection
 

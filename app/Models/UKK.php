@@ -46,6 +46,11 @@ class UKK extends Model
         return $this->hasMany(UKKResultTheory::class, 'ukk_id');
     }
 
+    public function practiceResults()
+    {
+        return $this->hasMany(UKKResultPractice::class, 'ukk_id');
+    }
+
     public function multipleQuestions()
     {
         return $this->morphMany(MultipleQuestion::class, 'questionable');

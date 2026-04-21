@@ -6,7 +6,6 @@ use App\Http\Controllers\User\MaterialController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/materi/{materi_id}/file', [MaterialController::class, 'getFile'])->name('user.material.file.get');
 
 Route::prefix('wakasek')->group(function () {
     require __DIR__ . '/web/vice-principal/index.php';

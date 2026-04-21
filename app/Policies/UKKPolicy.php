@@ -62,10 +62,7 @@ class UKKPolicy
             }
 
             if ($student) {
-                $currentStudentLevel = $student->class->level;
-                $maxLevelInMajor = $student->class->major->classes()->max('level');
-
-                return $currentStudentLevel === $maxLevelInMajor && $ukk->major === $student->class->major->name;
+                return $ukk->major === $student->class->major->name;
             }
         }
 

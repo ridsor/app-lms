@@ -1,3 +1,7 @@
+@php
+  use App\Helpers\Helper;
+@endphp
+
 @props(['content'])
 
 <div class="item d-flex w-100 border rounded-1 flex-column">
@@ -66,73 +70,69 @@
         {!! $content->description !!}
       </div>
     </div>
-    <div class="mb-3 view_file_path">
+    <div class="view_file_path">
       @switch($content->file_type)
         @case('eBook')
-          <div class="mt-2 border rounded-2
-         overflow-hidden bg-light"
-            style="min-height: 400px;
-         max-height: 800px;">
+          <div class="eBook">
             @php
-              $fileUrl = route('user.material.file.get', $content->id);
+              $fileUrl = URL::temporarySignedRoute(
+                  'user.material.file.get', // nama route
+                  now()->addMinutes(60), // masa berlaku
+                  ['materi_id' => $content->id],
+              );
               $fileType = Helper::getFileType($content->file_name);
             @endphp
-
             @if ($fileType == 'image')
-              <div class="d-flex justify-content-center
-         align-items-center p-3 h-100">
+              <div class="d-flex justify-content-center align-items-center p-3 h-100">
                 <img src="{{ $fileUrl }}" alt="{{ $content->file_name }}"
-                  style="max-width: 100%; height: auto;
-         object-fit: contain;">
+                  style="max-width: 100%; height: auto; object-fit: contain;">
               </div>
-              @elseif
-              (Helper::isGooglePreviewable($content->file_name))
+            @elseif (Helper::isGooglePreviewable($content->file_name))
               <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true" width="100%"
                 height="600px" frameborder="0"></iframe>
             @else
               <iframe src="{{ $fileUrl }}" width="100%" height="600px" frameborder="0"></iframe>
             @endif
           </div>
-        </div>
-      @break
+        @break
 
-      @case('Archive')
-        <div class="Archive py-3 px-3 mx-2 rounded-2 d-flex align-items-center flex-column gap-1">
-          <div style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;">
-            <i class="fa fa-file text-primary fs-2"></i>
-          </div>
-          <div class="fw-medium text-break" style="font-size: .8rem">
-            {{ $content?->file_name . ' (' . number_format($content?->file_size / (1024 * 1024), 2) . 'mb)' ?? '-' }}
-          </div>
-          <a href="{{ route('user.material.file.download', ['materi_id' => $content->id]) }}"
-            style="width: 38px; height: 38px;"
-            class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
-            <i data-feather="download" style="width: 20px; height: 20px"></i>
-          </a>
-        </div>
-      @break
-
-      @case('Link')
-        <div class="Link py-3 px-3 mx-2 rounded-2 d-flex align-items-center flex-md-row flex-column gap-2">
-          <div class="link d-flex align-items-center gap-2 copy-link" style="cursor:pointer;" title="Salin link"
-            tabindex="0" onclick="handleCopyText('{{ $content->file_path }}')">
-            <div class="px-2"
-              style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;">
-              <i class="fa fa-link text-primary fs-4"></i>
+        @case('Archive')
+          <div class="Archive py-3 px-3 mx-2 rounded-2 d-flex align-items-center flex-column gap-1">
+            <div style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;">
+              <i class="fa fa-file text-primary fs-2"></i>
             </div>
-            <div class="fw-medium text-break" style="font-size: .8rem">{{ $content->file_path }}</div>
+            <div class="fw-medium text-break" style="font-size: .8rem">
+              {{ $content?->file_name . ' (' . number_format($content?->file_size / (1024 * 1024), 2) . 'mb)' ?? '-' }}
+            </div>
+            <a href="{{ route('user.material.file.download', ['materi_id' => $content->id]) }}"
+              style="width: 38px; height: 38px;"
+              class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
+              <i data-feather="download" style="width: 20px; height: 20px"></i>
+            </a>
           </div>
-          <a href="{{ $content->file_path }}" target="_blank"
-            class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
-            <span style="font-size: .8rem" class="text-nowrap me-2">Buka Link</span>
-            <i data-feather="external-link" style="width: 20px; height: 20px"></i>
-          </a>
-        </div>
-      @break
+        @break
 
-      @default
-    @endswitch
+        @case('Link')
+          <div class="Link py-3 px-3 mx-2 rounded-2 d-flex align-items-center flex-md-row flex-column gap-2">
+            <div class="link d-flex align-items-center gap-2 copy-link" style="cursor:pointer;" title="Salin link"
+              tabindex="0" onclick="handleCopyText('{{ $content->file_path }}')">
+              <div class="px-2"
+                style="display:flex;align-items:center;justify-content:center;min-width:32px;min-height:32px;">
+                <i class="fa fa-link text-primary fs-4"></i>
+              </div>
+              <div class="fw-medium text-break" style="font-size: .8rem">{{ $content->file_path }}</div>
+            </div>
+            <a href="{{ $content->file_path }}" target="_blank"
+              class="btn d-flex align-items-center bg-20-info border justify-content-center text-info p-2">
+              <span style="font-size: .8rem" class="text-nowrap me-2">Buka Link</span>
+              <i data-feather="external-link" style="width: 20px; height: 20px"></i>
+            </a>
+          </div>
+        @break
+
+        @default
+      @endswitch
+    </div>
+
   </div>
-
-</div>
 </div>

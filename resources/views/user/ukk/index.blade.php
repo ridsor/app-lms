@@ -223,7 +223,7 @@
                                 @if ($ukk->type === 'Teori')
                                     href="{{ route('user.ukk.teori.info', $ukk->id) }}"
                                 @else
-                                    href="{{ route('user.ukk.show', $ukk->id) }}"
+                                    href="{{ route('user.ukk.praktik.info', $ukk->id) }}"
                                 @endif
                              @endrole
                             @role(['operator'])

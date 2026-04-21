@@ -127,8 +127,10 @@ class MaterialController extends Controller
             return abort(404, 'File tidak ditemukan.');
         }
 
-        if (Storage::exists($material->file_path)) {
-            return response()->file(Storage::path($material->file_path));
+        if (!empty($material->file_path) && Storage::exists($material->file_path)) {
+            $file = Storage::get($material->file_path);
+            $type = Storage::mimeType($material->file_path);
+            return response($file)->header('Content-Type', $type);
         }
 
         return abort(404, 'File tidak ditemukan.');

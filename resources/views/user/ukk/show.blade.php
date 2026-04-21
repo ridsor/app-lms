@@ -59,8 +59,7 @@
                       style="width: 38px; height: 38px;" onclick="handleEditUkk(event, {{ $ukk->id }})">
                       <i data-feather="edit-2" style="width: 20px; height: 20px"></i>
                     </button>
-                    <button
-                      class="btn d-flex align-items-center bg-20-danger border justify-content-center text-danger p-2"
+                    <button class="btn d-flex align-items-center bg-20-danger border justify-content-center text-danger p-2"
                       style="width: 38px; height: 38px;" data-redirect="{{ route('user.ukk.index') }}"
                       onclick="handleDeleteUkk(event, {{ $ukk->id }})">
                       <i data-feather="trash-2" style="width: 20px; height: 20px"></i>
@@ -179,7 +178,11 @@
                       <div class="mt-4 border rounded-2 overflow-hidden bg-light"
                         style="min-height: 400px; max-height: 800px;">
                         @php
-                          $fileUrl = route('user.ukk.file.get', $ukk->id);
+                          $fileUrl = URL::temporarySignedRoute(
+                              'user.ukk.file.get', // nama route
+                              now()->addMinutes(60), // masa berlaku
+                              ['id' => $ukk->id],
+                          );
                           $fileType = Helper::getFileType($ukk->file_name);
                         @endphp
 

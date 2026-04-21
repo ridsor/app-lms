@@ -277,10 +277,174 @@ class UKKController extends Controller
     }
     public function showResultPraktik(Request $request, $id)
     {
-        $ukk = UKK::findOrFail($id);
+        $ukk = UKK::with(['practiceResults', 'period'])->withCount(['practiceResults'])->findOrFail($id);
         $this->authorize('evaluate', $ukk);
 
+        if ($request->ajax()) {
+            $data = \App\Models\UKKResultPractice::where('ukk_id', $ukk->id)
+                ->select([
+                    'ukk_result_practice.*',
+                    'students.name',
+                    'students.nis',
+                ])
+                ->leftJoin('students', 'student_id', '=', 'students.id')
+                ->with('grader:id,name');
+
+            if ($request->filled('search') && !empty($request->search['value'])) {
+                $search = $request->search['value'];
+                $data->where(function ($q) use ($search) {
+                    $q->where('students.name', 'like', "%{$search}%")
+                        ->orWhere('students.nis', 'like', "%{$search}%");
+                });
+            }
+
+            return DataTables::of($data)
+                ->addColumn('Nama', fn($row) => '<div class="product-names"><p>' . $row->name . '</p></div>')
+                ->addColumn('NIS', fn($row) => '<p class="f-light">' . $row->nis . '</p>')
+                ->addColumn('Nilai', fn($row) => $row->score !== null ? '<span class="badge badge-light-primary">' . ($row->formatted_score) . '</span>' : '<span class="badge badge-light-warning">Belum Dinilai</span>')
+                ->addColumn('Waktu', fn($row) => $row->submitted_at ? $row->submitted_at->translatedFormat('d/m/Y H:i') : '-')
+                ->addColumn('Aksi', function ($row) use ($ukk) {
+                    return '
+                        <div class="common-align gap-2 justify-content-start">
+                            <a href="' . route('user.ukk.praktik.evaluation', [$ukk->id, $row->id]) . '" class="square-white">
+                                <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
+                            </a>
+                        </div>';
+                })
+                ->rawColumns(['Nama', 'NIS', 'Nilai', 'Waktu', 'Aksi'])
+                ->make(true);
+        }
+
         return view('user.ukk.result.praktik', compact('ukk'));
+    }
+
+    public function practiceInfo(Request $request, $id)
+    {
+        if (!$request->user()->hasRole('student') && !$request->user()->hasRole('parent')) {
+            return abort(403);
+        }
+
+        $ukk = UKK::with(['period', 'operator'])->findOrFail($id);
+
+        if ($ukk->type !== 'Praktik') {
+            return abort(404, 'UKK Praktik tidak ditemukan.');
+        }
+
+        $this->authorize('view', $ukk);
+
+        $studentId = null;
+        if ($request->user()->hasRole('student')) {
+            $studentId = $request->user()->student->id;
+        } elseif ($request->user()->hasRole('parent')) {
+            $studentId = $request->user()->parent->id;
+        }
+
+        $practice_result = \App\Models\UKKResultPractice::where('ukk_id', $ukk->id)
+            ->where('student_id', $studentId)
+            ->first();
+
+        return view('user.ukk.info.practice', [
+            'ukk' => $ukk,
+            'practice_result' => $practice_result,
+        ]);
+    }
+
+    public function practiceSubmit(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->hasRole('student')) {
+                return abort(403);
+            }
+
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('view', $ukk);
+
+            if ($ukk->type !== 'Praktik') {
+                return $this->sendError('Hanya UKK Praktik yang bisa mengumpulkan file.', [], 400);
+            }
+
+            $now = now();
+            if ($now->lt($ukk->start_time)) {
+                return $this->sendError('UKK belum dimulai.', [], 403);
+            }
+
+            if ($now->gt($ukk->end_time)) {
+                return $this->sendError('Waktu pengumpulan UKK sudah berakhir.', [], 403);
+            }
+
+            $request->validate([
+                'files.*' => 'nullable|file|max:10240', // Max 10MB per file
+                'links.*' => 'nullable|url',
+                'description' => 'nullable|string'
+            ]);
+
+            $student = auth()->user()->student;
+            $contents = [
+                'description' => $request->description,
+                'files' => [],
+                'links' => $request->links ?? []
+            ];
+
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    $path = $file->store('file/ukk/submissions');
+                    $contents['files'][] = [
+                        'name' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'size' => $file->getSize()
+                    ];
+                }
+            }
+
+            $result = \App\Models\UKKResultPractice::updateOrCreate(
+                ['ukk_id' => $ukk->id, 'student_id' => $student->id],
+                [
+                    'contents' => $contents,
+                    'submitted_at' => $now
+                ]
+            );
+
+            return $this->sendResponse('Hasil praktik berhasil dikumpulkan.', $result);
+        } catch (\Exception $e) {
+            Log::error('Error submit UKK Praktik: ' . $e->getMessage());
+            return $this->sendError('Gagal mengumpulkan. Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function evaluationPraktik(Request $request, $ukk_id, $result_id)
+    {
+        $ukk = UKK::findOrFail($ukk_id);
+        $this->authorize('evaluate', $ukk);
+
+        $practice_result = \App\Models\UKKResultPractice::with('student')->findOrFail($result_id);
+
+        return view('user.ukk.evaluation_praktik', compact('ukk', 'practice_result'));
+    }
+
+    public function updatePracticeScore(Request $request, $result_id)
+    {
+        $request->validate([
+            'score' => 'required|numeric|min:0|max:100',
+            'feedback' => 'nullable|string'
+        ]);
+
+        try {
+            $result = \App\Models\UKKResultPractice::findOrFail($result_id);
+            $ukk = UKK::findOrFail($result->ukk_id);
+            $this->authorize('evaluate', $ukk);
+
+            $result->update([
+                'score' => $request->score,
+                'feedback' => $request->feedback,
+                'graded_at' => now(),
+                'graded_by' => auth()->id()
+            ]);
+
+            return $this->sendResponse('Nilai praktik berhasil disimpan.');
+        } catch (\Exception $e) {
+            Log::error('Error update score UKK Praktik: ' . $e->getMessage());
+            return $this->sendError('Gagal menyimpan nilai.', [], 500);
+        }
     }
 
     public function update(UKKRequest $request, $id)
@@ -343,10 +507,12 @@ class UKKController extends Controller
         }
     }
 
-    public function getFile($id)
+    public function getFile(Request $request, $id)
     {
         $ukk = UKK::findOrFail($id);
-        $this->authorize('view', $ukk);
+        if (!$request->hasValidSignature()) {
+            $this->authorize('view', $ukk);
+        }
 
         if (!empty($ukk->file_path) && Storage::exists($ukk->file_path)) {
             $file = Storage::get($ukk->file_path);

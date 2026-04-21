@@ -25,6 +25,8 @@ use App\Http\Controllers\User\TeachingJournalController;
 use App\Http\Middleware\CheckExamTime;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/ukk/{id}/file', [UKKController::class, 'getFile'])->name('user.ukk.file.get');
+Route::get('/materi/{materi_id}/file', [MaterialController::class, 'getFile'])->name('user.material.file.get');
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"])->group(function () {
     Route::get('/beranda', [HomeController::class, 'index'])->name('user.home');
 
@@ -175,7 +177,6 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/ukk/{id}/soal', [UKKController::class, 'showQuestion'])->name('user.ukk.question.show');
     Route::get('/ukk/{id}/hasil/teori', [UKKController::class, 'showResultTeori'])->name('user.ukk.result.teori');
     Route::get('/ukk/{id}/hasil/teori/export', [UKKController::class, 'exportResultTeori'])->name('user.ukk.result.teori.export');
-    Route::get('/ukk/{id}/file', [UKKController::class, 'getFile'])->name('user.ukk.file.get');
     Route::get('/ukk/{id}/download', [UKKController::class, 'downloadFile'])->name('user.ukk.file.download');
     Route::patch('/ukk/{id}/hasil/teori/reset', [UKKController::class, 'resetResult'])->name('user.ukk.result.teori.reset');
     Route::patch('/ukk/{id}/hasil/teori/{ukk_result_id}/reset', [UKKController::class, 'resetResultById'])->name('user.ukk.result.teori.reset.byId');
@@ -187,6 +188,12 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::post('/ukk/{id}/teori/pengerjaan/answer', [UKKController::class, 'setAnswerByUKKResult'])->name('user.ukk.teori.workmanship.answer');
     Route::post('/ukk/{id}/teori/pengerjaan', [UKKController::class, 'theorySubmit'])->name('user.ukk.teori.workmanship.submit');
     Route::get('/ukk/{id}/teori/pengerjaan/hasil', [UKKController::class, 'theoryWorkmanshipResult'])->name('user.ukk.teori.workmanship.result');
-    Route::get('/ukk/{ukk_id}/penilaian/{page?}', [UKKController::class, 'evaluation'])->name('user.ukk.evaluation');
-    Route::post('/ukk/{id}/score/{answer_id}', [UKKController::class, 'updateAnswerScore'])->name('user.ukk.update-answer-score');
+    Route::get('/ukk/{id}/evaluasi', [UKKController::class, 'evaluation'])->name('user.ukk.evaluation');
+    Route::post('/ukk/{id}/update-skor/{answer_id}', [UKKController::class, 'updateAnswerScore'])->name('user.ukk.updateAnswerScore');
+
+    // UKK Praktik
+    Route::get('/ukk/{id}/praktik/info', [UKKController::class, 'practiceInfo'])->name('user.ukk.praktik.info');
+    Route::post('/ukk/{id}/praktik/submit', [UKKController::class, 'practiceSubmit'])->name('user.ukk.praktik.submit');
+    Route::get('/ukk/{id}/praktik/evaluasi/{result_id}', [UKKController::class, 'evaluationPraktik'])->name('user.ukk.praktik.evaluation');
+    Route::post('/ukk/praktik/update-skor/{result_id}', [UKKController::class, 'updatePracticeScore'])->name('user.ukk.praktik.updateScore');
 });
