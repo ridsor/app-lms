@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
@@ -13,6 +14,18 @@ class RolePermissionSeeder extends Seeder
     {
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // hapus relasi role-permission dan model_has_roles
+        DB::table('role_has_permissions')->delete();
+        DB::table('model_has_roles')->delete();
+        DB::table('model_has_permissions')->delete();
+
+        // hapus role & permission lama
+        Role::query()->delete();
+        Permission::query()->delete();
+
+        // hapus user yang dibuat seeder
+        User::whereIn('username', ['admin', 'wakasek', 'operator'])->delete();
 
         // Buat permissions untuk student management
         $permissions = [
@@ -56,7 +69,9 @@ class RolePermissionSeeder extends Seeder
             'ukk.view',
             'ukk.create',
             'ukk.edit',
-            'ukk.delete'
+            'ukk.delete',
+            'ukk.evaluation',
+            'operator_ukk.*'
         ];
 
         foreach ($permissions as $permission) {
@@ -175,7 +190,21 @@ class RolePermissionSeeder extends Seeder
             'ukk.view',
             'ukk.create',
             'ukk.edit',
-            'ukk.delete'
+            'ukk.delete',
+            'operator_ukk.*',
         ]);
+
+        $student = User::where('username', 'student')->first();
+        if ($student) {
+            $student->assignRole('student');
+        }
+        $teacher = User::where('username', 'teacher')->first();
+        if ($teacher) {
+            $teacher->assignRole('teacher');
+        }
+        $parent = User::where('username', 'parent')->first();
+        if ($parent) {
+            $parent->assignRole('parent');
+        }
     }
 }

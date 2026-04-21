@@ -179,7 +179,7 @@ $(document).ready(function () {
             );
         const formData = new FormData(this);
         formData.append('question_type', 'multiple_choice');
-        formData.append('model', 'exam');
+        formData.append('model', $(this).data('type') || 'exam');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -263,7 +263,7 @@ $(document).ready(function () {
             );
         const formData = new FormData(this);
         formData.append('question_type', 'essay');
-        formData.append('model', 'exam');
+        formData.append('model', $(this).data('type') || 'exam');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -330,7 +330,7 @@ $(document).ready(function () {
             );
         const formData = new FormData(this);
         formData.append('question_type', 'multiple_choice');
-        formData.append('model', 'exam');
+        formData.append('model', $(this).data('type') || 'exam');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -415,7 +415,7 @@ $(document).ready(function () {
             );
         const formData = new FormData(this);
         formData.append('question_type', 'essay');
-        formData.append('model', 'exam');
+        formData.append('model', $(this).data('type') || 'exam');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -718,6 +718,7 @@ $(function () {
         const trashBtn = $(this);
         var id = trashBtn.data("id");
         var exam_id = $("#question-bank-table").data("exam-id");
+        var type = $("#question-bank-table").data("type") || "exam";
         if (!id || !exam_id) return;
 
         Swal.fire({
@@ -740,8 +741,11 @@ $(function () {
                     .html(
                         '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
                     );
+                
+                let url = type === "ukk" ? `/ukk/${exam_id}/copy/${id}` : `/ujian/${exam_id}/copy/${id}`;
+                
                 $.ajax({
-                    url: `/ujian/${exam_id}/copy/${id}`,
+                    url: url,
                     method: "POST",
                     success: function (res) {
                         if (res.success) {

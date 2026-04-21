@@ -51,11 +51,8 @@ class ExamResult extends Model
 
     public function getFormattedScoreAttribute()
     {
-        if ($this->answers->isEmpty()) {
-            return ' - ';
-        }
 
-        $value = $this->answers->sum('score');
+        $value = $this->score;
 
         if (is_null($value)) {
             return ' - ';

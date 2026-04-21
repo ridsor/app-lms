@@ -3,9 +3,12 @@ const params = new URLSearchParams(window.location.search);
 let q = Number(params.get("q")) || 1;
 let lightbox;
 const answered = new Map();
-old_answer.forEach((item) => {
-    answered.set(item.questionable_id + (item.questionable_type === "App\\Models\\MultipleQuestion" ? "multiple" : "essay"), item.answer);
-});
+if (typeof old_answer !== "undefined" && old_answer) {
+    old_answer.forEach((item) => {
+        const typeSuffix = item.questionable_type.includes("MultipleQuestion") ? "multiple" : "essay";
+        answered.set(item.questionable_id + typeSuffix, item.answer);
+    });
+}
 
 // =================== Document Ready ===================
 $(document).ready(function () {
@@ -83,7 +86,7 @@ $(document).ready(function () {
                 .removeClass("btn-outline-secondary")
                 .addClass("btn-success");
         } else {
-            answered.delete(question_id);
+            answered.delete(question_id + question_type);
             $(`.nav-q${q}`)
                 .addClass("btn-outline-secondary")
                 .removeClass("btn-success");
@@ -105,7 +108,7 @@ $(document).ready(function () {
                 .removeClass("btn-outline-secondary")
                 .addClass("btn-success");
         } else {
-            answered.delete(question_id);
+            answered.delete(question_id + question_type);
             $(`.nav-q${q}`)
                 .addClass("btn-outline-secondary")
                 .removeClass("btn-success");
@@ -315,7 +318,11 @@ $(document).ready(function () {
         let index = 0;
 
         answered.forEach((value, key) => {
-            formData.append(`answered[${index}][question_id]`, key);
+            const question_id = key.replace("multiple", "").replace("essay", "");
+            const question_type = key.includes("multiple") ? "multiple" : "essay";
+
+            formData.append(`answered[${index}][question_id]`, question_id);
+            formData.append(`answered[${index}][question_type]`, question_type);
             formData.append(`answered[${index}][answer]`, value);
             index++;
         });

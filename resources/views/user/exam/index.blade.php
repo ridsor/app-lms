@@ -53,7 +53,7 @@
               <div class="row g-3 align-items-center mb-4">
                 <div class="d-flex align-items-center col gap-2">
                   <i data-feather="search"></i>
-                  <input type="search" class="form-control w-100" placeholder="Cari judul tugas"
+                  <input type="search" class="form-control w-100" placeholder="Cari judul ujian"
                     value="{{ request()->query('cari') }}" name="cari" id="globalSearch" />
                 </div>
                 <div class="col-auto">
@@ -209,7 +209,7 @@
                 </div>
               </div>
 
-              <div class="task-list d-flex flex-column gap-2">
+              <div class="exam-list d-flex flex-column gap-2">
                 @if (count($exams) > 0)
                   @foreach ($exams as $exam)
                     <div class="task-item border rounded-1 w-100 p-3">

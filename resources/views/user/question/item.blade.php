@@ -34,12 +34,12 @@
               @case('audio')
                 <div class="audio">
                   <audio controls>
-                    @if (strtolower(pathinfo($question_file, PATHINFO_EXTENSION)) == 'mp3')
+                    @if (strtolower(pathinfo($question->question_file, PATHINFO_EXTENSION)) == 'mp3')
                       <source src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType]) }}"
                         type="audio/mpeg">
                     @endif
-                    @if (strtolower(pathinfo($question_file, PATHINFO_EXTENSION)) == 'mav')
-                      <source src="{{ route('user.question.file.get', ['id' => $question->id]) }}" type="audio/wav">
+                    @if (strtolower(pathinfo($question->question_file, PATHINFO_EXTENSION)) == 'mav')
+                      <source src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType]) }}" type="audio/wav">
                     @endif
 
                     Browser Anda tidak mendukung elemen audio.
@@ -240,7 +240,7 @@
     </div>
     <div class="d-flex justify-content-end col-12 order-1 order-md-3 col-md-auto">
       <div class="d-flex gap-2 align-items-center">
-        @can(['exam.edit', 'exam.delete'])
+        @role(['operator', 'teacher'])
           <div class="bg-white">
             <button onclick="handleEditQuestion(event, {{ $question->id }}, '{{ $qType }}')"
               class="edit btn d-flex align-items-center bg-20-warning border justify-content-center text-warning p-2"
@@ -255,7 +255,7 @@
               <i data-feather="trash-2" style="width: 20px; height: 20px"></i>
             </button>
           </div>
-        @endcan
+        @endrole
         <div class="border rounded-3 d-flex px-3 py-2 align-items-center gap-2">
           <img src="{{ asset('assets/svg/star.svg') }}" alt="star" />
           <p class="mb-0">

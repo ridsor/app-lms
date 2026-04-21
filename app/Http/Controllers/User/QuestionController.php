@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\QuestionRequest;
 use App\Models\EssayQuestion;
 use App\Models\Exam;
+use App\Models\UKK;
 use App\Models\MultipleQuestion;
 use App\Models\QuestionBank;
 use Illuminate\Http\Request;
@@ -27,6 +28,8 @@ class QuestionController extends Controller
                 $validated['questionable_type'] = Exam::class;
             } else if ($request->input('model') === 'question_bank') {
                 $validated['questionable_type'] = QuestionBank::class;
+            } else if ($request->input('model') === 'ukk') {
+                $validated['questionable_type'] = UKK::class;
             }
 
             // Upload file
@@ -243,7 +246,7 @@ class QuestionController extends Controller
             if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
                 return abort(403);
             }
-        } else if ($question->questionable_type == Exam::class) {
+        } else if ($question->questionable_type == Exam::class || $question->questionable_type == UKK::class) {
             $this->authorize('view', $question->questionable);
         }
 
@@ -274,7 +277,7 @@ class QuestionController extends Controller
             if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
                 return abort(403);
             }
-        } else if ($question->questionable_type == Exam::class) {
+        } else if ($question->questionable_type == Exam::class || $question->questionable_type == UKK::class) {
             $this->authorize('view', $question->questionable);
         }
 
@@ -314,7 +317,7 @@ class QuestionController extends Controller
             if (!$request->user()->can(['question.create', 'question.view', 'question.edit', 'question.delete'])) {
                 return abort(403);
             }
-        } else if ($question->questionable_type == Exam::class) {
+        } else if ($question->questionable_type == Exam::class || $question->questionable_type == UKK::class) {
             $this->authorize('view', $question->questionable);
         }
 

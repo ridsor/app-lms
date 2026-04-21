@@ -274,4 +274,31 @@ class Helper
 
         return $array;
     }
+
+    public static function isGooglePreviewable($filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $supported = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+        return in_array($extension, $supported);
+    }
+
+    public static function isPreviewable($filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $supported = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+        return in_array($extension, $supported);
+    }
+
+    public static function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
 }

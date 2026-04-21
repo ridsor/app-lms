@@ -36,7 +36,7 @@ class QuestionRequest extends FormRequest
 
         return [
             'question_type' => 'required|in:multiple_choice,essay',
-            'model' => 'required|in:exam,question_bank',
+            'model' => 'required|in:exam,question_bank,ukk',
         ];
     }
 

@@ -36,6 +36,7 @@ class WorkmanshipRequest extends FormRequest
                     }
                 },
             ],
+            'answered.*.question_type' => 'required|in:multiple,essay',
             'answered.*.answer' => 'required|string'
         ];
     }

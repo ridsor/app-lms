@@ -72,7 +72,7 @@
               <div class="border rounded-2 p-3 card mb-0">
                 <p class="mb-2">Jumlah Soal</p>
                 <span
-                  class="fs-3">{{ $exam?->multipleQuestions->count() + $exam?->essayQuestions->count() ?: '-' }}</span>
+                  class="fs-3">{{ $exam?->multipleQuestions->count() + $exam?->essayQuestions->count() ?: '0' }}</span>
               </div>
             </div>
             <div class="col">

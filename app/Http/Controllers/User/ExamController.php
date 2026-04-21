@@ -381,38 +381,21 @@ class ExamController extends Controller
             $data->get();
 
             return Datatables::of($data)
-                ->addColumn('Nama', function ($row) {
-                    $html = '
-                    <div>
-                    <p class="f-light mb-0">
-                        ' . $row->name  . '</p>
-                    <p class="f-light mb-0">' . $row->nis  . '</p> 
-                    </div>
-                    ';
-                    return $html;
+                ->addColumn('Nama', fn($row) => '<div class="product-names"><p>' . $row->name . '</p></div>')
+                ->addColumn('NIS', fn($row) => '<p class="f-light">' . $row->nis . '</p>')
+                ->addColumn('Nilai', fn($row) => '<span class="badge badge-light-primary">' . ($row->formatted_score) . '</span>')
+                ->addColumn('Status', function ($row) {
+                    return Helper::getExamStatusLabel($row->status);
                 })
-                ->addColumn('Pengerjaan', function ($row) {
-                    $start = optional($row->start_time)->translatedFormat('j M Y H:i');
-                    $end   = optional($row->end_time)->translatedFormat('j M Y H:i');
-                    $html = '<p class="f-light">'
-                        . ($start ?? '-') . ' &middot; ' . ($end ?? '-') .
-                        '</p>';
-                    return $html;
-                })
-                ->addColumn('Nilai', function ($row) {
-                    $html = '
-                    <span class="badge badge-light-primary">' . ($row->formatted_score ?? '-') . '</span>
-                    ';
-                    return $html;
-                })
-                ->rawColumns(['Nama', 'Pengerjaan', 'Nilai'])
+                ->addColumn('Pengerjaan', fn($row) => $row->end_time ? $row->end_time->translatedFormat('d/m/Y H:i') : '-')
+                ->rawColumns(['Nama', 'NIS', 'Nilai', 'Status', 'Pengerjaan'])
                 ->make(true);
         }
 
         return view('user.exam.result.show', compact('exam'));
     }
 
-    public function info(Request $request, $id, $page = 1)
+    public function info(Request $request, $id)
     {
         if (!$request->user()->hasRole('student') && !$request->user()->hasRole('parent')) {
             return abort(403);
@@ -511,6 +494,7 @@ class ExamController extends Controller
                 ],
                 [
                     'answer' => $validated['answer'],
+                    'answered_at' => now(),
                 ]
             );
 
@@ -555,7 +539,15 @@ class ExamController extends Controller
                 return $this->sendError('Soal tidak ditemukan.', [], 404);
             }
 
-            $answer = ExamAnswer::where('questionable_id', $question['id'])->where('questionable_type', $question['question_type'] === 'multiple' ? MultipleQuestion::class : EssayQuestion::class)->first();
+            $student = auth()->user()->student;
+            $examResult = ExamResult::where('exam_id', $exam->id)
+                ->where('student_id', $student->id)
+                ->first();
+
+            $answer = $examResult ? $examResult->answers()
+                ->where('questionable_id', $question['id'])
+                ->where('questionable_type', $question['question_type'] === 'multiple' ? MultipleQuestion::class : EssayQuestion::class)
+                ->first() : null;
 
             $response = [
                 'exam' => $exam,
@@ -659,31 +651,32 @@ class ExamController extends Controller
             }
 
             $validated = $request->validated();
-            Log::info($validated);
 
-            $answersData = [];
-            if (isset($validated['answered'])) {
+            DB::beginTransaction();
+
+            if (isset($validated['answered']) && is_array($validated['answered'])) {
                 foreach ($validated['answered'] as $answer) {
-                    $answersData[] = [
-                        'questionable_id' => substr($answer['question_id'], 0, 1),
-                        'questionable_type' => (substr($answer['question_id'], 1, strlen((string)$answer['question_id']) - 1) === "multiple") ? MultipleQuestion::class : EssayQuestion::class,
-                        'exam_result_id' => $examResult->id,
-                        'answer' => $answer['answer']
-                    ];
+                    $examResult->answers()->updateOrCreate(
+                        [
+                            'questionable_id' => $answer['question_id'],
+                            'questionable_type' => $answer['question_type'] === "multiple" ? MultipleQuestion::class : EssayQuestion::class,
+                        ],
+                        [
+                            'answer' => $answer['answer'],
+                            'answered_at' => now(),
+                        ]
+                    );
                 }
             }
 
-            $examResult->answers()->upsert(
-                $answersData,
-                ['questionable_id', 'questionable_type', 'exam_result_id'],
-                ['answer']
-            );
-
             app(ExamScoringService::class)->saveScore($examResult, $student->id);
+
+            DB::commit();
 
             return $this->sendResponse('Ujian selesai. Terima kasih!', $examResult);
         } catch (\Exception $e) {
-            Log::error('Error : ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Error submit ujian: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -761,6 +754,12 @@ class ExamController extends Controller
                 $exam->results()->delete();
             }
 
+            activity()
+                ->useLog('Ujian')
+                ->performedOn($exam)
+                ->causedBy($request->user())
+                ->log('Pengguna ' . $request->user()->name . ' mereset semua hasil ujian untuk ujian ID: ' . $exam->id);
+
             DB::commit();
 
             return $this->sendResponse('Semua hasil ujian berhasil direset.');
@@ -799,6 +798,12 @@ class ExamController extends Controller
             // Delete child records first, then the parent
             $result->answers()->delete();
             $result->delete();
+
+            activity()
+                ->useLog('Ujian')
+                ->performedOn($exam)
+                ->causedBy($request->user())
+                ->log('Pengguna ' . $request->user()->name . ' mereset hasil ujian untuk ujian ID: ' . $exam->id . ', hasil ujian ID: ' . $exam_result_id);
 
             DB::commit();
 
@@ -843,7 +848,7 @@ class ExamController extends Controller
                 ['Mata Pelajaran', 'Mata Pelajaran' => $exam->schedule->subject ? $exam->schedule->subject->code . ' - ' . strtoupper($exam->schedule->subject->name) : '-'],
                 ['Kelas', 'Kelas' => $exam->schedule->class ? $exam->schedule->class->name . $exam->schedule->class->level . ($exam->schedule->class->major ? ' ' . $exam->schedule->class->major->name : '') : '-'],
                 ['Guru', 'Guru' => $exam->schedule->teacher ? $exam->schedule->teacher->name . ' (' . $exam->schedule->teacher->nip . ')' : '-'],
-                ['Jenis Ujian', 'Jenis Ujian' => Helper::getExamTypeLabel($exam->exam_type) ?: '-'],
+                ['Jenis Ujian', 'Jenis Ujian' => Helper::getExamTypeLabel($exam->type) ?: '-'],
                 ['Waktu Ujian', 'Waktu Ujian' => $exam->start_time && $exam->end_time ? $exam->start_time->translatedFormat('j F Y H:i') . ' - ' . $exam->end_time->translatedFormat('j F Y H:i') : '-'],
                 ['Durasi', 'Durasi' => $exam->duration ? $exam->duration . ' menit' : '-'],
                 [],
@@ -961,6 +966,13 @@ class ExamController extends Controller
 
         $answer->score = $request->score;
         $answer->save();
+        $answer->examResult()->update(['graded_by' => auth()->user()->teacher->id, 'graded_at' => now()]);
+
+        activity()
+            ->useLog('Jawaban Ujian')
+            ->performedOn($exam)
+            ->causedBy($request->user())
+            ->log('Pengguna ' . $request->user()->name . ' menilai jawaban ujian untuk ujian: ' . $exam->id . ', jawaban ID: ' . $answer->id . ', skor: ' . $answer->score);
 
         return $this->sendResponse('Skor berhasil diubah.');
     }

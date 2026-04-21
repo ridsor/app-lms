@@ -18,7 +18,6 @@ class LoginController extends Controller
         $request->authenticate('student');
 
         $request->session()->regenerate();
-
         return redirect()->intended(route('user.home', absolute: false));
     }
 }
