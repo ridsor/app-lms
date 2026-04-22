@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Mews\Purifier\Casts\CleanHtml;
+use App\Models\UKKAnswerTheory;
 
 class UKK extends Model
 {
@@ -30,6 +31,23 @@ class UKK extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
     ];
+
+    protected $appends = ['not_yet_rated'];
+
+    public function getNotYetRatedAttribute()
+    {
+        if ($this->type === 'Teori') {
+            return UKKAnswerTheory::whereHas('ukkResult', function ($query) {
+                $query->where('ukk_id', $this->id);
+            })->whereNull('score')->count();
+        }
+
+        if ($this->type === 'Praktik') {
+            return $this->practiceResults()->whereNull('score')->count();
+        }
+
+        return 0;
+    }
 
     public function period()
     {

@@ -187,66 +187,66 @@
                             </svg><span class="lan-3">Tugas </span></a>
                         </li>
                       @endcan
-                        @can(['exam.view'])
+                      @can(['exam.view'])
+                        <li class="sidebar-list">
+                          <i class="fa-solid fa-thumbtack"></i>
+                          <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.exam.index') }}"><svg
+                              class="stroke-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
+                              </use>
+                            </svg><svg class="fill-icon">
+                              <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
+                            </svg><span class="lan-3">Ujian </span></a>
+                        </li>
+                        @can('viewAny', App\Models\UKK::class)
                           <li class="sidebar-list">
                             <i class="fa-solid fa-thumbtack"></i>
-                            <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.exam.index') }}"><svg
+                            <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.ukk.index') }}"><svg
                                 class="stroke-icon">
                                 <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
                                 </use>
                               </svg><svg class="fill-icon">
                                 <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
-                              </svg><span class="lan-3">Ujian </span></a>
+                              </svg><span class="lan-3">UKK </span></a>
                           </li>
-                          @can('viewAny', App\Models\UKK::class)
-                            <li class="sidebar-list">
-                              <i class="fa-solid fa-thumbtack"></i>
-                              <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.ukk.index') }}"><svg
-                                  class="stroke-icon">
-                                  <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
-                                  </use>
-                                </svg><svg class="fill-icon">
-                                  <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
-                                </svg><span class="lan-3">UKK </span></a>
-                            </li>
-                          @endcan
-                          @can(['exam.edit', 'exam.delete', 'exam.create'])
-                            <li class="sidebar-list">
-                              <i class="fa-solid fa-thumbtack"></i>
-                              <a class="sidebar-link sidebar-title link-nav"
-                                href="{{ route('user.question-bank.index') }}"><svg class="stroke-icon">
-                                  <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
-                                  </use>
-                                </svg><svg class="fill-icon">
-                                  <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
-                                </svg><span class="lan-3">Bank Soal </span></a>
-                            </li>
-                          @endcan
-                          @can('operator_ukk.*')
-                            <li class="sidebar-list">
-                              <i class="fa-solid fa-thumbtack"></i>
-                              <a class="sidebar-link sidebar-title link-nav"
-                                href="{{ route('user.ukk-operator.index') }}"><svg class="stroke-icon">
-                                  <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-user') }}"></use>
-                                </svg><svg class="fill-icon">
-                                  <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
-                                </svg><span>Operator UKK</span></a>
-                            </li>
-                          @endcan
-                        @else
-                          @can('ukk.evaluation')
-                            <li class="sidebar-list">
-                              <i class="fa-solid fa-thumbtack"></i>
-                              <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.ukk.index') }}"><svg
-                                  class="stroke-icon">
-                                  <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
-                                  </use>
-                                </svg><svg class="fill-icon">
-                                  <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
-                                </svg><span class="lan-3">Penilaian UKK </span></a>
-                            </li>
-                          @endcan
                         @endcan
+                        @can(['exam.edit', 'exam.delete', 'exam.create'])
+                          <li class="sidebar-list">
+                            <i class="fa-solid fa-thumbtack"></i>
+                            <a class="sidebar-link sidebar-title link-nav"
+                              href="{{ route('user.question-bank.index') }}"><svg class="stroke-icon">
+                                <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
+                                </use>
+                              </svg><svg class="fill-icon">
+                                <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
+                              </svg><span class="lan-3">Bank Soal </span></a>
+                          </li>
+                        @endcan
+                        @can('operator_ukk.*')
+                          <li class="sidebar-list">
+                            <i class="fa-solid fa-thumbtack"></i>
+                            <a class="sidebar-link sidebar-title link-nav"
+                              href="{{ route('user.ukk-operator.index') }}"><svg class="stroke-icon">
+                                <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-user') }}"></use>
+                              </svg><svg class="fill-icon">
+                                <use href="{{ asset('assets/svg/icon-sprite.svg#fill-user') }}"></use>
+                              </svg><span>Operator UKK</span></a>
+                          </li>
+                        @endcan
+                      @else
+                        @can('ukk.evaluation')
+                          <li class="sidebar-list">
+                            <i class="fa-solid fa-thumbtack"></i>
+                            <a class="sidebar-link sidebar-title link-nav" href="{{ route('user.ukk.index') }}"><svg
+                                class="stroke-icon">
+                                <use href="{{ asset('assets/svg/icon-sprite.svg#stroke-calendar') }}">
+                                </use>
+                              </svg><svg class="fill-icon">
+                                <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
+                              </svg><span class="lan-3">Penilaian</span></a>
+                          </li>
+                        @endcan
+                      @endcan
                     </ul>
                   </div>
                 </nav>

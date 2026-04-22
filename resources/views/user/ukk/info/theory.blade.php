@@ -36,7 +36,7 @@
     <div class="page-title">
       <div class="row p-2 p-sm-0">
         <div class="col-sm-6">
-          <h3>Uji Kompetensi Keahlian</h3>
+          <h3>Uji Kompetensi Keahlian (Teori)</h3>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb">

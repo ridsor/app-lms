@@ -19,7 +19,7 @@ $(document).ready(function () {
         input.removeClass("is-invalid");
 
         $.ajax({
-            url: `/ukk/${ukkId}/score/${answerId}`,
+            url: `/ukk/${ukkId}/teori/score/${answerId}`,
             method: "POST",
             data: {
                 _token: $('meta[name="csrf-token"]').attr("content"),

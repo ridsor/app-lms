@@ -15,6 +15,7 @@ use App\Http\Requests\UKKRequest;
 use App\Http\Requests\WorkmanshipRequest;
 use App\Http\Requests\ExamAnswerRequest;
 use App\Models\UKKAnswerTheory;
+use App\Models\UKKResultPractice;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -32,7 +33,8 @@ class UKKController extends Controller
 
         $ukks = UKK::with([
             'period',
-            'results'
+            'results',
+            'practiceResults'
         ])
             ->filter($request->all())
             ->filterByPermission($request->user())
@@ -115,6 +117,7 @@ class UKKController extends Controller
         $ukk = UKK::with([
             'period',
             'results',
+            'practiceResults',
             'operator'
         ])->findOrFail($id);
         $this->authorize('view', $ukk);
@@ -214,12 +217,14 @@ class UKKController extends Controller
                 ->leftJoin('students', 'student_id', '=', 'students.id')
                 ->with('user:id,name');
 
-            if ($request->filled('search') && !empty($request->search['value'])) {
-                $search = $request->search['value'];
-                $data->where(function ($q) use ($search) {
-                    $q->where('students.name', 'like', "%{$search}%")
-                        ->orWhere('students.nis', 'like', "%{$search}%");
-                });
+            if ($request->filled('search')) {
+                $search = is_array($request->search) ? ($request->search['value'] ?? '') : $request->search;
+                if (!empty($search)) {
+                    $data->where(function ($q) use ($search) {
+                        $q->where('students.name', 'like', "%{$search}%")
+                            ->orWhere('students.nis', 'like', "%{$search}%");
+                    });
+                }
             }
 
             return DataTables::of($data)
@@ -250,7 +255,7 @@ class UKKController extends Controller
             $headerRows = [
                 ['HASIL UKK TEORI' => ''],
                 ['Periode', 'Periode' => $ukk->period ? $ukk->period->academic_year . ' ' . Helper::getSemesterLabel($ukk->period->semester) : '-'],
-                ['Nama UKK', 'Nama UKK' => $ukk->name],
+                ['Judul', 'Judul' => $ukk->title],
                 ['Waktu', 'Waktu' => $ukk->start_time && $ukk->end_time ? $ukk->start_time->translatedFormat('j F Y H:i') . ' - ' . $ukk->end_time->translatedFormat('j F Y H:i') : '-'],
                 [],
                 ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
@@ -265,7 +270,7 @@ class UKKController extends Controller
                 ];
             })->toArray();
 
-            $filename = 'Nilai UKK Teori ' . now()->format('Y-m-d') . '.xlsx';
+            $filename = 'Hasil UKK Teori ' . now()->format('Y-m-d') . '.xlsx';
 
             $exportData = array_merge($headerRows, $exportData);
 
@@ -290,28 +295,47 @@ class UKKController extends Controller
                 ->leftJoin('students', 'student_id', '=', 'students.id')
                 ->with('grader:id,name');
 
-            if ($request->filled('search') && !empty($request->search['value'])) {
-                $search = $request->search['value'];
-                $data->where(function ($q) use ($search) {
-                    $q->where('students.name', 'like', "%{$search}%")
-                        ->orWhere('students.nis', 'like', "%{$search}%");
-                });
+            if ($request->filled('search')) {
+                $search = is_array($request->search) ? ($request->search['value'] ?? '') : $request->search;
+                if (!empty($search)) {
+                    $data->where(function ($q) use ($search) {
+                        $q->where('students.name', 'like', "%{$search}%")
+                            ->orWhere('students.nis', 'like', "%{$search}%");
+                    });
+                }
             }
 
             return DataTables::of($data)
-                ->addColumn('Nama', fn($row) => '<div class="product-names"><p>' . $row->name . '</p></div>')
-                ->addColumn('NIS', fn($row) => '<p class="f-light">' . $row->nis . '</p>')
-                ->addColumn('Nilai', fn($row) => $row->score !== null ? '<span class="badge badge-light-primary">' . ($row->formatted_score) . '</span>' : '<span class="badge badge-light-warning">Belum Dinilai</span>')
-                ->addColumn('Waktu', fn($row) => $row->submitted_at ? $row->submitted_at->translatedFormat('d/m/Y H:i') : '-')
-                ->addColumn('Aksi', function ($row) use ($ukk) {
+                ->addColumn('Nama', function ($row) {
                     return '
-                        <div class="common-align gap-2 justify-content-start">
-                            <a href="' . route('user.ukk.praktik.evaluation', [$ukk->id, $row->id]) . '" class="square-white">
-                                <svg><use href="' . asset('assets/svg/icon-sprite.svg#edit-content') . '"></use></svg>
-                            </a>
+                        <div>
+                            <p class="f-light mb-0">' . $row->name . '</p>
+                            <p class="f-light mb-0">' . $row->nis . '</p>
                         </div>';
                 })
-                ->rawColumns(['Nama', 'NIS', 'Nilai', 'Waktu', 'Aksi'])
+                ->addColumn('Pengumpulan', function ($row) {
+                    $date = $row->submitted_at->translatedFormat('j M Y H:i');
+                    return '
+                        <div>
+                            <p class="f-light mb-0">' . $date . '</p>
+                        </div>';
+                })
+                ->addColumn('Nilai', function ($row) {
+                    $html = '
+                    <span class="badge badge-light-primary">' . ($row->formatted_score ?? '-') . '</span>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Penilaian', function ($row) {
+                    $html = '
+                    <p class="f-light mb-0">' . (optional($row->graded_at)->translatedFormat('j M Y H:i') ?? '-') . '</p>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Penilai', function ($row) {
+                    return $row->grader ? $row->grader->name : '-';
+                })
+                ->rawColumns(['Nama', 'Pengumpulan', 'Nilai', 'Penilaian', 'Penilai'])
                 ->make(true);
         }
 
@@ -351,6 +375,18 @@ class UKKController extends Controller
 
     public function practiceSubmit(Request $request, $id)
     {
+        $request->validate([
+            'description' => 'nullable|string',
+            'files.*' => 'nullable|file|mimes:zip,rar,pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3|max:102400',
+            'links.*' => 'nullable|url',
+            'existing_files.*' => 'nullable|array',
+            'delete_files.*' => 'nullable|string',
+        ], [
+            'files.*.max' => 'Ukuran file tidak boleh lebih dari 100 MB.',
+            'files.*.mimes' => 'Format file tidak didukung.',
+            'links.*.url' => 'Format tautan tidak valid.'
+        ]);
+
         try {
             if (!$request->user()->hasRole('student')) {
                 return abort(403);
@@ -372,19 +408,40 @@ class UKKController extends Controller
                 return $this->sendError('Waktu pengumpulan UKK sudah berakhir.', [], 403);
             }
 
-            $request->validate([
-                'files.*' => 'nullable|file|max:10240', // Max 10MB per file
-                'links.*' => 'nullable|url',
-                'description' => 'nullable|string'
-            ]);
-
             $student = auth()->user()->student;
+            $ukkResult = \App\Models\UKKResultPractice::where('ukk_id', $ukk->id)
+                ->where('student_id', $student->id)
+                ->first();
+
+            $oldContents = $ukkResult ? $ukkResult->contents : ['files' => [], 'links' => []];
+
             $contents = [
                 'description' => $request->description,
                 'files' => [],
                 'links' => $request->links ?? []
             ];
 
+            // Handle file deletions
+            if ($request->filled('delete_files')) {
+                foreach ($request->delete_files as $path) {
+                    if (Storage::exists($path)) {
+                        Storage::delete($path);
+                    }
+                }
+            }
+
+            // Handle existing files (that were not deleted)
+            if ($request->filled('existing_files')) {
+                foreach ($request->existing_files as $file) {
+                    $contents['files'][] = [
+                        'name' => $file['name'],
+                        'path' => $file['path'],
+                        'size' => $file['size']
+                    ];
+                }
+            }
+
+            // Handle new file uploads
             if ($request->hasFile('files')) {
                 foreach ($request->file('files') as $file) {
                     $path = $file->store('file/ukk/submissions');
@@ -411,14 +468,26 @@ class UKKController extends Controller
         }
     }
 
-    public function evaluationPraktik(Request $request, $ukk_id, $result_id)
+    public function evaluationPraktik(Request $request, $ukk_id, $page = 1)
     {
         $ukk = UKK::findOrFail($ukk_id);
         $this->authorize('evaluate', $ukk);
 
-        $practice_result = \App\Models\UKKResultPractice::with('student')->findOrFail($result_id);
+        $query = UKKResultPractice::where('ukk_id', $ukk->id)
+            ->with(['student', 'ukk']);
 
-        return view('user.ukk.evaluation_praktik', compact('ukk', 'practice_result'));
+
+        $ukk_results = $query->simplePaginate(1, ['*'], 'page', $page);
+        $ukk_result = $query->simplePaginate(1, ['*'], 'page', $page)->first();
+
+        $practice_results = $query->simplePaginate(1, ['*'], 'page', $page);
+        $practice_result = $practice_results->first();
+
+        if (!$practice_result) {
+            return redirect()->route('user.ukk.result.praktik', $ukk_id)->with('error', 'Belum ada pengumpulan hasil praktik.');
+        }
+
+        return view('user.ukk.evaluation_praktik', compact('ukk', 'practice_result', 'practice_results'));
     }
 
     public function updatePracticeScore(Request $request, $result_id)
@@ -440,11 +509,89 @@ class UKKController extends Controller
                 'graded_by' => auth()->id()
             ]);
 
+            activity()
+                ->useLog('Uji Kompetensi Keahlian (Praktik)')
+                ->performedOn($ukk)
+                ->causedBy($request->user())
+                ->log('Pengguna ' . $request->user()->name . ' menilai ukk : ' . $ukk->id . ', Hasil ID: ' . $result->id . ', nilai: ' . $result->score);
+
             return $this->sendResponse('Nilai praktik berhasil disimpan.');
         } catch (\Exception $e) {
             Log::error('Error update score UKK Praktik: ' . $e->getMessage());
             return $this->sendError('Gagal menyimpan nilai.', [], 500);
         }
+    }
+
+    public function exportResultPraktik($id)
+    {
+        try {
+            $ukk = UKK::with(['period'])->findOrFail($id);
+            $this->authorize('evaluate', $ukk);
+
+            $results = \App\Models\UKKResultPractice::where('ukk_id', $ukk->id)
+                ->with(['student', 'grader'])
+                ->get();
+
+            if ($results->isEmpty()) {
+                return back()->with('error', 'Belum ada data untuk di-export.');
+            }
+
+            $headerRows = [
+                ['HASIL UKK PRAKTIK' => ''],
+                ['Periode' => 'Periode', 'value' => $ukk->period ? $ukk->period->academic_year . ' ' . Helper::getSemesterLabel($ukk->period->semester) : '-'],
+                ['Judul' => 'Judul', 'value' => $ukk->title],
+                ['Waktu' => 'Waktu', 'value' => $ukk->start_time && $ukk->end_time ? $ukk->start_time->translatedFormat('j F Y H:i') . ' - ' . $ukk->end_time->translatedFormat('j F Y H:i') : '-'],
+                [],
+                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
+            ];
+
+            $exportData = $results->map(function ($row, $index) {
+                return [
+                    'No' => $index + 1,
+                    'Nama' => $row->student->name,
+                    'NIS' => $row->student->nis,
+                    'Nilai' => $row->score ?? 0,
+                ];
+            })->toArray();
+
+            $filename = 'Hasil UKK Praktik ' . now()->format('Y-m-d') . '.xlsx';
+
+            $finalData = array_merge($headerRows, $exportData);
+
+            return (new \Rap2hpoutre\FastExcel\FastExcel($finalData))->download($filename);
+        } catch (\Exception $e) {
+            Log::error('Error exporting UKK Praktik results: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
+        }
+    }
+
+    public function getFileSubmission(Request $request, $result_id, $filename)
+    {
+        $result = \App\Models\UKKResultPractice::findOrFail($result_id);
+
+        if (!$request->hasValidSignature()) {
+            $ukk = UKK::findOrFail($result->ukk_id);
+            $this->authorize('evaluate', $ukk);
+        }
+
+        // Cari file di dalam JSON contents
+        $files = $result->contents['files'] ?? [];
+        $filePath = null;
+        foreach ($files as $file) {
+            if ($file['name'] === $filename) {
+                $filePath = $file['path'];
+                break;
+            }
+        }
+
+        if ($filePath && Storage::exists($filePath)) {
+            $file = Storage::get($filePath);
+            $type = Storage::mimeType($filePath);
+
+            return response($file)->header('Content-Type', $type);
+        }
+
+        return abort(404, 'File tidak ditemukan.');
     }
 
     public function update(UKKRequest $request, $id)
@@ -958,6 +1105,12 @@ class UKKController extends Controller
         $ukkResult = $answer->ukkResult;
         $totalScore = $ukkResult->answers()->sum('score');
         $ukkResult->update(['score' => $totalScore]);
+
+        activity()
+            ->useLog('Jawaban UKK Teori')
+            ->performedOn($ukk)
+            ->causedBy($request->user())
+            ->log('Pengguna ' . $request->user()->name . ' menilai jawaban untuk ukk: ' . $ukk->id . ', hasil ukk: ' . $ukkResult->id . ', skor: ' . $ukkResult->score);
 
         return $this->sendResponse('Skor berhasil diubah.');
     }

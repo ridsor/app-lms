@@ -42,7 +42,12 @@
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 @role(['student', 'parent'])
-                  @if ($ukk->results->where('student_id', $studentId)->isEmpty())
+                  @php
+                    $is_done = $ukk->type === 'Teori'
+                      ? $ukk->results->where('student_id', $studentId)->isNotEmpty()
+                      : $ukk->practiceResults->where('student_id', $studentId)->isNotEmpty();
+                  @endphp
+                  @if (!$is_done)
                     <span class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">
                       Belum dikerjakan
                     </span>

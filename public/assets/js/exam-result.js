@@ -58,7 +58,7 @@ $(function () {
                         </a>
                         <a class="square-white view rounded-2" href=${"/ujian/" +
                         data.exam_id +
-                        "/penilaian/" +
+                        "/evaluasi/" +
                         (meta.row + meta.settings._iDisplayStart + 1)
                         }>
                             <i class="fa-solid fa-pen"></i>

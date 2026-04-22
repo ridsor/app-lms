@@ -27,7 +27,7 @@
     <div class="page-title">
       <div class="row p-2 p-sm-0">
         <div class="col-sm-6">
-          <h3>Evaluasi UKK Teori</h3>
+          <h3>Evaluasi</h3>
         </div>
         <div class="col-sm-6">
           <ol class="breadcrumb">
@@ -36,7 +36,7 @@
                 </svg></a></li>
             <li class="breadcrumb-item">
               <a href="{{ route('user.ukk.show', ['id' => $ukk->id]) }}">
-                UKK
+                Uji Kompetensi Keahlian
               </a>
             </li>
             <li class="breadcrumb-item active">Evaluasi</li>
@@ -71,7 +71,7 @@
       <div class="mb-3 px-3">
         <div class="d-flex justify-content-between align-items-center gap-2">
           <a {{ $ukk_results->onFirstPage() ? 'aria-disabled="true"' : '' }} role="button"
-            {{ $ukk_results->onFirstPage() ? '' : 'href=' . route('user.ukk.evaluation', ['ukk_id' => $ukk->id, 'page' => $ukk_results->currentPage() - 1]) }}
+            {{ $ukk_results->onFirstPage() ? '' : 'href=' . route('user.ukk.evaluation', ['id' => $ukk->id, 'page' => $ukk_results->currentPage() - 1]) }}
             class="btn btn-primary px-3 py-2 d-flex justify-content-center align-items-center {{ $ukk_results->onFirstPage() ? 'disabled' : '' }}">
             <i data-feather="chevron-left" style="width:18px; height: 18px"></i>
           </a>
@@ -81,7 +81,7 @@
             </p>
             <p class="f-light mb-0 text-break">{{ $ukk_result->student->nis }}</p>
           </div>
-          <a {{ $ukk_results->hasMorePages() ? 'href=' . route('user.ukk.evaluation', ['ukk_id' => $ukk->id, 'page' => $ukk_results->currentPage() + 1]) : '' }}
+          <a {{ $ukk_results->hasMorePages() ? 'href=' . route('user.ukk.evaluation', ['id' => $ukk->id, 'page' => $ukk_results->currentPage() + 1]) : '' }}
             role="button" {{ !$ukk_results->hasMorePages() ? 'aria-disabled="true"' : '' }}
             class="btn btn-primary px-3 py-2 d-flex justify-content-center align-items-center {{ !$ukk_results->hasMorePages() ? 'disabled' : '' }}">
             <i data-feather="chevron-right" style="width:18px; height: 18px"></i>

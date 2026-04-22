@@ -201,7 +201,12 @@
                             @endif
                           @endcan
                           @role(['student', 'parent'])
-                            @if ($ukk->results->where('student_id', $studentId)->isEmpty())
+                            @php
+                              $is_done = $ukk->type === 'Teori'
+                                ? $ukk->results->where('student_id', $studentId)->isNotEmpty()
+                                : $ukk->practiceResults->where('student_id', $studentId)->isNotEmpty();
+                            @endphp
+                            @if (!$is_done)
                               <span class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">
                                 Belum dikerjakan
                               </span>
@@ -227,7 +232,11 @@
                                 @endif
                              @endrole
                             @role(['operator'])
-                                href="{{ route('user.ukk.show', $ukk->id) }}"
+                                @if ($ukk->type === 'Teori')
+                                    href="{{ route('user.ukk.result.teori', $ukk->id) }}"
+                                @else
+                                    href="{{ route('user.ukk.result.praktik', $ukk->id) }}"
+                                @endif
                              @endrole
                             class="btn btn-outline-primary gap-1 px-3 btn-sm d-flex justify-content-center align-items-center">
                             <span>Lihat</span>

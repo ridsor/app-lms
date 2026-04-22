@@ -90,7 +90,7 @@
                     </span>
                   </button>
                   <a class="btn btn-outline-info d-flex align-items-center gap-2 {{ $ukk->results_count > 0 ? '' : 'pe-none' }}"
-                    {{ $ukk->results->first()?->id ? 'href=' . route('user.ukk.evaluation', ['ukk_id' => $ukk->id]) : '' }}>
+                    {{ $ukk->results->first()?->id ? 'href=' . route('user.ukk.evaluation', ['id' => $ukk->id]) : '' }}>
                     <span>
                       Penilaian
                     </span>

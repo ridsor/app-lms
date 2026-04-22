@@ -882,7 +882,7 @@ class ExamController extends Controller
 
         $exam_results = $query->simplePaginate(1, ['*'], 'page', $page);
         $exam_result = $query->simplePaginate(1, ['*'], 'page', $page)->first();
-
+        
         $exam = $exam_result->exam;
         $this->authorize('update', $exam);
 

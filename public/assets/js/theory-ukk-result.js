@@ -53,12 +53,12 @@ $(function () {
         render: function (data, type, row, meta) {
           const html = `
                     <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
-                        <a class="reset-result btn btn-danger btn-sm p-1 px-2 rounded-2" data-id="${data.id}" data-exam-id="${data.ukk_id}">
+                        <a class="reset-result btn btn-danger btn-sm p-1 px-2 rounded-2" data-id="${data.id}" data-ukk-id="${data.ukk_id}">
                                 <i class="fa-solid fa-rotate-right"></i>
                         </a>
                         <a class="square-white view rounded-2" href=${"/ukk/" +
             data.ukk_id +
-            "/penilaian/" +
+            "/teori/evaluasi/" +
             (meta.row + meta.settings._iDisplayStart + 1)
             }>
                             <i class="fa-solid fa-pen"></i>
@@ -156,7 +156,7 @@ $(document).ready(function () {
 
   $("#ukk-result-teori-table").on("click", ".reset-result", function () {
     let id = $(this).data("id");
-    let ukk_id = $(this).data("exam-id");
+    let ukk_id = $(this).data("ukk-id");
     const originalHtml = $(this).html();
     const btnSubmit = $(this);
 

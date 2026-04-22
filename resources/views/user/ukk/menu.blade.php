@@ -18,10 +18,12 @@
           </li>
         @endcan
       @elseif ($ukk->type === 'Praktik')
-        <li>
-          <a href="{{ !Request::routeIs('user.ukk.result.praktik') ? route('user.ukk.result.praktik', ['id' => $ukk->id]) : '' }}"
-            class="py-2 px-2 {{ Request::routeIs('user.ukk.result.praktik') ? 'border-bottom border-primary' : 'text-secondary' }}">Hasil</a>
-        </li>
+        @can('ukk.evaluation')
+          <li>
+            <a href="{{ !Request::routeIs('user.ukk.result.praktik') ? route('user.ukk.result.praktik', ['id' => $ukk->id]) : '' }}"
+              class="py-2 px-2 {{ Request::routeIs('user.ukk.result.praktik') ? 'border-bottom border-primary' : 'text-secondary' }}">Hasil</a>
+          </li>
+        @endcan
       @endif
     </ul>
   </div>
