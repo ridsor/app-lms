@@ -1110,7 +1110,7 @@ class UKKController extends Controller
             ->useLog('Jawaban UKK Teori')
             ->performedOn($ukk)
             ->causedBy($request->user())
-            ->log('Pengguna ' . $request->user()->name . ' menilai jawaban untuk ukk: ' . $ukk->id . ', hasil ukk: ' . $ukkResult->id . ', skor: ' . $ukkResult->score);
+            ->log('Pengguna ' . $request->user()->name . ' menilai jawaban untuk ukk: ' . $ukk->id . ', hasil ukk: ' . $ukkResult->id . ', nilai: ' . $ukkResult->score);
 
         return $this->sendResponse('Skor berhasil diubah.');
     }
