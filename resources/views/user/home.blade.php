@@ -165,6 +165,70 @@
               </div>
             </div>
           @endrole
+          @if (request()->user()->hasRole('operator') && request()->user()->can('ukk.evaluation'))
+            <div class="col-sm-6">
+              <div class="card course-box">
+                <div class="card-body">
+                  <div class="course-widget">
+                    <div class="course-icon">
+                      <img style="width:24px; height:24px; filter: invert(1);"
+                        src="{{ asset('assets/icons/exam.png') }}" />
+                    </div>
+                    <div>
+                      <h4 class="mb-0"> <span class="counter" data-target="100">{{ $countUKKTheory }}</span>
+                      </h4><span class="f-light">UKK Teori Belum Dinilai</span><a href="{{ route('user.ukk.index') }}"
+                        class="btn btn-light f-light">Lihat
+                        UKK<span class="ms-2"> <svg class="fill-icon f-light">
+                            <use href="{{ asset('assets/svg/icon-sprite.svg#arrowright') }}">
+                            </use>
+                          </svg></span></a>
+                    </div>
+                  </div>
+                </div>
+                <ul class="square-group">
+                  <li class="square-1 warning"></li>
+                  <li class="square-1 primary"></li>
+                  <li class="square-2 warning1"></li>
+                  <li class="square-3 danger"></li>
+                  <li class="square-4 light"></li>
+                  <li class="square-5 warning"></li>
+                  <li class="square-6 success"></li>
+                  <li class="square-7 success"></li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="card course-box">
+                <div class="card-body">
+                  <div class="course-widget">
+                    <div class="course-icon warning">
+                      <img style="width:24px; height:24px; filter: invert(1);"
+                        src="{{ asset('assets/icons/exam.png') }}" />
+                    </div>
+                    <div>
+                      <h4 class="mb-0"> <span class="counter" data-target="100">{{ $countUKKPractice }}</span>
+                      </h4><span class="f-light">UKK Praktik Belum Dinilai</span><a
+                        href="{{ route('user.ukk.index') }}" class="btn btn-light f-light">Lihat
+                        UKK<span class="ms-2"> <svg class="fill-icon f-light">
+                            <use href="{{ asset('assets/svg/icon-sprite.svg#arrowright') }}">
+                            </use>
+                          </svg></span></a>
+                    </div>
+                  </div>
+                </div>
+                <ul class="square-group">
+                  <li class="square-1 warning"></li>
+                  <li class="square-1 primary"></li>
+                  <li class="square-2 warning1"></li>
+                  <li class="square-3 danger"></li>
+                  <li class="square-4 light"></li>
+                  <li class="square-5 warning"></li>
+                  <li class="square-6 success"></li>
+                  <li class="square-7 success"></li>
+                </ul>
+              </div>
+            </div>
+          @endif
         </div>
       </div>
       @role(['teacher', 'student', 'parent'])
@@ -265,6 +329,124 @@
           </div>
         </div>
       @endrole
+      @if (request()->user()->hasRole('operator') && request()->user()->can('ukk.evaluation'))
+        <div class="col-ed-12 box-col-12">
+          <div class="header-top mb-3">
+            <h5 class="m-0">Uji Keahlian Kompetensi Terbaru</h5>
+            <div class="card-header-right-icon">
+              <a class="link-only" href="{{ route('user.ukk.index') }}">Lihat
+                Semua<i data-feather="arrow-right"></i>
+              </a>
+            </div>
+          </div>
+          <div class="projects-wrapper">
+            @if (count($ukks) > 0)
+              <div class="row g-3">
+                @foreach ($ukks as $ukk)
+                  <div class="col-xxl-4 col-md-6 col-lg-6 box-col-6">
+                    <a href="{{ route('user.ukk.show', ['id' => $ukk->id]) }}">
+                      <div class="progress-project-box">
+                        <div class="list-box title-line-primary">
+                          <div class="project-body">
+                            <div class="common-f-start gap-3">
+                              <div class="w-100">
+                                <h6 class="mb-2">
+                                  <span class="text-capitalize" style="word-break: break-all;">
+                                    {{ $ukk->title }}
+                                  </span>
+                                </h6>
+                                <div class="d-flex gap-2 flex-wrap">
+                                  <div>
+                                    <span class="fw-medium w-fit" style="word-break: break-all;">
+                                      {{ $ukk->major }}
+                                    </span>
+                                  </div>
+                                  <div style="max-width: fit-content">&middot;
+                                  </div>
+                                  <div>
+                                    <span class="text-nowrap">{{ $ukk->type }}</span>
+                                  </div>
+                                </div>
+                                <div class="d-flex flex-column mt-2">
+                                  <div class="row g-0 g-sm-2">
+                                    <div
+                                      class="col-12 col-md-auto d-flex align-items-center gap-2 justify-content-center">
+                                      <div class="d-flex align-items-center">
+                                        <span class="icon mb-0"><i data-feather="calendar"
+                                            style="width:18px; height: 18px"></i></span>
+                                        <span class="mb-0 ms-2">{{ $ukk->start_time->translatedFormat('d M Y') }}</span>
+                                      </div>
+                                      <div>&middot;</div>
+                                      <span class="mb-0">
+                                        {{ $ukk->start_time->translatedFormat('H:i') }} WIT
+                                      </span>
+                                    </div>
+                                    <div class="col-12 col-md-auto d-flex justify-content-center align-items-center">
+                                      <span class="icon  mb-0 d-flex align-items-center justify-content-center">
+                                        <i data-feather="minus" style="width:18px; height: 18px"></i>
+                                      </span>
+                                    </div>
+                                    <div
+                                      class="col-12 col-md-auto d-flex align-items-center gap-2 justify-content-center">
+                                      <div class="d-flex align-items-center">
+                                        <span class="icon mb-0"><i data-feather="calendar"
+                                            style="width:18px; height: 18px"></i></span>
+                                        <span class="mb-0 ms-2">{{ $ukk->end_time->translatedFormat('d M Y') }}</span>
+                                      </div>
+                                      <div>&middot;</div>
+                                      <span class="mb-0">
+                                        {{ $ukk->end_time->translatedFormat('H:i') }} WIT
+                                      </span>
+                                    </div>
+                                  </div>
+                                  {{-- <div class="d-flex gap-2">
+                                    <div class="col d-flex align-items-center">
+                                      <i data-feather="calendar" width="24"></i>
+                                      <span class="mb-0 ms-2">
+                                        {{ $ukk->start_time->translatedFormat('d M Y') }}
+                                      </span>
+                                    </div>
+                                    <div class="col">&middot;</div>
+                                    <span>
+                                      {{ $ukk->start_time->translatedFormat('H:i') }}
+                                      -
+                                      {{ $ukk->end_time->translatedFormat('H:i') }}
+                                    </span>
+                                  </div> --}}
+                                </div>
+                              </div>
+                            </div>
+                            <div class="project-bottom common-space mt-3">
+                              <div class="d-flex flex-column gap-1">
+                                <p class="mb-0">Periode</p>
+                                <p class="mb-0 fw-semibold">
+                                  {{ $ukk->period->academic_year }} -
+                                  {{ $ukk->period->semester === 'even' ? 'Genap' : 'Ganjil' }}
+                                </p>
+                              </div>
+                              <div class="badge badge-light-primary">
+                                {{ $ukk->not_yet_rated }} Belum Dinilai
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </a>
+                  </div>
+                @endforeach
+              </div>
+            @else
+              <div class="d-flex justify-content-center mb-3 w-100">
+                <div class="px-4 py-5 d-grid" style="justify-items: center">
+                  <img style="width: 120px; height: 120px" src="{{ asset('assets/images/data-empty.png') }}" />
+                  <p class="fw-semibold mb-0 text-center">Ups! Data Kosong</p>
+                  <p class="mb-0 text-center">Tidak ada UKK yang ditugaskan kepada Anda.</p>
+                </div>
+              </div>
+            @endif
+          </div>
+        </div>
+      @endif
     </div>
   </div>
 @endsection

@@ -10,6 +10,7 @@ use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\Task;
 use App\Models\Teacher;
+use App\Models\UKK;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -177,6 +178,28 @@ class HomeController extends Controller
                 'attendannce_percentage',
                 'journal_percentage'
             ));
+        } elseif ($request->user()->hasRole('operator') && $request->user()->can('ukk.evaluation')) {
+            $countUKKTheory = UKK::filterByPermission($request->user())
+                ->where('type', 'Teori')
+                ->whereHas('results', function ($query) {
+                    $query->whereHas('answers', function ($subQuery) {
+                        $subQuery->whereNull('score');
+                    });
+                })->count();
+
+            $countUKKPractice = UKK::filterByPermission($request->user())
+                ->where('type', 'Praktik')
+                ->whereHas('practiceResults', function ($query) {
+                    $query->whereNull('score');
+                })->count();
+
+            $ukks = UKK::filterByPermission($request->user())
+                ->with(['period'])
+                ->latest()
+                ->limit(5)
+                ->get();
+
+            return view('user.home', compact('countUKKTheory', 'countUKKPractice', 'ukks'));
         } else {
             return view('user.home');
         }
