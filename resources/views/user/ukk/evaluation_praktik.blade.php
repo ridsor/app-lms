@@ -9,6 +9,7 @@
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/quill.snow.css') }}">
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/vendors/sweetalert2.css') }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     /* Memaksa semua parent untuk mengizinkan sticky */
     .page-wrapper,
@@ -37,6 +38,11 @@
       background: #f9f9f9;
       padding: 10px;
       border-radius: 5px;
+    }
+
+    .map-container {
+      height: 500px;
+      width: 100%;
     }
   </style>
 @endsection
@@ -141,6 +147,16 @@
                       @elseif($isOffice)
                         <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true"
                           width="100%" height="700px" frameborder="0"></iframe>
+                      @elseif(in_array($ext, ['kml', 'gpx', 'geojson']))
+                        <div class="position-relative w-100">
+                          <div id="map-{{ $loop->index }}" class="map-container" data-url="{!! $fileUrl !!}"
+                            data-type="{{ $ext }}"></div>
+                          <div id="loader-{{ $loop->index }}"
+                            class="position-absolute top-50 start-50 translate-middle text-white text-center">
+                            <div class="spinner-border" role="status"></div>
+                            <p class="mt-2">Memuat data peta...</p>
+                          </div>
+                        </div>
                       @else
                         <div class="py-5 text-white-50 text-center">
                           <i class="fa fa-file-text-o fs-1 mb-3"></i>
@@ -241,8 +257,106 @@
 @endsection
 
 @section('scripts')
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
   <script>
     $(document).ready(function() {
+      // Initialize Maps
+      $('.map-container').each(function() {
+        const containerId = $(this).attr('id');
+        const loaderId = containerId.replace('map-', 'loader-');
+        const url = $(this).attr('data-url');
+        const type = $(this).data('type');
+
+        const map = L.map(containerId).setView([-2.5489, 118.0149], 5);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        fetch(url)
+          .then(response => {
+            if (!response.ok) throw new Error('Gagal mengambil file: ' + response.statusText);
+            return response.text();
+          })
+          .then(data => {
+
+            // Clean data from leading/trailing whitespace or BOM
+            const cleanData = data.trim().replace(/^\uFEFF/, '');
+
+            // Basic XML validation for KML
+            if (type === 'kml' || type === 'gpx') {
+              try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(cleanData, "text/xml");
+                const parserError = xmlDoc.getElementsByTagName("parsererror");
+                if (parserError.length > 0) {
+                  throw new Error("Format XML file tidak valid: " + parserError[0].textContent);
+                }
+              } catch (xmlErr) {
+                console.warn(`XML validation warning for ${containerId}:`, xmlErr.message);
+              }
+            }
+
+            let runLayer;
+            try {
+              if (type === 'kml') {
+                runLayer = omnivore.kml.parse(cleanData);
+              } else if (type === 'gpx') {
+                runLayer = omnivore.gpx.parse(cleanData);
+              } else if (type === 'geojson') {
+                runLayer = omnivore.geojson.parse(cleanData);
+              }
+
+              if (runLayer) {
+                const setupMap = () => {
+                  $(`#${loaderId}`).fadeOut();
+
+                  try {
+                    // Force map to recalculate size in case container was hidden
+                    map.invalidateSize();
+
+                    const bounds = runLayer.getBounds();
+                    if (bounds && bounds.isValid()) {
+                      map.fitBounds(bounds, {
+                        padding: [20, 20]
+                      });
+                    } else {
+                      console.warn(`No valid bounds found for ${containerId}`);
+                    }
+                  } catch (boundsErr) {
+                    console.warn(`Error getting bounds for ${containerId}:`, boundsErr);
+                  }
+
+                  runLayer.eachLayer(function(layer) {
+                    if (layer.feature && layer.feature.properties) {
+                      const props = layer.feature.properties;
+                      let content = `<div class="p-1"><b>${props.name || 'Titik'}</b>`;
+                      if (props.description) {
+                        content += `<hr class="my-1"><small>${props.description}</small>`;
+                      }
+                      content += `</div>`;
+                      layer.bindPopup(content);
+                    }
+                  });
+                };
+
+                runLayer.addTo(map);
+                setupMap(); // Call immediately since parse() is synchronous
+              }
+            } catch (e) {
+              throw new Error('Gagal memproses format file: ' + e.message);
+            }
+          })
+          .catch(error => {
+            console.error('Map loading error:', error);
+            $(`#${loaderId}`).hide();
+            $(`#${containerId}`).html(
+              `<div class="p-5 text-white text-center"><i class="fa fa-exclamation-triangle fs-1 mb-3"></i><p>${error.message}</p></div>`
+              );
+          });
+      });
+
       $('#form_ukk_evaluation').on('submit', function(e) {
         e.preventDefault();
         const resultId = $(this).data('result-id');
@@ -252,7 +366,8 @@
         btnSave.prop('disabled', true).html('<i class="fa-solid fa-arrows-rotate fa-spin me-2"></i>Menyimpan...');
 
         $.ajax({
-          url: "{{ route('user.ukk.praktik.updateScore', ['result_id' => ':id']) }}".replace(':id', resultId),
+          url: "{{ route('user.ukk.praktik.updateScore', ['result_id' => ':id']) }}".replace(':id',
+            resultId),
           method: 'POST',
           data: $(this).serialize(),
           success: function(res) {

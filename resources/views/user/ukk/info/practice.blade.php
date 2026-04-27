@@ -164,7 +164,7 @@
                         class="mb-0 btn btn-light rounded-0 border-0 text-inherit w-100 text-center p-2 tasksubmission-content-item">
                         <p class="mb-0">File</p>
                         <input type="file" hidden multiple
-                          accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp4,.mp3"
+                          accept=".zip,.rar,.pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.mp4,.mp3,.kml,.gpx,.geojson"
                           id="ukk-submission-content-file">
                       </label>
                       <button data-bs-toggle="modal" data-bs-target="#linkModal"

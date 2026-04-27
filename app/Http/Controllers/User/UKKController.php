@@ -377,13 +377,13 @@ class UKKController extends Controller
     {
         $request->validate([
             'description' => 'nullable|string',
-            'files.*' => 'nullable|file|mimes:zip,rar,pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3|max:102400',
+            'files.*' => 'nullable|file|extensions:zip,rar,pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3,kml,gpx,geojson|max:102400',
             'links.*' => 'nullable|url',
             'existing_files.*' => 'nullable|array',
             'delete_files.*' => 'nullable|string',
         ], [
             'files.*.max' => 'Ukuran file tidak boleh lebih dari 100 MB.',
-            'files.*.mimes' => 'Format file tidak didukung.',
+            'files.*.extensions' => 'Format file tidak didukung.',
             'links.*.url' => 'Format tautan tidak valid.'
         ]);
 
@@ -585,10 +585,27 @@ class UKKController extends Controller
         }
 
         if ($filePath && Storage::exists($filePath)) {
-            $file = Storage::get($filePath);
-            $type = Storage::mimeType($filePath);
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            
+            $mimeTypes = [
+                'kml' => 'application/vnd.google-earth.kml+xml',
+                'gpx' => 'application/gpx+xml',
+                'geojson' => 'application/geo+json',
+            ];
 
-            return response($file)->header('Content-Type', $type);
+            $contentType = $mimeTypes[$extension] ?? Storage::mimeType($filePath);
+            $content = Storage::get($filePath);
+
+            // Trim content for XML-based files to prevent "XML declaration allowed only at start" error
+            if (in_array($extension, ['kml', 'gpx', 'xml'])) {
+                $content = trim($content);
+            }
+
+            return response()->make($content, 200, [
+                'Content-Type' => $contentType,
+                'Access-Control-Allow-Origin' => '*',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"'
+            ]);
         }
 
         return abort(404, 'File tidak ditemukan.');
