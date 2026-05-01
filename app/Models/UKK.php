@@ -16,6 +16,9 @@ class UKK extends Model
         'title',
         'type',
         'major',
+        'code',
+        'package_number',
+        'exam_format',
         'file_path',
         'file_name',
         'file_size',
@@ -24,12 +27,14 @@ class UKK extends Model
         'duration',
         'instructions',
         'is_shuffle_questions',
+        'rubric',
     ];
 
     protected $casts = [
         'instructions' => CleanHtml::class . ':strip_nl,strip_nbsp',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'rubric' => 'array',
     ];
 
     protected $appends = ['not_yet_rated'];

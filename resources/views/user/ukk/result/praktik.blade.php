@@ -117,9 +117,9 @@
                                   <th>Nama</th>
                                   <th>Pengumpulan</th>
                                   <th>Nilai</th>
-                                  <th>Penilaian</th>
+                                  <th>Kesimpulan</th>
                                   <th>Penilai</th>
-                                  <th></th>
+                                  <th>Aksi</th>
                                 </tr>
                               </thead>
                             </table>

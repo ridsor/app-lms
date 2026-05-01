@@ -123,18 +123,89 @@
             @if ($practice_result && $practice_result->graded_at)
               <div class="card border mb-3">
                 <div class="card-body p-3">
-                  <div class="d-flex justify-content-between">
+                  <div class="d-flex justify-content-between mb-2">
                     <span class="fw-bold">Nilai:</span>
-                    <span class="badge badge-primary fs-6">{{ $practice_result->formatted_score }}</span>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="badge badge-primary fs-6">{{ $practice_result->formatted_score }}</span>
+                      <a href="{{ route('user.ukk.result.praktik.print', $practice_result->id) }}" target="_blank" class="btn btn-xs btn-outline-primary py-1 px-2">
+                        <i class="fa fa-file-pdf-o"></i> Cetak PDF
+                      </a>
+                    </div>
                   </div>
+                  @if (isset($practice_result->contents['final_conclusion']))
+                    <div class="mb-2">
+                      <small class="text-muted d-block">Kesimpulan Akhir:</small>
+                      <span class="fw-bold text-primary">{{ $practice_result->contents['final_conclusion'] }}</span>
+                    </div>
+                  @endif
                   @if ($practice_result->feedback)
                     <div class="mt-2">
                       <small class="text-muted d-block">Feedback:</small>
-                      <p class="mb-0">{{ $practice_result->feedback }}</p>
+                      <p class="mb-0 small">{{ $practice_result->feedback }}</p>
                     </div>
                   @endif
                 </div>
               </div>
+
+              @if (isset($practice_result->contents['rubric_assessment']))
+                <div class="card border mb-3">
+                  <div class="card-header py-2 bg-light">
+                    <h6 class="mb-0 small fw-bold">Rincian Penilaian</h6>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="table-responsive">
+                      <table class="table table-sm table-bordered mb-0" style="font-size: 0.75rem;">
+                        <thead>
+                          <tr class="bg-light">
+                            <th>Elemen</th>
+                            <th class="text-center">Capaian</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach ($ukk->rubric['element'] as $idx => $element)
+                            @php
+                              $assessment = $practice_result->contents['rubric_assessment'][$idx] ?? null;
+                            @endphp
+                            @if ($assessment)
+                              @php
+                                $status = $assessment['status'] ?? '-';
+                              @endphp
+                              <tr>
+                                <td>{{ $element }}</td>
+                                <td class="text-center">
+                                  <span
+                                    class="badge {{ $status === 'Kompeten' ? 'badge-light-success' : 'badge-light-danger' }} p-1">
+                                    {{ $status }}
+                                  </span>
+                                </td>
+                              </tr>
+                            @endif
+                          @endforeach
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              @endif
+
+              @if (isset($practice_result->contents['positive_note']) || isset($practice_result->contents['negative_note']))
+                <div class="card border mb-3">
+                  <div class="card-body p-3">
+                    @if ($practice_result->contents['positive_note'])
+                      <div class="mb-2">
+                        <small class="text-muted d-block">Catatan Positif:</small>
+                        <p class="mb-0 small text-success">{{ $practice_result->contents['positive_note'] }}</p>
+                      </div>
+                    @endif
+                    @if ($practice_result->contents['negative_note'])
+                      <div>
+                        <small class="text-muted d-block">Catatan Negatif:</small>
+                        <p class="mb-0 small text-danger">{{ $practice_result->contents['negative_note'] }}</p>
+                      </div>
+                    @endif
+                  </div>
+                </div>
+              @endif
             @endif
 
             <div class="d-flex flex-column gap-1 mb-2" id="ukk-submission-preview">

@@ -196,4 +196,6 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/ukk/{id}/praktik/evaluasi/{page?}', [UKKController::class, 'evaluationPraktik'])->name('user.ukk.praktik.evaluation');
     Route::post('/ukk/praktik/update-skor/{result_id}', [UKKController::class, 'updatePracticeScore'])->name('user.ukk.praktik.updateScore');
     Route::get('/ukk/{id}/praktik/export', [UKKController::class, 'exportResultPraktik'])->name('user.ukk.result.praktik.export');
+    Route::get('/ukk/praktik/print/{result_id}', [UKKController::class, 'printResultPraktik'])->name('user.ukk.result.praktik.print');
+    Route::get('/ukk/{id}/praktik/print-student/{student_id}', [UKKController::class, 'printResultPraktikByStudent'])->name('user.ukk.result.praktik.printByStudent');
 });

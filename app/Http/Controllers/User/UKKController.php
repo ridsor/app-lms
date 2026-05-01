@@ -326,16 +326,13 @@ class UKKController extends Controller
                     ';
                     return $html;
                 })
-                ->addColumn('Penilaian', function ($row) {
-                    $html = '
-                    <p class="f-light mb-0">' . (optional($row->graded_at)->translatedFormat('j M Y H:i') ?? '-') . '</p>
-                    ';
-                    return $html;
+                ->addColumn('Kesimpulan', function ($row) {
+                    return $row->contents['final_conclusion'] ?? '-';
                 })
                 ->addColumn('Penilai', function ($row) {
                     return $row->grader ? $row->grader->name : '-';
                 })
-                ->rawColumns(['Nama', 'Pengumpulan', 'Nilai', 'Penilaian', 'Penilai'])
+                ->rawColumns(['Nama', 'Pengumpulan', 'Nilai', 'Penilai'])
                 ->make(true);
         }
 
@@ -493,8 +490,10 @@ class UKKController extends Controller
     public function updatePracticeScore(Request $request, $result_id)
     {
         $request->validate([
-            'score' => 'required|numeric|min:0|max:100',
-            'feedback' => 'nullable|string'
+            'score' => 'required|string',
+            'feedback' => 'nullable|string',
+            'rubric_assessment' => 'nullable|array',
+            'final_conclusion' => 'nullable|string',
         ]);
 
         try {
@@ -502,9 +501,14 @@ class UKKController extends Controller
             $ukk = UKK::findOrFail($result->ukk_id);
             $this->authorize('evaluate', $ukk);
 
+            $contents = $result->contents ?? [];
+            $contents['rubric_assessment'] = $request->rubric_assessment;
+            $contents['final_conclusion'] = $request->final_conclusion;
+
             $result->update([
                 'score' => $request->score,
                 'feedback' => $request->feedback,
+                'contents' => $contents,
                 'graded_at' => now(),
                 'graded_by' => auth()->id()
             ]);
@@ -542,7 +546,7 @@ class UKKController extends Controller
                 ['Judul' => 'Judul', 'value' => $ukk->title],
                 ['Waktu' => 'Waktu', 'value' => $ukk->start_time && $ukk->end_time ? $ukk->start_time->translatedFormat('j F Y H:i') . ' - ' . $ukk->end_time->translatedFormat('j F Y H:i') : '-'],
                 [],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai', 'Kesimpulan Akhir' => 'Kesimpulan Akhir'],
             ];
 
             $exportData = $results->map(function ($row, $index) {
@@ -550,7 +554,8 @@ class UKKController extends Controller
                     'No' => $index + 1,
                     'Nama' => $row->student->name,
                     'NIS' => $row->student->nis,
-                    'Nilai' => $row->score ?? 0,
+                    'Nilai' => $row->score ?? '-',
+                    'Kesimpulan Akhir' => $row->contents['final_conclusion'] ?? '-',
                 ];
             })->toArray();
 
@@ -562,6 +567,48 @@ class UKKController extends Controller
         } catch (\Exception $e) {
             Log::error('Error exporting UKK Praktik results: ' . $e->getMessage());
             return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
+        }
+    }
+
+    public function printResultPraktik($result_id)
+    {
+        try {
+            $result = \App\Models\UKKResultPractice::with(['student.class.major', 'ukk.period', 'grader'])->findOrFail($result_id);
+
+            // Authorization - any related role can view if graded
+            if (!$result->graded_at && !auth()->user()->can('ukk.evaluation')) {
+                return back()->with('error', 'Hasil belum dinilai.');
+            }
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('user.ukk.print.praktik', [
+                'result' => $result,
+                'ukk' => $result->ukk,
+                'student' => $result->student,
+            ])->setOptions([
+                'isPhpEnabled' => true,
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+            ])->setPaper('a4', 'portrait');;
+
+            return $pdf->stream('Hasil UKK Praktik - ' . $result->student->name . '.pdf');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to print UKK practice result: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mencetak dokumen.');
+        }
+    }
+
+    public function printResultPraktikByStudent($id, $student_id)
+    {
+        try {
+            $result = \App\Models\UKKResultPractice::with(['student.class.major', 'ukk.period', 'grader'])
+                ->where('ukk_id', $id)
+                ->where('student_id', $student_id)
+                ->firstOrFail();
+
+            return $this->printResultPraktik($result->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to print UKK practice result by student: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mencetak dokumen.');
         }
     }
 
@@ -586,7 +633,7 @@ class UKKController extends Controller
 
         if ($filePath && Storage::exists($filePath)) {
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-            
+
             $mimeTypes = [
                 'kml' => 'application/vnd.google-earth.kml+xml',
                 'gpx' => 'application/gpx+xml',

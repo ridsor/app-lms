@@ -88,6 +88,46 @@ $(document).ready(function () {
         }
     });
 
+    $("[name='type']").on("change", function () {
+        const type = $(this).val();
+        const rubricSection = $(this).closest("form").find(".rubric-section");
+        const extraFields = $(this).closest("form").find(".extra-fields-praktik");
+        if (type === 'Praktik') {
+            rubricSection.show();
+            extraFields.show();
+        } else {
+            rubricSection.hide();
+            extraFields.hide();
+        }
+    }).trigger('change');
+
+    $(".add-rubric-row").on("click", function () {
+        const tbody = $(this).closest(".rubric-section").find(".rubric-table tbody");
+        const row = `
+            <tr>
+                <td>
+                    <select class="form-select" name="rubric[category][]">
+                        <option value="Utama">Utama</option>
+                        <option value="Pendukung">Pendukung</option>
+                    </select>
+                </td>
+                <td>
+                    <textarea class="form-control" name="rubric[element][]" rows="2" placeholder="Tulis elemen kompetensi"></textarea>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-xs btn-danger remove-rubric-row">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+    });
+
+    $(document).on("click", ".remove-rubric-row", function () {
+        $(this).closest("tr").remove();
+    });
+
     $("#addUkkForm").on("submit", function (e) {
         console.log("Submitting add UKK form");
         e.preventDefault();
@@ -320,17 +360,51 @@ function handleEditUkk(e, id) {
                 $("#editUkkForm [name='title']").val(res.data.title);
                 $("#editUkkForm [name='operator_id']").val(res.data.operator_id);
                 $("#editUkkForm [name='major']").val(res.data.major);
+                $("#editUkkForm [name='code']").val(res.data.code);
+                $("#editUkkForm [name='package_number']").val(res.data.package_number);
+                $("#editUkkForm [name='exam_format']").val(res.data.exam_format);
                 editUkkInstructionQuill.setContents(
                     editUkkInstructionQuill.clipboard.convert(
                         res.data.instructions
                     )
                 );
                 $("#editUkkForm [name='instructions']").val(res.data.instructions);
-                $("#editUkkForm [name='type']").val(res.data.type);
+                $("#editUkkForm [name='type']").val(res.data.type).trigger('change');
                 edit_start_time.setDate(new Date(res.data.start_time));
                 edit_end_time.setDate(new Date(res.data.end_time));
                 edit_end_time.set("minTime", new Date(res.data.start_time));
                 edit_end_time.set("minDate", new Date(res.data.start_time));
+
+                // Load Rubric
+                const rubricTbody = $("#editUkkForm .rubric-table tbody");
+                rubricTbody.empty();
+                if (res.data.type === 'Praktik' && res.data.rubric) {
+                    const rubric = res.data.rubric;
+                    // Check if rubric is in old format (just elements) or new format (category and element)
+                    if (Array.isArray(rubric.category)) {
+                        for (let i = 0; i < rubric.category.length; i++) {
+                            const row = `
+                                <tr>
+                                    <td>
+                                        <select class="form-select" name="rubric[category][]">
+                                            <option value="Utama" ${rubric.category[i] === 'Utama' ? 'selected' : ''}>Utama</option>
+                                            <option value="Pendukung" ${rubric.category[i] === 'Pendukung' ? 'selected' : ''}>Pendukung</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <textarea class="form-control" name="rubric[element][]" rows="2">${rubric.element[i]}</textarea>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-xs btn-danger remove-rubric-row">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                            rubricTbody.append(row);
+                        }
+                    }
+                }
 
                 if (res.data.duration) {
                     $(`#editUkkForm [name='allow_duration'][value='1']`).prop(

@@ -27,6 +27,9 @@ class UKKRequest extends FormRequest
             'operator_id' => 'required|exists:users,id',
             'type' => 'required|in:Praktik,Teori',
             'major' => 'required|exists:majors,name',
+            'code' => 'nullable|string|max:255',
+            'package_number' => 'nullable|string|max:255',
+            'exam_format' => 'nullable|string|max:255',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'duration' => 'nullable|integer',
@@ -34,6 +37,7 @@ class UKKRequest extends FormRequest
             'is_shuffle_questions' => 'boolean',
             'file_path' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,jpg,jpeg,png,txt|max:10240',
             'deletedFile' => 'nullable|boolean',
+            'rubric' => 'nullable|array',
         ];
     }
 

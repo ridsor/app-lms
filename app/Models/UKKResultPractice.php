@@ -24,7 +24,6 @@ class UKKResultPractice extends Model
         'contents' => 'array',
         'submitted_at' => 'datetime',
         'graded_at' => 'datetime',
-        'score' => 'float'
     ];
 
     public function ukk(): BelongsTo
@@ -44,11 +43,6 @@ class UKKResultPractice extends Model
 
     public function getFormattedScoreAttribute()
     {
-        $value = $this->score;
-        if (is_null($value)) return null;
-        
-        return $value == (int)$value
-            ? (int)$value
-            : rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.');
+        return $this->score;
     }
 }

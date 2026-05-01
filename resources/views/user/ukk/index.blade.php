@@ -202,9 +202,10 @@
                           @endcan
                           @role(['student', 'parent'])
                             @php
-                              $is_done = $ukk->type === 'Teori'
-                                ? $ukk->results->where('student_id', $studentId)->isNotEmpty()
-                                : $ukk->practiceResults->where('student_id', $studentId)->isNotEmpty();
+                              $is_done =
+                                  $ukk->type === 'Teori'
+                                      ? $ukk->results->where('student_id', $studentId)->isNotEmpty()
+                                      : $ukk->practiceResults->where('student_id', $studentId)->isNotEmpty();
                             @endphp
                             @if (!$is_done)
                               <span class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">
@@ -233,9 +234,9 @@
                              @endrole
                             @role(['operator'])
                                 @if ($ukk->type === 'Teori')
-                                    href="{{ route('user.ukk.result.teori', $ukk->id) }}"
+                                    href="{{ route('user.ukk.show', $ukk->id) }}"
                                 @else
-                                    href="{{ route('user.ukk.result.praktik', $ukk->id) }}"
+                                    href="{{ route('user.ukk.show', $ukk->id) }}"
                                 @endif
                              @endrole
                             class="btn btn-outline-primary gap-1 px-3 btn-sm d-flex justify-content-center align-items-center">
@@ -259,10 +260,9 @@
                   </div>
                 @endif
               </div>
-
-              @include('user.ukk.modal')
             </div>
           </form>
+          @include('user.ukk.modal')
         </div>
       </div>
     </div>

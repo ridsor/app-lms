@@ -22,7 +22,7 @@ $(document).ready(function () {
             { data: "Nama", name: "students.name" },
             { data: "Pengumpulan", name: "submitted_at" },
             { data: "Nilai", name: "score" },
-            { data: "Penilaian", name: "graded_at" },
+            { data: "Kesimpulan", name: "contents->final_conclusion" },
             { data: "Penilai", name: "grader.name" },
             {
                 data: null,
@@ -31,13 +31,16 @@ $(document).ready(function () {
                 searchable: false,
                 render: function (data, type, row, meta) {
                     const html = `
-                    <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
+                    <div class="common-align gap-2 justify-content-start">
                         <a class="square-white view rounded-2" href=${"/ukk/" +
                         data.ukk_id +
                         "/praktik/evaluasi/" +
                         (meta.row + meta.settings._iDisplayStart + 1)
-                        }>
+                        } title="Evaluasi">
                             <i class="fa-solid fa-pen"></i>
+                        </a>
+                        <a class="square-white view bg-info-subtle text-info rounded-2" target="_blank" href=${"/ukk/praktik/print/" + data.id} title="Cetak PDF">
+                            <i class="fa-solid fa-file-pdf"></i>
                         </a>
                     </div>
                     `;
