@@ -94,7 +94,14 @@
           </button>
         </form>
         @can(['ukk.create', 'ukk.edit'])
-          <div class="col-12 col-md-auto d-flex justify-content-end">
+          <div class="col-12 col-md-auto d-flex justify-content-end gap-2">
+            <a href="{{ route('user.ukk.template.download') }}" class="btn btn-outline-info">
+              <i class="fa fa-download me-1"></i> Template Soal
+            </a>
+            <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
+              data-bs-target="#importQuestionModal">
+              <i class="fa fa-upload me-1"></i> Import Soal
+            </button>
             <div class="btn-group">
               <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
                 aria-expanded="false">Tambah Soal</button>

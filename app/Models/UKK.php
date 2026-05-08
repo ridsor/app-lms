@@ -24,7 +24,6 @@ class UKK extends Model
         'file_size',
         'start_time',
         'end_time',
-        'duration',
         'instructions',
         'is_shuffle_questions',
         'rubric',
@@ -97,6 +96,15 @@ class UKK extends Model
         });
 
         return $multiple->concat($essay)->sortBy('created_at')->values();
+    }
+
+    public function getRemainingSecondsAttribute()
+    {
+        $now = now();
+        if ($now->gt($this->end_time)) {
+            return 0;
+        }
+        return $now->diffInSeconds($this->end_time);
     }
 
     public function scopeFilter($query, array $filters)

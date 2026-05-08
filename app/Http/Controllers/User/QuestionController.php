@@ -111,6 +111,31 @@ class QuestionController extends Controller
 
             $validated = $request->validated();
 
+            // Prevent accidental nulling of existing files
+            unset($validated['question_file']);
+            foreach (['a', 'b', 'c', 'd', 'e'] as $opt) {
+                unset($validated["option_{$opt}_image"]);
+            }
+
+            if ($request->has('deleteData')) {
+                $deleteData = $request->input('deleteData');
+                if (in_array('question_file', $deleteData)) {
+                    if (!empty($question->question_file) && Storage::exists($question->question_file)) {
+                        Storage::delete($question->question_file);
+                    }
+                    $validated['question_file'] = null;
+                }
+                foreach (['a', 'b', 'c', 'd', 'e'] as $opt) {
+                    if (in_array("option_{$opt}_image", $deleteData)) {
+                        $imageKey = "option_{$opt}_image";
+                        if (!empty($question->$imageKey) && Storage::exists($question->$imageKey)) {
+                            Storage::delete($question->$imageKey);
+                        }
+                        $validated[$imageKey] = null;
+                    }
+                }
+            }
+
             if ($request->hasFile('question_file')) {
                 if (!empty($question->question_file) && Storage::exists($question->question_file)) {
                     Storage::delete($question->question_file);
@@ -119,35 +144,14 @@ class QuestionController extends Controller
             }
 
             if ($request->input('question_type') === 'multiple_choice') {
-                if ($request->hasFile('option_a_image')) {
-                    if (!empty($question->option_a_image) && Storage::exists($question->option_a_image)) {
-                        Storage::delete($question->option_a_image);
+                foreach (['a', 'b', 'c', 'd', 'e'] as $opt) {
+                    $fileKey = "option_{$opt}_image";
+                    if ($request->hasFile($fileKey)) {
+                        if (!empty($question->$fileKey) && Storage::exists($question->$fileKey)) {
+                            Storage::delete($question->$fileKey);
+                        }
+                        $validated[$fileKey] = $request->file($fileKey)->store('file/ujian');
                     }
-                    $validated['option_a_image'] = $request->file('option_a_image')->store('file/ujian');
-                }
-                if ($request->hasFile('option_b_image')) {
-                    if (!empty($question->option_b_image) && Storage::exists($question->option_b_image)) {
-                        Storage::delete($question->option_b_image);
-                    }
-                    $validated['option_b_image'] = $request->file('option_b_image')->store('file/ujian');
-                }
-                if ($request->hasFile('option_c_image')) {
-                    if (!empty($question->option_c_image) && Storage::exists($question->option_c_image)) {
-                        Storage::delete($question->option_c_image);
-                    }
-                    $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
-                }
-                if ($request->hasFile('option_d_image')) {
-                    if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
-                        Storage::delete($question->option_d_image);
-                    }
-                    $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
-                }
-                if ($request->hasFile('option_e_image')) {
-                    if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
-                        Storage::delete($question->option_e_image);
-                    }
-                    $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
                 }
 
                 if (!$request->has('option_d')) {
@@ -155,12 +159,14 @@ class QuestionController extends Controller
                     if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
                         Storage::delete($question->option_d_image);
                     }
+                    $validated['option_d_image'] = null;
                 }
                 if (!$request->has('option_e')) {
                     $validated['option_e'] = null;
                     if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
                         Storage::delete($question->option_e_image);
                     }
+                    $validated['option_e_image'] = null;
                 }
             }
 

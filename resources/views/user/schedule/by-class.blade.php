@@ -29,7 +29,8 @@
             {{ $class->major ? '(' . $class->major->name . ')' : '' }}</h3>
         </div>
         <div class="col-sm-6 text-end mt-2 mt-sm-0">
-          <a href="{{ route('user.schedule.index') }}" class="btn btn-secondary btn-sm"><i class="fa fa-arrow-left"></i>
+          <a href="{{ route('user.schedule.classlist') }}" class="btn btn-secondary btn-sm"><i
+              class="fa fa-arrow-left"></i>
             Kembali ke Daftar Kelas</a>
         </div>
       </div>

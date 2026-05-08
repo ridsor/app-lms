@@ -259,12 +259,12 @@
                   <span class="icon d-inline-flex justify-content-center align-items-center">
                     <i data-feather="calendar" style="width:18px; height: 18px"></i>
                   </span>
-                  @if ($ukk_result?->start_time && $ukk_result?->end_time)
+                  @if ($ukk_result?->status == 'completed')
                     <div class="d-flex flex-column">
                       <span class="mb-0 ms-2" id="date">Mulai
-                        {{ $ukk_result?->start_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
+                        {{ $ukk_result?->created_at->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
                       <span class="mb-0 ms-2" id="date">Selesai
-                        {{ $ukk_result?->end_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
+                        {{ $ukk_result?->updated_at->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
                     </div>
                   @else
                     <span class="mb-0 ms-2" id="date">-</span>
@@ -272,6 +272,16 @@
                 </div>
               </div>
             </div>
+
+            @if ($is_ukk_available)
+              <div class="mb-3">
+                <div class="text-center">
+                  <span class="fw-bold">Waktu tersisa:</span>
+                  <span id="countdown" class="badge bg-danger fs-6">00:00:00</span>
+                </div>
+              </div>
+            @endif
+
             <div class="d-flex justify-content-end gap-2">
               <a href="{{ route('user.ukk.index') }}" class="btn btn-outline-secondary" type="button"
                 aria-label="Close">
@@ -293,5 +303,8 @@
 @section('scripts')
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
+  <script>
+    const duration = {{ $ukk_result?->remaining_seconds ?? $ukk->remaining_seconds }};
+  </script>
   <script src="{{ asset('assets/js/ukk-info.js') }}"></script>
 @endsection

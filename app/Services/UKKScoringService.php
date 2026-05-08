@@ -47,7 +47,6 @@ class UKKScoringService
         $ukkResult->update([
             'score'  => $totalScore,
             'status' => 'completed',
-            'end_time' => now(),
         ]);
 
         return $ukkResult;

@@ -49,7 +49,6 @@ class ExamScoringService
     $examResult->update([
       'score'  => $totalScore,
       'status' => 'completed',
-      'end_time' => now(),
     ]);
 
     return $examResult;

@@ -84,7 +84,17 @@
             </div>
             @can('exam.create')
               <div class="col-12">
-                <div class="d-flex justify-content-end">
+                <div class="d-flex justify-content-end gap-2">
+                  <a href="{{ route('user.exam.template.download') }}"
+                    class="btn btn-outline-info gap-2 px-3 btn-sm d-flex justify-content-center align-items-center">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Template Soal</span>
+                  </a>
+                  <button type="button" data-bs-toggle="modal" data-bs-target="#importQuestionModal"
+                    class="btn btn-info gap-2 px-3 btn-sm d-flex justify-content-center align-items-center">
+                    <i class="fa-solid fa-upload"></i>
+                    <span>Import Soal</span>
+                  </button>
                   <button type="button" data-bs-toggle="modal" data-bs-target="#copyQuestionModal"
                     class="btn btn-primary gap-2 px-3 btn-sm d-flex justify-content-center align-items-center">
                     <i class="fa-solid fa-copy"></i>

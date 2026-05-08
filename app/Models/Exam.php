@@ -19,7 +19,6 @@ class Exam extends Model
         'type',
         'start_time',
         'end_time',
-        'duration',
         'exam_mode',
         'is_shuffle_questions',
     ];
@@ -70,6 +69,15 @@ class Exam extends Model
     public function results(): HasMany
     {
         return $this->hasMany(ExamResult::class);
+    }
+
+    public function getRemainingSecondsAttribute()
+    {
+        $now = now();
+        if ($now->gt($this->end_time)) {
+            return 0;
+        }
+        return $now->diffInSeconds($this->end_time);
     }
 
     public function scopeFilter($query, array $filters)

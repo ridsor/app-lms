@@ -210,12 +210,12 @@
                   <span class="icon d-inline-flex justify-content-center align-items-center">
                     <i data-feather="calendar" style="width:18px; height: 18px"></i>
                   </span>
-                  @if ($exam_result?->start_time && $exam_result?->end_time)
+                  @if ($exam_result?->status == 'completed')
                     <div class="d-flex flex-column">
                       <span class="mb-0 ms-2" id="date">Mulai
-                        {{ $exam_result?->start_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
+                        {{ $exam_result?->created_at->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
                       <span class="mb-0 ms-2" id="date">Selesai
-                        {{ $exam_result?->end_time->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
+                        {{ $exam_result?->updated_at->translatedFormat('j M Y H:i') . ' WIT' ?: '-' }}</span>
                     </div>
                   @else
                     <span class="mb-0 ms-2" id="date">-</span>
@@ -223,6 +223,16 @@
                 </div>
               </div>
             </div>
+
+            @if ($is_exam_available)
+              <div class="mb-3">
+                <div class="text-center">
+                  <span class="fw-bold">Waktu tersisa:</span>
+                  <span id="countdown" class="badge bg-danger fs-6">00:00:00</span>
+                </div>
+              </div>
+            @endif
+
             <div class="d-flex justify-content-end gap-2">
               <a href="{{ route('user.exam.index') }}" class="btn btn-outline-secondary" type="button"
                 aria-label="Close">
@@ -244,5 +254,8 @@
 @section('scripts')
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script src="{{ asset('assets/js/editors/quill.js') }}"></script>
+  <script>
+    const duration = {{ $exam->remaining_seconds ?? 0 }};
+  </script>
   <script src="{{ asset('assets/js/exam-info.js') }}"></script>
 @endsection

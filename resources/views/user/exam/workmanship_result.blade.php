@@ -56,15 +56,11 @@
                 poin</span></p>
           </div>
           @php
-            $percentage =
-                $exam?->multipleQuestions->count() + $exam?->essayQuestions->count() > 0
-                    ? ($totalCorrectAnswers / $exam?->multipleQuestions->count() + $exam?->essayQuestions->count()) *
-                        100
-                    : 0;
+            $percentage = $totalPoints > 0 ? ($totalCorrectAnswers / $totalPoints) * 100 : 0;
           @endphp
           <div class="d-flex align-items-center justify-content-center mb-2">
             <div class="progress-bar position-relative border border-secondary-subtle"
-              style="background: conic-gradient(#6a5acd {{ $percentage * 100 }}%, #eee 0);">
+              style="background: conic-gradient(#6a5acd {{ $percentage }}%, #eee 0);">
               <div class="position-absolute top-0 wrapper-result rounded-circle position-center"
                 style="width:90%;height:90%; background:#eee">
                 <div class="d-flex align-items-center justify-content-center" style="height: 100%;">

@@ -21,9 +21,9 @@
             @switch(Helper::getFileType($question->question_file))
               @case('image')
                 <div class="image">
-                  <a href="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType]) }}"
+                  <a href="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType, 'v' => $question->updated_at?->timestamp]) }}"
                     class="glightbox" data-gallery="question-{{ $question->id }}" data-type="image">
-                    <img src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType]) }}"
+                    <img src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType, 'v' => $question->updated_at?->timestamp]) }}"
                       alt="soal gambar"
                       style="max-width:150px; max-height:150px; object-fit:cover; object-position:center;" />
                   </a>

@@ -29,7 +29,6 @@ class ExamRequest extends FormRequest
             'type' => 'required|in:Midterm,Final',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
-            'duration' => 'nullable|numeric',
             'exam_mode' => 'nullable|in:"Closed Book","Open Book"',
             'is_shuffle_questions' => 'nullable|boolean',
         ];
@@ -56,8 +55,6 @@ class ExamRequest extends FormRequest
             'end_time.date' => ':attribute harus berupa tanggal.',
             'end_time.after' => ':attribute harus setelah :date.',
 
-            'duration.numeric' => ':attribute harus berupa angka.',
-
             'exam_mode.in' => ':attribute harus salah satu dari: Closed Book atau Open Book.',
 
             'is_shuffle_questions.boolean' => ':attribute harus bernilai true atau false.',
@@ -73,7 +70,6 @@ class ExamRequest extends FormRequest
             'type' => 'Tipe Ujian',
             'start_time' => 'Waktu Mulai',
             'end_time' => 'Waktu Selesai',
-            'duration' => 'Durasi',
             'exam_mode' => 'Mode Ujian',
             'is_shuffle_questions' => 'Acak Soal',
         ];

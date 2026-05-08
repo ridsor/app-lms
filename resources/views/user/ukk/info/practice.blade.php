@@ -1,5 +1,9 @@
 @php
   use App\Helpers\Helper;
+
+  $now = now();
+  $can_submit = $now >= $ukk->start_time && $now <= $ukk->end_time;
+
 @endphp
 
 @extends('layouts.user.app')
@@ -49,6 +53,18 @@
       <div class="col-xl-8 col-lg-7">
         <div class="card rounded-responsive">
           <div class="card-body">
+            @role('student')
+              @if ($can_submit)
+                <div class="d-flex justify-content-end">
+                  <div class="mb-3">
+                    <div class="text-center">
+                      <span class="fw-bold">Waktu tersisa:</span>
+                      <span id="countdown" class="badge bg-danger fs-6">00:00:00</span>
+                    </div>
+                  </div>
+                </div>
+              @endif
+            @endrole
             <h5>{{ $ukk->title }}</h5>
             <div class="mt-3">
               <label class="form-label fw-bold">Instruksi:</label>
@@ -127,9 +143,6 @@
                     <span class="fw-bold">Nilai:</span>
                     <div class="d-flex align-items-center gap-2">
                       <span class="badge badge-primary fs-6">{{ $practice_result->formatted_score }}</span>
-                      <a href="{{ route('user.ukk.result.praktik.print', $practice_result->id) }}" target="_blank" class="btn btn-xs btn-outline-primary py-1 px-2">
-                        <i class="fa fa-file-pdf-o"></i> Cetak PDF
-                      </a>
                     </div>
                   </div>
                   @if (isset($practice_result->contents['final_conclusion']))
@@ -146,47 +159,6 @@
                   @endif
                 </div>
               </div>
-
-              @if (isset($practice_result->contents['rubric_assessment']))
-                <div class="card border mb-3">
-                  <div class="card-header py-2 bg-light">
-                    <h6 class="mb-0 small fw-bold">Rincian Penilaian</h6>
-                  </div>
-                  <div class="card-body p-0">
-                    <div class="table-responsive">
-                      <table class="table table-sm table-bordered mb-0" style="font-size: 0.75rem;">
-                        <thead>
-                          <tr class="bg-light">
-                            <th>Elemen</th>
-                            <th class="text-center">Capaian</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @foreach ($ukk->rubric['element'] as $idx => $element)
-                            @php
-                              $assessment = $practice_result->contents['rubric_assessment'][$idx] ?? null;
-                            @endphp
-                            @if ($assessment)
-                              @php
-                                $status = $assessment['status'] ?? '-';
-                              @endphp
-                              <tr>
-                                <td>{{ $element }}</td>
-                                <td class="text-center">
-                                  <span
-                                    class="badge {{ $status === 'Kompeten' ? 'badge-light-success' : 'badge-light-danger' }} p-1">
-                                    {{ $status }}
-                                  </span>
-                                </td>
-                              </tr>
-                            @endif
-                          @endforeach
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              @endif
 
               @if (isset($practice_result->contents['positive_note']) || isset($practice_result->contents['negative_note']))
                 <div class="card border mb-3">
@@ -215,11 +187,6 @@
             </div>
 
             @role('student')
-              @php
-                $now = now();
-                $can_submit = $now >= $ukk->start_time && $now <= $ukk->end_time;
-              @endphp
-
               @if ($can_submit)
                 <div class="mb-3">
                   <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="collapse"
@@ -300,6 +267,7 @@
 
 @section('scripts')
   <script>
+    const duration = {{ $ukk->remaining_seconds }};
     let ukkSubmissionContents = @json($practice_result->contents ?? ['description' => '', 'files' => [], 'links' => []]);
     if (!ukkSubmissionContents.files) ukkSubmissionContents.files = [];
     if (!ukkSubmissionContents.links) ukkSubmissionContents.links = [];

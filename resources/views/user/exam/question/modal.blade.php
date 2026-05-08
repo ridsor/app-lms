@@ -172,8 +172,7 @@
                     </label>
                   </div>
                   <input type="file" class="form-control file_path" id="addEssayQuestionFile"
-                    name="question_file" hidden
-                    accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
+                    name="question_file" hidden accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
                   <div id="file-preview" class="d-flex flex-column gap-1"></div>
                 </div>
                 <div class="invalid-feedback"></div>
@@ -226,7 +225,7 @@
                 <div class="taskFile">
                   <label class="form-label">File</label>
                   <div class="info text-danger mb-1" style="font-size: 12px;">
-                    Format file PNG / JPG /   JPEG / MP3 / WAV / MP4 / WEBM
+                    Format file PNG / JPG / JPEG / MP3 / WAV / MP4 / WEBM
                     <br />
                     Ukuran maksimal 5MB
                   </div>
@@ -241,8 +240,7 @@
                     </label>
                   </div>
                   <input type="file" class="form-control file_path" id="editQuestionFile" name="question_file"
-                    hidden
-                    accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
+                    hidden accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
                   <div id="file-preview" class="d-flex flex-column gap-1"></div>
                 </div>
                 <div class="invalid-feedback"></div>
@@ -371,8 +369,7 @@
                     </label>
                   </div>
                   <input type="file" class="form-control file_path" id="editEssayQuestionFile"
-                    name="question_file" hidden
-                    accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
+                    name="question_file" hidden accept=".jpg,.jpeg,.png,.mp3,.wav,.mp4,.webm">
                   <div id="file-preview" class="d-flex flex-column gap-1"></div>
                 </div>
                 <div class="invalid-feedback"></div>
@@ -457,6 +454,75 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="importQuestionModal" tabindex="-1" aria-labelledby="importQuestionModal"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content category-popup">
+      <div class="modal-header">
+        <h5 class="modal-title">Import Soal</h5>
+        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0 custom-input">
+        <div class="text-start">
+          <div class="p-20">
+            <form class="row g-3 needs-validation" novalidate="" id="importQuestionForm" method="POST"
+              action="{{ route('user.exam.importQuestions', $exam->id) }}" enctype="multipart/form-data">
+              @csrf
+              <div class="col-12">
+                <div class="taskFile">
+                  <label class="form-label">File Template Soal</label>
+                  <div class="info text-secondary mb-3" style="font-size: 12px; line-height: 1.5;">
+                    <span class="text-danger fw-bold">Format file: .xls, .xlsx, atau .zip</span><br>
+                    Jika menyertakan gambar, unggah file <strong>.zip</strong> dengan struktur berikut:
+                    <div class="bg-light p-2 rounded-2 mt-2 border border-light-subtle">
+                      <code class="text-dark" style="font-family: monospace; white-space: pre-wrap;">arsip_soal.zip
+                        ├── soal_ujian.xlsx (Data Soal)
+                        └── media/ (Folder Gambar)
+                        ├── soal1_soal.png
+                        └── soal1_opsi_a.png</code>
+                    </div>
+                    <p class="mt-2 mb-1 fw-bold text-dark">Langkah-langkah:</p>
+                    <ol class="ps-3 mb-2">
+                      <li>Siapkan file Excel sesuai template.</li>
+                      <li>Masukkan semua gambar ke dalam folder bernama <strong class="text-primary">media</strong>
+                        (huruf kecil semua).</li>
+                      <li>Pilih file Excel dan folder media secara bersamaan.</li>
+                      <li>Klik kanan > <strong>Compress to ZIP</strong>.</li>
+                    </ol>
+                    <div class="alert alert-light-info p-2 mb-0" style="font-size: 11px;">
+                      <i class="fa fa-info-circle me-1"></i> Pastikan nama file di Excel sama persis dengan nama file
+                      di folder media.
+                    </div>
+                  </div>
+                  <div style="display: block" class="custom-file-upload w-100 border rounded-2 px-3 py-3">
+                    <label for="importQuestionFile" class="d-flex align-items-center mb-0 w-100"
+                      style="cursor:pointer;">
+                      <span
+                        style="display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; background:#e3f0ff; border-radius:6px; margin-right:12px;">
+                        <i class="fa fa-upload text-primary fs-5"></i>
+                      </span>
+                      <span style="color:#b0b0b0; font-weight:500;">Unggah File Template</span>
+                    </label>
+                  </div>
+                  <input type="file" class="form-control file_path" id="importQuestionFile" name="import_file"
+                    hidden accept=".xls,.xlsx,.zip">
+                  <div id="import-file-preview" class="d-flex flex-column gap-1 mt-2"></div>
+                </div>
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-12 d-flex justify-content-end gap-2 mt-4">
+                <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal"
+                  aria-label="Close">Batal</button>
+                <button class="btn btn-primary" type="submit" id="importQuestionSubmitBtn">Import</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>

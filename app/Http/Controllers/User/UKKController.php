@@ -234,7 +234,7 @@ class UKKController extends Controller
                 ->addColumn('Status', function ($row) {
                     return Helper::getExamStatusLabel($row->status);
                 })
-                ->addColumn('Pengerjaan', fn($row) => $row->end_time ? $row->end_time->translatedFormat('d/m/Y H:i') : '-')
+                ->addColumn('Pengerjaan', fn($row) => $row->status === 'completed' ? $row->updated_at->translatedFormat('d/m/Y H:i') : '-')
                 ->rawColumns(['Nama', 'NIS', 'Nilai', 'Status', 'Pengerjaan'])
                 ->make(true);
         }
@@ -804,7 +804,8 @@ class UKKController extends Controller
                 if ($existingResult->status === 'completed') {
                     return $this->sendError('Anda sudah menyelesaikan UKK ini.', [], 403);
                 }
-                if ($existingResult->end_time && $now->gt($existingResult->end_time)) {
+
+                if ($now->gt($ukk->end_time)) {
                     return $this->sendError('Waktu UKK telah berakhir.', [], 403);
                 }
 
@@ -822,8 +823,6 @@ class UKKController extends Controller
             $result = UKKResultTheory::create([
                 'ukk_id' => $ukk->id,
                 'student_id' => $student->id,
-                'start_time' => $now,
-                'end_time' => $ukk->duration ? $now->copy()->addMinutes($ukk->duration) : null,
                 'status' => 'in_progress',
             ]);
 
@@ -867,7 +866,7 @@ class UKKController extends Controller
                 ->with('error', 'Anda sudah mengerjakan UKK ini.');
         }
 
-        if ($ukkResult->end_time && $now->gt($ukkResult->end_time)) {
+        if ($now->gt($ukk->end_time)) {
             $ukkResult->update(['status' => 'completed']);
             app(UKKScoringService::class)->saveScore($ukkResult, auth()->user()->student->id);
             return redirect()->route('user.ukk.teori.workmanship.result', $ukk->id)
@@ -1018,7 +1017,6 @@ class UKKController extends Controller
 
             $ukkResult->update([
                 'status' => 'completed',
-                'end_time' => now()
             ]);
 
             app(UKKScoringService::class)->saveScore($ukkResult, $student->id);
@@ -1061,7 +1059,7 @@ class UKKController extends Controller
                 ->with('error', 'Anda belum menyelesaikan UKK ini.');
         }
 
-        if (($ukkResult->end_time && now()->gt($ukkResult->end_time)) && $ukkResult->status !== 'completed') {
+        if (now()->gt($ukk->end_time) && $ukkResult->status !== 'completed') {
             app(UKKScoringService::class)->saveScore($ukkResult, $student->id);
         }
 
@@ -1177,6 +1175,267 @@ class UKKController extends Controller
             ->log('Pengguna ' . $request->user()->name . ' menilai jawaban untuk ukk: ' . $ukk->id . ', hasil ukk: ' . $ukkResult->id . ', nilai: ' . $ukkResult->score);
 
         return $this->sendResponse('Skor berhasil diubah.');
+    }
+
+    public function downloadTemplate()
+    {
+        $data = collect([
+            [
+                'Jenis Soal (Pilihan Ganda/Essay)' => 'Pilihan Ganda',
+                'Poin' => 10,
+                'Teks Soal' => 'Siapakah tokoh pada gambar di bawah ini?',
+                'File Gambar Soal' => '',
+                'Opsi A' => 'Ir. Soekarno',
+                'File Gambar Opsi A' => 'soal1_opsi_a.png',
+                'Opsi B' => 'Moh. Hatta',
+                'File Gambar Opsi B' => 'soal1_opsi_b.png',
+                'Opsi C' => 'Sutan Syahrir',
+                'File Gambar Opsi C' => '',
+                'Opsi D' => 'Ki Hajar Dewantara',
+                'File Gambar Opsi D' => '',
+                'Opsi E' => 'Jenderal Sudirman',
+                'File Gambar Opsi E' => '',
+                'Kunci Jawaban (A/B/C/D/E)' => 'A',
+            ],
+            [
+                'Jenis Soal (Pilihan Ganda/Essay)' => 'Essay',
+                'Poin' => 20,
+                'Teks Soal' => 'Amati gambar tersebut dan jelaskan maknanya!',
+                'File Gambar Soal' => 'soal2_soal.png',
+                'Opsi A' => '',
+                'File Gambar Opsi A' => '',
+                'Opsi B' => '',
+                'File Gambar Opsi B' => '',
+                'Opsi C' => '',
+                'File Gambar Opsi C' => '',
+                'Opsi D' => '',
+                'File Gambar Opsi D' => '',
+                'Opsi E' => '',
+                'File Gambar Opsi E' => '',
+                'Kunci Jawaban (A/B/C/D/E)' => '',
+            ],
+        ]);
+
+        return (new FastExcel($data))->download('Template_Soal_UKK.xlsx');
+    }
+
+    public function importQuestions(Request $request, $id)
+    {
+        try {
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('update', $ukk);
+
+            $request->validate([
+                'import_file' => 'required|file',
+            ]);
+
+            $file = $request->file('import_file');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $mimeType = $file->getMimeType();
+
+            $isZip = ($extension === 'zip' || in_array($mimeType, ['application/zip', 'application/x-zip-compressed', 'application/octet-stream']));
+
+            DB::beginTransaction();
+
+            if ($isZip) {
+                $zip = new \ZipArchive;
+                if ($zip->open($file->getRealPath()) === TRUE) {
+                    $extractPath = storage_path('app/temp_import_ukk_' . uniqid());
+                    $zip->extractTo($extractPath);
+                    $zip->close();
+
+                    Log::info("Import UKK: ZIP extracted to {$extractPath}");
+
+                    $allFiles = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($extractPath));
+                    $excelPath = null;
+                    foreach ($allFiles as $f) {
+                        if (str_contains($f->getRealPath(), '__MACOSX')) continue;
+                        if (in_array(strtolower(pathinfo($f->getFilename(), PATHINFO_EXTENSION)), ['xls', 'xlsx'])) {
+                            $excelPath = $f->getRealPath();
+                            break;
+                        }
+                    }
+
+                    if (!$excelPath) {
+                        \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+                        throw new \Exception('File Excel tidak ditemukan di dalam ZIP.');
+                    }
+
+                    $collection = (new FastExcel)->import($excelPath);
+                    
+                    $mediaPath = null;
+                    $directories = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($extractPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+                        \RecursiveIteratorIterator::SELF_FIRST
+                    );
+                    foreach ($directories as $dir) {
+                        if (str_contains($dir->getRealPath(), '__MACOSX')) continue;
+                        if ($dir->isDir() && strtolower($dir->getFilename()) === 'media') {
+                            $mediaPath = $dir->getRealPath();
+                            break;
+                        }
+                    }
+
+                    foreach ($collection as $index => $row) {
+                        $this->processImportRow($ukk, $row, $mediaPath, $index + 1, $extractPath);
+                    }
+
+                    \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+                } else {
+                    throw new \Exception('Gagal membuka file ZIP.');
+                }
+            } else {
+                $collection = (new FastExcel)->import($file);
+                foreach ($collection as $index => $row) {
+                    $this->processImportRow($ukk, $row, null, $index + 1);
+                }
+            }
+
+            DB::commit();
+
+            return $this->sendResponse('Soal berhasil diimport.');
+        } catch (\Exception $e) {
+            if (DB::transactionLevel() > 0) DB::rollBack();
+            Log::error('Error importing UKK questions: ' . $e->getMessage());
+            return $this->sendError('Gagal mengimpor file. ' . $e->getMessage(), [], 500);
+        }
+    }
+
+    private function processImportRow($ukk, $row, $mediaPath = null, $rowNumber = 1, $basePath = null)
+    {
+        $cleanRow = [];
+        foreach ($row as $key => $value) {
+            $cleanRow[trim($key)] = is_string($value) ? trim($value) : $value;
+        }
+        $row = $cleanRow;
+
+        $jenis = strtolower($row['Jenis Soal (Pilihan Ganda/Essay)'] ?? '');
+        $poin = floatval($row['Poin'] ?? 0);
+        $teks = $row['Teks Soal'] ?? '';
+
+        if (empty($teks)) return;
+
+        $data = [
+            'questionable_id' => $ukk->id,
+            'questionable_type' => UKK::class,
+            'question_text' => $teks,
+            'question_points' => $poin,
+        ];
+
+        $mainFileName = $row['File Gambar Soal'] ?? '';
+        $imageFile = $this->findFileAnywhere($mainFileName, $mediaPath, $basePath);
+        
+        if (!$imageFile && $basePath) {
+            $imageFile = $this->findFileByConvention($rowNumber, 'soal', null, $mediaPath, $basePath);
+        }
+
+        if ($imageFile) {
+            $data['question_file'] = $this->saveImportedFile($imageFile);
+        }
+
+        if ($jenis === 'pilihan ganda' || $jenis === 'multiple') {
+            $options = ['a', 'b', 'c', 'd', 'e'];
+            foreach ($options as $opt) {
+                $data["option_{$opt}"] = $row["Opsi " . strtoupper($opt)] ?? null;
+                
+                $imgKey = "File Gambar Opsi " . strtoupper($opt);
+                $optFileName = $row[$imgKey] ?? '';
+                $optImageFile = $this->findFileAnywhere($optFileName, $mediaPath, $basePath);
+                
+                if (!$optImageFile && $basePath) {
+                    $optImageFile = $this->findFileByConvention($rowNumber, 'opsi', $opt, $mediaPath, $basePath);
+                }
+
+                if ($optImageFile) {
+                    $data["option_{$opt}_image"] = $this->saveImportedFile($optImageFile);
+                }
+            }
+            $data['correct_answer'] = strtolower(trim($row['Kunci Jawaban (A/B/C/D/E)'] ?? ''));
+            MultipleQuestion::create($data);
+        } elseif ($jenis === 'essay' || $jenis === 'uraian') {
+            EssayQuestion::create($data);
+        }
+    }
+
+    private function findFileAnywhere($fileName, $mediaPath, $basePath)
+    {
+        if (empty($fileName)) return null;
+
+        if ($mediaPath) {
+            $file = $this->findFileInDir($mediaPath, $fileName);
+            if ($file) return $file;
+        }
+
+        if ($basePath) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($basePath));
+            foreach ($iterator as $f) {
+                if ($f->isDir()) continue;
+                if (str_contains($f->getRealPath(), '__MACOSX')) continue;
+                if (strtolower($f->getFilename()) === strtolower($fileName)) {
+                    return $f->getRealPath();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function findFileInDir($dir, $fileName)
+    {
+        $filePath = $dir . DIRECTORY_SEPARATOR . $fileName;
+        if (file_exists($filePath)) return $filePath;
+
+        $files = scandir($dir);
+        foreach ($files as $file) {
+            if (strtolower($file) === strtolower($fileName)) {
+                return $dir . DIRECTORY_SEPARATOR . $file;
+            }
+        }
+        return null;
+    }
+
+    private function findFileByConvention($rowNumber, $type, $option = null, $mediaPath = null, $basePath = null)
+    {
+        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+        
+        $patterns = [];
+        if ($type === 'soal') {
+            $patterns[] = "soal_{$rowNumber}_soal";
+            $patterns[] = "soal{$rowNumber}_soal";
+            $patterns[] = "soal_{$rowNumber}";
+            $patterns[] = "soal{$rowNumber}";
+            $patterns[] = "gambar_soal_{$rowNumber}";
+            $patterns[] = "gambar_soal_{$rowNumber}_soal";
+            $patterns[] = "gambar_{$rowNumber}";
+            $patterns[] = "gambar{$rowNumber}";
+            $patterns[] = "{$rowNumber}";
+        } else {
+            $patterns[] = "soal_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "soal{$rowNumber}_opsi_{$option}";
+            $patterns[] = "gambar_soal_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "gambar_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "soal_{$rowNumber}_{$option}";
+            $patterns[] = "soal{$rowNumber}_{$option}";
+            $patterns[] = "{$rowNumber}_{$option}";
+        }
+
+        foreach ($patterns as $pattern) {
+            foreach ($extensions as $ext) {
+                $fileName = "{$pattern}.{$ext}";
+                $file = $this->findFileAnywhere($fileName, $mediaPath, $basePath);
+                if ($file) return $file;
+            }
+        }
+
+        return null;
+    }
+
+    private function saveImportedFile($fullPath)
+    {
+        $fileName = pathinfo($fullPath, PATHINFO_BASENAME);
+        $newPath = 'file/ujian/' . uniqid() . '_' . $fileName;
+        Storage::put($newPath, file_get_contents($fullPath));
+        return $newPath;
     }
 
     public function resetResult(Request $request, $id)

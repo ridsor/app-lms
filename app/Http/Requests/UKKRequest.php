@@ -32,7 +32,6 @@ class UKKRequest extends FormRequest
             'exam_format' => 'nullable|string|max:255',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
-            'duration' => 'nullable|integer',
             'instructions' => 'required|string',
             'is_shuffle_questions' => 'boolean',
             'file_path' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,zip,rar,jpg,jpeg,png,txt|max:10240',
@@ -63,7 +62,6 @@ class UKKRequest extends FormRequest
             'end_time.required' => 'Waktu selesai wajib diisi',
             'end_time.date' => 'Waktu selesai harus berupa format tanggal dan waktu yang valid',
             'end_time.after' => 'Waktu selesai harus setelah waktu mulai',
-            'duration.integer' => 'Durasi harus berupa angka',
             'instructions.required' => 'Instruksi wajib diisi',
             'instructions.string' => 'Instruksi harus berupa teks',
             'file_path.file' => 'File harus berupa dokumen atau gambar',
@@ -86,7 +84,6 @@ class UKKRequest extends FormRequest
             'major' => 'jurusan',
             'start_time' => 'waktu mulai',
             'end_time' => 'waktu selesai',
-            'duration' => 'durasi',
             'instructions' => 'instruksi',
             'file_path' => 'file lampiran',
         ];

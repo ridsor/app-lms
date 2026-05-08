@@ -16,12 +16,10 @@
         <h4>{{ $ukk->title }}</h4>
       </div>
 
-      @if (!is_null($ukk->duration))
-        <div class="text-center">
-          <span class="fw-bold">Waktu tersisa:</span>
-          <span id="countdown" class="badge bg-danger fs-6">00:00</span>
-        </div>
-      @endif
+      <div class="text-center">
+        <span class="fw-bold">Waktu tersisa:</span>
+        <span id="countdown" class="badge bg-danger fs-6">00:00:00</span>
+      </div>
     </div>
 
     <!-- Progress bar -->
@@ -91,8 +89,8 @@
   <script src={{ asset('assets/js/glightbox.min.js') }}></script>
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script>
-    let hasDuration = {{ !is_null($ukk->duration) ? 1 : 0 }};
-    let duration = {{ $ukkResult?->remainingDuration ? round($ukkResult->remainingDuration * 60) : 0 }};
+    let hasDuration = 1;
+    let duration = {{ $ukkResult?->remaining_seconds ?? $ukk->remaining_seconds }};
     let total = {{ count($questions) }};
     const routeResult = @json(route('user.ukk.index')); // Redirect to index for now
     const ukk_id = @json($ukk->id);

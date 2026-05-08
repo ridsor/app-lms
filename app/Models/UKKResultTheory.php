@@ -11,8 +11,6 @@ class UKKResultTheory extends Model
     protected $fillable = [
         'ukk_id',
         'student_id',
-        'start_time',
-        'end_time',
         'score',
         'graded_at',
         'graded_by',
@@ -20,8 +18,6 @@ class UKKResultTheory extends Model
     ];
 
     protected $casts = [
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
         'graded_at' => 'datetime',
     ];
 
@@ -59,17 +55,15 @@ class UKKResultTheory extends Model
             : rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.');
     }
 
-    public function getRemainingDurationAttribute()
+    public function getRemainingSecondsAttribute()
     {
         $now = now();
+        $endTime = $this->ukk->end_time;
 
-        if ($this->end_time) {
-            if ($now->gt($this->end_time)) {
-                return 0;
-            }
-            return $now->diffInMinutes($this->end_time, false);
+        if ($now->gt($endTime)) {
+            return 0;
         }
 
-        return 0;
+        return $now->diffInSeconds($endTime);
     }
 }

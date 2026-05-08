@@ -1,4 +1,33 @@
 $(document).ready(function () {
+    // =================== Timer Countdown ===================
+    if (typeof duration !== "undefined" && duration > 0) {
+        const display = document.getElementById("countdown");
+
+        if (display) {
+            const endTime = Date.now() + duration * 1000;
+
+            const timer = setInterval(() => {
+                const now = Date.now();
+                const diff = Math.floor((endTime - now) / 1000); // sisa detik
+
+                if (diff <= 0) {
+                    clearInterval(timer);
+                    display.textContent = "00:00";
+                    location.reload(); // Reload to update status
+                    return;
+                }
+
+                const hours = Math.floor(diff / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                const seconds = diff % 60;
+
+                display.textContent = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
+                    seconds
+                ).padStart(2, "0")}`;
+            }, 1000);
+        }
+    }
+
     const preview = $("#ukk-submission-preview");
     
     // Normalisasi data awal

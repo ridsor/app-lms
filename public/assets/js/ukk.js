@@ -74,20 +74,6 @@ const edit_end_time = flatpickr("#editUkkEndTime", {
 });
 
 $(document).ready(function () {
-    $("[name='allow_duration']").on("change", function () {
-        const value = $(this).val();
-
-        const duration = $(this).closest("form").find("[name='duration']");
-        const duration_form_input = $(this).closest("form").find(".duration");
-        if (value == "1") {
-            duration.prop("disabled", false);
-            duration_form_input.show();
-        } else {
-            duration.prop("disabled", true);
-            duration_form_input.hide();
-        }
-    });
-
     $("[name='type']").on("change", function () {
         const type = $(this).val();
         const rubricSection = $(this).closest("form").find(".rubric-section");
@@ -404,22 +390,6 @@ function handleEditUkk(e, id) {
                             rubricTbody.append(row);
                         }
                     }
-                }
-
-                if (res.data.duration) {
-                    $(`#editUkkForm [name='allow_duration'][value='1']`).prop(
-                        "checked",
-                        true
-                    );
-                    $("#editUkkForm .duration").show();
-                    $("#editUkkForm [name='duration']").val(res.data.duration);
-                } else {
-                    $(`#editUkkForm [name='allow_duration'][value='0']`).prop(
-                        "checked",
-                        true
-                    );
-                    $("#editUkkForm .duration").hide();
-                    $("#editUkkForm [name='duration']").val("");
                 }
 
                 if (res.data.is_shuffle_questions) {

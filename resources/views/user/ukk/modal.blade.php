@@ -101,30 +101,6 @@
                       </div>
                     </div>
                     <div class="col-12">
-                      <label class="form-label">Batas Waktu</label>
-                      <div class="checkbox-checked d-flex gap-2">
-                        <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                          <input type="radio" value="0" checked name="allow_duration"
-                            class="me-2 form-check-input radio" style="transform: translateY(-2px)">
-                          <span class="fw-bold text-uppercase">Tidak</span>
-                        </label>
-                        <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                          <input type="radio" value="1" class="me-2 form-check-input radio"
-                            name="allow_duration" style="transform: translateY(-2px)">
-                          <span class="fw-bold text-uppercase">Ya</span>
-                        </label>
-                      </div>
-                      <div class="invalid-feedback"></div>
-                    </div>
-                    <div class="col-12 duration" style="display: none;">
-                      <div class="d-flex flex-column">
-                        <label class="form-label" for="addDurationUkk">Batas Waktu</label>
-                        <input class="form-control" autocomplete="off" id="addDurationUkk" type="number"
-                          placeholder="(menit)" name="duration">
-                        <div class="invalid-feedback"></div>
-                      </div>
-                    </div>
-                    <div class="col-12">
                       <label class="form-label">Acak Soal</label>
                       <div class="checkbox-checked d-flex gap-2">
                         <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
@@ -337,30 +313,6 @@
                             class="txt-danger">*</span></label>
                         <input class="form-control flatpicker" autocomplete="off" id="editUkkEndTime" type="text"
                           placeholder="Pilih waktu selesai" name="end_time" data-language="id">
-                        <div class="invalid-feedback"></div>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <label class="form-label">Batas Waktu</label>
-                      <div class="checkbox-checked d-flex gap-2">
-                        <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                          <input type="radio" value="0" checked name="allow_duration"
-                            class="me-2 form-check-input radio" style="transform: translateY(-2px)">
-                          <span class="fw-bold text-uppercase">Tidak</span>
-                        </label>
-                        <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                          <input type="radio" value="1" class="me-2 form-check-input radio"
-                            name="allow_duration" style="transform: translateY(-2px)">
-                          <span class="fw-bold text-uppercase">Ya</span>
-                        </label>
-                      </div>
-                      <div class="invalid-feedback"></div>
-                    </div>
-                    <div class="col-12 duration" style="display: none;">
-                      <div class="d-flex flex-column">
-                        <label class="form-label" for="editDurationUkk">Batas Waktu</label>
-                        <input class="form-control" autocomplete="off" id="editDurationUkk" type="number"
-                          placeholder="(menit)" name="duration">
                         <div class="invalid-feedback"></div>
                       </div>
                     </div>

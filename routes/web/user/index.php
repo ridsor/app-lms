@@ -153,6 +153,8 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/ujian/{id}/edit', [ExamController::class, 'edit'])->name('user.exam.edit');
     Route::delete('/ujian/{id}', [ExamController::class, 'destroy'])->name('user.exam.destroy');
     Route::get('/ujian/{id}/soal', [ExamController::class, 'showQuestion'])->name('user.exam.question.show');
+    Route::get('/ujian/template-soal/download', [ExamController::class, 'downloadTemplate'])->name('user.exam.template.download');
+    Route::post('/ujian/{id}/import-soal', [ExamController::class, 'importQuestions'])->name('user.exam.importQuestions');
     Route::post('/ujian/{exam_id}/copy/{id}', [ExamController::class, 'copyQuestions'])->name('user.exam.copyQuestions');
     Route::get('/ujian/{id}/hasil', [ExamController::class, 'showResult'])->name('user.exam.result.show');
     Route::patch('/ujian/{id}/hasil/reset', [ExamController::class, 'resetResult'])->name('user.exam.result.reset');
@@ -176,6 +178,8 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::put('/ukk/{id}', [UKKController::class, 'update'])->name('user.ukk.update');
     Route::delete('/ukk/{id}', [UKKController::class, 'destroy'])->name('user.ukk.destroy');
     Route::get('/ukk/{id}/soal', [UKKController::class, 'showQuestion'])->name('user.ukk.question.show');
+    Route::get('/ukk/template-soal/download', [UKKController::class, 'downloadTemplate'])->name('user.ukk.template.download');
+    Route::post('/ukk/{id}/import-soal', [UKKController::class, 'importQuestions'])->name('user.ukk.importQuestions');
     Route::get('/ukk/{id}/hasil/teori', [UKKController::class, 'showResultTeori'])->name('user.ukk.result.teori');
     Route::get('/ukk/{id}/hasil/teori/export', [UKKController::class, 'exportResultTeori'])->name('user.ukk.result.teori.export');
     Route::get('/ukk/{id}/download', [UKKController::class, 'downloadFile'])->name('user.ukk.file.download');

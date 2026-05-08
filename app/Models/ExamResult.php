@@ -15,8 +15,6 @@ class ExamResult extends Model
     protected $fillable = [
         'exam_id',
         'student_id',
-        'start_time',
-        'end_time',
         'score',
         'status',
         'graded_at',
@@ -24,8 +22,6 @@ class ExamResult extends Model
     ];
 
     protected $casts = [
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
         'graded_at' => 'datetime',
     ];
 
@@ -63,15 +59,15 @@ class ExamResult extends Model
             : rtrim(rtrim(number_format($value, 1, '.', ''), '0'), '.');
     }
 
-    public function getRemainingDurationAttribute()
+    public function getRemainingSecondsAttribute()
     {
         $now = now();
-        $this->end_time;
+        $endTime = $this->exam->end_time;
 
-        if ($this->end_time) {
-            return $now->diffInMinutes($this->end_time);
+        if ($now->gt($endTime)) {
+            return 0;
         }
 
-        return 0;
+        return $now->diffInSeconds($endTime);
     }
 }

@@ -49,15 +49,16 @@ $(document).ready(function () {
 
             if (diff <= 0) {
                 clearInterval(timer);
-                display.textContent = "00:00";
+                display.textContent = "00:00:00";
                 submitExam();
                 return;
             }
 
-            const minutes = Math.floor(diff / 60);
+            const hours = Math.floor(diff / 3600);
+            const minutes = Math.floor((diff % 3600) / 60);
             const seconds = diff % 60;
 
-            display.textContent = `${String(minutes).padStart(2, "0")}:${String(
+            display.textContent = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
                 seconds
             ).padStart(2, "0")}`;
         }, 1000);

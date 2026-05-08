@@ -16,12 +16,10 @@
         <h4>{{ $exam->title }}</h4>
       </div>
 
-      @if (!is_null($exam->duration))
-        <div class="text-center">
-          <span class="fw-bold">Waktu tersisa:</span>
-          <span id="countdown" class="badge bg-danger fs-6">00:00</span>
-        </div>
-      @endif
+      <div class="text-center">
+        <span class="fw-bold">Waktu tersisa:</span>
+        <span id="countdown" class="badge bg-danger fs-6">00:00:00</span>
+      </div>
     </div>
 
     <!-- Progress bar -->
@@ -92,8 +90,8 @@
   <script src={{ asset('assets/js/glightbox.min.js') }}></script>
   <script src="{{ asset('assets/js/sweet-alert/sweetalert.min.js') }}"></script>
   <script>
-    let hasDuration = {{ !is_null($exam->duration) ? 1 : 0 }};
-    let duration = {{ $examResult?->remainingDuration ? round($examResult->remainingDuration * 60) : 0 }};
+    let hasDuration = 1;
+    let duration = {{ $examResult ? $examResult->remaining_seconds : 0 }};
     let total = {{ $exam?->multipleQuestions->count() + $exam?->essayQuestions->count() ?? 0 }};
     const routeResult = @json(route('user.exam.workmanship.result', $exam->id));
     const exam_id = @json($exam->id);
