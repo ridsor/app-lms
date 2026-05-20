@@ -194,17 +194,17 @@ class RolePermissionSeeder extends Seeder
             'operator_ukk.*',
         ]);
 
-        $student = User::where('username', 'student')->first();
-        if ($student) {
-            $student->assignRole('student');
-        }
-        $teacher = User::where('username', 'teacher')->first();
-        if ($teacher) {
-            $teacher->assignRole('teacher');
-        }
-        $parent = User::where('username', 'parent')->first();
-        if ($parent) {
-            $parent->assignRole('parent');
-        }
+        // $student = User::where('username', 'student')->first();
+        // if ($student) {
+        //     $student->assignRole('student');
+        // }
+        // $teacher = User::where('username', 'teacher')->first();
+        // if ($teacher) {
+        //     $teacher->assignRole('teacher');
+        // }
+        // $parent = User::where('username', 'parent')->first();
+        // if ($parent) {
+        //     $parent->assignRole('parent');
+        // }
     }
 }

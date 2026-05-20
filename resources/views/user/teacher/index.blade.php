@@ -98,22 +98,19 @@
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="teacherBirthplace">Tempat Lahir<span
-                                  class="txt-danger">*</span></label>
+                              <label class="form-label" for="teacherBirthplace">Tempat Lahir</label>
                               <input class="form-control" id="teacherBirthplace" type="text"
                                 placeholder="Masukan tempat lahir" name="birthplace">
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="teacherDateOfBirth">Tanggal Lahir<span
-                                  class="txt-danger">*</span></label>
+                              <label class="form-label" for="teacherDateOfBirth">Tanggal Lahir</label>
                               <input class="form-control datepicker-here" autocomplete="off" id="teacherDateOfBirth"
                                 type="text" name="date_of_birth" placeholder="dd/mm/yyyy" data-language="id">
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="teacherReligion">Agama<span
-                                  class="txt-danger">*</span></label>
+                              <label class="form-label" for="teacherReligion">Agama</label>
                               <select class="form-select" id="teacherReligion" name="religion">
                                 <option value="">Pilih Agama</option>
                                 @foreach ($religions as $religion)
@@ -123,8 +120,7 @@
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="teacherGender">Jenis Kelamin<span
-                                  class="txt-danger">*</span></label>
+                              <label class="form-label" for="teacherGender">Jenis Kelamin</label>
                               <select class="form-select" id="teacherGender" name="gender">
                                 <option value="">Pilih Jenis Kelamin</option>
                                 @foreach ($genders as $gender)
@@ -177,23 +173,20 @@
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="editTeacherBirthplace">Tempat Lahir<span
-                                  class="txt-danger">*</span></label>
+                              <label class="form-label" for="editTeacherBirthplace">Tempat Lahir</label>
                               <input class="form-control" id="editTeacherBirthplace" type="text"
                                 placeholder="Masukan tempat lahir" name="birthplace">
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="editTeacherDateOfBirth">Tanggal Lahir<span
-                                  class="txt-danger">*</span></label>
+                              <label class="form-label" for="editTeacherDateOfBirth">Tanggal Lahir</label>
                               <input class="form-control datepicker-here" autocomplete="off"
                                 id="editTeacherDateOfBirth" type="text" placeholder="dd/mm/yyyy" data-language="id"
                                 name="date_of_birth">
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="editTeacherReligion">Agama<span
-                                  class="txt-danger">*</span></label>
+                              <label class="form-label" for="editTeacherReligion">Agama</label>
                               <select class="form-select" id="editTeacherReligion" name="religion">
                                 <option value="">Pilih Agama</option>
                                 @foreach ($religions as $religion)
@@ -203,8 +196,7 @@
                               <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
-                              <label class="form-label" for="editTeacherGender">Jenis Kelamin<span
-                                  class="txt-danger">*</span></label>
+                              <label class="form-label" for="editTeacherGender">Jenis Kelamin</label>
                               <select class="form-select" id="editTeacherGender" name="gender">
                                 <option value="">Pilih Jenis Kelamin</option>
                                 @foreach ($genders as $gender)

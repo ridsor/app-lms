@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::table(
             'exam_answers',
             function (Blueprint $table) {
+                // Buat index baru agar foreign key tetap valid saat unique index dihapus
+                $table->index('exam_result_id');
+                $table->dropUnique('unique_answer');
+                
                 $table->dropColumn('question_id');
                 $table->morphs('questionable');
             }

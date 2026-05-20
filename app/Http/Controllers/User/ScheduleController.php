@@ -476,6 +476,7 @@ class ScheduleController extends Controller
         ->where('period_id', $activePeriod->id)
         ->whereHas('schedule_times', function ($query) use ($formRequest) {
           $query->where('day', $formRequest->day)
+            ->where('subject_id', '!=', $formRequest->subject_id)
             ->where(function ($q) use ($formRequest) {
               $q->where(function ($q2) use ($formRequest) {
                 $q2->where('start_time', '<', $formRequest->end_time)
@@ -559,6 +560,7 @@ class ScheduleController extends Controller
         ->where('period_id', $activePeriod->id)
         ->whereHas('schedule_times', function ($query) use ($formRequest) {
           $query->where('day', $formRequest->day)
+            ->where('subject_id', '!=', $formRequest->subject_id)
             ->where(function ($q) use ($formRequest) {
               $q->where(function ($q2) use ($formRequest) {
                 $q2->where('start_time', '<', $formRequest->end_time)

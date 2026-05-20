@@ -55,6 +55,56 @@ $(function () {
         $("#teacher-action-buttons").css("display", "none");
     });
 
+    // Hapus guru satuan
+    $("#teacher-table").on("click", ".trash", function (e) {
+        e.preventDefault();
+        var id = $(this).data("id");
+        if (!id) return;
+        Swal.fire({
+            title: "Apakah Anda yakin ingin?",
+            text: "Data guru akan dihapus secara permanen. Tindakan ini tidak dapat dibatalkan.",
+            showDenyButton: true,
+            showCancelButton: false,
+            confirmButtonText: "Hapus",
+            denyButtonText: `Batal`,
+            confirmButtonColor: "#FC4438",
+            cancelButtonColor: "#16C7F9",
+            imageUrl: "/assets/images/gif/trash.gif",
+            imageWidth: 120,
+            imageHeight: 120,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const trashBtn = $(this);
+                const originalHtml = trashBtn.html();
+                trashBtn
+                    .prop("disabled", true)
+                    .html(
+                        '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"> </span>'
+                    );
+                $.ajax({
+                    url: `/guru/${id}`,
+                    method: "DELETE",
+                    success: function (res) {
+                        t.clearPipeline().draw();
+                        const toast = new bootstrap.Toast($("#toast-success"));
+                        $("#toast-success #toast-text").text(res.message);
+                        toast.show();
+                    },
+                    error: function (xhr) {
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON.message
+                        );
+                        toast.show();
+                    },
+                    complete: function () {
+                        trashBtn.prop("disabled", false).html(originalHtml);
+                    },
+                });
+            }
+        });
+    });
+
     // Hapus banyak
     $("#delete-selected").on("click", function () {
         var selectedIds = [];
@@ -248,10 +298,12 @@ $(function () {
             error: function (xhr) {
                 if (xhr.status === 422) {
                     const errors = xhr.responseJSON.errors;
-                    $("#editTeacherForm [name='" + key + "']")
-                        .addClass("is-invalid")
-                        .next(".invalid-feedback")
-                        .text(errors[key][0]);
+                    for (const key in errors) {
+                        $("#editTeacherForm [name='" + key + "']")
+                            .addClass("is-invalid")
+                            .next(".invalid-feedback")
+                            .text(errors[key][0]);
+                    }
                 } else {
                     const toast = new bootstrap.Toast($("#toast-error"));
                     $("#toast-error #toast-text").text(

@@ -155,7 +155,7 @@
                           @endforeach
                         </select>
                       </div>
-                      <div class="col-12">
+                      <div class="col-12 d-none">
                         <label class="form-label" for="teacher-filter">Wali Kelas</label>
                         <select class="selectpicker search-picker filter" data-live-search="true" id="teacher-filter"
                           @cannot('student.*') disabled @endcannot>
@@ -239,11 +239,9 @@
                         </div>
                       </th>
                       <th> <span class="c-o-light f-w-600">Nama</span></th>
-                      <th> <span class="c-o-light f-w-600">NIS</span></th>
                       <th> <span class="c-o-light f-w-600">NISN</span></th>
                       <th> <span class="c-o-light f-w-600">Jurusan</span></th>
                       <th> <span class="c-o-light f-w-600">Kelas</span></th>
-                      <th> <span class="c-o-light f-w-600">Wali Kelas</span></th>
                       <th> <span class="c-o-light f-w-600">Status</span></th>
                       <th> <span class="c-o-light f-w-600">Waktu</span></th>
                       <th> <span class="c-o-light f-w-600">Aksi</span></th>
