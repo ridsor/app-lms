@@ -23,17 +23,14 @@ class StudentRequest extends FormRequest
     public function rules(): array
     {
         $studentId = $this->route('siswa');
-        $uniqueNis = 'unique:students,nis';
         $uniqueNisn = 'unique:students,nisn';
 
         if ($studentId) {
-            $uniqueNis .= ',' . $studentId;
             $uniqueNisn .= ',' . $studentId;
         }
 
         return [
             'name' => 'required|string|max:100',
-            'nis' => 'required|string|max:100|' . $uniqueNis,
             'nisn' => 'required|string|max:100|' . $uniqueNisn,
             'homeroom_teacher_id' => 'nullable|exists:teachers,id',
             'class_id' => 'nullable|exists:classes,id',
@@ -41,7 +38,6 @@ class StudentRequest extends FormRequest
             'birthplace' => 'required|string|max:50',
             'gender' => 'required|in:M,F',
             'religion' => 'required|string|max:50',
-            'admission_year' => 'required|integer|min:2000|max:' . (date('Y') + 1),
             'status' => 'required|in:active,transferred,graduated,dropout'
         ];
     }
@@ -60,10 +56,6 @@ class StudentRequest extends FormRequest
             'name.required' => 'Nama siswa wajib diisi',
             'name.string' => 'Nama siswa harus berupa teks',
             'name.max' => 'Nama siswa maksimal 100 karakter',
-            'nis.required' => 'NIS wajib diisi',
-            'nis.string' => 'NIS harus berupa teks',
-            'nis.max' => 'NIS maksimal 100 karakter',
-            'nis.unique' => 'NIS sudah terdaftar',
             'nisn.required' => 'NISN wajib diisi',
             'nisn.string' => 'NISN harus berupa teks',
             'nisn.max' => 'NISN maksimal 100 karakter',
@@ -80,10 +72,6 @@ class StudentRequest extends FormRequest
             'religion.required' => 'Agama wajib diisi',
             'religion.string' => 'Agama harus berupa teks',
             'religion.max' => 'Agama maksimal 50 karakter',
-            'admission_year.required' => 'Tahun masuk wajib diisi',
-            'admission_year.integer' => 'Tahun masuk harus berupa angka',
-            'admission_year.min' => 'Tahun masuk minimal 2000',
-            'admission_year.max' => 'Tahun masuk maksimal ' . (date('Y') + 1),
             'status.required' => 'Status wajib diisi',
             'status.in' => 'Status harus aktif, pindah, lulus, atau keluar'
         ];
@@ -99,7 +87,6 @@ class StudentRequest extends FormRequest
         return [
             'user_id' => 'user ID',
             'name' => 'nama siswa',
-            'nis' => 'NIS',
             'nisn' => 'NISN',
             'homeroom_teacher_id' => 'wali kelas',
             'class_id' => 'kelas',
@@ -107,7 +94,6 @@ class StudentRequest extends FormRequest
             'birthplace' => 'tempat lahir',
             'gender' => 'jenis kelamin',
             'religion' => 'agama',
-            'admission_year' => 'tahun masuk',
             'status' => 'status'
         ];
     }

@@ -4,15 +4,15 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QuestionBankRequest;
-use App\Models\Exam;
 use App\Models\Major;
-use App\Models\Period;
 use App\Models\QuestionBank;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 
 class QuestionBankController extends Controller
 {
@@ -31,10 +31,9 @@ class QuestionBankController extends Controller
                 ])
                 ->with([
                     'subject:id,curriculum_id',
-                    'subject.curriculum:id,name'
-                ])
-                ->withCount([
-                    'questions'
+                    'subject.curriculum:id,name',
+                    'multipleQuestions',
+                    'essayQuestions'
                 ]);
 
             // filter
@@ -80,7 +79,7 @@ class QuestionBankController extends Controller
                 ->addColumn('Soal', function ($row) {
                     $html = '
                         <div>
-                        <span class="badge badge-light-primary">' . $row->questions_count . '</span>
+                        <span class="badge badge-light-primary">' . ($row?->multipleQuestions->count() + $row?->essayQuestions->count()) ?? 0 . '</span>
                         </div>
                         ';
                     return $html;
@@ -126,10 +125,9 @@ class QuestionBankController extends Controller
             ])
             ->with([
                 'subject:id,curriculum_id',
-                'subject.curriculum:id,name'
-            ])
-            ->withCount([
-                'questions'
+                'subject.curriculum:id,name',
+                'multipleQuestions',
+                'essayQuestions'
             ]);
 
         // filter
@@ -175,7 +173,7 @@ class QuestionBankController extends Controller
             ->addColumn('Soal', function ($row) {
                 $html = '
                         <div>
-                        <span class="badge badge-light-primary">' . $row->questions_count . '</span>
+                        <span class="badge badge-light-primary">' . ($row?->multipleQuestions->count() + $row?->essayQuestions->count()) ?? 0 . '</span>
                         </div>
                         ';
                 return $html;
@@ -221,23 +219,50 @@ class QuestionBankController extends Controller
 
     public function show(Request $request, $id)
     {
-        if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
+        // 1. Gunakan canAny jika user hanya butuh salah satu dari permission tersebut
+        if (!$request->user()->canAny(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
             abort(403);
         }
 
-        $question_bank = QuestionBank::withCount(['questions'])
-            ->findOrFail($id);
+        // 2. Ambil QuestionBank (tidak perlu with() karena kita akan query relasinya secara terpisah)
+        $question_bank = QuestionBank::findOrFail($id);
 
-        $questionsQuery = $question_bank->questions();
+        // 3. Siapkan query untuk masing-masing relasi
+        $multipleQuery = $question_bank->multipleQuestions();
+        $essayQuery = $question_bank->essayQuestions();
 
+        // 4. Terapkan pencarian (search) pada level Database
         if ($request->filled('search')) {
             $search = $request->query('search');
-            $questionsQuery->where('question_text', 'like', "%{$search}%");
+            $multipleQuery->where('question_text', 'like', "%{$search}%");
+            $essayQuery->where('question_text', 'like', "%{$search}%");
         }
 
-        $questions = $questionsQuery->paginate(5);
+        // 5. Eksekusi query, gabungkan hasilnya, dan urutkan (Hasilnya berupa Collection)
+        $questions = $multipleQuery->get()
+            ->concat($essayQuery->get())
+            ->sortByDesc('created_at')
+            ->values();
 
-        return view('user.question-bank.show', compact('question_bank', 'questions'));
+        // 6. Buat paginasi manual untuk Collection
+        $perPage = 5;
+        $currentPage = Paginator::resolveCurrentPage() ?: 1;
+
+        $paginatedQuestions = new LengthAwarePaginator(
+            $questions->forPage($currentPage, $perPage), // Ambil data untuk halaman saat ini
+            $questions->count(),                         // Total semua data
+            $perPage,                                    // Data per halaman
+            $currentPage,                                // Halaman saat ini
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'query' => $request->query()             // Pertahankan query string (seperti ?search=...) saat pindah halaman
+            ]
+        );
+
+        return view('user.question-bank.show', [
+            'question_bank' => $question_bank,
+            'questions' => $paginatedQuestions
+        ]);
     }
 
 

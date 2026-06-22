@@ -146,12 +146,6 @@
                                         </div>
                                     </div>
                                     <div class="col-lg-3 col-md-4 col-sm-6">
-                                        <div class="ttl-info text-start">
-                                            <h6>NIS</h6>
-                                            <span>{{ $user->student->nis }}</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-3 col-md-4 col-sm-6">
                                         <div class="ttl-info text-start pb-0">
                                             <h6>Tempat & Tanggal Lahir</h6>
                                             <span>{{ $user->student->birthplace }},
@@ -221,6 +215,7 @@
                                                                         Ini</label>
                                                                     <div class="form-input position-relative">
                                                                         <input class="form-control password" type="password"
+                                                                        autocomplete="off"
                                                                             name="current_password">
                                                                         <div class="show-hide-change-password"><span
                                                                                 class="show"></span></div>
@@ -233,7 +228,7 @@
                                                                         Baru</label>
                                                                     <div class="form-input position-relative">
                                                                         <input class="form-control password"
-                                                                            type="password" name="password">
+                                                                            type="password" name="password" autocomplete="off">
                                                                         <div class="show-hide-change-password"><span
                                                                                 class="show"></span></div>
                                                                     </div>
@@ -245,7 +240,7 @@
                                                                         Sandi</label>
                                                                     <div class="form-input position-relative">
                                                                         <input class="form-control password"
-                                                                            type="password" name="password_confirmation">
+                                                                            type="password" name="password_confirmation" autocomplete="off">
                                                                         <div class="show-hide-change-password"><span
                                                                                 class="show"></span></div>
                                                                     </div>

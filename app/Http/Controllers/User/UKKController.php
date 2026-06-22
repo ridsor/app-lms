@@ -1,0 +1,1590 @@
+<?php
+
+namespace App\Http\Controllers\User;
+
+use App\Helpers\Helper;
+use App\Http\Controllers\Controller;
+use App\Models\Major;
+use App\Models\Period;
+use App\Models\UKK;
+use App\Models\UKKResultTheory;
+use App\Models\MultipleQuestion;
+use App\Models\EssayQuestion;
+use App\Services\UKKScoringService;
+use App\Http\Requests\UKKRequest;
+use App\Http\Requests\WorkmanshipRequest;
+use App\Http\Requests\ExamAnswerRequest;
+use App\Models\UKKAnswerTheory;
+use App\Models\UKKResultPractice;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Yajra\DataTables\Facades\DataTables;
+use Rap2hpoutre\FastExcel\FastExcel;
+
+class UKKController extends Controller
+{
+    public function index(Request $request)
+    {
+        $this->authorize('viewAny', UKK::class);
+
+        $ukks = UKK::with([
+            'period',
+            'results',
+            'practiceResults'
+        ])
+            ->filter($request->all())
+            ->filterByPermission($request->user())
+            ->paginate(10);
+
+        $majors = Major::with(['classes' => function ($query) {
+            $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
+        }])->select('id', 'name')->orderBy('name', 'asc')->get();
+        $hasMajors = Major::count() > 0;
+        $periods = Period::select('id', 'academic_year', 'semester')->orderBy('start_date', 'desc')->get();
+        $ukkTypes = [
+            ['value' => 'Praktik', 'label' => 'Praktik'],
+            ['value' => 'Teori', 'label' => 'Teori'],
+        ];
+        $activePeriod = Period::where('status', true)->first();
+
+        $studentId = null;
+        if ($request->user()->hasRole('student')) {
+            $studentId = $request->user()->student->id;
+        } elseif ($request->user()->hasRole('parent')) {
+            $studentId = $request->user()->parent->id;
+        }
+
+        $operators = User::role('operator')
+            ->whereHas('permissions', function ($q) {
+                $q->where('name', 'ukk.evaluation');
+            })
+            ->select('id', 'name')
+            ->get();
+
+        return view('user.ukk.index', compact('ukks', 'majors', 'hasMajors', 'periods', 'ukkTypes', 'activePeriod', 'studentId', 'operators'));
+    }
+
+    public function store(UKKRequest $request)
+    {
+        try {
+            $this->authorize('create', UKK::class);
+
+            $validated = $request->validated();
+
+            $activePeriod = Period::where('status', true)->first();
+            if (!$activePeriod) {
+                return $this->sendError('Tidak ada periode aktif. Silakan aktifkan periode terlebih dahulu.', [], 400);
+            }
+            $validated['period_id'] = $activePeriod->id;
+
+            if ($request->hasFile('file_path')) {
+                $filePath = $request->file('file_path')->store('file/ukk');
+                $validated['file_path'] = $filePath;
+                $file = $request->file('file_path');
+                $file_name = $file->getClientOriginalName();
+                $file_size = $file->getSize();
+                $validated['file_name'] = $file_name;
+                $validated['file_size'] = $file_size;
+            }
+
+            $ukk = UKK::create($validated);
+
+            return $this->sendResponse('Uji Kompetensi Keahlian berhasil ditambahkan', $ukk, 201);
+        } catch (\Exception $e) {
+            Log::error('Error creating UKK: ' . $e->getMessage());
+            return $this->sendError('Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function edit($id)
+    {
+        try {
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('update', $ukk);
+
+            return $this->sendResponse('Data UKK berhasil diambil', $ukk);
+        } catch (\Exception $e) {
+            return $this->sendError('Data tidak ditemukan.', [], 404);
+        }
+    }
+
+    public function show(Request $request, $id)
+    {
+        $ukk = UKK::with([
+            'period',
+            'results',
+            'practiceResults',
+            'operator'
+        ])->findOrFail($id);
+        $this->authorize('view', $ukk);
+
+        $studentId = null;
+        if ($request->user()->hasRole('student')) {
+            $studentId = $request->user()->student->id;
+        } elseif ($request->user()->hasRole('parent')) {
+            $studentId = $request->user()->parent->id;
+        }
+
+        $operators = User::role('operator')
+            ->whereHas('permissions', function ($q) {
+                $q->where('name', 'ukk.evaluation');
+            })
+            ->select('id', 'name')
+            ->get();
+
+        $majors = Major::with(['classes' => function ($query) {
+            $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
+        }])->select('id', 'name')->orderBy('name', 'asc')->get();
+        $ukkTypes = [
+            ['value' => 'Praktik', 'label' => 'Praktik'],
+            ['value' => 'Teori', 'label' => 'Teori'],
+        ];
+
+        return view('user.ukk.show', compact('ukk', 'majors', 'ukkTypes', 'studentId', 'operators'));
+    }
+
+    public function showQuestion(Request $request, $id)
+    {
+        if (!$request->user()->hasRole('operator')) {
+            return abort(403);
+        }
+
+        $ukk = UKK::with('multipleQuestions', 'essayQuestions')->findOrFail($id);
+
+        if ($ukk->type !== 'Teori') {
+            return abort(403, 'Hanya UKK tipe Teori yang memiliki soal.');
+        }
+
+        $this->authorize('view', $ukk);
+
+        $multipleQuery = $ukk->multipleQuestions();
+        $essayQuery = $ukk->essayQuestions();
+
+        if ($request->filled('search')) {
+            $search = $request->query('search');
+            $multipleQuery->where('question_text', 'like', "%{$search}%");
+            $essayQuery->where('question_text', 'like', "%{$search}%");
+        }
+
+        $questions = $multipleQuery->get()
+            ->concat($essayQuery->get())
+            ->values();
+
+        $perPage = 10;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+        $paginatedQuestions = new LengthAwarePaginator(
+            $questions->forPage($currentPage, $perPage),
+            $questions->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        $majors = Major::with(['classes' => function ($query) {
+            $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
+        }])->select('id', 'name')->orderBy('name', 'asc')->get();
+
+        return view('user.ukk.question.show', [
+            'ukk' => $ukk,
+            'questions' => $paginatedQuestions,
+            'majors' => $majors,
+        ]);
+    }
+
+    public function showResultTeori(Request $request, $id)
+    {
+        $ukk = UKK::selectRaw('ukk.*, (
+                SELECT COUNT(*) FROM ukk_answer_theory
+                JOIN ukk_result_theory ON ukk_answer_theory.ukk_result_id = ukk_result_theory.id
+                WHERE ukk_result_theory.ukk_id = ukk.id AND ukk_answer_theory.score IS NULL
+            ) as not_yet_rated')->with(['results', 'period'])->withCount(['results'])->findOrFail($id);
+
+        $this->authorize('evaluate', $ukk);
+
+        if ($request->ajax()) {
+            $data = UKKResultTheory::where('ukk_id', $ukk->id)
+                ->select([
+                    'ukk_result_theory.*',
+                    'students.name',
+                    'students.nisn',
+                ])
+                ->leftJoin('students', 'student_id', '=', 'students.id')
+                ->with('user:id,name');
+
+            if ($request->filled('search')) {
+                $search = is_array($request->search) ? ($request->search['value'] ?? '') : $request->search;
+                if (!empty($search)) {
+                    $data->where(function ($q) use ($search) {
+                        $q->where('students.name', 'like', "%{$search}%")
+                            ->orWhere('students.nisn', 'like', "%{$search}%");
+                    });
+                }
+            }
+
+            return DataTables::of($data)
+                ->addColumn('Nama', fn($row) => '<div class="product-names"><p>' . $row->name . '</p></div>')
+                ->addColumn('NISN', fn($row) => '<p class="f-light">' . $row->nisn . '</p>')
+                ->addColumn('Status', function ($row) {
+                    return Helper::getExamStatusLabel($row->status);
+                })
+                ->addColumn('Pengerjaan', fn($row) => $row->status === 'completed' && $row->updated_at ? $row->updated_at->translatedFormat('d/m/Y H:i') : '-')
+                ->rawColumns(['Nama', 'NISN', 'Status', 'Pengerjaan'])
+                ->make(true);
+        }
+
+        return view('user.ukk.result.teori', compact('ukk'));
+    }
+
+    public function exportResultTeori($id)
+    {
+        try {
+            $ukk = UKK::with([
+                'results.student',
+                'period',
+            ])->findOrFail($id);
+
+            $this->authorize('evaluate', $ukk);
+
+            $headerRows = [
+                ['HASIL UKK TEORI' => ''],
+                ['Periode', 'Periode' => $ukk->period ? $ukk->period->academic_year . ' ' . Helper::getSemesterLabel($ukk->period->semester) : '-'],
+                ['Judul', 'Judul' => $ukk->title],
+                ['Waktu', 'Waktu' => $ukk->start_time && $ukk->end_time ? $ukk->start_time->translatedFormat('j F Y H:i') . ' - ' . $ukk->end_time->translatedFormat('j F Y H:i') : '-'],
+                [],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN'],
+            ];
+
+            $exportData = $ukk->results->map(function ($result, $index) {
+                return [
+                    'No' => $index + 1,
+                    'Nama' => $result->student ? $result->student->name : '-',
+                    'NISN' => $result->student ? $result->student->nisn : '-',
+                ];
+            })->toArray();
+
+            $filename = 'Hasil UKK Teori ' . now()->format('Y-m-d') . '.xlsx';
+
+            $exportData = array_merge($headerRows, $exportData);
+
+            return (new FastExcel($exportData))->download($filename);
+        } catch (\Exception $e) {
+            Log::info($e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
+        }
+    }
+    public function showResultPraktik(Request $request, $id)
+    {
+        $ukk = UKK::with(['practiceResults', 'period'])->withCount(['practiceResults'])->findOrFail($id);
+        $this->authorize('evaluate', $ukk);
+
+        if ($request->ajax()) {
+            $data = \App\Models\UKKResultPractice::where('ukk_id', $ukk->id)
+                ->select([
+                    'ukk_result_practice.*',
+                    'students.name',
+                    'students.nisn',
+                ])
+                ->leftJoin('students', 'student_id', '=', 'students.id')
+                ->with('grader:id,name');
+
+            if ($request->filled('search')) {
+                $search = is_array($request->search) ? ($request->search['value'] ?? '') : $request->search;
+                if (!empty($search)) {
+                    $data->where(function ($q) use ($search) {
+                        $q->where('students.name', 'like', "%{$search}%")
+                            ->orWhere('students.nisn', 'like', "%{$search}%");
+                    });
+                }
+            }
+
+            return DataTables::of($data)
+                ->addColumn('Nama', function ($row) {
+                    return '
+                        <div>
+                            <p class="f-light mb-0">' . $row->name . '</p>
+                            <p class="f-light mb-0">' . $row->nisn . '</p>
+                        </div>';
+                })
+                ->addColumn('Pengumpulan', function ($row) {
+                    $date = $row->submitted_at->translatedFormat('j M Y H:i');
+                    return '
+                        <div>
+                            <p class="f-light mb-0">' . $date . '</p>
+                        </div>';
+                })
+                ->addColumn('Nilai', function ($row) {
+                    $html = '
+                    <span class="badge badge-light-primary">' . ($row->formatted_score ?? '-') . '</span>
+                    ';
+                    return $html;
+                })
+                ->addColumn('Kesimpulan', function ($row) {
+                    return $row->contents['final_conclusion'] ?? '-';
+                })
+                ->addColumn('Penilai', function ($row) {
+                    return $row->grader ? $row->grader->name : '-';
+                })
+                ->rawColumns(['Nama', 'Pengumpulan', 'Nilai', 'Penilai'])
+                ->make(true);
+        }
+
+        return view('user.ukk.result.praktik', compact('ukk'));
+    }
+
+    public function practiceInfo(Request $request, $id)
+    {
+        if (!$request->user()->hasRole('student') && !$request->user()->hasRole('parent')) {
+            return abort(403);
+        }
+
+        $ukk = UKK::with(['period', 'operator'])->findOrFail($id);
+
+        if ($ukk->type !== 'Praktik') {
+            return abort(404, 'UKK Praktik tidak ditemukan.');
+        }
+
+        $this->authorize('view', $ukk);
+
+        $studentId = null;
+        if ($request->user()->hasRole('student')) {
+            $studentId = $request->user()->student->id;
+        } elseif ($request->user()->hasRole('parent')) {
+            $studentId = $request->user()->parent->id;
+        }
+
+        $practice_result = \App\Models\UKKResultPractice::where('ukk_id', $ukk->id)
+            ->where('student_id', $studentId)
+            ->first();
+
+        return view('user.ukk.info.practice', [
+            'ukk' => $ukk,
+            'practice_result' => $practice_result,
+        ]);
+    }
+
+    public function practiceSubmit(Request $request, $id)
+    {
+        $request->validate([
+            'description' => 'nullable|string',
+            'files.*' => 'nullable|file|extensions:zip,rar,pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,mp4,mp3,kml,gpx,geojson|max:102400',
+            'links.*' => 'nullable|url',
+            'existing_files.*' => 'nullable|array',
+            'delete_files.*' => 'nullable|string',
+        ], [
+            'files.*.max' => 'Ukuran file tidak boleh lebih dari 100 MB.',
+            'files.*.extensions' => 'Format file tidak didukung.',
+            'links.*.url' => 'Format tautan tidak valid.'
+        ]);
+
+        try {
+            if (!$request->user()->hasRole('student')) {
+                return abort(403);
+            }
+
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('view', $ukk);
+
+            if ($ukk->type !== 'Praktik') {
+                return $this->sendError('Hanya UKK Praktik yang bisa mengumpulkan file.', [], 400);
+            }
+
+            $now = now();
+            if ($now->lt($ukk->start_time)) {
+                return $this->sendError('UKK belum dimulai.', [], 403);
+            }
+
+            if ($now->gt($ukk->end_time)) {
+                return $this->sendError('Waktu pengumpulan UKK sudah berakhir.', [], 403);
+            }
+
+            $student = auth()->user()->student;
+            $ukkResult = \App\Models\UKKResultPractice::where('ukk_id', $ukk->id)
+                ->where('student_id', $student->id)
+                ->first();
+
+            $oldContents = $ukkResult ? $ukkResult->contents : ['files' => [], 'links' => []];
+
+            $contents = [
+                'description' => $request->description,
+                'files' => [],
+                'links' => $request->links ?? []
+            ];
+
+            // Handle file deletions
+            if ($request->filled('delete_files')) {
+                foreach ($request->delete_files as $path) {
+                    if (Storage::exists($path)) {
+                        Storage::delete($path);
+                    }
+                }
+            }
+
+            // Handle existing files (that were not deleted)
+            if ($request->filled('existing_files')) {
+                foreach ($request->existing_files as $file) {
+                    $contents['files'][] = [
+                        'name' => $file['name'],
+                        'path' => $file['path'],
+                        'size' => $file['size']
+                    ];
+                }
+            }
+
+            // Handle new file uploads
+            if ($request->hasFile('files')) {
+                foreach ($request->file('files') as $file) {
+                    $path = $file->store('file/ukk/submissions');
+                    $contents['files'][] = [
+                        'name' => $file->getClientOriginalName(),
+                        'path' => $path,
+                        'size' => $file->getSize()
+                    ];
+                }
+            }
+
+            $result = \App\Models\UKKResultPractice::updateOrCreate(
+                ['ukk_id' => $ukk->id, 'student_id' => $student->id],
+                [
+                    'contents' => $contents,
+                    'submitted_at' => $now
+                ]
+            );
+
+            return $this->sendResponse('Hasil praktik berhasil dikumpulkan.', $result);
+        } catch (\Exception $e) {
+            Log::error('Error submit UKK Praktik: ' . $e->getMessage());
+            return $this->sendError('Gagal mengumpulkan. Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function evaluationPraktik(Request $request, $ukk_id, $page = 1)
+    {
+        $ukk = UKK::findOrFail($ukk_id);
+        $this->authorize('evaluate', $ukk);
+
+        $query = UKKResultPractice::where('ukk_id', $ukk->id)
+            ->with(['student', 'ukk']);
+
+
+        $ukk_results = $query->simplePaginate(1, ['*'], 'page', $page);
+        $ukk_result = $query->simplePaginate(1, ['*'], 'page', $page)->first();
+
+        $practice_results = $query->simplePaginate(1, ['*'], 'page', $page);
+        $practice_result = $practice_results->first();
+
+        if (!$practice_result) {
+            return redirect()->route('user.ukk.result.praktik', $ukk_id)->with('error', 'Belum ada pengumpulan hasil praktik.');
+        }
+
+        return view('user.ukk.evaluation_praktik', compact('ukk', 'practice_result', 'practice_results'));
+    }
+
+    public function updatePracticeScore(Request $request, $result_id)
+    {
+        $request->validate([
+            'score' => 'required|string',
+            'feedback' => 'nullable|string',
+            'rubric_assessment' => 'nullable|array',
+            'final_conclusion' => 'nullable|string',
+        ]);
+
+        try {
+            $result = \App\Models\UKKResultPractice::findOrFail($result_id);
+            $ukk = UKK::findOrFail($result->ukk_id);
+            $this->authorize('evaluate', $ukk);
+
+            $contents = $result->contents ?? [];
+            $contents['rubric_assessment'] = $request->rubric_assessment;
+            $contents['final_conclusion'] = $request->final_conclusion;
+
+            $result->update([
+                'score' => $request->score,
+                'feedback' => $request->feedback,
+                'contents' => $contents,
+                'graded_at' => now(),
+                'graded_by' => auth()->id()
+            ]);
+
+            activity()
+                ->useLog('Uji Kompetensi Keahlian (Praktik)')
+                ->performedOn($ukk)
+                ->causedBy($request->user())
+                ->log('Pengguna ' . $request->user()->name . ' menilai ukk : ' . $ukk->id . ', Hasil ID: ' . $result->id . ', nilai: ' . $result->score);
+
+            return $this->sendResponse('Nilai praktik berhasil disimpan.');
+        } catch (\Exception $e) {
+            Log::error('Error update score UKK Praktik: ' . $e->getMessage());
+            return $this->sendError('Gagal menyimpan nilai.', [], 500);
+        }
+    }
+
+    public function exportResultPraktik($id)
+    {
+        try {
+            $ukk = UKK::with(['period'])->findOrFail($id);
+            $this->authorize('evaluate', $ukk);
+
+            $results = \App\Models\UKKResultPractice::where('ukk_id', $ukk->id)
+                ->with(['student', 'grader'])
+                ->get();
+
+            if ($results->isEmpty()) {
+                return back()->with('error', 'Belum ada data untuk di-export.');
+            }
+
+            $headerRows = [
+                ['HASIL UKK PRAKTIK' => ''],
+                ['Periode' => 'Periode', 'value' => $ukk->period ? $ukk->period->academic_year . ' ' . Helper::getSemesterLabel($ukk->period->semester) : '-'],
+                ['Judul' => 'Judul', 'value' => $ukk->title],
+                ['Waktu' => 'Waktu', 'value' => $ukk->start_time && $ukk->end_time ? $ukk->start_time->translatedFormat('j F Y H:i') . ' - ' . $ukk->end_time->translatedFormat('j F Y H:i') : '-'],
+                [],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN', 'Nilai' => 'Nilai', 'Kesimpulan Akhir' => 'Kesimpulan Akhir'],
+            ];
+
+            $exportData = $results->map(function ($row, $index) {
+                return [
+                    'No' => $index + 1,
+                    'Nama' => $row->student->name,
+                    'NISN' => $row->student->nisn,
+                    'Nilai' => $row->score ?? '-',
+                    'Kesimpulan Akhir' => $row->contents['final_conclusion'] ?? '-',
+                ];
+            })->toArray();
+
+            $filename = 'Hasil UKK Praktik ' . now()->format('Y-m-d') . '.xlsx';
+
+            $finalData = array_merge($headerRows, $exportData);
+
+            return (new \Rap2hpoutre\FastExcel\FastExcel($finalData))->download($filename);
+        } catch (\Exception $e) {
+            Log::error('Error exporting UKK Praktik results: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
+        }
+    }
+
+    public function printResultPraktik($result_id)
+    {
+        try {
+            $result = \App\Models\UKKResultPractice::with(['student.class.major', 'ukk.period', 'grader'])->findOrFail($result_id);
+
+            // Authorization - any related role can view if graded
+            if (!$result->graded_at && !auth()->user()->can('ukk.evaluation')) {
+                return back()->with('error', 'Hasil belum dinilai.');
+            }
+
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('user.ukk.print.praktik', [
+                'result' => $result,
+                'ukk' => $result->ukk,
+                'student' => $result->student,
+            ])->setOptions([
+                'isPhpEnabled' => true,
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+            ])->setPaper('a4', 'portrait');;
+
+            return $pdf->stream('Hasil UKK Praktik - ' . $result->student->name . '.pdf');
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to print UKK practice result: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mencetak dokumen.');
+        }
+    }
+
+    public function printResultPraktikByStudent($id, $student_id)
+    {
+        try {
+            $result = \App\Models\UKKResultPractice::with(['student.class.major', 'ukk.period', 'grader'])
+                ->where('ukk_id', $id)
+                ->where('student_id', $student_id)
+                ->firstOrFail();
+
+            return $this->printResultPraktik($result->id);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to print UKK practice result by student: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mencetak dokumen.');
+        }
+    }
+
+    public function getFileSubmission(Request $request, $result_id, $filename)
+    {
+        $result = \App\Models\UKKResultPractice::findOrFail($result_id);
+
+        if (!$request->hasValidSignature()) {
+            $ukk = UKK::findOrFail($result->ukk_id);
+            $this->authorize('evaluate', $ukk);
+        }
+
+        // Cari file di dalam JSON contents
+        $files = $result->contents['files'] ?? [];
+        $filePath = null;
+        foreach ($files as $file) {
+            if ($file['name'] === $filename) {
+                $filePath = $file['path'];
+                break;
+            }
+        }
+
+        if ($filePath && Storage::exists($filePath)) {
+            $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+            $mimeTypes = [
+                'kml' => 'application/vnd.google-earth.kml+xml',
+                'gpx' => 'application/gpx+xml',
+                'geojson' => 'application/geo+json',
+            ];
+
+            $contentType = $mimeTypes[$extension] ?? Storage::mimeType($filePath);
+            $content = Storage::get($filePath);
+
+            // Trim content for XML-based files to prevent "XML declaration allowed only at start" error
+            if (in_array($extension, ['kml', 'gpx', 'xml'])) {
+                $content = trim($content);
+            }
+
+            return response()->make($content, 200, [
+                'Content-Type' => $contentType,
+                'Access-Control-Allow-Origin' => '*',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"'
+            ]);
+        }
+
+        return abort(404, 'File tidak ditemukan.');
+    }
+
+    public function update(UKKRequest $request, $id)
+    {
+        try {
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('update', $ukk);
+
+            $validated = $request->validated();
+
+            if ($validated['deletedFile'] ?? false) {
+                if (!empty($ukk->file_path) && Storage::exists($ukk->file_path)) {
+                    Storage::delete($ukk->file_path);
+                }
+                $validated['file_path'] = null;
+                $validated['file_name'] = null;
+                $validated['file_size'] = null;
+            }
+
+            if ($request->hasFile('file_path')) {
+                if (!empty($ukk->file_path) && Storage::exists($ukk->file_path)) {
+                    Storage::delete($ukk->file_path);
+                }
+                $filePath = $request->file('file_path')->store('file/ukk');
+                $validated['file_path'] = $filePath;
+                $file = $request->file('file_path');
+                $file_name = $file->getClientOriginalName();
+                $file_size = $file->getSize();
+                $validated['file_name'] = $file_name;
+                $validated['file_size'] = $file_size;
+            }
+
+            $ukk->update($validated);
+
+            return $this->sendResponse('UKK berhasil diperbarui', $ukk);
+        } catch (\Exception $e) {
+            Log::error('Error updating UKK: ' . $e->getMessage());
+            return $this->sendError('Gagal memperbarui UKK. Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('delete', $ukk);
+
+            if (!empty($ukk->file_path) && Storage::exists($ukk->file_path)) {
+                Storage::delete($ukk->file_path);
+            }
+
+            $ukk->delete();
+
+            return $this->sendResponse('UKK berhasil dihapus', null);
+        } catch (\Exception $e) {
+            return $this->sendError('Gagal menghapus UKK. Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function getFile(Request $request, $id)
+    {
+        $ukk = UKK::findOrFail($id);
+        if (!$request->hasValidSignature()) {
+            $this->authorize('view', $ukk);
+        }
+
+        if (!empty($ukk->file_path) && Storage::exists($ukk->file_path)) {
+            $file = Storage::get($ukk->file_path);
+            $type = Storage::mimeType($ukk->file_path);
+
+            return response($file)->header('Content-Type', $type);
+        }
+
+        return abort(404);
+    }
+
+    public function downloadFile($id)
+    {
+        $ukk = UKK::findOrFail($id);
+        $this->authorize('view', $ukk);
+
+        if (!empty($ukk->file_path) && Storage::exists($ukk->file_path)) {
+            return Storage::download($ukk->file_path, $ukk->file_name);
+        }
+
+        return abort(404);
+    }
+
+    public function theoryInfo(Request $request, $id)
+    {
+        if (!$request->user()->hasRole('student') && !$request->user()->hasRole('parent')) {
+            return abort(403);
+        }
+
+        $ukk = UKK::with([
+            'period',
+            'multipleQuestions',
+            'essayQuestions',
+        ])->findOrFail($id);
+
+        if ($ukk->type !== 'Teori') {
+            return abort(404, 'UKK Teori tidak ditemukan.');
+        }
+
+        $this->authorize('view', $ukk);
+
+        $ukk_result = $ukk->results();
+        if ($request->user()->hasRole('student')) {
+            $ukk_result->where('student_id', $request->user()->student->id);
+        } elseif ($request->user()->hasRole('parent')) {
+            $ukk_result->where('student_id', $request->user()->parent->id);
+        }
+        $ukk_result = $ukk_result->first();
+
+        return view('user.ukk.info.theory', [
+            'ukk' => $ukk,
+            'ukk_result' => $ukk_result,
+        ]);
+    }
+
+    public function theoryStart(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->hasRole('student')) {
+                return abort(403);
+            }
+
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('view', $ukk);
+
+            if ($ukk->type !== 'Teori') {
+                return $this->sendError('Hanya UKK Teori yang bisa dikerjakan secara online.', [], 400);
+            }
+
+            $student = auth()->user()->student;
+
+            $existingResult = UKKResultTheory::where('ukk_id', $ukk->id)
+                ->where('student_id', $student->id)
+                ->first();
+
+            $now = now();
+            if ($existingResult) {
+                if ($existingResult->status === 'completed') {
+                    return $this->sendError('Anda sudah menyelesaikan UKK ini.', [], 403);
+                }
+
+                if ($now->gt($ukk->end_time)) {
+                    return $this->sendError('Waktu UKK telah berakhir.', [], 403);
+                }
+
+                return $this->sendResponse('UKK dilanjutkan!', $existingResult, 200);
+            }
+
+            if ($now->lt($ukk->start_time)) {
+                return $this->sendError('UKK belum dimulai.', [], 403);
+            }
+
+            if ($now->gt($ukk->end_time)) {
+                return $this->sendError('Waktu UKK sudah berakhir.', [], 403);
+            }
+
+            $result = UKKResultTheory::create([
+                'ukk_id' => $ukk->id,
+                'student_id' => $student->id,
+                'status' => 'in_progress',
+            ]);
+
+            session()->forget("ukk_order_{$ukk->id}");
+
+            return $this->sendResponse('UKK dimulai!', $result, 200);
+        } catch (\Exception $e) {
+            Log::error('Error starting UKK: ' . $e->getMessage());
+            return $this->sendError('Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function theoryWorkmanship(Request $request, $id)
+    {
+        if (!auth()->user()->hasRole('student')) {
+            return abort(403);
+        }
+
+        $ukk = UKK::with([
+            'multipleQuestions',
+            'essayQuestions',
+        ])
+            ->findOrFail($id);
+        $this->authorize('view', $ukk);
+
+        if ($ukk->type !== 'Teori') {
+            return abort(404, 'UKK Teori tidak ditemukan.');
+        }
+
+        $now = now();
+        $ukkResult = UKKResultTheory::with('answers')->where('ukk_id', $ukk->id)
+            ->where('student_id', auth()->user()->student->id)
+            ->first();
+
+        if (!$ukkResult) {
+            return redirect()->route('user.ukk.teori.info', $ukk->id);
+        }
+
+        if ($ukkResult->status === 'completed') {
+            return redirect()->route('user.ukk.teori.workmanship.result', $ukk->id)
+                ->with('error', 'Anda sudah mengerjakan UKK ini.');
+        }
+
+        $order = session("ukk_order_{$ukk->id}");
+
+        if (!$order) {
+            if ($ukk->is_shuffle_questions) {
+                $order = Helper::fisherYatesShuffle($ukk->questions->toArray());
+            } else {
+                $order = $ukk->questions->toArray();
+            }
+            session(["ukk_order_{$ukk->id}" => $order]);
+        }
+
+        $questions = $order;
+
+        return view('user.ukk.workmanship', compact('ukk', 'ukkResult', 'questions'));
+    }
+
+    public function getRandomQuestions(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->hasRole('student')) {
+                return abort(403);
+            }
+
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('view', $ukk);
+
+            $order = session("ukk_order_{$ukk->id}");
+
+            if (!$order) {
+                if ($ukk->is_shuffle_questions) {
+                    $order = Helper::fisherYatesShuffle($ukk->questions->toArray());
+                } else {
+                    $order = $ukk->questions->toArray();
+                }
+                session(["ukk_order_{$ukk->id}" => $order]);
+            }
+
+            $index = $request->query('q', 1);
+            $question = $order[$index - 1] ?? null;
+
+            if (!$question) {
+                return $this->sendError('Soal tidak ditemukan.', [], 404);
+            }
+
+            $student = auth()->user()->student;
+            $ukkResult = UKKResultTheory::where('student_id', $student->id)->where('ukk_id', $id)->firstOrFail();
+
+            $answer = UKKAnswerTheory::where('ukk_result_id', $ukkResult->id)
+                ->where('questionable_id', $question['id'])
+                ->where('questionable_type', $question['question_type'] === 'multiple' ? MultipleQuestion::class : EssayQuestion::class)
+                ->first();
+
+            $response = [
+                'ukk' => $ukk,
+                'question' => $question,
+                'index' => $index,
+                'total' => count($order),
+                'answer' => $answer,
+            ];
+
+            return $this->sendResponse('Soal ditemukan.', $response);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return $this->sendError(
+                'Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+
+    public function setAnswerByUKKResult(ExamAnswerRequest $request, $id)
+    {
+        try {
+            if (!auth()->user()->hasRole('student')) {
+                return abort(403);
+            }
+
+            $validated = $request->validated();
+
+            $student = auth()->user()->student;
+
+            $ukk_result = UKKResultTheory::where('student_id', $student->id)->where('ukk_id', $id)->firstOrFail();
+            $ukk_result->answers()->updateOrCreate(
+                [
+                    'questionable_id' => $validated['question_id'],
+                    'questionable_type' => $validated['question_type'] === 'multiple' ? MultipleQuestion::class : EssayQuestion::class,
+                ],
+                [
+                    'answer' => $validated['answer'],
+                    'answered_at' => now()
+                ]
+            );
+
+            return $this->sendResponse('Jawaban berhasil disimpan.');
+        } catch (\Exception $e) {
+            Log::error('Error menyimpan jawaban UKK: ' . $e->getMessage());
+            return $this->sendError(
+                'Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+
+    public function theorySubmit(WorkmanshipRequest $request, $id)
+    {
+        try {
+            if (!$request->user()->hasRole('student')) {
+                return abort(403);
+            }
+
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('view', $ukk);
+
+            $student = auth()->user()->student;
+
+            $ukkResult = UKKResultTheory::where('ukk_id', $ukk->id)
+                ->where('student_id', $student->id)
+                ->first();
+
+            if (!$ukkResult) {
+                return $this->sendError('Anda belum memulai UKK ini.', [], 403);
+            }
+
+            $validated = $request->validated();
+
+            if (isset($validated['answered']) && is_array($validated['answered'])) {
+                foreach ($validated['answered'] as $answer) {
+                    $ukkResult->answers()->updateOrCreate(
+                        [
+                            'questionable_id' => $answer['question_id'],
+                            'questionable_type' => $answer['question_type'] === 'multiple' ? MultipleQuestion::class : EssayQuestion::class,
+                        ],
+                        [
+                            'answer' => $answer['answer'],
+                            'answered_at' => now()
+                        ]
+                    );
+                }
+            }
+
+            $ukkResult->update([
+                'status' => 'completed',
+            ]);
+
+            app(UKKScoringService::class)->saveScore($ukkResult, $student->id);
+
+            session()->forget("ukk_order_{$ukk->id}");
+
+            return $this->sendResponse('UKK selesai. Terima kasih!', $ukkResult);
+        } catch (\Exception $e) {
+            Log::error('Error submit UKK: ' . $e->getMessage());
+            return $this->sendError(
+                'Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+
+    public function theoryWorkmanshipResult(Request $request, $id)
+    {
+        if (!$request->user()->hasRole('student') && !$request->user()->hasRole('parent')) {
+            return abort(403);
+        }
+
+        $ukk = UKK::findOrFail($id);
+        $this->authorize('view', $ukk);
+
+        $student = null;
+        if ($request->user()->hasRole('student')) {
+            $student = auth()->user()->student;
+        } elseif ($request->user()->hasRole('parent')) {
+            $student = auth()->user()->parent;
+        }
+
+        $ukkResult = UKKResultTheory::with('answers')->where('ukk_id', $ukk->id)
+            ->where('student_id', $student->id)
+            ->first();
+
+        if (!$ukkResult) {
+            return redirect()->route('user.ukk.teori.info', $ukk->id)
+                ->with('error', 'Anda belum menyelesaikan UKK ini.');
+        }
+
+        if (now()->gt($ukk->end_time) && $ukkResult->status !== 'completed') {
+            app(UKKScoringService::class)->saveScore($ukkResult, $student->id);
+        }
+
+        if ($ukkResult->status !== 'completed') {
+            return redirect()->route('user.ukk.teori.info', $ukk->id)
+                ->with('error', 'Anda belum menyelesaikan UKK ini.');
+        }
+
+        $totalPoints = $ukk->multipleQuestions->sum('question_points') + $ukk->essayQuestions->sum('question_points');
+        $totalCorrectAnswers = $ukkResult->answers->sum('score');
+
+        // cek jika jawaban masih ada yang null, maka berikan pesan untuk menunggu penilaian guru
+        $hasPendingScores = $ukkResult->answers()->whereNull('score')->exists();
+
+        return view('user.ukk.workmanship_result', compact('ukkResult', 'student', 'ukk', 'totalPoints', 'totalCorrectAnswers', 'hasPendingScores'));
+    }
+
+    public function evaluation(Request $request, $ukk_id, $page = 1)
+    {
+        $ukk = UKK::findOrFail($ukk_id);
+
+        $this->authorize('evaluate', $ukk);
+
+        $query = UKKResultTheory::where('ukk_id', $ukk_id)
+            ->with(['student', 'ukk', 'answers']);
+
+        $ukk_results = $query->simplePaginate(1, ['*'], 'page', $page);
+        $ukk_result = $query->simplePaginate(1, ['*'], 'page', $page)->first();
+
+        if (!$ukk_result) {
+            return redirect()->route('user.ukk.result.teori', $ukk_id)->with('error', 'Belum ada hasil yang bisa dinilai.');
+        }
+
+        $multipleQuery = $ukk->multipleQuestions();
+        $essayQuery = $ukk->essayQuestions();
+
+        if ($request->filled('search')) {
+            $search = $request->query('search');
+            $multipleQuery->where('question_text', 'like', "%{$search}%");
+            $essayQuery->where('question_text', 'like', "%{$search}%");
+        }
+
+        $multipleQuestions = $multipleQuery->get()->map(function ($q) {
+            $q->q_type = 'App\Models\MultipleQuestion';
+            return $q;
+        });
+
+        $essayQuestions = $essayQuery->get()->map(function ($q) {
+            $q->q_type = 'App\Models\EssayQuestion';
+            return $q;
+        });
+
+        $questions = $multipleQuestions
+            ->concat($essayQuestions)
+            ->sortByDesc('created_at')
+            ->values();
+
+        $studentAnswers = $ukk_result->answers->keyBy(function ($answer) {
+            return $answer->questionable_type . '_' . $answer->questionable_id;
+        });
+
+        $questions->transform(function ($question) use ($studentAnswers) {
+            $matchingKey = $question->q_type . '_' . $question->id;
+            $question->student_answer = $studentAnswers->get($matchingKey);
+            return $question;
+        });
+
+        $perPage = 5;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+        $paginatedQuestions = new LengthAwarePaginator(
+            $questions->forPage($currentPage, $perPage),
+            $questions->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('user.ukk.evaluation', [
+            'ukk_result' => $ukk_result,
+            'ukk' => $ukk,
+            'ukk_results' => $ukk_results,
+            'questions' => $paginatedQuestions
+        ]);
+    }
+
+    public function updateAnswerScore(Request $request, $id, $answer_id)
+    {
+        $request->validate([
+            'score' => 'required|numeric|min:0'
+        ]);
+
+        $answer = UKKAnswerTheory::with('questionable')->find($answer_id);
+        if (!$answer) {
+            return $this->sendError('Jawaban tidak ditemukan.', [], 404);
+        }
+
+        $ukk = UKK::findOrFail($id);
+        $this->authorize('evaluate', $ukk);
+
+        $answer->score = $request->score;
+        $answer->save();
+
+        // Update total score di UKKResultTheory
+        $ukkResult = $answer->ukkResult;
+        $totalScore = $ukkResult->answers()->sum('score');
+        $ukkResult->update(['score' => $totalScore]);
+
+        activity()
+            ->useLog('Jawaban UKK Teori')
+            ->performedOn($ukk)
+            ->causedBy($request->user())
+            ->log('Pengguna ' . $request->user()->name . ' menilai jawaban untuk ukk: ' . $ukk->id . ', hasil ukk: ' . $ukkResult->id . ', nilai: ' . $ukkResult->score);
+
+        return $this->sendResponse('Skor berhasil diubah.');
+    }
+
+    public function downloadTemplate()
+    {
+        $data = collect([
+            [
+                'Jenis Soal (Pilihan Ganda/Essay)' => 'Pilihan Ganda',
+                'Teks Soal' => 'Siapakah tokoh pada gambar di bawah ini?',
+                'File Gambar Soal' => '',
+                'Opsi A' => 'Ir. Soekarno',
+                'File Gambar Opsi A' => 'soal1_opsi_a.png',
+                'Opsi B' => 'Moh. Hatta',
+                'File Gambar Opsi B' => 'soal1_opsi_b.png',
+                'Opsi C' => 'Sutan Syahrir',
+                'File Gambar Opsi C' => '',
+                'Opsi D' => 'Ki Hajar Dewantara',
+                'File Gambar Opsi D' => '',
+                'Opsi E' => 'Jenderal Sudirman',
+                'File Gambar Opsi E' => '',
+                'Kunci Jawaban (A/B/C/D/E)' => 'A',
+            ],
+            [
+                'Jenis Soal (Pilihan Ganda/Essay)' => 'Essay',
+                'Teks Soal' => 'Amati gambar tersebut dan jelaskan maknanya!',
+                'File Gambar Soal' => 'soal2_soal.png',
+                'Opsi A' => '',
+                'File Gambar Opsi A' => '',
+                'Opsi B' => '',
+                'File Gambar Opsi B' => '',
+                'Opsi C' => '',
+                'File Gambar Opsi C' => '',
+                'Opsi D' => '',
+                'File Gambar Opsi D' => '',
+                'Opsi E' => '',
+                'File Gambar Opsi E' => '',
+                'Kunci Jawaban (A/B/C/D/E)' => '',
+            ],
+        ]);
+
+        return (new FastExcel($data))->download('Template_Soal_UKK.xlsx');
+    }
+
+    public function importQuestions(Request $request, $id)
+    {
+        try {
+            $ukk = UKK::findOrFail($id);
+            $this->authorize('update', $ukk);
+
+            $request->validate([
+                'import_file' => 'required|file',
+            ]);
+
+            $file = $request->file('import_file');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $mimeType = $file->getMimeType();
+
+            $isZip = ($extension === 'zip' || in_array($mimeType, ['application/zip', 'application/x-zip-compressed', 'application/octet-stream']));
+
+            DB::beginTransaction();
+
+            $successCount = 0;
+
+            if ($isZip) {
+                $zip = new \ZipArchive;
+                if ($zip->open($file->getRealPath()) === TRUE) {
+                    $extractPath = storage_path('app/temp_import_ukk_' . uniqid());
+                    $zip->extractTo($extractPath);
+                    $zip->close();
+
+                    Log::info("Import UKK: ZIP extracted to {$extractPath}");
+
+                    $allFiles = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($extractPath));
+                    $excelPath = null;
+                    foreach ($allFiles as $f) {
+                        if (str_contains($f->getRealPath(), '__MACOSX')) continue;
+                        if (in_array(strtolower(pathinfo($f->getFilename(), PATHINFO_EXTENSION)), ['xls', 'xlsx'])) {
+                            $excelPath = $f->getRealPath();
+                            break;
+                        }
+                    }
+
+                    if (!$excelPath) {
+                        \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+                        throw new \Exception('File Excel tidak ditemukan di dalam ZIP.');
+                    }
+
+                    $collection = (new FastExcel)->import($excelPath);
+
+                    if ($collection->isEmpty()) {
+                        \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+                        throw new \Exception('File Excel kosong atau tidak terbaca.');
+                    }
+
+                    $this->validateImportHeaders($collection->first());
+
+                    $mediaPath = null;
+                    $directories = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($extractPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+                        \RecursiveIteratorIterator::SELF_FIRST
+                    );
+                    foreach ($directories as $dir) {
+                        if (str_contains($dir->getRealPath(), '__MACOSX')) continue;
+                        if ($dir->isDir() && strtolower($dir->getFilename()) === 'media') {
+                            $mediaPath = $dir->getRealPath();
+                            break;
+                        }
+                    }
+
+                    foreach ($collection as $index => $row) {
+                        if ($this->processImportRow($ukk, $row, $mediaPath, $index + 1, $extractPath)) {
+                            $successCount++;
+                        }
+                    }
+
+                    \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+                } else {
+                    throw new \Exception('Gagal membuka file ZIP.');
+                }
+            } else {
+                $collection = (new FastExcel)->import($file);
+
+                if ($collection->isEmpty()) {
+                    throw new \Exception('File Excel kosong atau tidak terbaca.');
+                }
+
+                $this->validateImportHeaders($collection->first());
+
+                foreach ($collection as $index => $row) {
+                    if ($this->processImportRow($ukk, $row, null, $index + 1)) {
+                        $successCount++;
+                    }
+                }
+            }
+
+            if ($successCount === 0) {
+                throw new \Exception('Tidak ada soal yang berhasil diimpor. Periksa kembali format kolom dan isi file Anda.');
+            }
+
+            DB::commit();
+
+            return $this->sendResponse("Berhasil mengimpor {$successCount} soal.");
+        } catch (\Exception $e) {
+            if (DB::transactionLevel() > 0) DB::rollBack();
+            Log::error('Error importing UKK questions: ' . $e->getMessage());
+            return $this->sendError($e->getMessage(), [], 500);
+        }
+    }
+
+    private function validateImportHeaders($firstRow)
+    {
+        $cleanFirstRow = [];
+        foreach ($firstRow as $key => $value) {
+            $cleanFirstRow[strtolower(trim($key))] = $key;
+        }
+
+        $requiredKeywords = [
+            ['jenis', 'tipe'],
+            ['teks', 'soal', 'pertanyaan']
+        ];
+
+        foreach ($requiredKeywords as $keywords) {
+            $found = false;
+            foreach ($keywords as $kw) {
+                foreach ($cleanFirstRow as $lowerKey => $originalKey) {
+                    if (str_contains($lowerKey, $kw)) {
+                        $found = true;
+                        break 2;
+                    }
+                }
+            }
+            if (!$found) {
+                throw new \Exception("Kolom wajib (seperti '" . $keywords[0] . "') tidak ditemukan. Pastikan Anda menggunakan template yang benar.");
+            }
+        }
+    }
+
+    private function getMapValue($row, $keywords, $default = null)
+    {
+        // 1. Prioritaskan kecocokan persis (Exact Match)
+        foreach ($row as $key => $value) {
+            $lowerKey = strtolower(trim($key));
+            if (in_array($lowerKey, $keywords)) {
+                return $value;
+            }
+        }
+
+        // 2. Pencarian parsial (Fuzzy Match)
+        foreach ($row as $key => $value) {
+            $lowerKey = strtolower(trim($key));
+            foreach ($keywords as $kw) {
+                // Hindari mencocokkan "jenis soal" atau "tipe soal" saat mencari kata kunci "soal" atau "pertanyaan"
+                if (($kw === 'soal' || $kw === 'pertanyaan') && (str_contains($lowerKey, 'jenis') || str_contains($lowerKey, 'tipe'))) {
+                    continue;
+                }
+
+                if (str_contains($lowerKey, $kw)) {
+                    return $value;
+                }
+            }
+        }
+        return $default;
+    }
+
+    private function processImportRow($ukk, $row, $mediaPath = null, $rowNumber = 1, $basePath = null)
+    {
+        $cleanRow = [];
+        foreach ($row as $key => $value) {
+            $cleanRow[trim($key)] = is_string($value) ? trim($value) : $value;
+        }
+        $row = $cleanRow;
+
+        $jenisText = $this->getMapValue($row, ['jenis soal', 'tipe soal', 'jenis', 'tipe'], '');
+        $jenis = strtolower(trim($jenisText));
+
+        $teks = $this->getMapValue($row, ['teks soal', 'teks pertanyaan', 'soal', 'pertanyaan'], '');
+
+        if (empty($teks)) return false;
+
+        $data = [
+            'questionable_id' => $ukk->id,
+            'questionable_type' => UKK::class,
+            'question_text' => $teks,
+            'question_points' => $this->getMapValue($row, ['poin', 'skor', 'nilai'], 0),
+        ];
+
+        $mainFileName = $this->getMapValue($row, ['file gambar soal', 'gambar soal', 'gambar'], '');
+        $imageFile = $this->findFileAnywhere($mainFileName, $mediaPath, $basePath);
+
+        if (!$imageFile && $basePath) {
+            $imageFile = $this->findFileByConvention($rowNumber, 'soal', null, $mediaPath, $basePath);
+        }
+
+        if ($imageFile) {
+            $data['question_file'] = $this->saveImportedFile($imageFile);
+        }
+
+        if (str_contains($jenis, 'pilihan') || str_contains($jenis, 'ganda') || str_contains($jenis, 'multiple')) {
+            $options = ['a', 'b', 'c', 'd', 'e'];
+            foreach ($options as $opt) {
+                $data["option_{$opt}"] = $this->getMapValue($row, ["opsi {$opt}", "pilihan {$opt}", "jawaban {$opt}"], null);
+
+                // Fallback for very simple headers like just "A", "B", etc.
+                if (is_null($data["option_{$opt}"])) {
+                    $data["option_{$opt}"] = $row[strtoupper($opt)] ?? $row[strtolower($opt)] ?? null;
+                }
+
+                $imgKeyKeywords = ["file gambar opsi {$opt}", "gambar opsi {$opt}", "gambar {$opt}"];
+                $optFileName = $this->getMapValue($row, $imgKeyKeywords, '');
+                $optImageFile = $this->findFileAnywhere($optFileName, $mediaPath, $basePath);
+
+                if (!$optImageFile && $basePath) {
+                    $optImageFile = $this->findFileByConvention($rowNumber, 'opsi', $opt, $mediaPath, $basePath);
+                }
+
+                if ($optImageFile) {
+                    $data["option_{$opt}_image"] = $this->saveImportedFile($optImageFile);
+                }
+            }
+
+            $correctAnswer = $this->getMapValue($row, ['kunci jawaban', 'kunci', 'jawaban benar'], '');
+            if (empty($correctAnswer)) {
+                // If still empty, try looking for common letters in the row
+                $correctAnswer = $row['Kunci'] ?? $row['Jawaban'] ?? '';
+            }
+
+            $data['correct_answer'] = strtolower(trim($correctAnswer));
+            MultipleQuestion::create($data);
+            return true;
+        } elseif (str_contains($jenis, 'essay') || str_contains($jenis, 'uraian')) {
+            EssayQuestion::create($data);
+            return true;
+        }
+
+        return false;
+    }
+
+    private function findFileAnywhere($fileName, $mediaPath, $basePath)
+    {
+        if (empty($fileName)) return null;
+
+        if ($mediaPath) {
+            $file = $this->findFileInDir($mediaPath, $fileName);
+            if ($file) return $file;
+        }
+
+        if ($basePath) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($basePath));
+            foreach ($iterator as $f) {
+                if ($f->isDir()) continue;
+                if (str_contains($f->getRealPath(), '__MACOSX')) continue;
+                if (strtolower($f->getFilename()) === strtolower($fileName)) {
+                    return $f->getRealPath();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function findFileInDir($dir, $fileName)
+    {
+        $filePath = $dir . DIRECTORY_SEPARATOR . $fileName;
+        if (file_exists($filePath)) return $filePath;
+
+        $files = scandir($dir);
+        foreach ($files as $file) {
+            if (strtolower($file) === strtolower($fileName)) {
+                return $dir . DIRECTORY_SEPARATOR . $file;
+            }
+        }
+        return null;
+    }
+
+    private function findFileByConvention($rowNumber, $type, $option = null, $mediaPath = null, $basePath = null)
+    {
+        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+
+        $patterns = [];
+        if ($type === 'soal') {
+            $patterns[] = "soal_{$rowNumber}_soal";
+            $patterns[] = "soal{$rowNumber}_soal";
+            $patterns[] = "soal_{$rowNumber}";
+            $patterns[] = "soal{$rowNumber}";
+            $patterns[] = "gambar_soal_{$rowNumber}";
+            $patterns[] = "gambar_soal_{$rowNumber}_soal";
+            $patterns[] = "gambar_{$rowNumber}";
+            $patterns[] = "gambar{$rowNumber}";
+            $patterns[] = "{$rowNumber}";
+        } else {
+            $patterns[] = "soal_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "soal{$rowNumber}_opsi_{$option}";
+            $patterns[] = "gambar_soal_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "gambar_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "soal_{$rowNumber}_{$option}";
+            $patterns[] = "soal{$rowNumber}_{$option}";
+            $patterns[] = "{$rowNumber}_{$option}";
+        }
+
+        foreach ($patterns as $pattern) {
+            foreach ($extensions as $ext) {
+                $fileName = "{$pattern}.{$ext}";
+                $file = $this->findFileAnywhere($fileName, $mediaPath, $basePath);
+                if ($file) return $file;
+            }
+        }
+
+        return null;
+    }
+
+    private function saveImportedFile($fullPath)
+    {
+        $fileName = pathinfo($fullPath, PATHINFO_BASENAME);
+        $newPath = 'file/ujian/' . uniqid() . '_' . $fileName;
+        Storage::put($newPath, file_get_contents($fullPath));
+        return $newPath;
+    }
+
+    public function resetResult(Request $request, $id)
+    {
+        $ukk = UKK::findOrFail($id);
+        $this->authorize('evaluate', $ukk);
+
+        try {
+            DB::beginTransaction();
+
+            $resultIds = $ukk->results()->pluck('id');
+
+            if ($resultIds->isNotEmpty()) {
+                DB::table('ukk_answer_theory')->whereIn('ukk_result_id', $resultIds)->delete();
+                $ukk->results()->delete();
+            }
+
+            activity()
+                ->useLog('UKK')
+                ->performedOn($ukk)
+                ->causedBy($request->user())
+                ->log('Pengguna ' . $request->user()->name . ' mereset semua hasil teori UKK untuk UKK ID: ' . $ukk->id);
+
+            DB::commit();
+
+            return $this->sendResponse('Semua hasil teori UKK berhasil direset.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to reset all UKK theory results: ' . $e->getMessage());
+
+            return $this->sendError(
+                'Terjadi kesalahan server. Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+
+    public function resetResultById(Request $request, $id, $ukk_result_id)
+    {
+        $ukk = UKK::findOrFail($id);
+        $this->authorize('evaluate', $ukk);
+
+        try {
+            DB::beginTransaction();
+
+            $result = $ukk->results()->findOrFail($ukk_result_id);
+            $result->answers()->delete();
+            $result->delete();
+
+            activity()
+                ->useLog('UKK')
+                ->performedOn($ukk)
+                ->causedBy($request->user())
+                ->log('Pengguna ' . $request->user()->name . ' mereset hasil teori UKK untuk UKK ID: ' . $ukk->id . ', hasil UKK ID: ' . $ukk_result_id);
+
+            DB::commit();
+
+            return $this->sendResponse('Hasil teori UKK berhasil direset.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to reset UKK theory result: ' . $e->getMessage());
+
+            return $this->sendError(
+                'Terjadi kesalahan server. Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+}

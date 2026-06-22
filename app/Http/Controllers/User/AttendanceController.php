@@ -235,7 +235,7 @@ class AttendanceController extends Controller
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
       'class.major' => fn($query) => $query->select('id', 'name'),
       'class.students' => function ($query) use ($request) {
-        $query->select('id', 'name', 'nis', 'user_id', 'class_id', 'parent_id');
+        $query->select('id', 'name', 'nisn', 'user_id', 'class_id', 'parent_id');
         if ($request->user()->hasRole('parent')) {
           $query->where('parent_id', $request->user()->id);
         } elseif ($request->user()->hasRole('student')) {
@@ -301,7 +301,7 @@ class AttendanceController extends Controller
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
       'class.major' => fn($query) => $query->select('id', 'name'),
       'class.students' => function ($query) use ($request) {
-        $query->select('id', 'name', 'nis', 'user_id', 'class_id', 'parent_id');
+        $query->select('id', 'name', 'nisn', 'user_id', 'class_id', 'parent_id');
         if ($request->user()->hasRole('parent')) {
           $query->where('parent_id', $request->user()->id);
         } elseif ($request->user()->hasRole('student')) {
@@ -403,7 +403,7 @@ class AttendanceController extends Controller
         'schedule.subject:id,name',
         'schedule.class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
         'schedule.class.major:id,name',
-        'schedule.class.students:id,class_id,user_id,nis,name',
+        'schedule.class.students:id,class_id,user_id,nisn,name',
         'attendances:id,meeting_id,user_id,status,edit_by,updated_at',
         'attendances.editby:id,name',
         'schedule_time:id,schedule_id,day,meeting_method,start_time,end_time',
@@ -440,7 +440,7 @@ class AttendanceController extends Controller
     try {
       DB::beginTransaction();
 
-      $meeting = Meeting::findOrFail($meeting_id);
+      $meeting = Meeting::with('attendances')->findOrFail($meeting_id);
       $this->authorize('update', $meeting);
 
       $validated = $request->validated();

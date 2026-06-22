@@ -22,7 +22,6 @@ use App\Jobs\UpdateScheduleMeetings;
 use App\Models\Meeting;
 use App\Models\ScheduleTime;
 use App\Models\Subject;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ScheduleController extends Controller
@@ -301,12 +300,53 @@ class ScheduleController extends Controller
     }
   }
 
+  public function syncByClass($classId)
+  {
+    try {
+      $this->authorize('update', Schedule::class);
+
+      $activePeriod = Period::where('status', true)->first();
+      if (!$activePeriod) {
+        return $this->sendError('Tidak ada periode aktif.', [], 400);
+      }
+
+      $class = SchoolClass::with('students.schedules')->findOrFail($classId);
+      $scheduleIds = Schedule::where('class_id', $classId)
+        ->where('period_id', $activePeriod->id)
+        ->pluck('id')
+        ->toArray();
+
+      DB::beginTransaction();
+
+      foreach ($class->students as $student) {
+        if ($student->schedules) {
+          $student->schedules->update([
+            'schedule_ids' => $scheduleIds
+          ]);
+        } else {
+          $student->schedules()->create([
+            'student_id' => $student->id,
+            'schedule_ids' => $scheduleIds
+          ]);
+        }
+      }
+
+      DB::commit();
+
+      return $this->sendResponse('Jadwal siswa berhasil disinkronisasi.');
+    } catch (\Exception $e) {
+      DB::rollBack();
+      Log::error("Error syncing schedules: " . $e->getMessage());
+      return $this->sendError('Silakan coba lagi.', [], 500);
+    }
+  }
+
   public function showBySchedule($id)
   {
     $schedule = Schedule::with([
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
       'class.major' => fn($query) => $query->select('id', 'name'),
-      'class.students:class_id,user_id,name,nis',
+      'class.students:class_id,user_id,name,nisn',
       'class.students.user:id,image,username',
       'subject' => fn($query) => $query->select('id', 'name', 'code'),
       'teacher' => fn($query) => $query->select('id', 'name', 'user_id'),
@@ -327,7 +367,7 @@ class ScheduleController extends Controller
     $meeting = Meeting::with([
       'schedule' => fn($query) => $query->select('id', 'class_id', 'subject_id', 'teacher_id', 'room_id', 'period_id'),
       'schedule.class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
-      'schedule.class.students:class_id,user_id,name,nis',
+      'schedule.class.students:class_id,user_id,name,nisn',
       'schedule.class.major' => fn($query) => $query->select('id', 'name'),
       'schedule.subject' => fn($query) => $query->select('id', 'name', 'code'),
       'schedule.teacher' => fn($query) => $query->select('id', 'name', 'user_id'),
@@ -397,8 +437,8 @@ class ScheduleController extends Controller
     $scheduleTime = $meeting->schedule_time;
 
     $isToday = $today->isSameDay(Carbon::parse($meeting->date));
-    $isStartedAt = !$meeting->started_at && $isToday && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time;
-    $isRealization = $meeting->started_at && $isToday && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time->addHours(2);
+    $isStartedAt =  (!$meeting->started_at && $isToday && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time);
+    $isRealization = ($meeting->started_at && $isToday && $scheduleTime->start_time <= $today && $today <= $scheduleTime->end_time->addHours(2));
 
     $attendancePercentage = 0.0;
     $totalStudents = $meeting->schedule->class->students->count();
@@ -477,6 +517,7 @@ class ScheduleController extends Controller
         ->where('period_id', $activePeriod->id)
         ->whereHas('schedule_times', function ($query) use ($formRequest) {
           $query->where('day', $formRequest->day)
+            ->where('teacher_id', '=', $formRequest->teacher_id)
             ->where(function ($q) use ($formRequest) {
               $q->where(function ($q2) use ($formRequest) {
                 $q2->where('start_time', '<', $formRequest->end_time)
@@ -494,17 +535,7 @@ class ScheduleController extends Controller
 
       $validated['period_id'] = $activePeriod->id;
 
-      $scheduleExist = Schedule::where('subject_id', $validated['subject_id'])
-        ->where('teacher_id', $validated['teacher_id'])
-        ->where('period_id', $activePeriod->id)
-        ->where('class_id', $validated['class_id'])
-        ->first();
-
-      if ($scheduleExist) {
-        $schedule = $scheduleExist;
-      } else {
-        $schedule = Schedule::create($validated);
-      }
+      $schedule = Schedule::create($validated);
 
       $schedule_time = $schedule->schedule_times()->create($validated);
 
@@ -560,6 +591,7 @@ class ScheduleController extends Controller
         ->where('period_id', $activePeriod->id)
         ->whereHas('schedule_times', function ($query) use ($formRequest) {
           $query->where('day', $formRequest->day)
+            ->where('teacher_id', '=', $formRequest->teacher_id)
             ->where(function ($q) use ($formRequest) {
               $q->where(function ($q2) use ($formRequest) {
                 $q2->where('start_time', '<', $formRequest->end_time)
@@ -575,16 +607,6 @@ class ScheduleController extends Controller
 
       $validated = $formRequest->validated();
       $validated['period_id'] = $activePeriod->id;
-
-      $scheduleExist = Schedule::where('subject_id', $validated['subject_id'])
-        ->where('teacher_id', $validated['teacher_id'])
-        ->where('class_id', $validated['class_id'])
-        ->where('period_id', $activePeriod->id)
-        ->first();
-
-      if ($scheduleExist) {
-        $schedule = $scheduleExist;
-      }
 
 
       DB::beginTransaction();
@@ -642,12 +664,44 @@ class ScheduleController extends Controller
    */
   private function hasMeetingAffectingChanges($oldData, $newData, $newDataScheduleTime)
   {
-    // Perubahan yang mempengaruhi meeting
+    // Pastikan semua data berupa array
+    $newData = is_string($newData) ? json_decode($newData, true) : (array) $newData;
+    $newDataScheduleTime = is_string($newDataScheduleTime) ? json_decode($newDataScheduleTime, true) : (array) $newDataScheduleTime;
+    $oldData = is_string($oldData) ? json_decode($oldData, true) : (array) $oldData;
+
     $meetingAffectingFields = ['day', 'start_time', 'end_time', 'meeting_method'];
 
     foreach ($meetingAffectingFields as $field) {
-      if (isset($oldData[$field]) && (isset($newData[$field]) && $oldData[$field] !== $newData[$field] || isset($newDataScheduleTime[$field]) && $newDataScheduleTime[$field] !== $newDataScheduleTime[$field])) {
-        return true;
+      if (isset($oldData[$field])) {
+
+        // Ambil nilainya
+        $oldVal = $oldData[$field];
+        $newVal = $newData[$field] ?? null;
+        $newScheduleVal = $newDataScheduleTime[$field] ?? null;
+
+        // --- NORMALISASI WAKTU (Object Carbon ke String 'H:i') ---
+        // Jika field adalah start_time / end_time dan datanya berupa Object Tanggal
+        if (in_array($field, ['start_time', 'end_time'])) {
+          if ($oldVal instanceof \DateTimeInterface) {
+            $oldVal = $oldVal->format('H:i');
+          }
+          if ($newVal instanceof \DateTimeInterface) {
+            $newVal = $newVal->format('H:i');
+          }
+          if ($newScheduleVal instanceof \DateTimeInterface) {
+            $newScheduleVal = $newScheduleVal->format('H:i');
+          }
+        }
+
+        // --- CEK PERUBAHAN ---
+        // Bandingkan nilainya. Jika newVal ada (tidak null) dan berbeda dengan oldVal
+        $isChangedInNewData = $newVal !== null && $newVal !== $oldVal;
+        $isChangedInSchedule = $newScheduleVal !== null && $newScheduleVal !== $oldVal;
+
+        if ($isChangedInNewData || $isChangedInSchedule) {
+          // Kamu bisa menambahkan Log::info("Berubah di field: $field", ['old' => $oldVal, 'new' => $newVal]) disini untuk debugging
+          return true;
+        }
       }
     }
 

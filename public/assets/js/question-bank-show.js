@@ -21,6 +21,16 @@ var editQuestionTextQuill = new Quill("#editQuestionTextQuill", {
     modules: { toolbar: toolbarOptions },
     placeholder: "Tulis soal",
 });
+var addEssayQuestionTextQuill = new Quill("#addEssayQuestionTextQuill", {
+    theme: "snow",
+    modules: { toolbar: toolbarOptions },
+    placeholder: "Tulis soal",
+});
+var editEssayQuestionTextQuill = new Quill("#editEssayQuestionTextQuill", {
+    theme: "snow",
+    modules: { toolbar: toolbarOptions },
+    placeholder: "Tulis soal",
+});
 
 let alphabet = ["a", "b", "c", "d", "e"];
 
@@ -76,7 +86,7 @@ $(document).ready(function () {
         if (file) {
             let reader = new FileReader();
             reader.onload = (e) => {
-            $preview.attr("src", e.target.result).show();
+                $preview.attr("src", e.target.result).show();
                 $fileIcon.hide();
             };
             reader.readAsDataURL(file);
@@ -137,6 +147,22 @@ $(document).ready(function () {
         }
         $("#editQuestionText").val(value);
     });
+    addEssayQuestionTextQuill.on("text-change", function () {
+        var value = addEssayQuestionTextQuill.root.innerHTML;
+        var descriptionText = addEssayQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#addEssayQuestionText").val(value);
+    });
+    editEssayQuestionTextQuill.on("text-change", function () {
+        var value = editEssayQuestionTextQuill.root.innerHTML;
+        var descriptionText = editEssayQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#editEssayQuestionText").val(value);
+    });
 
     $("#addQuestionForm").on("submit", function (e) {
         e.preventDefault();
@@ -152,9 +178,11 @@ $(document).ready(function () {
                 '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
             );
         const formData = new FormData(this);
+        formData.append('question_type', 'multiple_choice');
+        formData.append('model', 'question_bank');
 
         $.ajax({
-            url: `/soal/${id}/bank-soal`,
+            url: `/soal/${id}`,
             method: "POST",
             data: formData,
             processData: false,
@@ -220,6 +248,73 @@ $(document).ready(function () {
         });
     });
 
+    $("#addEssayQuestionForm").on("submit", function (e) {
+        e.preventDefault();
+        const id = $(this).data("id");
+
+        $("#addEssayQuestionForm").find("input, select").removeClass("is-invalid");
+        $("#addEssayQuestionForm").find(".invalid-feedback").text("");
+        const submitBtn = $(this).find("button[type='submit']");
+        const originalHtml = submitBtn.html();
+        submitBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
+            );
+        const formData = new FormData(this);
+        formData.append('question_type', 'essay');
+        formData.append('model', 'question_bank');
+
+        $.ajax({
+            url: `/soal/${id}`,
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    const toast = new bootstrap.Toast($("#toast-success"));
+                    $("#toast-success #toast-text").text(response.message);
+                    toast.show();
+                    location.reload();
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    for (const key in errors) {
+                        if (
+                            $("#addEssayQuestionForm [name='" + key + "']").hasClass(
+                                "file_path"
+                            ) ||
+                            $("#addEssayQuestionForm [name='" + key + "']").hasClass(
+                                "quill"
+                            )
+                        ) {
+                            $("#addEssayQuestionForm [name='" + key + "']")
+                                .parent()
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        } else {
+                            $("#addEssayQuestionForm [name='" + key + "']")
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        }
+                    }
+                } else {
+                    const toast = new bootstrap.Toast($("#toast-error"));
+                    $("#toast-error #toast-text").text(
+                        xhr.responseJSON.message
+                    );
+                    toast.show();
+                }
+                submitBtn.prop("disabled", false).html(originalHtml);
+            },
+        });
+    });
+
     $("#editQuestionForm").on("submit", function (e) {
         e.preventDefault();
         const id = $(this).data("id");
@@ -234,6 +329,8 @@ $(document).ready(function () {
                 '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
             );
         const formData = new FormData(this);
+        formData.append('question_type', 'multiple_choice');
+        formData.append('model', 'question_bank');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -302,6 +399,91 @@ $(document).ready(function () {
             },
         });
     });
+
+    $("#editEssayQuestionForm").on("submit", function (e) {
+        e.preventDefault();
+        const id = $(this).data("id");
+
+        $("#editEssayQuestionForm").find("input, select").removeClass("is-invalid");
+        $("#editEssayQuestionForm").find(".invalid-feedback").text("");
+        const submitBtn = $(this).find("button[type='submit']");
+        const originalHtml = submitBtn.html();
+        submitBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
+            );
+        const formData = new FormData(this);
+        formData.append('question_type', 'essay');
+        formData.append('model', 'question_bank');
+
+        $.ajax({
+            url: `/soal/${id}`,
+            method: "POST",
+            headers: { "X-HTTP-Method-Override": "PUT" },
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    const toast = new bootstrap.Toast($("#toast-success"));
+                    $("#toast-success #toast-text").text(response.message);
+                    toast.show();
+                    location.reload();
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    const options_errors = [];
+                    for (const key in errors) {
+                        if (
+                            $(
+                                "#editEssayQuestionForm [name='" + key + "']"
+                            ).hasClass("file_path") ||
+                            $(
+                                "#editEssayQuestionForm [name='" + key + "']"
+                            ).hasClass("quill")
+                        ) {
+                            $("#editEssayQuestionForm [name='" + key + "']")
+                                .parent()
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        } else if (
+                            $("#editEssayQuestionForm [name='" + key + "']")
+                                .parent()
+                                .hasClass("answer-option")
+                        ) {
+                            options_errors.push(errors[key]);
+                        } else {
+                            $("#editEssayQuestionForm [name='" + key + "']")
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        }
+
+                        if (options_errors.length > 0) {
+                            const toast = new bootstrap.Toast(
+                                $("#toast-error")
+                            );
+                            $("#toast-error #toast-text").text(
+                                options_errors[0]
+                            );
+                            toast.show();
+                        }
+                    }
+                } else {
+                    const toast = new bootstrap.Toast($("#toast-error"));
+                    $("#toast-error #toast-text").text(
+                        xhr.responseJSON.message
+                    );
+                    toast.show();
+                }
+                submitBtn.prop("disabled", false).html(originalHtml);
+            },
+        });
+    });
 });
 
 $(function () {
@@ -332,7 +514,7 @@ $(function () {
     });
 });
 
-function handleEditQuestion(e, id) {
+function handleEditQuestion(e, id, type) {
     e.preventDefault();
 
     const editBtn = $(e.currentTarget);
@@ -342,47 +524,60 @@ function handleEditQuestion(e, id) {
         .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
     $.ajax({
-        url: `/soal/${id}/edit`,
+        url: `/soal/${id}/edit?question_type=${type}`,
         method: "GET",
         success: function (res) {
             if (res.success && res.data) {
-                $("#editQuestionForm").data("id", id);
-                editQuestionTextQuill.setContents(
-                    editQuestionTextQuill.clipboard.convert(
-                        res.data.question_text
-                    )
-                );
-                $("#editQuestionForm [name='question_points']").val(
-                    res.data.question_points
-                );
-                $(
-                    `#editQuestionForm [name='correct_answer'][value='${res.data.correct_answer}']`
-                ).prop("checked", true);
-                $("#editQuestionForm [name='option_a']").val(res.data.option_a);
-                $("#editQuestionForm [name='option_b']").val(res.data.option_b);
-                $("#editQuestionForm [name='option_c']").val(res.data.option_c);
+                if (res.data.question_type === 'multiple') {
+                    $("#editQuestionForm").data("id", id);
+                    editQuestionTextQuill.setContents(
+                        editQuestionTextQuill.clipboard.convert(
+                            res.data.question_text
+                        )
+                    );
+                    $("#editQuestionForm [name='question_points']").val(
+                        res.data.question_points
+                    );
+                    $(
+                        `#editQuestionForm [name='correct_answer'][value='${res.data.correct_answer}']`
+                    ).prop("checked", true);
+                    $("#editQuestionForm [name='option_a']").val(res.data.option_a);
+                    $("#editQuestionForm [name='option_b']").val(res.data.option_b);
+                    $("#editQuestionForm [name='option_c']").val(res.data.option_c);
 
-                let $container =
-                    $("#editQuestionForm").find("#optionsContainer");
+                    let $container =
+                        $("#editQuestionForm").find("#optionsContainer");
 
-                if (res.data.option_d) {
-                    $container.append(elementOption("d", res.data.option_d));
-                } else {
-                    if ($("#editQuestionForm [name='option_d']").length > 0)
-                        $("#editQuestionForm [name='option_d']")
-                            .closest(".answer-option")
-                            .remove();
+                    if (res.data.option_d) {
+                        $container.append(elementOption("d", res.data.option_d));
+                    } else {
+                        if ($("#editQuestionForm [name='option_d']").length > 0)
+                            $("#editQuestionForm [name='option_d']")
+                                .closest(".answer-option")
+                                .remove();
+                    }
+                    if (res.data.option_e) {
+                        $container.append(elementOption("e", res.data.option_e));
+                    } else {
+                        if ($("#editQuestionForm [name='option_e']").length > 0)
+                            $("#editQuestionForm [name='option_e']")
+                                .closest(".answer-option")
+                                .remove();
+                    }
+                    $("#editQuestionModal").modal("show");
+                } else if (res.data.question_type === 'essay') {
+                    $("#editEssayQuestionForm").data("id", id);
+                    editEssayQuestionTextQuill.setContents(
+                        editEssayQuestionTextQuill.clipboard.convert(
+                            res.data.question_text
+                        )
+                    );
+                    $("#editEssayQuestionForm [name='question_points']").val(
+                        res.data.question_points
+                    );
+
+                    $("#editEssayQuestionModal").modal("show");
                 }
-                if (res.data.option_e) {
-                    $container.append(elementOption("e", res.data.option_e));
-                } else {
-                    if ($("#editQuestionForm [name='option_e']").length > 0)
-                        $("#editQuestionForm [name='option_e']")
-                            .closest(".answer-option")
-                            .remove();
-                }
-
-                $("#editQuestionModal").modal("show");
             }
         },
         error: function (xhr) {
@@ -396,7 +591,7 @@ function handleEditQuestion(e, id) {
     });
 }
 
-function handleDeleteQuestion(e, id) {
+function handleDeleteQuestion(e, id, type) {
     e.preventDefault();
     const deleteBtn = $(e.currentTarget);
     const originalHtml = deleteBtn.html();
@@ -419,7 +614,7 @@ function handleDeleteQuestion(e, id) {
                 .html('<i class="fa-solid fa-arrows-rotate fa-spin"></i>');
 
             $.ajax({
-                url: `/soal/${id}`,
+                url: `/soal/${id}?question_type=${type}`,
                 method: "DELETE",
                 success: function (response) {
                     if (response.success) {

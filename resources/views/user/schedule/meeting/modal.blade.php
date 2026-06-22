@@ -358,7 +358,7 @@
                                             <td>
                                                 <p class="f-light mb-0">
                                                     {{ $attendance['student']->name }}</p>
-                                                <p class="f-light mb-0">{{ $attendance['student']->nis }}</p>
+                                                <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
                                             </td>
                                             <td class="status-input" style="padding: 12px 20px;"
                                                 data-user-id="{{ $attendance['student']->user_id }}">

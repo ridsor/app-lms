@@ -17,6 +17,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
 use Rap2hpoutre\FastExcel\FastExcel;
 
+
 class TaskController extends Controller
 {
     public function index(Request $request)
@@ -123,7 +124,7 @@ class TaskController extends Controller
             'meeting.schedule.subject:id,name,code',
             'meeting.schedule.class:id,name,level,major_id',
             'meeting.schedule.class.major:id,name',
-            'submissions:id,task_id'
+            'submissions:id,task_id,submitted_at'
         ])
             ->withCount([
                 'submissions as not_yet_rated' => function ($query) {
@@ -139,7 +140,7 @@ class TaskController extends Controller
                 'task_id',
                 'task_submissions.id',
                 'students.name',
-                'students.nis',
+                'students.nisn',
                 'task_submissions.submitted_at',
                 'task_submissions.graded_at',
                 'task_submissions.score',
@@ -147,6 +148,7 @@ class TaskController extends Controller
             ])
                 ->leftJoin('students', 'student_id', '=', 'students.id')
                 ->with('grader:id,name')
+                ->orderBy('submitted_at', 'asc')
                 ->where('task_id', $task->id);
 
             if ($request->filled('search') && !empty($request->search['value'])) {
@@ -162,7 +164,7 @@ class TaskController extends Controller
                     <div>
                     <p class="f-light mb-0">
                         ' . $row->name  . '</p>
-                    <p class="f-light mb-0">' . $row->nis  . '</p> 
+                    <p class="f-light mb-0">' . $row->nisn  . '</p> 
                     </div>
                     ';
                     return $html;
@@ -213,7 +215,7 @@ class TaskController extends Controller
                 'meeting.schedule.class.major:id,name',
                 'meeting.schedule.period:id,academic_year,semester',
                 'submissions',
-                'submissions.student:id,name,nis',
+                'submissions.student:id,name,nisn',
             ])->findOrFail($id);
 
             $this->authorize('update', $task);
@@ -227,14 +229,14 @@ class TaskController extends Controller
                 ['Jenis Tugas', 'Jenis Tugas' => Helper::getTaskTypeLabel($task->type) ?: '-'],
                 ['Waktu Tugas', 'Waktu Tugas' => $task->start_time && $task->end_time ? $task->start_time->translatedFormat('j F Y H:i') . ' - ' . $task->end_time->translatedFormat('j F Y H:i') : '-'],
                 [],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN', 'Nilai' => 'Nilai'],
             ];
 
             $exportData = $task->submissions->map(function ($result, $index) {
                 return [
                     'No' => $index + 1,
                     'Nama' => $result->student ? $result->student->name : '-',
-                    'NIS' => $result->student ? $result->student->nis : '-',
+                    'NISN' => $result->student ? $result->student->nisn : '-',
                     'Nilai' => $result->formatted_score ? $result->formatted_score : '-',
                 ];
             })->toArray();
@@ -358,10 +360,16 @@ class TaskController extends Controller
     public function getFile(Request $request, $task_id)
     {
         $task = Task::findOrFail($task_id);
-        $this->authorize('view', $task);
+        if (!$request->hasValidSignature()) {
+            $this->authorize('view', $task);
+        }
 
         if (!empty($task->file_path) && Storage::exists($task->file_path)) {
-            return response()->file(Storage::path($task->file_path));
+            $path = storage_path('app/' . $task->file_path);
+            return response()->file($path, [
+                'Content-Type' => Storage::mimeType($task->file_path),
+                'Content-Disposition' => 'inline; filename="' . $task->file_name . '"'
+            ]);
         }
 
         return abort(404, 'File tidak ditemukan.');
