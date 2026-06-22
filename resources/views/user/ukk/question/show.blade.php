@@ -68,18 +68,11 @@
         <div class="col-12">
           <h1 class="mb-2">Soal</h1>
           <div class="row g-2 align-items-center">
-            <div class="col">
+            <div class="col-12">
               <div class="border rounded-2 p-3 card mb-0">
                 <p class="mb-2">Jumlah Soal</p>
                 <span
                   class="fs-3">{{ $ukk?->multipleQuestions->count() + $ukk?->essayQuestions->count() ?: '0' }}</span>
-              </div>
-            </div>
-            <div class="col">
-              <div class="border rounded-2 p-3 card mb-0">
-                <p class="mb-2">Jumlah Poin</p>
-                <span
-                  class="fs-3">{{ $ukk->multipleQuestions()->sum('question_points') + $ukk->essayQuestions()->sum('question_points') ?? 0 }}</span>
               </div>
             </div>
           </div>

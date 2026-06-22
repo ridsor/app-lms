@@ -38,7 +38,7 @@
                                                 <label class="form-label" for="startDate">Waktu Mulai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" id="addExamStartTime"
-                                                    type="date" placeholder="Pilih waktu mulai" name="start_time"
+                                                    type="text" placeholder="Pilih waktu mulai" name="start_time"
                                                     data-language="id">
                                                 <div class="invalid-feedback"></div>
                                             </div>
@@ -48,7 +48,7 @@
                                                 <label class="form-label" for="endDate">Waktu Selesai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" autocomplete="off"
-                                                    id="addExamEndTime" type="date" placeholder="Pilih waktu selesai"
+                                                    id="addExamEndTime" type="text" placeholder="Pilih waktu selesai"
                                                     name="end_time" data-language="id">
                                                 <div class="invalid-feedback"></div>
                                             </div>
@@ -197,7 +197,7 @@
                                                 <label class="form-label" for="startDate">Waktu Mulai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" id="editExamStartTime"
-                                                    type="date" placeholder="Pilih waktu mulai" name="start_time"
+                                                    type="text" placeholder="Pilih waktu mulai" name="start_time"
                                                     data-language="id">
                                                 <div class="invalid-feedback"></div>
                                             </div>
@@ -207,7 +207,7 @@
                                                 <label class="form-label" for="endDate">Waktu Selesai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" autocomplete="off"
-                                                    id="editExamEndTime" type="date"
+                                                    id="editExamEndTime" type="text"
                                                     placeholder="Pilih waktu selesai" name="end_time"
                                                     data-language="id">
                                                 <div class="invalid-feedback"></div>

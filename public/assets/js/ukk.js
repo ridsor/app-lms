@@ -17,8 +17,6 @@ const formatTime = (date) => {
 
 const add_start_time = flatpickr("#addUkkStartTime", {
     defaultDate: new Date(),
-    minDate: "today",
-    minTime: formatTime(new Date()),
     enableTime: true,
     static: true,
     dateFormat: "Y-m-d H:i",
@@ -38,7 +36,6 @@ const add_start_time = flatpickr("#addUkkStartTime", {
 
 const add_end_time = flatpickr("#addUkkEndTime", {
     defaultDate: new Date(),
-    minTime: formatTime(new Date()),
     enableTime: true,
     static: true,
     dateFormat: "Y-m-d H:i",
@@ -51,7 +48,6 @@ const edit_start_time = flatpickr("#editUkkStartTime", {
     static: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
-    minTime: formatTime(new Date()),
     locale: flatpickrLocationID,
     onChange: function (selectedDates) {
         if (selectedDates.length > 0) {
@@ -78,12 +74,20 @@ $(document).ready(function () {
         const type = $(this).val();
         const rubricSection = $(this).closest("form").find(".rubric-section");
         const extraFields = $(this).closest("form").find(".extra-fields-praktik");
+        const shuffleSection = $(this).closest("form").find(".shuffle-questions-section");
+        
         if (type === 'Praktik') {
             rubricSection.show();
             extraFields.show();
+            shuffleSection.hide();
+        } else if (type === 'Teori') {
+            rubricSection.hide();
+            extraFields.hide();
+            shuffleSection.show();
         } else {
             rubricSection.hide();
             extraFields.hide();
+            shuffleSection.hide();
         }
     }).trigger('change');
 
@@ -120,6 +124,15 @@ $(document).ready(function () {
 
         $("#addUkkForm").find("input, select").removeClass("is-invalid");
         $("#addUkkForm").find(".invalid-feedback").text("");
+
+        // Sync Quill to input
+        var value = addUkkInstructionQuill.root.innerHTML;
+        var descriptionText = addUkkInstructionQuill.getText().trim();
+        if (descriptionText === "") {
+            value = "";
+        }
+        $("#addUkkForm [name='instructions']").val(value);
+
         const submitBtn = $(this).find("button[type='submit']");
         const originalHtml = submitBtn.html();
         submitBtn
@@ -199,6 +212,15 @@ $(document).ready(function () {
 
         $("#editUkkForm").find("input, select").removeClass("is-invalid");
         $("#editUkkForm").find(".invalid-feedback").text("");
+
+        // Sync Quill to input
+        var value = editUkkInstructionQuill.root.innerHTML;
+        var descriptionText = editUkkInstructionQuill.getText().trim();
+        if (descriptionText === "") {
+            value = "";
+        }
+        $("#editUkkForm [name='instructions']").val(value);
+
         const submitBtn = $(this).find("button[type='submit']");
         const originalHtml = submitBtn.html();
         submitBtn
@@ -272,24 +294,6 @@ $(document).ready(function () {
             },
         });
     });
-
-    editUkkInstructionQuill.on("text-change", function () {
-        var value = editUkkInstructionQuill.root.innerHTML;
-        var descriptionText = editUkkInstructionQuill.getText().trim();
-        if (descriptionText === "" || descriptionText === "\n") {
-            value = "";
-        }
-        $("#editUkkForm [name='instructions']").val(value);
-    });
-    addUkkInstructionQuill.on("text-change", function () {
-        var value = addUkkInstructionQuill.root.innerHTML;
-        var descriptionText = addUkkInstructionQuill.getText().trim();
-        if (descriptionText === "" || descriptionText === "\n") {
-            value = "";
-        }
-        $("#addUkkForm [name='instructions']").val(value);
-    });
-
     $("#addUkkFile").on("change", function (e) {
         const file = e.target.files[0];
         if (file) {

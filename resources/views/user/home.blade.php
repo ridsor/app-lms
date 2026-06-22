@@ -176,7 +176,7 @@
                     </div>
                     <div>
                       <h4 class="mb-0"> <span class="counter" data-target="100">{{ $countUKKTheory }}</span>
-                      </h4><span class="f-light">UKK Teori Belum Dinilai</span><a href="{{ route('user.ukk.index') }}"
+                      </h4><span class="f-light">Siswa Selesai UKK Teori</span><a href="{{ route('user.ukk.index') }}"
                         class="btn btn-light f-light">Lihat
                         UKK<span class="ms-2"> <svg class="fill-icon f-light">
                             <use href="{{ asset('assets/svg/icon-sprite.svg#arrowright') }}">
@@ -207,7 +207,7 @@
                     </div>
                     <div>
                       <h4 class="mb-0"> <span class="counter" data-target="100">{{ $countUKKPractice }}</span>
-                      </h4><span class="f-light">UKK Praktik Belum Dinilai</span><a
+                      </h4><span class="f-light">Siswa Selesai UKK Praktik</span><a
                         href="{{ route('user.ukk.index') }}" class="btn btn-light f-light">Lihat
                         UKK<span class="ms-2"> <svg class="fill-icon f-light">
                             <use href="{{ asset('assets/svg/icon-sprite.svg#arrowright') }}">
@@ -424,9 +424,11 @@
                                   {{ $ukk->period->semester === 'even' ? 'Genap' : 'Ganjil' }}
                                 </p>
                               </div>
-                              <div class="badge badge-light-primary">
-                                {{ $ukk->not_yet_rated }} Belum Dinilai
-                              </div>
+                              @if ($ukk->type !== 'Teori')
+                                <div class="badge badge-light-primary">
+                                  {{ $ukk->not_yet_rated }} Belum Dinilai
+                                </div>
+                              @endif
                             </div>
                           </div>
                         </div>

@@ -59,13 +59,10 @@
               <h3 class="mb-3">Hasil</h3>
               <div class="row justify-content-between gap-2">
                 <div class="col-auto row g-2 align-items-center flex-grow-1">
-                  @if ($ukk->not_yet_rated)
-                    <div class="d-flex flep-wrap align-items-center col-auto">
-                      <span class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum
-                        dinilai <span class="badge ms-1 badge-danger">{{ $ukk->not_yet_rated }}</span>
-                      </span>
-                    </div>
-                  @endif
+                  <div class="d-flex flep-wrap align-items-center col-auto">
+                    <span class="badge m-0 badge-light-primary px-2 py-1 d-flex align-items-center">Selesai
+                      dikerjakan <span class="badge ms-1 badge-primary">{{ $ukk->completed_count }}</span></span>
+                  </div>
                   <div class="d-flex align-items-center w-100 gap-2 col-12" style="max-width:400px">
                     <i data-feather="search"></i>
                     <input type="type" class="form-control w-100" placeholder="Cari nama siswa" id="globalSearch" />
@@ -113,8 +110,7 @@
                                 <tr>
                                   <th> <span class="c-o-light f-w-600">No</span></th>
                                   <th> <span class="c-o-light f-w-600">Nama</span></th>
-                                  <th> <span class="c-o-light f-w-600">NIS</span></th>
-                                  <th> <span class="c-o-light f-w-600">Nilai</span></th>
+                                  <th> <span class="c-o-light f-w-600">NISN</span></th>
                                   <th> <span class="c-o-light f-w-600">Status</span></th>
                                   <th> <span class="c-o-light f-w-600">Pengerjaan</span></th>
                                   <th> <span class="c-o-light f-w-600">Aksi</span></th>

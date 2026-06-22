@@ -172,10 +172,9 @@ class UKKController extends Controller
 
         $questions = $multipleQuery->get()
             ->concat($essayQuery->get())
-            ->sortByDesc('created_at')
             ->values();
 
-        $perPage = 5;
+        $perPage = 10;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
         $paginatedQuestions = new LengthAwarePaginator(
@@ -212,7 +211,7 @@ class UKKController extends Controller
                 ->select([
                     'ukk_result_theory.*',
                     'students.name',
-                    'students.nis',
+                    'students.nisn',
                 ])
                 ->leftJoin('students', 'student_id', '=', 'students.id')
                 ->with('user:id,name');
@@ -222,20 +221,19 @@ class UKKController extends Controller
                 if (!empty($search)) {
                     $data->where(function ($q) use ($search) {
                         $q->where('students.name', 'like', "%{$search}%")
-                            ->orWhere('students.nis', 'like', "%{$search}%");
+                            ->orWhere('students.nisn', 'like', "%{$search}%");
                     });
                 }
             }
 
             return DataTables::of($data)
                 ->addColumn('Nama', fn($row) => '<div class="product-names"><p>' . $row->name . '</p></div>')
-                ->addColumn('NIS', fn($row) => '<p class="f-light">' . $row->nis . '</p>')
-                ->addColumn('Nilai', fn($row) => '<span class="badge badge-light-primary">' . ($row->formatted_score) . '</span>')
+                ->addColumn('NISN', fn($row) => '<p class="f-light">' . $row->nisn . '</p>')
                 ->addColumn('Status', function ($row) {
                     return Helper::getExamStatusLabel($row->status);
                 })
-                ->addColumn('Pengerjaan', fn($row) => $row->status === 'completed' ? $row->updated_at->translatedFormat('d/m/Y H:i') : '-')
-                ->rawColumns(['Nama', 'NIS', 'Nilai', 'Status', 'Pengerjaan'])
+                ->addColumn('Pengerjaan', fn($row) => $row->status === 'completed' && $row->updated_at ? $row->updated_at->translatedFormat('d/m/Y H:i') : '-')
+                ->rawColumns(['Nama', 'NISN', 'Status', 'Pengerjaan'])
                 ->make(true);
         }
 
@@ -258,15 +256,14 @@ class UKKController extends Controller
                 ['Judul', 'Judul' => $ukk->title],
                 ['Waktu', 'Waktu' => $ukk->start_time && $ukk->end_time ? $ukk->start_time->translatedFormat('j F Y H:i') . ' - ' . $ukk->end_time->translatedFormat('j F Y H:i') : '-'],
                 [],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN'],
             ];
 
             $exportData = $ukk->results->map(function ($result, $index) {
                 return [
                     'No' => $index + 1,
                     'Nama' => $result->student ? $result->student->name : '-',
-                    'NIS' => $result->student ? $result->student->nis : '-',
-                    'Nilai' => $result->formatted_score ? $result->formatted_score : '-',
+                    'NISN' => $result->student ? $result->student->nisn : '-',
                 ];
             })->toArray();
 
@@ -290,7 +287,7 @@ class UKKController extends Controller
                 ->select([
                     'ukk_result_practice.*',
                     'students.name',
-                    'students.nis',
+                    'students.nisn',
                 ])
                 ->leftJoin('students', 'student_id', '=', 'students.id')
                 ->with('grader:id,name');
@@ -300,7 +297,7 @@ class UKKController extends Controller
                 if (!empty($search)) {
                     $data->where(function ($q) use ($search) {
                         $q->where('students.name', 'like', "%{$search}%")
-                            ->orWhere('students.nis', 'like', "%{$search}%");
+                            ->orWhere('students.nisn', 'like', "%{$search}%");
                     });
                 }
             }
@@ -310,7 +307,7 @@ class UKKController extends Controller
                     return '
                         <div>
                             <p class="f-light mb-0">' . $row->name . '</p>
-                            <p class="f-light mb-0">' . $row->nis . '</p>
+                            <p class="f-light mb-0">' . $row->nisn . '</p>
                         </div>';
                 })
                 ->addColumn('Pengumpulan', function ($row) {
@@ -546,14 +543,14 @@ class UKKController extends Controller
                 ['Judul' => 'Judul', 'value' => $ukk->title],
                 ['Waktu' => 'Waktu', 'value' => $ukk->start_time && $ukk->end_time ? $ukk->start_time->translatedFormat('j F Y H:i') . ' - ' . $ukk->end_time->translatedFormat('j F Y H:i') : '-'],
                 [],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai', 'Kesimpulan Akhir' => 'Kesimpulan Akhir'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN', 'Nilai' => 'Nilai', 'Kesimpulan Akhir' => 'Kesimpulan Akhir'],
             ];
 
             $exportData = $results->map(function ($row, $index) {
                 return [
                     'No' => $index + 1,
                     'Nama' => $row->student->name,
-                    'NIS' => $row->student->nis,
+                    'NISN' => $row->student->nisn,
                     'Nilai' => $row->score ?? '-',
                     'Kesimpulan Akhir' => $row->contents['final_conclusion'] ?? '-',
                 ];
@@ -665,9 +662,6 @@ class UKKController extends Controller
             $this->authorize('update', $ukk);
 
             $validated = $request->validated();
-            $validated = array_filter($validated, function ($value) {
-                return !is_null($value);
-            });
 
             if ($validated['deletedFile'] ?? false) {
                 if (!empty($ukk->file_path) && Storage::exists($ukk->file_path)) {
@@ -864,13 +858,6 @@ class UKKController extends Controller
         if ($ukkResult->status === 'completed') {
             return redirect()->route('user.ukk.teori.workmanship.result', $ukk->id)
                 ->with('error', 'Anda sudah mengerjakan UKK ini.');
-        }
-
-        if ($now->gt($ukk->end_time)) {
-            $ukkResult->update(['status' => 'completed']);
-            app(UKKScoringService::class)->saveScore($ukkResult, auth()->user()->student->id);
-            return redirect()->route('user.ukk.teori.workmanship.result', $ukk->id)
-                ->with('error', 'Waktu UKK telah berakhir.');
         }
 
         $order = session("ukk_order_{$ukk->id}");
@@ -1182,7 +1169,6 @@ class UKKController extends Controller
         $data = collect([
             [
                 'Jenis Soal (Pilihan Ganda/Essay)' => 'Pilihan Ganda',
-                'Poin' => 10,
                 'Teks Soal' => 'Siapakah tokoh pada gambar di bawah ini?',
                 'File Gambar Soal' => '',
                 'Opsi A' => 'Ir. Soekarno',
@@ -1199,7 +1185,6 @@ class UKKController extends Controller
             ],
             [
                 'Jenis Soal (Pilihan Ganda/Essay)' => 'Essay',
-                'Poin' => 20,
                 'Teks Soal' => 'Amati gambar tersebut dan jelaskan maknanya!',
                 'File Gambar Soal' => 'soal2_soal.png',
                 'Opsi A' => '',
@@ -1237,6 +1222,8 @@ class UKKController extends Controller
 
             DB::beginTransaction();
 
+            $successCount = 0;
+
             if ($isZip) {
                 $zip = new \ZipArchive;
                 if ($zip->open($file->getRealPath()) === TRUE) {
@@ -1262,7 +1249,14 @@ class UKKController extends Controller
                     }
 
                     $collection = (new FastExcel)->import($excelPath);
-                    
+
+                    if ($collection->isEmpty()) {
+                        \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+                        throw new \Exception('File Excel kosong atau tidak terbaca.');
+                    }
+
+                    $this->validateImportHeaders($collection->first());
+
                     $mediaPath = null;
                     $directories = new \RecursiveIteratorIterator(
                         new \RecursiveDirectoryIterator($extractPath, \RecursiveDirectoryIterator::SKIP_DOTS),
@@ -1277,7 +1271,9 @@ class UKKController extends Controller
                     }
 
                     foreach ($collection as $index => $row) {
-                        $this->processImportRow($ukk, $row, $mediaPath, $index + 1, $extractPath);
+                        if ($this->processImportRow($ukk, $row, $mediaPath, $index + 1, $extractPath)) {
+                            $successCount++;
+                        }
                     }
 
                     \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
@@ -1286,19 +1282,87 @@ class UKKController extends Controller
                 }
             } else {
                 $collection = (new FastExcel)->import($file);
-                foreach ($collection as $index => $row) {
-                    $this->processImportRow($ukk, $row, null, $index + 1);
+
+                if ($collection->isEmpty()) {
+                    throw new \Exception('File Excel kosong atau tidak terbaca.');
                 }
+
+                $this->validateImportHeaders($collection->first());
+
+                foreach ($collection as $index => $row) {
+                    if ($this->processImportRow($ukk, $row, null, $index + 1)) {
+                        $successCount++;
+                    }
+                }
+            }
+
+            if ($successCount === 0) {
+                throw new \Exception('Tidak ada soal yang berhasil diimpor. Periksa kembali format kolom dan isi file Anda.');
             }
 
             DB::commit();
 
-            return $this->sendResponse('Soal berhasil diimport.');
+            return $this->sendResponse("Berhasil mengimpor {$successCount} soal.");
         } catch (\Exception $e) {
             if (DB::transactionLevel() > 0) DB::rollBack();
             Log::error('Error importing UKK questions: ' . $e->getMessage());
-            return $this->sendError('Gagal mengimpor file. ' . $e->getMessage(), [], 500);
+            return $this->sendError($e->getMessage(), [], 500);
         }
+    }
+
+    private function validateImportHeaders($firstRow)
+    {
+        $cleanFirstRow = [];
+        foreach ($firstRow as $key => $value) {
+            $cleanFirstRow[strtolower(trim($key))] = $key;
+        }
+
+        $requiredKeywords = [
+            ['jenis', 'tipe'],
+            ['teks', 'soal', 'pertanyaan']
+        ];
+
+        foreach ($requiredKeywords as $keywords) {
+            $found = false;
+            foreach ($keywords as $kw) {
+                foreach ($cleanFirstRow as $lowerKey => $originalKey) {
+                    if (str_contains($lowerKey, $kw)) {
+                        $found = true;
+                        break 2;
+                    }
+                }
+            }
+            if (!$found) {
+                throw new \Exception("Kolom wajib (seperti '" . $keywords[0] . "') tidak ditemukan. Pastikan Anda menggunakan template yang benar.");
+            }
+        }
+    }
+
+    private function getMapValue($row, $keywords, $default = null)
+    {
+        // 1. Prioritaskan kecocokan persis (Exact Match)
+        foreach ($row as $key => $value) {
+            $lowerKey = strtolower(trim($key));
+            if (in_array($lowerKey, $keywords)) {
+                return $value;
+            }
+        }
+
+        // 2. Pencarian parsial (Fuzzy Match)
+        foreach ($row as $key => $value) {
+            $lowerKey = strtolower(trim($key));
+            foreach ($keywords as $kw) {
+                // Hindari mencocokkan "jenis soal" atau "tipe soal" saat mencari kata kunci "soal" atau "pertanyaan"
+                if (($kw === 'soal' || $kw === 'pertanyaan') && (str_contains($lowerKey, 'jenis') || str_contains($lowerKey, 'tipe'))) {
+                    continue;
+                }
+
+                if (str_contains($lowerKey, $kw)) {
+                    return $value;
+                }
+            }
+        }
+        return $default;
     }
 
     private function processImportRow($ukk, $row, $mediaPath = null, $rowNumber = 1, $basePath = null)
@@ -1309,22 +1373,23 @@ class UKKController extends Controller
         }
         $row = $cleanRow;
 
-        $jenis = strtolower($row['Jenis Soal (Pilihan Ganda/Essay)'] ?? '');
-        $poin = floatval($row['Poin'] ?? 0);
-        $teks = $row['Teks Soal'] ?? '';
+        $jenisText = $this->getMapValue($row, ['jenis soal', 'tipe soal', 'jenis', 'tipe'], '');
+        $jenis = strtolower(trim($jenisText));
 
-        if (empty($teks)) return;
+        $teks = $this->getMapValue($row, ['teks soal', 'teks pertanyaan', 'soal', 'pertanyaan'], '');
+
+        if (empty($teks)) return false;
 
         $data = [
             'questionable_id' => $ukk->id,
             'questionable_type' => UKK::class,
             'question_text' => $teks,
-            'question_points' => $poin,
+            'question_points' => $this->getMapValue($row, ['poin', 'skor', 'nilai'], 0),
         ];
 
-        $mainFileName = $row['File Gambar Soal'] ?? '';
+        $mainFileName = $this->getMapValue($row, ['file gambar soal', 'gambar soal', 'gambar'], '');
         $imageFile = $this->findFileAnywhere($mainFileName, $mediaPath, $basePath);
-        
+
         if (!$imageFile && $basePath) {
             $imageFile = $this->findFileByConvention($rowNumber, 'soal', null, $mediaPath, $basePath);
         }
@@ -1333,15 +1398,20 @@ class UKKController extends Controller
             $data['question_file'] = $this->saveImportedFile($imageFile);
         }
 
-        if ($jenis === 'pilihan ganda' || $jenis === 'multiple') {
+        if (str_contains($jenis, 'pilihan') || str_contains($jenis, 'ganda') || str_contains($jenis, 'multiple')) {
             $options = ['a', 'b', 'c', 'd', 'e'];
             foreach ($options as $opt) {
-                $data["option_{$opt}"] = $row["Opsi " . strtoupper($opt)] ?? null;
-                
-                $imgKey = "File Gambar Opsi " . strtoupper($opt);
-                $optFileName = $row[$imgKey] ?? '';
+                $data["option_{$opt}"] = $this->getMapValue($row, ["opsi {$opt}", "pilihan {$opt}", "jawaban {$opt}"], null);
+
+                // Fallback for very simple headers like just "A", "B", etc.
+                if (is_null($data["option_{$opt}"])) {
+                    $data["option_{$opt}"] = $row[strtoupper($opt)] ?? $row[strtolower($opt)] ?? null;
+                }
+
+                $imgKeyKeywords = ["file gambar opsi {$opt}", "gambar opsi {$opt}", "gambar {$opt}"];
+                $optFileName = $this->getMapValue($row, $imgKeyKeywords, '');
                 $optImageFile = $this->findFileAnywhere($optFileName, $mediaPath, $basePath);
-                
+
                 if (!$optImageFile && $basePath) {
                     $optImageFile = $this->findFileByConvention($rowNumber, 'opsi', $opt, $mediaPath, $basePath);
                 }
@@ -1350,11 +1420,22 @@ class UKKController extends Controller
                     $data["option_{$opt}_image"] = $this->saveImportedFile($optImageFile);
                 }
             }
-            $data['correct_answer'] = strtolower(trim($row['Kunci Jawaban (A/B/C/D/E)'] ?? ''));
+
+            $correctAnswer = $this->getMapValue($row, ['kunci jawaban', 'kunci', 'jawaban benar'], '');
+            if (empty($correctAnswer)) {
+                // If still empty, try looking for common letters in the row
+                $correctAnswer = $row['Kunci'] ?? $row['Jawaban'] ?? '';
+            }
+
+            $data['correct_answer'] = strtolower(trim($correctAnswer));
             MultipleQuestion::create($data);
-        } elseif ($jenis === 'essay' || $jenis === 'uraian') {
+            return true;
+        } elseif (str_contains($jenis, 'essay') || str_contains($jenis, 'uraian')) {
             EssayQuestion::create($data);
+            return true;
         }
+
+        return false;
     }
 
     private function findFileAnywhere($fileName, $mediaPath, $basePath)
@@ -1397,7 +1478,7 @@ class UKKController extends Controller
     private function findFileByConvention($rowNumber, $type, $option = null, $mediaPath = null, $basePath = null)
     {
         $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
-        
+
         $patterns = [];
         if ($type === 'soal') {
             $patterns[] = "soal_{$rowNumber}_soal";

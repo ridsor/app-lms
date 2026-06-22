@@ -195,10 +195,8 @@
                         </div>
                         <div class="col-12 justify-content-end flex-wrap col-md-auto d-flex align-items-center gap-2">
                           @can('ukk.evaluation')
-                            @if ($ukk?->not_yet_rated)
-                              <span class="badge m-0 badge-light-danger px-2 py-1 d-flex align-items-center">Belum
-                                dinilai <span class="badge ms-1 badge-danger">{{ $ukk->not_yet_rated }}</span></span>
-                            @endif
+                            <span class="badge m-0 badge-light-primary px-2 py-1 d-flex align-items-center">Selesai
+                              dikerjakan <span class="badge ms-1 badge-primary">{{ $ukk->completed_count }}</span></span>
                           @endcan
                           @role(['student', 'parent'])
                             @php

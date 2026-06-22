@@ -210,7 +210,7 @@
                               </svg><span class="lan-3">UKK </span></a>
                           </li>
                         @endcan
-                        @can(['exam.edit', 'exam.delete', 'exam.create'])
+                        {{-- @can(['exam.edit', 'exam.delete', 'exam.create'])
                           <li class="sidebar-list">
                             <i class="fa-solid fa-thumbtack"></i>
                             <a class="sidebar-link sidebar-title link-nav"
@@ -221,7 +221,7 @@
                                 <use href="{{ asset('assets/svg/icon-sprite.svg#fill-calendar') }}"></use>
                               </svg><span class="lan-3">Bank Soal </span></a>
                           </li>
-                        @endcan
+                        @endcan --}}
                         @can('operator_ukk.*')
                           <li class="sidebar-list">
                             <i class="fa-solid fa-thumbtack"></i>

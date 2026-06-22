@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('option_d', 255)->nullable();
             $table->string('option_e', 255)->nullable();
             $table->string('correct_answer', 255);
-            $table->integer('question_points');
+            $table->integer('question_points')->nullable();
             $table->string('question_file', 255)->nullable();
             $table->timestamps();
         });

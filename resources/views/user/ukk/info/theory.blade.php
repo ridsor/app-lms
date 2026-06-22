@@ -246,12 +246,6 @@
               </div>
             @endif
 
-            <div class="d-flex mb-3 justify-content-between align-items-center">
-              <p class="mb-0 fw-semibold fs-6">Nilai</p>
-              <input class="form-control text-center" type="number" style="width: 70px" disabled
-                value="{{ $ukk_result?->formatted_score }}" name="score" step="0.1" />
-            </div>
-
             <div class="mb-3">
               <label class="form-label">Waktu Pengerjaan</label>
               <div class="c-o-light f-w-600">

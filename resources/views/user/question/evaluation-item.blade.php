@@ -131,7 +131,7 @@
               <div class="option-item checkbox-checked">
                 <div class="d-flex align-items-center gap-2">
                   <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                    <input type="radio" @if ($question->correct_answer == 'b') checked @endif value="b" disabled
+                    <input type="radio" @if ($question?->student_answer?->answer == 'b') checked @endif value="b" disabled
                       class="me-2 form-check-input" style="transform: translateY(-2px)">
                     <span class="fw-bold text-uppercase">b.</span>
                   </label>
@@ -156,7 +156,7 @@
               <div class="option-item checkbox-checked">
                 <div class="d-flex align-items-center gap-2">
                   <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                    <input type="radio" @if ($question->correct_answer == 'c') checked @endif value="c" disabled
+                    <input type="radio" @if ($question?->student_answer?->answer == 'c') checked @endif value="c" disabled
                       class="me-2 form-check-input" style="transform: translateY(-2px)">
                     <span class="fw-bold text-uppercase">c.</span>
                   </label>
@@ -182,7 +182,7 @@
                 <div class="option-item checkbox-checked">
                   <div class="d-flex align-items-center gap-2">
                     <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                      <input type="radio" @if ($question->correct_answer == 'd') checked @endif value="d" disabled
+                      <input type="radio" @if ($question?->student_answer?->answer == 'd') checked @endif value="d" disabled
                         class="me-2 form-check-input" style="transform: translateY(-2px)">
                       <span class="fw-bold text-uppercase">d.</span>
                     </label>
@@ -209,7 +209,7 @@
                 <div class="option-item checkbox-checked">
                   <div class="d-flex align-items-center gap-2">
                     <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                      <input type="radio" @if ($question->correct_answer == 'e') checked @endif value="e" disabled
+                      <input type="radio" @if ($question?->student_answer?->answer == 'e') checked @endif value="e" disabled
                         class="me-2 form-check-input" style="transform: translateY(-2px)">
                       <span class="fw-bold text-uppercase">e.</span>
                     </label>

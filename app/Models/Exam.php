@@ -34,6 +34,17 @@ class Exam extends Model
         'end_time' => 'datetime',
     ];
 
+    protected $appends = ['duration'];
+
+    public function getDurationAttribute()
+    {
+        if (!$this->start_time || !$this->end_time) {
+            return 0;
+        }
+
+        return $this->start_time->diffInMinutes($this->end_time);
+    }
+
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);

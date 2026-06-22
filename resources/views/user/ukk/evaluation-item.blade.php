@@ -73,16 +73,6 @@
     </div>
     <div class="d-flex justify-content-end col-12 order-1 order-md-3 col-md-auto">
       <div class="d-flex gap-2 align-items-center">
-        <div class="border rounded-3 d-flex align-items-center p-1 position-relative">
-          <img src="{{ asset('assets/svg/star.svg') }}" alt="star" class="px-2 py-2 " />
-          <input class="mb-0 form-control answer-score py-2 text-center" style="width: 60px"
-            {{ $qType === 'multiple' ? 'disabled' : '' }} 
-            name="score[{{ $question?->student_answer?->id }}]"
-            data-answer-id="{{ $question?->student_answer?->id }}"
-            type="number" value="{{ $question?->student_answer->score ?? '' }}"
-            maxlength="{{ $question?->question_points }}" 
-            data-ukk-id="{{ $ukk->id }}" />
-        </div>
       </div>
     </div>
   </div>

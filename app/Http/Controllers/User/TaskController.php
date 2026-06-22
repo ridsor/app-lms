@@ -140,7 +140,7 @@ class TaskController extends Controller
                 'task_id',
                 'task_submissions.id',
                 'students.name',
-                'students.nis',
+                'students.nisn',
                 'task_submissions.submitted_at',
                 'task_submissions.graded_at',
                 'task_submissions.score',
@@ -164,7 +164,7 @@ class TaskController extends Controller
                     <div>
                     <p class="f-light mb-0">
                         ' . $row->name  . '</p>
-                    <p class="f-light mb-0">' . $row->nis  . '</p> 
+                    <p class="f-light mb-0">' . $row->nisn  . '</p> 
                     </div>
                     ';
                     return $html;
@@ -215,7 +215,7 @@ class TaskController extends Controller
                 'meeting.schedule.class.major:id,name',
                 'meeting.schedule.period:id,academic_year,semester',
                 'submissions',
-                'submissions.student:id,name,nis',
+                'submissions.student:id,name,nisn',
             ])->findOrFail($id);
 
             $this->authorize('update', $task);
@@ -229,14 +229,14 @@ class TaskController extends Controller
                 ['Jenis Tugas', 'Jenis Tugas' => Helper::getTaskTypeLabel($task->type) ?: '-'],
                 ['Waktu Tugas', 'Waktu Tugas' => $task->start_time && $task->end_time ? $task->start_time->translatedFormat('j F Y H:i') . ' - ' . $task->end_time->translatedFormat('j F Y H:i') : '-'],
                 [],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN', 'Nilai' => 'Nilai'],
             ];
 
             $exportData = $task->submissions->map(function ($result, $index) {
                 return [
                     'No' => $index + 1,
                     'Nama' => $result->student ? $result->student->name : '-',
-                    'NIS' => $result->student ? $result->student->nis : '-',
+                    'NISN' => $result->student ? $result->student->nisn : '-',
                     'Nilai' => $result->formatted_score ? $result->formatted_score : '-',
                 ];
             })->toArray();

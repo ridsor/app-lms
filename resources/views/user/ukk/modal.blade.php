@@ -86,7 +86,7 @@
                       <div class="d-flex flex-column flatpicker-form">
                         <label class="form-label" for="startDate">Waktu Mulai<span
                             class="txt-danger">*</span></label>
-                        <input class="form-control flatpicker" id="addUkkStartTime" type="date"
+                        <input class="form-control flatpicker" id="addUkkStartTime" type="text"
                           placeholder="Pilih waktu mulai" name="start_time" data-language="id">
                         <div class="invalid-feedback"></div>
                       </div>
@@ -95,12 +95,12 @@
                       <div class="d-flex flex-column flatpicker-form">
                         <label class="form-label" for="endDate">Waktu Selesai<span
                             class="txt-danger">*</span></label>
-                        <input class="form-control flatpicker" autocomplete="off" id="addUkkEndTime" type="date"
+                        <input class="form-control flatpicker" autocomplete="off" id="addUkkEndTime" type="text"
                           placeholder="Pilih waktu selesai" name="end_time" data-language="id">
                         <div class="invalid-feedback"></div>
                       </div>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 shuffle-questions-section" style="display: none;">
                       <label class="form-label">Acak Soal</label>
                       <div class="checkbox-checked d-flex gap-2">
                         <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
@@ -141,8 +141,7 @@
                   </div>
                 </div>
                 <div class="col-12">
-                  <label class="form-label" for="addUkkInstruction">Instruksi<span
-                      class="txt-danger">*</span></label>
+                  <label class="form-label" for="addUkkInstruction">Instruksi</label>
                   <div class="toolbar-box">
                     <div id="addUkkToolbar">
                       <select class="ql-header">
@@ -302,7 +301,7 @@
                       <div class="d-flex flex-column flatpicker-form">
                         <label class="form-label" for="editUkkStartTime">Waktu Mulai<span
                             class="txt-danger">*</span></label>
-                        <input class="form-control flatpicker" id="editUkkStartTime" type="date"
+                        <input class="form-control flatpicker" id="editUkkStartTime" type="text"
                           placeholder="Pilih waktu mulai" name="start_time" data-language="id">
                         <div class="invalid-feedback"></div>
                       </div>
@@ -316,7 +315,7 @@
                         <div class="invalid-feedback"></div>
                       </div>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 shuffle-questions-section" style="display: none;">
                       <label class="form-label">Acak Soal</label>
                       <div class="checkbox-checked d-flex gap-2">
                         <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
@@ -357,8 +356,7 @@
                   </div>
                 </div>
                 <div class="col-12">
-                  <label class="form-label" for="editUkkInstruction">Instruksi<span
-                      class="txt-danger">*</span></label>
+                  <label class="form-label" for="editUkkInstruction">Instruksi</label>
                   <div class="toolbar-box">
                     <div id="editUkkToolbar">
                       <select class="ql-header">

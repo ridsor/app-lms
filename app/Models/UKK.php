@@ -36,14 +36,34 @@ class UKK extends Model
         'rubric' => 'array',
     ];
 
-    protected $appends = ['not_yet_rated'];
+    protected $appends = ['not_yet_rated', 'duration', 'completed_count'];
+
+    public function getCompletedCountAttribute()
+    {
+        if ($this->type === 'Teori') {
+            return $this->results()->where('status', 'completed')->count();
+        }
+
+        if ($this->type === 'Praktik') {
+            return $this->practiceResults()->count();
+        }
+
+        return 0;
+    }
+
+    public function getDurationAttribute()
+    {
+        if (!$this->start_time || !$this->end_time) {
+            return 0;
+        }
+
+        return $this->start_time->diffInMinutes($this->end_time);
+    }
 
     public function getNotYetRatedAttribute()
     {
         if ($this->type === 'Teori') {
-            return UKKAnswerTheory::whereHas('ukkResult', function ($query) {
-                $query->where('ukk_id', $this->id);
-            })->whereNull('score')->count();
+            return 0;
         }
 
         if ($this->type === 'Praktik') {

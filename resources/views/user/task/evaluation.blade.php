@@ -190,7 +190,7 @@
                         <p class="mb-0 fw-medium text-break">
                             {{ $task_submission->student->name }}
                         </p>
-                        <p class="f-light mb-0 text-break">{{ $task_submission->student->nis }}</p>
+                        <p class="f-light mb-0 text-break">{{ $task_submission->student->nisn }}</p>
                     </div>
                     <a {{ $submission->hasMorePages() ? 'href=' . route('user.task.evaluation', ['task_id' => $task->id, 'page' => $submission->currentPage() + 1]) : '' }}
                         role="button" {{ !$submission->hasMorePages() ? 'aria-disabled="true"' : '' }}

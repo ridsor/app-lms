@@ -22,17 +22,12 @@ $(function () {
       },
       {
         data: "Nama",
-        name: "student.name",
+        name: "students.name",
         searchable: false,
       },
       {
-        data: "NIS",
-        name: "student.nis",
-        searchable: false,
-      },
-      {
-        data: "Nilai",
-        name: "score",
+        data: "NISN",
+        name: "students.nisn",
         searchable: false,
       },
       {

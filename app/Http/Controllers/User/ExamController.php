@@ -165,7 +165,8 @@ class ExamController extends Controller
 
             DB::beginTransaction();
 
-            $exam->questions()->delete();
+            $exam->multipleQuestions()->delete();
+            $exam->essayQuestions()->delete();
 
             $exam->delete();
 
@@ -200,15 +201,8 @@ class ExamController extends Controller
             $essayQuery->where('question_text', 'like', "%{$search}%");
         }
 
-        $multipleQuestions = $multipleQuery->get()->map(function ($q) {
-            $q->q_type = 'App\Models\MultipleQuestion';
-            return $q;
-        });
-
-        $essayQuestions = $essayQuery->get()->map(function ($q) {
-            $q->q_type = 'App\Models\EssayQuestion';
-            return $q;
-        });
+        $multipleQuestions = $multipleQuery->get();
+        $essayQuestions = $essayQuery->get();
 
         $questions = $multipleQuestions->concat($essayQuestions);
 
@@ -313,7 +307,7 @@ class ExamController extends Controller
                     }
 
                     $collection = (new FastExcel)->import($excelPath);
-                    
+
                     // Search for media folder
                     $mediaPath = null;
                     $directories = new \RecursiveIteratorIterator(
@@ -378,7 +372,7 @@ class ExamController extends Controller
         // 1. Handle main question image
         $mainFileName = $row['File Gambar Soal'] ?? '';
         $imageFile = $this->findFileAnywhere($mainFileName, $mediaPath, $basePath);
-        
+
         // Auto-discovery fallback for main question
         if (!$imageFile && $basePath) {
             $imageFile = $this->findFileByConvention($rowNumber, 'soal', null, $mediaPath, $basePath);
@@ -393,12 +387,12 @@ class ExamController extends Controller
             $options = ['a', 'b', 'c', 'd', 'e'];
             foreach ($options as $opt) {
                 $data["option_{$opt}"] = $row["Opsi " . strtoupper($opt)] ?? null;
-                
+
                 // 2. Handle option images
                 $imgKey = "File Gambar Opsi " . strtoupper($opt);
                 $optFileName = $row[$imgKey] ?? '';
                 $optImageFile = $this->findFileAnywhere($optFileName, $mediaPath, $basePath);
-                
+
                 // Auto-discovery fallback for options
                 if (!$optImageFile && $basePath) {
                     $optImageFile = $this->findFileByConvention($rowNumber, 'opsi', $opt, $mediaPath, $basePath);
@@ -419,7 +413,7 @@ class ExamController extends Controller
     private function findFileByConvention($rowNumber, $type, $option = null, $mediaPath = null, $basePath = null)
     {
         $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
-        
+
         // Patterns to try
         $patterns = [];
         if ($type === 'soal') {
@@ -556,7 +550,7 @@ class ExamController extends Controller
             return DataTables::of($exam->results)
                 ->addIndexColumn()
                 ->addColumn('Nama', fn($row) => $row->student ? '<div class="product-names"><p>' . $row->student->name . '</p></div>' : '-')
-                ->addColumn('NIS', fn($row) => $row->student ? '<p class="f-light">' . $row->student->nis . '</p>' : '-')
+                ->addColumn('NISN', fn($row) => $row->student ? '<p class="f-light">' . $row->student->nisn . '</p>' : '-')
                 ->addColumn('Nilai', fn($row) => '<span class="badge badge-light-primary">' . ($row->formatted_score) . '</span>')
                 ->addColumn('Status', function ($row) {
                     return Helper::getExamStatusLabel($row->status);
@@ -571,7 +565,7 @@ class ExamController extends Controller
                     $btn .= '</div>';
                     return $btn;
                 })
-                ->rawColumns(['Nama', 'NIS', 'Nilai', 'Status', 'Pengerjaan', 'action'])
+                ->rawColumns(['Nama', 'NISN', 'Nilai', 'Status', 'Pengerjaan', 'action'])
                 ->make(true);
         }
 
@@ -666,14 +660,14 @@ class ExamController extends Controller
                 ['Guru', 'Guru' => $exam->schedule->teacher ? $exam->schedule->teacher->name . ' (' . $exam->schedule->teacher->nip . ')' : '-'],
                 ['Tipe Ujian', 'Tipe Ujian' => Helper::getExamTypeLabel($exam->type)],
                 ['Waktu Ujian', 'Waktu Ujian' => $exam->start_time && $exam->end_time ? $exam->start_time->translatedFormat('j F Y H:i') . ' - ' . $exam->end_time->translatedFormat('j F Y H:i') : '-'],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN', 'Nilai' => 'Nilai'],
             ];
 
             $exportData = $exam->results->map(function ($result, $index) {
                 return [
                     'No' => $index + 1,
                     'Nama' => $result->student ? $result->student->name : '-',
-                    'NIS' => $result->student ? $result->student->nis : '-',
+                    'NISN' => $result->student ? $result->student->nisn : '-',
                     'Nilai' => $result->formatted_score ? $result->formatted_score : '-',
                 ];
             })->toArray();
@@ -696,7 +690,7 @@ class ExamController extends Controller
 
         $exam_results = $query->simplePaginate(1, ['*'], 'page', $page);
         $exam_result = $query->simplePaginate(1, ['*'], 'page', $page)->first();
-        
+
         $exam = $exam_result->exam;
         $this->authorize('update', $exam);
 
@@ -709,13 +703,21 @@ class ExamController extends Controller
             $essayQuery->where('question_text', 'like', "%{$search}%");
         }
 
-        $multipleQuestions = $multipleQuery->get()->map(function ($q) {
+        $multipleQuestions = $multipleQuery->get()->map(function ($q) use ($exam_result) {
             $q->q_type = 'App\Models\MultipleQuestion';
+            $q->student_answer = $exam_result->answers
+                ->where('questionable_id', $q->id)
+                ->where('questionable_type', 'App\Models\MultipleQuestion')
+                ->first();
             return $q;
         });
 
-        $essayQuestions = $essayQuery->get()->map(function ($q) {
+        $essayQuestions = $essayQuery->get()->map(function ($q) use ($exam_result) {
             $q->q_type = 'App\Models\EssayQuestion';
+            $q->student_answer = $exam_result->answers
+                ->where('questionable_id', $q->id)
+                ->where('questionable_type', 'App\Models\EssayQuestion')
+                ->first();
             return $q;
         });
 
@@ -731,7 +733,7 @@ class ExamController extends Controller
             ['path' => $request->url(), 'query' => $request->query(), 'pageName' => 'q_page']
         );
 
-        return view('user.exam.evaluation', compact('exam_result', 'exam_results', 'questions', 'page'));
+        return view('user.exam.evaluation', compact('exam', 'exam_result', 'exam_results', 'questions', 'page'));
     }
 
     public function updateAnswerScore(Request $request, $id, $answer_id)
@@ -945,27 +947,10 @@ class ExamController extends Controller
 
 
             $now = now();
-            if ($existingExamResult) {
-                if ($existingExamResult->status === 'completed') {
-                    return $this->sendError('Anda sudah memulai ujian ini.', [], 403);
-                }
-                if ($now->gt($exam->end_time)) {
-                    return $this->sendError('Waktu ujian telah berakhir.', [], 403);
-                }
 
-                return $this->sendResponse('Ujian dimulai!', $existingExamResult, 200);
-            }
-
-            if ($now->lt($exam->start_time)) {
-                return $this->sendError('Ujian belum dimulai.', [], 403);
-            }
-
-            if ($now->gt($exam->end_time)) {
-                return $this->sendError('Ujian telah berakhir.', [], 403);
-            }
-
-            if (($exam?->multipleQuestions->count() + $exam?->essayQuestions->count() ?? 0) <= 0) {
-                return $this->sendError('Pertanyan belum tersedia.', [], 403);
+            $availabilityResponse = $this->validateExamAvailability($exam, $existingExamResult, $now);
+            if ($availabilityResponse) {
+                return $availabilityResponse;
             }
 
             $examResult = ExamResult::create([
@@ -1026,6 +1011,10 @@ class ExamController extends Controller
                 }
             }
 
+            $examResult->update([
+                'status' => 'completed',
+            ]);
+
             app(ExamScoringService::class)->saveScore($examResult, $student->id);
 
             DB::commit();
@@ -1072,5 +1061,39 @@ class ExamController extends Controller
         $hasPendingScores = $examResult->answers()->whereNull('score')->exists();
 
         return view('user.exam.workmanship_result', compact('exam', 'examResult', 'totalPoints', 'totalCorrectAnswers', 'hasPendingScores'));
+    }
+
+    /**
+     * Memvalidasi ketersediaan ujian, batasan waktu, dan status pengerjaan sebelumnya.
+     *
+     * @return \Illuminate\Http\JsonResponse|null
+     */
+    protected function validateExamAvailability(Exam $exam, ?ExamResult $existingExamResult, $now)
+    {
+        if ($existingExamResult) {
+            if ($existingExamResult->status === 'completed') {
+                return $this->sendError('Anda sudah memulai ujian ini.', [], 403);
+            }
+            if ($now->gt($exam->end_time)) {
+                return $this->sendError('Waktu ujian telah berakhir.', [], 403);
+            }
+
+            return $this->sendResponse('Ujian dimulai!', $existingExamResult, 200);
+        }
+
+        if ($now->lt($exam->start_time)) {
+            return $this->sendError('Ujian belum dimulai.', [], 403);
+        }
+
+        if ($now->gt($exam->end_time)) {
+            return $this->sendError('Ujian telah berakhir.', [], 403);
+        }
+
+        $totalQuestions = $exam->multipleQuestions()->count() + $exam->essayQuestions()->count();
+        if ($totalQuestions <= 0) {
+            return $this->sendError('Pertanyan belum tersedia.', [], 403);
+        }
+
+        return null;
     }
 }

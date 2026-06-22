@@ -15,6 +15,7 @@
     .content-item {
       transition: all .3s;
     }
+
     .content-item:hover,
     .content-item:focus {
       background: rgba(0, 0, 0, .1);
@@ -60,7 +61,8 @@
                 </div>
                 <div class="col-12 col-md-6">
                   <label class="form-label">Waktu Selesai</label>
-                  <p class="c-o-light f-w-600"><span>{{ $ukk_result->end_time ? $ukk_result->end_time->translatedFormat('j M Y H:i') : '-' }}</span></p>
+                  <p class="c-o-light f-w-600"><span>{{ $ukk_result->updated_at->translatedFormat('j M Y H:i') }}</span>
+                  </p>
                 </div>
               </div>
             </div>
@@ -79,7 +81,7 @@
             <p class="mb-0 fw-medium text-break">
               {{ $ukk_result->student->name }}
             </p>
-            <p class="f-light mb-0 text-break">{{ $ukk_result->student->nis }}</p>
+            <p class="f-light mb-0 text-break">{{ $ukk_result->student->nisn }}</p>
           </div>
           <a {{ $ukk_results->hasMorePages() ? 'href=' . route('user.ukk.evaluation', ['id' => $ukk->id, 'page' => $ukk_results->currentPage() + 1]) : '' }}
             role="button" {{ !$ukk_results->hasMorePages() ? 'aria-disabled="true"' : '' }}
@@ -105,7 +107,7 @@
             @include('user.ukk.evaluation-item', [
                 'question' => $question,
                 'number' => $questions->firstItem() + $loop->index,
-                'ukk' => $ukk
+                'ukk' => $ukk,
             ])
           @endforeach
           <div class="pagination-wrapper w-100">

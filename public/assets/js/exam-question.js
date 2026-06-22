@@ -166,6 +166,15 @@ $(document).ready(function () {
 
     $("#addQuestionForm").on("submit", function (e) {
         e.preventDefault();
+
+        // Sync Quill to input
+        var value = addQuestionTextQuill.root.innerHTML;
+        var descriptionText = addQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#addQuestionText").val(value);
+
         const id = $(this).data("id");
 
         $("#addQuestionForm").find("input, select").removeClass("is-invalid");
@@ -250,6 +259,15 @@ $(document).ready(function () {
 
     $("#addEssayQuestionForm").on("submit", function (e) {
         e.preventDefault();
+
+        // Sync Quill to input
+        var value = addEssayQuestionTextQuill.root.innerHTML;
+        var descriptionText = addEssayQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#addEssayQuestionText").val(value);
+
         const id = $(this).data("id");
 
         $("#addEssayQuestionForm").find("input, select").removeClass("is-invalid");
@@ -317,6 +335,15 @@ $(document).ready(function () {
 
     $("#editQuestionForm").on("submit", function (e) {
         e.preventDefault();
+
+        // Sync Quill to input
+        var value = editQuestionTextQuill.root.innerHTML;
+        var descriptionText = editQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#editQuestionText").val(value);
+
         const id = $(this).data("id");
 
         $("#editQuestionForm").find("input, select").removeClass("is-invalid");
@@ -402,6 +429,15 @@ $(document).ready(function () {
 
     $("#editEssayQuestionForm").on("submit", function (e) {
         e.preventDefault();
+
+        // Sync Quill to input
+        var value = editEssayQuestionTextQuill.root.innerHTML;
+        var descriptionText = editEssayQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#editEssayQuestionText").val(value);
+
         const id = $(this).data("id");
 
         $("#editEssayQuestionForm").find("input, select").removeClass("is-invalid");

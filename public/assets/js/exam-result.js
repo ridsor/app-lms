@@ -26,8 +26,8 @@ $(function () {
                 searchable: false,
             },
             {
-                data: "NIS",
-                name: "students.nis",
+                data: "NISN",
+                name: "students.nisn",
                 searchable: false,
             },
             {

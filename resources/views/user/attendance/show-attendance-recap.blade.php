@@ -47,7 +47,7 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Mata Pelajaran</label>
                                 <p class="c-o-light f-w-600">
-                                    strtoupper({{ $schedule->subject->name }})
+                                    {{ $schedule->subject->name }}
                                 </p>
                                 <label class="form-label">Kelas</label>
                                 <p class="c-o-light f-w-600">
@@ -241,7 +241,7 @@
                                             <td>
                                                 <p class="f-light mb-0">
                                                     {{ $attendance['student']->name }}</p>
-                                                <p class="f-light mb-0">{{ $attendance['student']->nis }}</p>
+                                                <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
                                             </td>
                                             @foreach ($attendance['attendances'] as $status)
                                                 <td class="text-center">

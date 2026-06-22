@@ -89,7 +89,7 @@
                       Reset Semua
                     </span>
                   </button>
-                  <a class="btn btn-outline-info d-flex align-items-center gap-2 {{ $exam->results_count > 0 ? '' : 'pe-none' }}"
+                  <a class="btn btn-outline-info d-flex align-items-center gap-2 {{ $exam->results->first()?->id ? '' : 'pe-none' }}"
                     {{ $exam->results->first()?->id ? 'href=' . route('user.exam.evaluation', ['exam_id' => $exam->id]) : '' }}>
                     <span>
                       Penilaian
@@ -113,7 +113,7 @@
                                 <tr>
                                   <th> <span class="c-o-light f-w-600">No</span></th>
                                   <th> <span class="c-o-light f-w-600">Nama</span></th>
-                                  <th> <span class="c-o-light f-w-600">NIS</span></th>
+                                  <th> <span class="c-o-light f-w-600">NISN</span></th>
                                   <th> <span class="c-o-light f-w-600">Nilai</span></th>
                                   <th> <span class="c-o-light f-w-600">Status</span></th>
                                   <th> <span class="c-o-light f-w-600">Pengerjaan</span></th>

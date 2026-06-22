@@ -50,35 +50,11 @@
   <div class="container-fluid e-category p-0">
     <div class="card h-100 my-0 rounded-responsive mb-3">
       <div class="card-body p-3">
-        <h1 class="text-center mb-3">Hasil Uji Kompetensi Keahlian Teori</h1>
+        <h1 class="text-center mb-3">Selesai Mengerjakan UKK Teori</h1>
         <div class="wrapper-result p-3 mb-3">
           <div class="text-center mb-3">
-            <p class="mb-0 fs-5">Anda memperoleh <span class="fw-medium txt-primary">{{ $ukkResult->formatted_score }}
-                poin</span></p>
+            <p class="mb-0 fs-5 text-success">Terima kasih, Anda telah menyelesaikan Uji Kompetensi Keahlian Teori.</p>
           </div>
-          @php
-            $percentage = $totalPoints > 0 ? ($totalCorrectAnswers / $totalPoints) * 100 : 0;
-          @endphp
-          <div class="d-flex align-items-center justify-content-center mb-2">
-            <div class="progress-bar-circle position-relative border border-secondary-subtle"
-              style="background: conic-gradient(#6a5acd {{ $percentage }}%, #eee 0);">
-              <div class="position-absolute top-0 wrapper-result rounded-circle position-center"
-                style="width:90%;height:90%; background:#eee">
-                <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
-                  <div id="progress-text" class="fs-3"><span class="fw-bold">{{ $totalCorrectAnswers }}</span><span
-                      class="fs-6">/{{ $totalPoints }}</span></div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-          @if ($hasPendingScores)
-            <div class="d-flex align-items-center justify-content-center" style="height: 100%;">
-              <div id="progress-text" class="fs-6 text-center">Nilai ini hanya <span
-                  class="text-warning">sementara</span>, menunggu penilaian...
-              </div>
-            </div>
-          @endif
         </div>
         <div class="row g-3">
           <div class="col-12">

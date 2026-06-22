@@ -22,6 +22,11 @@ class QuestionController extends Controller
 
             $validated = $request->validated();
 
+            // Set default points if null or empty string (especially for UKK)
+            if (!isset($validated['question_points']) || is_null($validated['question_points']) || $validated['question_points'] === '') {
+                $validated['question_points'] = 0;
+            }
+
             // Set polymorphic relation
             $validated['questionable_id'] = $id;
             if ($request->input('model') === 'exam') {
@@ -103,13 +108,23 @@ class QuestionController extends Controller
             if (!$request->user()->can(['question.edit'])) return abort(403);
 
             $question = null;
-            if ($request->input('question_type') === 'multiple_choice') {
+            $type = $request->input('question_type');
+            if ($type === 'multiple_choice' || $type === 'multiple') {
                 $question = MultipleQuestion::find($id);
-            } else if ($request->input('question_type') === 'essay') {
+            } else if ($type === 'essay') {
                 $question = EssayQuestion::find($id);
             }
 
+            if (!$question) {
+                return $this->sendError('Soal tidak ditemukan.', [], 404);
+            }
+
             $validated = $request->validated();
+
+            // Set default points if null or empty string (especially for UKK)
+            if (!isset($validated['question_points']) || is_null($validated['question_points']) || $validated['question_points'] === '') {
+                $validated['question_points'] = 0;
+            }
 
             // Prevent accidental nulling of existing files
             unset($validated['question_file']);
@@ -143,7 +158,7 @@ class QuestionController extends Controller
                 $validated['question_file'] = $request->file('question_file')->store('file/ujian');
             }
 
-            if ($request->input('question_type') === 'multiple_choice') {
+            if ($type === 'multiple_choice' || $type === 'multiple') {
                 foreach (['a', 'b', 'c', 'd', 'e'] as $opt) {
                     $fileKey = "option_{$opt}_image";
                     if ($request->hasFile($fileKey)) {

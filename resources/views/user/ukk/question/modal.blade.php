@@ -10,15 +10,6 @@
           <div class="p-20">
             <form class="row g-3 needs-validation" novalidate="" id="addQuestionForm" data-id="{{ $ukk->id }}" data-type="ukk">
               <div class="col-12">
-                <div class="d-flex justify-content-end">
-                  <label class="d-flex gap-2 align-items-center justify-content-center">
-                    <p class="mb-0">Poin : </p>
-                    <input type="number" style="width: 50px" name="question_points"
-                      class="form-control form-control-sm text-center question-points">
-                  </label>
-                </div>
-              </div>
-              <div class="col-12">
                 <div class="toolbar-box">
                   <div id="addQuestionTextQuill"></div>
                   <input type="hidden" id="addQuestionText" name="question_text" class="quill">
@@ -137,15 +128,6 @@
             <form class="row g-3 needs-validation" novalidate="" id="addEssayQuestionForm"
               data-id="{{ $ukk->id }}" data-type="ukk">
               <div class="col-12">
-                <div class="d-flex justify-content-end">
-                  <label class="d-flex gap-2 align-items-center justify-content-center">
-                    <p class="mb-0">Poin : </p>
-                    <input type="number" style="width: 50px" name="question_points"
-                      class="form-control form-control-sm text-center question-points">
-                  </label>
-                </div>
-              </div>
-              <div class="col-12">
                 <div class="toolbar-box">
                   <div id="addEssayQuestionTextQuill"></div>
                   <input type="hidden" id="addEssayQuestionText" name="question_text" class="quill">
@@ -204,17 +186,8 @@
       <div class="modal-body p-0 custom-input">
         <div class="text-start">
           <div class="p-20">
-            <form class="row g-3 needs-validation" novalidate="" id="editQuestionForm">
+            <form class="row g-3 needs-validation" novalidate="" id="editQuestionForm" data-type="ukk">
               <input type="hidden" name="deleteData[]" />
-              <div class="col-12">
-                <div class="d-flex justify-content-end">
-                  <label class="d-flex gap-2 align-items-center justify-content-center">
-                    <p class="mb-0">Poin : </p>
-                    <input type="number" style="width: 50px" name="question_points"
-                      class="form-control form-control-sm text-center question-points">
-                  </label>
-                </div>
-              </div>
               <div class="col-12">
                 <div class="toolbar-box">
                   <div id="editQuestionTextQuill"></div>
@@ -333,17 +306,8 @@
       <div class="modal-body p-0 custom-input">
         <div class="text-start">
           <div class="p-20">
-            <form class="row g-3 needs-validation" novalidate="" id="editEssayQuestionForm">
+            <form class="row g-3 needs-validation" novalidate="" id="editEssayQuestionForm" data-type="ukk">
               <input type="hidden" name="deleteData[]" />
-              <div class="col-12">
-                <div class="d-flex justify-content-end">
-                  <label class="d-flex gap-2 align-items-center justify-content-center">
-                    <p class="mb-0">Poin : </p>
-                    <input type="number" style="width: 50px" name="question_points"
-                      class="form-control form-control-sm text-center question-points">
-                  </label>
-                </div>
-              </div>
               <div class="col-12">
                 <div class="toolbar-box">
                   <div id="editEssayQuestionTextQuill"></div>

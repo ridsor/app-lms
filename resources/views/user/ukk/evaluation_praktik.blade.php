@@ -241,18 +241,20 @@
             </a>
           @endif
         </div>
-        <div class="card-body p-4">
-          <div class="instruction-box ql-editor">
-            {!! $ukk->instructions !!}
+        @if ($ukk->instructions)
+          <div class="card-body p-4">
+            <div class="instruction-box ql-editor">
+              {!! $ukk->instructions !!}
+            </div>
           </div>
-        </div>
+        @endif
       </div>
 
       {{-- Navigasi Siswa Modern --}}
       <div class="mb-3 px-3">
         <div class="d-flex justify-content-between align-items-center gap-2">
           <a {{ $practice_results->onFirstPage() ? 'aria-disabled="true"' : '' }} role="button"
-            {{ $practice_results->onFirstPage() ? '' : 'href=' . route('user.ukk.evaluation', ['id' => $ukk->id, 'page' => $practice_results->currentPage() - 1]) }}
+            {{ $practice_results->onFirstPage() ? '' : 'href=' . route('user.ukk.praktik.evaluation', ['id' => $ukk->id, 'page' => $practice_results->currentPage() - 1]) }}
             class="btn btn-primary px-3 py-2 d-flex justify-content-center align-items-center {{ $practice_results->onFirstPage() ? 'disabled' : '' }}">
             <i data-feather="chevron-left" style="width:18px; height: 18px"></i>
           </a>
@@ -260,9 +262,9 @@
             <p class="mb-0 fw-medium text-break">
               {{ $practice_result->student->name }}
             </p>
-            <p class="f-light mb-0 text-break">{{ $practice_result->student->nis }}</p>
+            <p class="f-light mb-0 text-break">{{ $practice_result->student->nisn }}</p>
           </div>
-          <a {{ $practice_results->hasMorePages() ? 'href=' . route('user.ukk.evaluation', ['id' => $ukk->id, 'page' => $practice_results->currentPage() + 1]) : '' }}
+          <a {{ $practice_results->hasMorePages() ? 'href=' . route('user.ukk.praktik.evaluation', ['id' => $ukk->id, 'page' => $practice_results->currentPage() + 1]) : '' }}
             role="button" {{ !$practice_results->hasMorePages() ? 'aria-disabled="true"' : '' }}
             class="btn btn-primary px-3 py-2 d-flex justify-content-center align-items-center {{ !$practice_results->hasMorePages() ? 'disabled' : '' }}">
             <i data-feather="chevron-right" style="width:18px; height: 18px"></i>
@@ -331,6 +333,9 @@
                             <div id="map-{{ $loop->index }}" class="map-container" data-url="{!! $fileUrl !!}"
                               data-type="{{ $ext }}"></div>
                           </div>
+                        @elseif (Helper::isGooglePreviewable($file['name']))
+                          <iframe src="https://docs.google.com/gview?url={{ urlencode($fileUrl) }}&embedded=true"
+                            width="100%" height="600px" frameborder="0"></iframe>
                         @else
                           <div class="text-center py-5">
                             <i class="fa fa-file-text-o fs-1 text-muted mb-3 d-block"></i>
