@@ -19,7 +19,6 @@ class Exam extends Model
         'type',
         'start_time',
         'end_time',
-        'duration',
         'exam_mode',
         'is_shuffle_questions',
     ];
@@ -34,6 +33,17 @@ class Exam extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
     ];
+
+    protected $appends = ['duration'];
+
+    public function getDurationAttribute()
+    {
+        if (!$this->start_time || !$this->end_time) {
+            return 0;
+        }
+
+        return $this->start_time->diffInMinutes($this->end_time);
+    }
 
     public function schedule(): BelongsTo
     {
@@ -70,6 +80,15 @@ class Exam extends Model
     public function results(): HasMany
     {
         return $this->hasMany(ExamResult::class);
+    }
+
+    public function getRemainingSecondsAttribute()
+    {
+        $now = now();
+        if ($now->gt($this->end_time)) {
+            return 0;
+        }
+        return $now->diffInSeconds($this->end_time);
     }
 
     public function scopeFilter($query, array $filters)

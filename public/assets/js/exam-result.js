@@ -26,13 +26,23 @@ $(function () {
                 searchable: false,
             },
             {
-                data: "Pengerjaan",
-                name: "task_submissions.submitted_at",
+                data: "NISN",
+                name: "students.nisn",
                 searchable: false,
             },
             {
                 data: "Nilai",
-                name: "task_submissions.score",
+                name: "score",
+                searchable: false,
+            },
+            {
+                data: "Status",
+                name: "status",
+                searchable: false
+            },
+            {
+                data: "Pengerjaan",
+                name: "end_time",
                 searchable: false,
             },
             {
@@ -41,7 +51,6 @@ $(function () {
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row, meta) {
-                    console.log(data, meta);
                     const html = `
                     <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
                         <a class="reset-result btn btn-danger btn-sm p-1 px-2 rounded-2" data-id="${data.id}" data-exam-id="${data.exam_id}">
@@ -49,7 +58,7 @@ $(function () {
                         </a>
                         <a class="square-white view rounded-2" href=${"/ujian/" +
                         data.exam_id +
-                        "/penilaian/" +
+                        "/evaluasi/" +
                         (meta.row + meta.settings._iDisplayStart + 1)
                         }>
                             <i class="fa-solid fa-pen"></i>

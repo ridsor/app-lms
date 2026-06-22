@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::table(
             'exam_answers',
             function (Blueprint $table) {
-                $table->dropUnique('unique_answer');
                 $table->unique(['exam_result_id', 'questionable_id', 'questionable_type'], 'unique_answer');
             }
         );

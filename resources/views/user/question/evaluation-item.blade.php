@@ -22,9 +22,9 @@
             @switch(Helper::getFileType($question->question_file))
               @case('image')
                 <div class="image">
-                  <a href="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType]) }}"
+                  <a href="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType, 'v' => $question->updated_at?->timestamp]) }}"
                     class="glightbox" data-gallery="question-{{ $question->id }}" data-type="image">
-                    <img src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType]) }}"
+                    <img src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType, 'v' => $question->updated_at?->timestamp]) }}"
                       alt="soal gambar"
                       style="max-width:150px; max-height:150px; object-fit:cover; object-position:center;" />
                   </a>
@@ -35,11 +35,11 @@
                 <div class="audio">
                   <audio controls>
                     @if (strtolower(pathinfo($question_file, PATHINFO_EXTENSION)) == 'mp3')
-                      <source src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType]) }}"
+                      <source src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType, 'v' => $question->updated_at?->timestamp]) }}"
                         type="audio/mpeg">
                     @endif
                     @if (strtolower(pathinfo($question_file, PATHINFO_EXTENSION)) == 'mav')
-                      <source src="{{ route('user.question.file.get', ['id' => $question->id]) }}" type="audio/wav">
+                      <source src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType, 'v' => $question->updated_at?->timestamp]) }}" type="audio/wav">
                     @endif
 
                     Browser Anda tidak mendukung elemen audio.
@@ -50,7 +50,7 @@
               @case('video')
                 <div class="video">
                   <video width="320" height="240" controls>
-                    <source src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType]) }}"
+                    <source src="{{ route('user.question.file.get', ['id' => $question->id, 'type' => $qType, 'v' => $question->updated_at?->timestamp]) }}"
                       type="video/mp4">
                     Browser Anda tidak mendukung elemen video.
                   </video>
@@ -116,10 +116,10 @@
                     </p>
                     @if ($question->option_a_image)
                       <div class="option-image mt-1">
-                        <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'a']) }}"
+                        <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'a', 'v' => $question->updated_at?->timestamp]) }}"
                           class="glightbox" data-type="image" data-gallery="option-{{ $question->id }}-a">
                           <img
-                            src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'a']) }}"
+                            src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'a', 'v' => $question->updated_at?->timestamp]) }}"
                             alt="opsi gambar"
                             style="max-width:150px; max-height:150px; object-fit:cover; object-position:center;" />
                         </a>
@@ -131,7 +131,7 @@
               <div class="option-item checkbox-checked">
                 <div class="d-flex align-items-center gap-2">
                   <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                    <input type="radio" @if ($question->correct_answer == 'b') checked @endif value="b" disabled
+                    <input type="radio" @if ($question?->student_answer?->answer == 'b') checked @endif value="b" disabled
                       class="me-2 form-check-input" style="transform: translateY(-2px)">
                     <span class="fw-bold text-uppercase">b.</span>
                   </label>
@@ -141,10 +141,10 @@
                     </p>
                     @if ($question->option_b_image)
                       <div class="option-image mt-1">
-                        <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'b']) }}"
+                        <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'b', 'v' => $question->updated_at?->timestamp]) }}"
                           class="glightbox" data-type="image" data-gallery="option-{{ $question->id }}-b">
                           <img
-                            src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'b']) }}"
+                            src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'b', 'v' => $question->updated_at?->timestamp]) }}"
                             alt="opsi gambar"
                             style="max-width:150px; max-height:150px; object-fit:cover; object-position:center;" />
                         </a>
@@ -156,7 +156,7 @@
               <div class="option-item checkbox-checked">
                 <div class="d-flex align-items-center gap-2">
                   <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                    <input type="radio" @if ($question->correct_answer == 'c') checked @endif value="c" disabled
+                    <input type="radio" @if ($question?->student_answer?->answer == 'c') checked @endif value="c" disabled
                       class="me-2 form-check-input" style="transform: translateY(-2px)">
                     <span class="fw-bold text-uppercase">c.</span>
                   </label>
@@ -166,10 +166,10 @@
                     </p>
                     @if ($question->option_c_image)
                       <div class="option-image mt-1">
-                        <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'c']) }}"
+                        <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'c', 'v' => $question->updated_at?->timestamp]) }}"
                           class="glightbox" data-type="image" data-gallery="option-{{ $question->id }}-c">
                           <img
-                            src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'c']) }}"
+                            src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'c', 'v' => $question->updated_at?->timestamp]) }}"
                             alt="opsi gambar"
                             style="max-width:150px; max-height:150px; object-fit:cover; object-position:center;" />
                         </a>
@@ -182,7 +182,7 @@
                 <div class="option-item checkbox-checked">
                   <div class="d-flex align-items-center gap-2">
                     <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                      <input type="radio" @if ($question->correct_answer == 'd') checked @endif value="d" disabled
+                      <input type="radio" @if ($question?->student_answer?->answer == 'd') checked @endif value="d" disabled
                         class="me-2 form-check-input" style="transform: translateY(-2px)">
                       <span class="fw-bold text-uppercase">d.</span>
                     </label>
@@ -192,10 +192,10 @@
                       </p>
                       @if ($question->option_d_image)
                         <div class="option-image mt-1">
-                          <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'd']) }}"
+                          <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'd', 'v' => $question->updated_at?->timestamp]) }}"
                             class="glightbox" data-type="image" data-gallery="option-{{ $question->id }}-d">
                             <img
-                              src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'd']) }}"
+                              src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'd', 'v' => $question->updated_at?->timestamp]) }}"
                               alt="opsi gambar"
                               style="max-width:150px; max-height:150px; object-fit:cover; object-position:center;" />
                           </a>
@@ -209,7 +209,7 @@
                 <div class="option-item checkbox-checked">
                   <div class="d-flex align-items-center gap-2">
                     <label class="d-flex align-items-center mb-0" style="align-self: flex-start">
-                      <input type="radio" @if ($question->correct_answer == 'e') checked @endif value="e" disabled
+                      <input type="radio" @if ($question?->student_answer?->answer == 'e') checked @endif value="e" disabled
                         class="me-2 form-check-input" style="transform: translateY(-2px)">
                       <span class="fw-bold text-uppercase">e.</span>
                     </label>
@@ -219,10 +219,10 @@
                       </p>
                       @if ($question->option_e_image)
                         <div class="option-image mt-1">
-                          <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'e']) }}"
+                          <a href="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'e', 'v' => $question->updated_at?->timestamp]) }}"
                             class="glightbox" data-type="image" data-gallery="option-{{ $question->id }}-e">
                             <img
-                              src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'e']) }}"
+                              src="{{ route('user.question.option.file.get', ['id' => $question->id, 'option' => 'e', 'v' => $question->updated_at?->timestamp]) }}"
                               alt="opsi gambar"
                               style="max-width:150px; max-height:150px; object-fit:cover; object-position:center;" />
                           </a>

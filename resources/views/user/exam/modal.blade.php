@@ -38,7 +38,7 @@
                                                 <label class="form-label" for="startDate">Waktu Mulai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" id="addExamStartTime"
-                                                    type="date" placeholder="Pilih waktu mulai" name="start_time"
+                                                    type="text" placeholder="Pilih waktu mulai" name="start_time"
                                                     data-language="id">
                                                 <div class="invalid-feedback"></div>
                                             </div>
@@ -48,7 +48,7 @@
                                                 <label class="form-label" for="endDate">Waktu Selesai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" autocomplete="off"
-                                                    id="addExamEndTime" type="date" placeholder="Pilih waktu selesai"
+                                                    id="addExamEndTime" type="text" placeholder="Pilih waktu selesai"
                                                     name="end_time" data-language="id">
                                                 <div class="invalid-feedback"></div>
                                             </div>
@@ -137,34 +137,6 @@
                                             </div>
                                             <div class="invalid-feedback"></div>
                                         </div>
-                                        <div class="col-12">
-                                            <label class="form-label">Batas Waktu</label>
-                                            <div class="checkbox-checked d-flex gap-2">
-                                                <label class="d-flex align-items-center mb-0"
-                                                    style="align-self: flex-start">
-                                                    <input type="radio" value="0" checked
-                                                        name="allow_duration" class="me-2 form-check-input radio"
-                                                        style="transform: translateY(-2px)">
-                                                    <span class="fw-bold text-uppercase">Tidak</span>
-                                                </label>
-                                                <label class="d-flex align-items-center mb-0"
-                                                    style="align-self: flex-start">
-                                                    <input type="radio" value="1"
-                                                        class="me-2 form-check-input radio" name="allow_duration"
-                                                        style="transform: translateY(-2px)">
-                                                    <span class="fw-bold text-uppercase">Ya</span>
-                                                </label>
-                                            </div>
-                                            <div class="invalid-feedback"></div>
-                                        </div>
-                                        <div class="col-12 duration" style="display: none;">
-                                            <div class="d-flex flex-column">
-                                                <label class="form-label" for="addDurationExam">Batas Waktu</label>
-                                                <input class="form-control" autocomplete="off" id="addDurationExam"
-                                                    type="number" placeholder="(menit)" name="duration">
-                                                <div class="invalid-feedback"></div>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
@@ -225,7 +197,7 @@
                                                 <label class="form-label" for="startDate">Waktu Mulai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" id="editExamStartTime"
-                                                    type="date" placeholder="Pilih waktu mulai" name="start_time"
+                                                    type="text" placeholder="Pilih waktu mulai" name="start_time"
                                                     data-language="id">
                                                 <div class="invalid-feedback"></div>
                                             </div>
@@ -235,7 +207,7 @@
                                                 <label class="form-label" for="endDate">Waktu Selesai<span
                                                         class="txt-danger">*</span></label>
                                                 <input class="form-control flatpicker" autocomplete="off"
-                                                    id="editExamEndTime" type="date"
+                                                    id="editExamEndTime" type="text"
                                                     placeholder="Pilih waktu selesai" name="end_time"
                                                     data-language="id">
                                                 <div class="invalid-feedback"></div>
@@ -325,34 +297,6 @@
                                                 </label>
                                             </div>
                                             <div class="invalid-feedback"></div>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label">Batas Waktu</label>
-                                            <div class="checkbox-checked d-flex gap-2">
-                                                <label class="d-flex align-items-center mb-0"
-                                                    style="align-self: flex-start">
-                                                    <input type="radio" value="0" checked
-                                                        name="allow_duration" class="me-2 form-check-input radio"
-                                                        style="transform: translateY(-2px)">
-                                                    <span class="fw-bold text-uppercase">Tidak</span>
-                                                </label>
-                                                <label class="d-flex align-items-center mb-0"
-                                                    style="align-self: flex-start">
-                                                    <input type="radio" value="1"
-                                                        class="me-2 form-check-input radio" name="allow_duration"
-                                                        style="transform: translateY(-2px)">
-                                                    <span class="fw-bold text-uppercase">Ya</span>
-                                                </label>
-                                            </div>
-                                            <div class="invalid-feedback"></div>
-                                        </div>
-                                        <div class="col-12 duration" style="display: none;">
-                                            <div class="d-flex flex-column">
-                                                <label class="form-label" for="editDurationExam">Batas Waktu</label>
-                                                <input class="form-control" autocomplete="off" id="editDurationExam"
-                                                    type="number" placeholder="(menit)" name="duration">
-                                                <div class="invalid-feedback"></div>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>

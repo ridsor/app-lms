@@ -205,7 +205,7 @@
             <p class="mb-0 fw-medium text-break">
               {{ $exam_result->student->name }}
             </p>
-            <p class="f-light mb-0 text-break">{{ $exam_result->student->nis }}</p>
+            <p class="f-light mb-0 text-break">{{ $exam_result->student->nisn }}</p>
           </div>
           <a {{ $exam_results->hasMorePages() ? 'href=' . route('user.exam.evaluation', ['exam_id' => $exam->id, 'page' => $exam_results->currentPage() + 1]) : '' }}
             role="button" {{ !$exam_results->hasMorePages() ? 'aria-disabled="true"' : '' }}

@@ -29,7 +29,8 @@
             {{ $class->major ? '(' . $class->major->name . ')' : '' }}</h3>
         </div>
         <div class="col-sm-6 text-end mt-2 mt-sm-0">
-          <a href="{{ route('user.schedule.index') }}" class="btn btn-secondary btn-sm"><i class="fa fa-arrow-left"></i>
+          <a href="{{ route('user.schedule.classlist') }}" class="btn btn-secondary btn-sm"><i
+              class="fa fa-arrow-left"></i>
             Kembali ke Daftar Kelas</a>
         </div>
       </div>
@@ -84,6 +85,10 @@
             <div class="card-header card-no-border text-end">
               <button class="btn btn-primary f-w-500 mb-2" data-bs-toggle="modal" data-bs-target="#addScheduleModal"><i
                   class="fa fa-plus pe-2"></i>Tambah Jadwal</button>
+              <div class="row">
+                <button class="btn btn-info f-w-500 mb-2 me-1" id="sync-schedule-btn"><i
+                    class="fa fa-refresh pe-2"></i>Sinkronisasi Jadwal</button>
+              </div>
               <div class="row g-3 justify-content-end align-items-center" id="schedule-by-class-action-buttons">
                 <div class="col-auto">
                   <span>

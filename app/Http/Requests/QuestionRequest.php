@@ -25,19 +25,25 @@ class QuestionRequest extends FormRequest
     public function rules()
     {
         $type = $this->input('question_type');
+        $model = $this->input('model');
 
-        if ($type === 'multiple_choice') {
-            return (new MultipleQuestionRequest())->rules();
+        $rules = [];
+        if ($type === 'multiple_choice' || $type === 'multiple') {
+            $rules = (new MultipleQuestionRequest())->rules();
+        } else if ($type === 'essay') {
+            $rules = (new EssayQuestionRequest())->rules();
+        } else {
+            return [
+                'question_type' => 'required|in:multiple_choice,multiple,essay',
+                'model' => 'required|in:exam,question_bank,ukk',
+            ];
         }
 
-        if ($type === 'essay') {
-            return (new EssayQuestionRequest())->rules();
+        if ($model === 'ukk') {
+            $rules['question_points'] = ['nullable', 'integer'];
         }
 
-        return [
-            'question_type' => 'required|in:multiple_choice,essay',
-            'model' => 'required|in:exam,question_bank',
-        ];
+        return $rules;
     }
 
     public function attributes()

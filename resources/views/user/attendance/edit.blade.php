@@ -204,7 +204,7 @@
                                                     <td>
                                                         <p class="f-light mb-0">
                                                             {{ $attendance['student']->name }}</p>
-                                                        <p class="f-light mb-0">{{ $attendance['student']->nis }}</p>
+                                                        <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
                                                     </td>
                                                     <td>
                                                         {!! Helper::getAttendanceLabel($attendance['status']) !!}

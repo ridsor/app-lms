@@ -56,7 +56,7 @@
         <div class="col-12 p-0">
           <div class="card h-100 my-0 rounded-responsive">
             <div class="card-body px-3 py-4">
-              <h3 class="mb-3">Hasil Ujian</h3>
+              <h3 class="mb-3">Hasil</h3>
               <div class="row justify-content-between gap-2">
                 <div class="col-auto row g-2 align-items-center flex-grow-1">
                   @if ($exam->not_yet_rated)
@@ -68,8 +68,7 @@
                   @endif
                   <div class="d-flex align-items-center w-100 gap-2 col-12" style="max-width:400px">
                     <i data-feather="search"></i>
-                    <input type="type" class="form-control w-100" placeholder="Cari nama mahasiswa"
-                      id="globalSearch" />
+                    <input type="type" class="form-control w-100" placeholder="Cari nama siswa" id="globalSearch" />
                   </div>
                 </div>
                 <div class="d-flex flex-wrap gap-2 align-items-center col-12 justify-content-between col-md-auto">
@@ -90,7 +89,7 @@
                       Reset Semua
                     </span>
                   </button>
-                  <a class="btn btn-outline-info d-flex align-items-center gap-2 {{ $exam->results_count > 0 ? '' : 'pe-none' }}"
+                  <a class="btn btn-outline-info d-flex align-items-center gap-2 {{ $exam->results->first()?->id ? '' : 'pe-none' }}"
                     {{ $exam->results->first()?->id ? 'href=' . route('user.exam.evaluation', ['exam_id' => $exam->id]) : '' }}>
                     <span>
                       Penilaian
@@ -109,16 +108,19 @@
                       <div class="card-body px-0 pt-0">
                         <div class="list-product list-category">
                           <div class="recent-table table-responsive custom-scrollbar">
-                            <table class="table table-bordered" id="exam-result-table">
+                            <table class="table" id="exam-result-table">
                               <thead>
                                 <tr>
-                                  <th>No</th>
-                                  <th>Nama</th>
-                                  <th>Pengerjaan</th>
-                                  <th>Nilai</th>
-                                  <th></th>
+                                  <th> <span class="c-o-light f-w-600">No</span></th>
+                                  <th> <span class="c-o-light f-w-600">Nama</span></th>
+                                  <th> <span class="c-o-light f-w-600">NISN</span></th>
+                                  <th> <span class="c-o-light f-w-600">Nilai</span></th>
+                                  <th> <span class="c-o-light f-w-600">Status</span></th>
+                                  <th> <span class="c-o-light f-w-600">Pengerjaan</span></th>
+                                  <th> <span class="c-o-light f-w-600">Aksi</span></th>
                                 </tr>
                               </thead>
+                              <tbody></tbody>
                             </table>
                           </div>
                         </div>

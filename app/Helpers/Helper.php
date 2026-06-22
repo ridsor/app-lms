@@ -231,6 +231,9 @@ class Helper
         if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
             return "fa fa-file-image text-info";
         }
+        if (in_array($ext, ['kml', 'gpx', 'geojson'])) {
+            return "fa fa-map-marker text-success";
+        }
 
         return "fa fa-file";
     }
@@ -244,6 +247,7 @@ class Helper
         $audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a'];
         $documentExtensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'xlsx', 'xls', 'ppt', 'pptx'];
         $archiveExtensions = ['zip', 'rar', '7z', 'tar', 'gz'];
+        $mapExtensions = ['kml', 'gpx', 'geojson'];
 
         if (in_array($extension, $imageExtensions)) {
             return 'image';
@@ -255,6 +259,8 @@ class Helper
             return 'document';
         } elseif (in_array($extension, $archiveExtensions)) {
             return 'archive';
+        } elseif (in_array($extension, $mapExtensions)) {
+            return 'map';
         } else {
             return 'other';
         }
@@ -273,5 +279,32 @@ class Helper
         }
 
         return $array;
+    }
+
+    public static function isGooglePreviewable($filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $supported = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+        return in_array($extension, $supported);
+    }
+
+    public static function isPreviewable($filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $supported = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'kml', 'gpx', 'geojson'];
+        return in_array($extension, $supported);
+    }
+
+    public static function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }

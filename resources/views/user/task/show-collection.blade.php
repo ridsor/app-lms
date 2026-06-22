@@ -83,8 +83,7 @@
                   @endif
                   <div class="d-flex align-items-center w-100 gap-2 col-12" style="max-width:400px">
                     <i data-feather="search"></i>
-                    <input type="type" class="form-control w-100" placeholder="Cari nama mahasiswa"
-                      id="globalSearch" />
+                    <input type="type" class="form-control w-100" placeholder="Cari nama siswa" id="globalSearch" />
                   </div>
                 </div>
                 <div class="d-flex flex-wrap align-items-center gap-2 col-12 justify-content-between col-md-auto">

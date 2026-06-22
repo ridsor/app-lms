@@ -30,10 +30,10 @@ class StoreTeacherRequest extends FormRequest
             'name' => 'required|string|max:100',
             'nip' => 'required|string|max:100|' . $uniqueNip,
             'specialization' => 'nullable|string',
-            'date_of_birth' => 'required|date_format:d/m/Y',
-            'birthplace' => 'required|string|max:50',
-            'gender' => 'required|in:M,F',
-            'religion' => 'required|string|max:50',
+            'date_of_birth' => 'nullable|date_format:d/m/Y',
+            'birthplace' => 'nullable|string|max:50',
+            'gender' => 'nullable|in:M,F',
+            'religion' => 'nullable|string|max:50',
         ];
     }
 

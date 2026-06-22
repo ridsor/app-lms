@@ -75,13 +75,13 @@ class TaskSubmissionController extends Controller
     public function show(Request $request, $task_id)
     {
         $user = $request->user();
-        $task = Task::with(['meeting.schedule.class.students:id,user_id,class_id,nis,name'])->findOrFail($task_id);
+        $task = Task::with(['meeting.schedule.class.students:id,user_id,class_id,nisn,name'])->findOrFail($task_id);
         $this->authorize('viewPossession', $task);
         $members = $task->meeting->schedule->class->students
             ->where('user_id', '!=', $user->id)
-            ->pluck('nis', 'name')
-            ->map(function ($nis, $name) {
-                return $name . ' (' . $nis . ')';
+            ->pluck('nisn', 'name')
+            ->map(function ($nisn, $name) {
+                return $name . ' (' . $nisn . ')';
             })
             ->values()
             ->toArray();

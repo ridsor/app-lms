@@ -64,7 +64,6 @@ const indonesianLocale = {
 const add_start_time = flatpickr("#addTaskStartTime", {
     defaultDate: new Date(),
     minDate: "today",
-    minTime: formatTime(new Date()),
     enableTime: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
@@ -84,7 +83,6 @@ const add_start_time = flatpickr("#addTaskStartTime", {
 const add_end_time = flatpickr("#addTaskEndTime", {
     defaultDate: new Date(),
     minDate: "today",
-    minTime: formatTime(new Date()),
     enableTime: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
@@ -103,7 +101,6 @@ const add_end_time = flatpickr("#addTaskEndTime", {
 const add_late_submission_time = flatpickr("#addLateSubmissionTime", {
     defaultDate: new Date(),
     minDate: "today",
-    minTime: formatTime(new Date()),
     enableTime: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
@@ -114,7 +111,6 @@ const edit_start_time = flatpickr("#editTaskStartTime", {
     enableTime: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
-    minTime: formatTime(new Date()),
     locale: indonesianLocale,
     onChange: function (selectedDates) {
         if (selectedDates.length > 0) {

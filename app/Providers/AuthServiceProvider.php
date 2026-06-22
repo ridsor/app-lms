@@ -20,8 +20,10 @@ use App\Models\Task;
 use App\Models\TaskSubmission;
 use App\Policies\TaskPolicy;
 use App\Models\Exam;
+use App\Models\UKK;
 use App\Policies\ExamPolicy;
 use App\Policies\TaskSubmissionPolicy;
+use App\Policies\UKKPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -42,6 +44,7 @@ class AuthServiceProvider extends ServiceProvider
     Task::class => TaskPolicy::class,
     TaskSubmission::class => TaskSubmissionPolicy::class,
     Exam::class => ExamPolicy::class,
+    UKK::class => UKKPolicy::class,
   ];
 
   /**

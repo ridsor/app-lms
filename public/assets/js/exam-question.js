@@ -166,6 +166,15 @@ $(document).ready(function () {
 
     $("#addQuestionForm").on("submit", function (e) {
         e.preventDefault();
+
+        // Sync Quill to input
+        var value = addQuestionTextQuill.root.innerHTML;
+        var descriptionText = addQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#addQuestionText").val(value);
+
         const id = $(this).data("id");
 
         $("#addQuestionForm").find("input, select").removeClass("is-invalid");
@@ -179,7 +188,7 @@ $(document).ready(function () {
             );
         const formData = new FormData(this);
         formData.append('question_type', 'multiple_choice');
-        formData.append('model', 'exam');
+        formData.append('model', $(this).data('type') || 'exam');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -250,6 +259,15 @@ $(document).ready(function () {
 
     $("#addEssayQuestionForm").on("submit", function (e) {
         e.preventDefault();
+
+        // Sync Quill to input
+        var value = addEssayQuestionTextQuill.root.innerHTML;
+        var descriptionText = addEssayQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#addEssayQuestionText").val(value);
+
         const id = $(this).data("id");
 
         $("#addEssayQuestionForm").find("input, select").removeClass("is-invalid");
@@ -263,7 +281,7 @@ $(document).ready(function () {
             );
         const formData = new FormData(this);
         formData.append('question_type', 'essay');
-        formData.append('model', 'exam');
+        formData.append('model', $(this).data('type') || 'exam');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -317,6 +335,15 @@ $(document).ready(function () {
 
     $("#editQuestionForm").on("submit", function (e) {
         e.preventDefault();
+
+        // Sync Quill to input
+        var value = editQuestionTextQuill.root.innerHTML;
+        var descriptionText = editQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#editQuestionText").val(value);
+
         const id = $(this).data("id");
 
         $("#editQuestionForm").find("input, select").removeClass("is-invalid");
@@ -330,7 +357,7 @@ $(document).ready(function () {
             );
         const formData = new FormData(this);
         formData.append('question_type', 'multiple_choice');
-        formData.append('model', 'exam');
+        formData.append('model', $(this).data('type') || 'exam');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -402,6 +429,15 @@ $(document).ready(function () {
 
     $("#editEssayQuestionForm").on("submit", function (e) {
         e.preventDefault();
+
+        // Sync Quill to input
+        var value = editEssayQuestionTextQuill.root.innerHTML;
+        var descriptionText = editEssayQuestionTextQuill.getText().trim();
+        if (descriptionText === "" || descriptionText === "\n") {
+            value = "";
+        }
+        $("#editEssayQuestionText").val(value);
+
         const id = $(this).data("id");
 
         $("#editEssayQuestionForm").find("input, select").removeClass("is-invalid");
@@ -415,7 +451,7 @@ $(document).ready(function () {
             );
         const formData = new FormData(this);
         formData.append('question_type', 'essay');
-        formData.append('model', 'exam');
+        formData.append('model', $(this).data('type') || 'exam');
 
         $.ajax({
             url: `/soal/${id}`,
@@ -471,6 +507,87 @@ $(document).ready(function () {
                                 options_errors[0]
                             );
                             toast.show();
+                        }
+                    }
+                } else {
+                    const toast = new bootstrap.Toast($("#toast-error"));
+                    $("#toast-error #toast-text").text(
+                        xhr.responseJSON.message
+                    );
+                    toast.show();
+                }
+                submitBtn.prop("disabled", false).html(originalHtml);
+            },
+        });
+    });
+
+    // Import file preview
+    $("#importQuestionFile").on("change", function (e) {
+        const file = e.target.files[0];
+        if (file) {
+            $("#import-file-preview").html(`
+                <div class="d-flex align-items-center gap-2 border p-2 rounded">
+                    <i class="fa fa-file-excel text-success"></i>
+                    <span class="text-truncate flex-grow-1" style="max-width: 250px;">${file.name}</span>
+                    <button type="button" class="btn btn-sm text-danger remove-import-file p-0">
+                        <i class="fa fa-times-circle fs-5"></i>
+                    </button>
+                </div>
+            `);
+        }
+    });
+
+    $(document).on("click", ".remove-import-file", function () {
+        $("#import-file-preview").html("");
+    });
+
+    $("#importQuestionForm").on("submit", function (e) {
+        e.preventDefault();
+
+        $("#importQuestionForm").find("input, select").removeClass("is-invalid");
+        $("#importQuestionForm").find(".invalid-feedback").text("");
+        const submitBtn = $(this).find("button[type='submit']");
+        const originalHtml = submitBtn.html();
+        submitBtn
+            .prop("disabled", true)
+            .html(
+                '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Loading...'
+            );
+        const formData = new FormData(this);
+
+        $.ajax({
+            url: $(this).attr('action'),
+            method: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                if (response.success) {
+                    const toast = new bootstrap.Toast($("#toast-success"));
+                    $("#toast-success #toast-text").text(response.message);
+                    toast.show();
+                    location.reload();
+                }
+            },
+            error: function (xhr) {
+                if (xhr.status === 422) {
+                    const errors = xhr.responseJSON.errors;
+                    for (const key in errors) {
+                        if (
+                            $("#importQuestionForm [name='" + key + "']").hasClass(
+                                "file_path"
+                            )
+                        ) {
+                            $("#importQuestionForm [name='" + key + "']")
+                                .parent()
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
+                        } else {
+                            $("#importQuestionForm [name='" + key + "']")
+                                .addClass("is-invalid")
+                                .next(".invalid-feedback")
+                                .text(errors[key][0]);
                         }
                     }
                 } else {
@@ -545,11 +662,40 @@ function handleEditQuestion(e, id, type) {
                     $("#editQuestionForm [name='option_b']").val(res.data.option_b);
                     $("#editQuestionForm [name='option_c']").val(res.data.option_c);
 
+                    // Preview main file
+                    if (res.data.question_file) {
+                        let fileName = res.data.question_file.split('/').pop();
+                        let fileIcon = typeof getFileIcon === 'function' ? getFileIcon(fileName) : "fa fa-file";
+                        let html = typeof getElementFileSimple === 'function' ? getElementFileSimple(fileName, "File Server", fileIcon, 'server') : `<div>${fileName}</div>`;
+                        $("#editQuestionForm").find("#file-preview").html(html);
+                    } else {
+                        $("#editQuestionForm").find("#file-preview").empty();
+                    }
+
+                    // Reset all option images first
+                    ["a", "b", "c", "d", "e"].forEach(opt => {
+                        let $optionRow = $("#editQuestionForm").find(`.answer-option [name='option_${opt}']`).closest(".answer-option");
+                        if ($optionRow.length) {
+                            $optionRow.find(".img-preview").attr("src", "").hide();
+                            $optionRow.find(".file-icon").show();
+                        }
+                    });
+
+                    // Set option images if exist
+                    ["a", "b", "c"].forEach(opt => {
+                        if (res.data[`option_${opt}_image`]) {
+                            let $optionRow = $("#editQuestionForm").find(`.answer-option [name='option_${opt}']`).closest(".answer-option");
+                            $optionRow.find(".img-preview").attr("src", `/soal/${res.data.id}/${opt}/file?type=${res.data.question_type}`).show();
+                            $optionRow.find(".file-icon").hide();
+                        }
+                    });
+
                     let $container =
                         $("#editQuestionForm").find("#optionsContainer");
 
                     if (res.data.option_d) {
-                        $container.append(elementOption("d", res.data.option_d));
+                        let imageHtml = res.data.option_d_image ? `/soal/${res.data.id}/d/file?type=${res.data.question_type}` : null;
+                        $container.append(elementOption("d", res.data.option_d, imageHtml));
                     } else {
                         if ($("#editQuestionForm [name='option_d']").length > 0)
                             $("#editQuestionForm [name='option_d']")
@@ -557,7 +703,8 @@ function handleEditQuestion(e, id, type) {
                                 .remove();
                     }
                     if (res.data.option_e) {
-                        $container.append(elementOption("e", res.data.option_e));
+                        let imageHtml = res.data.option_e_image ? `/soal/${res.data.id}/e/file?type=${res.data.question_type}` : null;
+                        $container.append(elementOption("e", res.data.option_e, imageHtml));
                     } else {
                         if ($("#editQuestionForm [name='option_e']").length > 0)
                             $("#editQuestionForm [name='option_e']")
@@ -575,6 +722,15 @@ function handleEditQuestion(e, id, type) {
                     $("#editEssayQuestionForm [name='question_points']").val(
                         res.data.question_points
                     );
+
+                    if (res.data.question_file) {
+                        let fileName = res.data.question_file.split('/').pop();
+                        let fileIcon = typeof getFileIcon === 'function' ? getFileIcon(fileName) : "fa fa-file";
+                        let html = typeof getElementFileSimple === 'function' ? getElementFileSimple(fileName, "File Server", fileIcon, 'server') : `<div>${fileName}</div>`;
+                        $("#editEssayQuestionForm").find("#file-preview").html(html);
+                    } else {
+                        $("#editEssayQuestionForm").find("#file-preview").empty();
+                    }
 
                     $("#editEssayQuestionModal").modal("show");
                 }
@@ -718,6 +874,7 @@ $(function () {
         const trashBtn = $(this);
         var id = trashBtn.data("id");
         var exam_id = $("#question-bank-table").data("exam-id");
+        var type = $("#question-bank-table").data("type") || "exam";
         if (!id || !exam_id) return;
 
         Swal.fire({
@@ -740,8 +897,11 @@ $(function () {
                     .html(
                         '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span>'
                     );
+
+                let url = type === "ukk" ? `/ukk/${exam_id}/copy/${id}` : `/ujian/${exam_id}/copy/${id}`;
+
                 $.ajax({
-                    url: `/ujian/${exam_id}/copy/${id}`,
+                    url: url,
                     method: "POST",
                     success: function (res) {
                         if (res.success) {

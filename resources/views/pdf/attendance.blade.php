@@ -87,7 +87,7 @@
                     <td>{{ $index + 1 }}</td>
                     <td class="left">
                         {{ $attendance['student']->name }}<br>
-                        <small>{{ $attendance['student']->nis }}</small>
+                        <small>{{ $attendance['student']->nisn }}</small>
                     </td>
                     @foreach ($attendance['attendances'] as $status)
                         <td>{{ $status }}</td>

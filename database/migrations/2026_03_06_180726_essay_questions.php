@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->morphs('questionable');
             $table->text('question_text');
-            $table->integer('question_points');
+            $table->integer('question_points')->nullable();
             $table->string('question_file', 255)->nullable();
             $table->timestamps();
         });

@@ -173,7 +173,7 @@
                                                 <div class="d-flex flex-column">
                                                     <p class="mb-0 c-o-light fw-medium" id="teacher">{{ $student->name }}
                                                     </p>
-                                                    <p class="mb-0 c-o-light" id="teacher">{{ $student->nis }}</p>
+                                                    <p class="mb-0 c-o-light" id="teacher">{{ $student->nisn }}</p>
                                                 </div>
                                             </div>
                                         </div>

@@ -72,7 +72,11 @@ class TeacherController extends Controller
     }
     try {
       $validated = $request->validated();
-      $validated['date_of_birth'] = \Carbon\Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
+      if (!empty($validated['date_of_birth'])) {
+        $validated['date_of_birth'] = \Carbon\Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
+      } else {
+        $validated['date_of_birth'] = null;
+      }
       DB::beginTransaction();
       $user = User::create(['name' => $validated['name']]);
       $user->assignRole('teacher');
@@ -133,7 +137,11 @@ class TeacherController extends Controller
         return abort(403);
       }
       $validated = $request->validated();
-      $validated['date_of_birth'] = \Carbon\Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
+      if (!empty($validated['date_of_birth'])) {
+        $validated['date_of_birth'] = \Carbon\Carbon::createFromFormat('d/m/Y', $validated['date_of_birth'])->translatedFormat('Y-m-d');
+      } else {
+        $validated['date_of_birth'] = null;
+      }
       DB::beginTransaction();
       $teacher->update($validated);
       $teacher->user->update(['name' => $validated['name']]);
@@ -152,10 +160,6 @@ class TeacherController extends Controller
       if (!$request->user()->can('delete', Teacher::class)) {
         return abort(403);
       }
-      DB::beginTransaction();
-      if ($teacher->user) {
-        $teacher->user->delete();
-      }
       if ($teacher->schedules()->count() > 0) {
         return $this->sendError(
           'Tidak dapat dihapus karena masih memiliki jadwal.',
@@ -163,11 +167,16 @@ class TeacherController extends Controller
           400
         );
       }
+      DB::beginTransaction();
+      if ($teacher->user) {
+        $teacher->user->delete();
+      }
       $teacher->delete();
       DB::commit();
       return $this->sendResponse('Guru berhasil dihapus.');
     } catch (\Exception $e) {
       DB::rollBack();
+      Log::error('Error destroying teacher: ' . $e->getMessage());
       return $this->sendError('Silakan coba lagi.', [], 500);
     }
   }
@@ -182,18 +191,23 @@ class TeacherController extends Controller
       if (empty($ids)) {
         return $this->sendError('Tidak ada data yang dipilih untuk dihapus.', [], 400);
       }
-      DB::beginTransaction();
+
       $teachers = Teacher::whereIn('id', $ids)->get();
+
       foreach ($teachers as $teacher) {
-        if ($teacher->user) {
-          $teacher->user->delete();
-        }
         if ($teacher->schedules()->count() > 0) {
           return $this->sendError(
-            'Tidak dapat dihapus karena masih memiliki jadwal.',
+            "Guru {$teacher->name} tidak dapat dihapus karena masih memiliki jadwal.",
             [],
             400
           );
+        }
+      }
+
+      DB::beginTransaction();
+      foreach ($teachers as $teacher) {
+        if ($teacher->user) {
+          $teacher->user->delete();
         }
         $teacher->delete();
       }

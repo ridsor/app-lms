@@ -22,13 +22,11 @@ class Student extends Model
         'homeroom_teacher_id',
         'parent_id',
         'name',
-        'nis',
         'nisn',
         'date_of_birth',
         'birthplace',
         'gender',
         'religion',
-        'admission_year',
         'status'
     ];
 
@@ -91,7 +89,7 @@ class Student extends Model
         if (!empty($filters['search']['value'])) {
             $search = $filters['search']['value'];
             $query->where(function ($q) use ($search) {
-                $q->whereFullText('students.name', $search)->orWhere('students.nis', 'like', '%' . $search . '%')->orWhere('students.nisn', 'like', '%' . $search . '%');
+                $q->whereFullText('students.name', $search)->orWhere('students.nisn', 'like', '%' . $search . '%');
             });
         }
 

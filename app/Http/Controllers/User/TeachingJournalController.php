@@ -23,7 +23,7 @@ class TeachingJournalController extends Controller
     public function store(TeachingJournalRequest $request, $meeting_id)
     {
         try {
-            $meeting = Meeting::findOrFail($meeting_id);
+            $meeting = Meeting::with('teaching_journal')->findOrFail($meeting_id);
             $this->authorize('update', $meeting);
 
             $today = Carbon::now();
@@ -54,6 +54,7 @@ class TeachingJournalController extends Controller
 
             return $this->sendResponse('Jurnal berhasil disimpan.', $meeting->teaching_journal, 201);
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -365,7 +366,7 @@ class TeachingJournalController extends Controller
                 $q->orderBy('date', 'asc')->where('type', '!=', 'Holiday');
             },
             'class.students' => function ($query) use ($request) {
-                $query->select('id', 'name', 'nis', 'user_id', 'class_id', 'parent_id');
+                $query->select('id', 'name', 'nisn', 'user_id', 'class_id', 'parent_id');
             },
             'meetings.attendances:id,status,user_id,meeting_id',
             'meetings.teaching_journal',

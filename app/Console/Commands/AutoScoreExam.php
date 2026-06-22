@@ -24,11 +24,11 @@ class AutoScoreExam extends Command
      */
     public function handle(ExamScoringService $scoringService)
     {
-        $examResults = ExamResult::where(function ($q) {
-            $q->whereNull('score');
-        })
-            ->whereNotNull('end_time')
-            ->where('end_time', '<', now())
+        $examResults = ExamResult::whereNull('score')
+            ->whereHas('exam', function ($q) {
+                $q->whereNotNull('end_time')
+                    ->where('end_time', '<', now());
+            })
             ->get();
 
         foreach ($examResults as $examResult) {

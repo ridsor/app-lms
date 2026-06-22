@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\QuestionRequest;
 use App\Models\EssayQuestion;
 use App\Models\Exam;
+use App\Models\UKK;
 use App\Models\MultipleQuestion;
 use App\Models\QuestionBank;
 use Illuminate\Http\Request;
@@ -21,12 +22,19 @@ class QuestionController extends Controller
 
             $validated = $request->validated();
 
+            // Set default points if null or empty string (especially for UKK)
+            if (!isset($validated['question_points']) || is_null($validated['question_points']) || $validated['question_points'] === '') {
+                $validated['question_points'] = 0;
+            }
+
             // Set polymorphic relation
             $validated['questionable_id'] = $id;
             if ($request->input('model') === 'exam') {
                 $validated['questionable_type'] = Exam::class;
             } else if ($request->input('model') === 'question_bank') {
                 $validated['questionable_type'] = QuestionBank::class;
+            } else if ($request->input('model') === 'ukk') {
+                $validated['questionable_type'] = UKK::class;
             }
 
             // Upload file
@@ -100,13 +108,48 @@ class QuestionController extends Controller
             if (!$request->user()->can(['question.edit'])) return abort(403);
 
             $question = null;
-            if ($request->input('question_type') === 'multiple_choice') {
+            $type = $request->input('question_type');
+            if ($type === 'multiple_choice' || $type === 'multiple') {
                 $question = MultipleQuestion::find($id);
-            } else if ($request->input('question_type') === 'essay') {
+            } else if ($type === 'essay') {
                 $question = EssayQuestion::find($id);
             }
 
+            if (!$question) {
+                return $this->sendError('Soal tidak ditemukan.', [], 404);
+            }
+
             $validated = $request->validated();
+
+            // Set default points if null or empty string (especially for UKK)
+            if (!isset($validated['question_points']) || is_null($validated['question_points']) || $validated['question_points'] === '') {
+                $validated['question_points'] = 0;
+            }
+
+            // Prevent accidental nulling of existing files
+            unset($validated['question_file']);
+            foreach (['a', 'b', 'c', 'd', 'e'] as $opt) {
+                unset($validated["option_{$opt}_image"]);
+            }
+
+            if ($request->has('deleteData')) {
+                $deleteData = $request->input('deleteData');
+                if (in_array('question_file', $deleteData)) {
+                    if (!empty($question->question_file) && Storage::exists($question->question_file)) {
+                        Storage::delete($question->question_file);
+                    }
+                    $validated['question_file'] = null;
+                }
+                foreach (['a', 'b', 'c', 'd', 'e'] as $opt) {
+                    if (in_array("option_{$opt}_image", $deleteData)) {
+                        $imageKey = "option_{$opt}_image";
+                        if (!empty($question->$imageKey) && Storage::exists($question->$imageKey)) {
+                            Storage::delete($question->$imageKey);
+                        }
+                        $validated[$imageKey] = null;
+                    }
+                }
+            }
 
             if ($request->hasFile('question_file')) {
                 if (!empty($question->question_file) && Storage::exists($question->question_file)) {
@@ -115,36 +158,15 @@ class QuestionController extends Controller
                 $validated['question_file'] = $request->file('question_file')->store('file/ujian');
             }
 
-            if ($request->input('question_type') === 'multiple_choice') {
-                if ($request->hasFile('option_a_image')) {
-                    if (!empty($question->option_a_image) && Storage::exists($question->option_a_image)) {
-                        Storage::delete($question->option_a_image);
+            if ($type === 'multiple_choice' || $type === 'multiple') {
+                foreach (['a', 'b', 'c', 'd', 'e'] as $opt) {
+                    $fileKey = "option_{$opt}_image";
+                    if ($request->hasFile($fileKey)) {
+                        if (!empty($question->$fileKey) && Storage::exists($question->$fileKey)) {
+                            Storage::delete($question->$fileKey);
+                        }
+                        $validated[$fileKey] = $request->file($fileKey)->store('file/ujian');
                     }
-                    $validated['option_a_image'] = $request->file('option_a_image')->store('file/ujian');
-                }
-                if ($request->hasFile('option_b_image')) {
-                    if (!empty($question->option_b_image) && Storage::exists($question->option_b_image)) {
-                        Storage::delete($question->option_b_image);
-                    }
-                    $validated['option_b_image'] = $request->file('option_b_image')->store('file/ujian');
-                }
-                if ($request->hasFile('option_c_image')) {
-                    if (!empty($question->option_c_image) && Storage::exists($question->option_c_image)) {
-                        Storage::delete($question->option_c_image);
-                    }
-                    $validated['option_c_image'] = $request->file('option_c_image')->store('file/ujian');
-                }
-                if ($request->hasFile('option_d_image')) {
-                    if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
-                        Storage::delete($question->option_d_image);
-                    }
-                    $validated['option_d_image'] = $request->file('option_d_image')->store('file/ujian');
-                }
-                if ($request->hasFile('option_e_image')) {
-                    if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
-                        Storage::delete($question->option_e_image);
-                    }
-                    $validated['option_e_image'] = $request->file('option_e_image')->store('file/ujian');
                 }
 
                 if (!$request->has('option_d')) {
@@ -152,12 +174,14 @@ class QuestionController extends Controller
                     if (!empty($question->option_d_image) && Storage::exists($question->option_d_image)) {
                         Storage::delete($question->option_d_image);
                     }
+                    $validated['option_d_image'] = null;
                 }
                 if (!$request->has('option_e')) {
                     $validated['option_e'] = null;
                     if (!empty($question->option_e_image) && Storage::exists($question->option_e_image)) {
                         Storage::delete($question->option_e_image);
                     }
+                    $validated['option_e_image'] = null;
                 }
             }
 
@@ -243,7 +267,7 @@ class QuestionController extends Controller
             if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
                 return abort(403);
             }
-        } else if ($question->questionable_type == Exam::class) {
+        } else if ($question->questionable_type == Exam::class || $question->questionable_type == UKK::class) {
             $this->authorize('view', $question->questionable);
         }
 
@@ -274,7 +298,7 @@ class QuestionController extends Controller
             if (!$request->user()->can(['exam.create', 'exam.view', 'exam.edit', 'exam.delete'])) {
                 return abort(403);
             }
-        } else if ($question->questionable_type == Exam::class) {
+        } else if ($question->questionable_type == Exam::class || $question->questionable_type == UKK::class) {
             $this->authorize('view', $question->questionable);
         }
 
@@ -314,7 +338,7 @@ class QuestionController extends Controller
             if (!$request->user()->can(['question.create', 'question.view', 'question.edit', 'question.delete'])) {
                 return abort(403);
             }
-        } else if ($question->questionable_type == Exam::class) {
+        } else if ($question->questionable_type == Exam::class || $question->questionable_type == UKK::class) {
             $this->authorize('view', $question->questionable);
         }
 
