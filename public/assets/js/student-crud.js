@@ -45,10 +45,6 @@ $(function () {
                 name: "students.name",
             },
             {
-                data: "NIS",
-                name: "students.nis",
-            },
-            {
                 data: "NISN",
                 name: "students.nisn",
             },
@@ -60,11 +56,6 @@ $(function () {
             {
                 data: "Kelas",
                 name: "classes.name",
-                searchable: false,
-            },
-            {
-                data: "Wali Kelas",
-                name: "homeroom_teacher_name",
                 searchable: false,
             },
             {
@@ -576,7 +567,6 @@ $(document).ready(function () {
             success: function (res) {
                 if (res.success && res.data) {
                     $("#editStudentForm [name='name']").val(res.data.name);
-                    $("#editStudentForm [name='nis']").val(res.data.nis);
                     $("#editStudentForm [name='nisn']").val(res.data.nisn);
 
                     let classOptions = '<option value="">Pilih Kelas</option>';
@@ -635,9 +625,6 @@ $(document).ready(function () {
                     $("#editStudentForm [name='religion']").val(
                         res.data.religion
                     );
-                    $("#editStudentForm [name='admission_year']").val(
-                        res.data.admission_year
-                    );
                     $("#editStudentForm [name='status']").val(res.data.status);
 
                     $("#editStudentForm").attr("data-id", id);
@@ -684,7 +671,6 @@ $(document).ready(function () {
             success: function (res) {
                 if (res.success && res.data) {
                     $("#viewStudentName").text(res.data.name || "-");
-                    $("#viewStudentNis").text(res.data.nis || "-");
                     $("#viewStudentNisn").text(res.data.nisn || "-");
                     $("#viewStudentMajor").text(
                         res.data.class && res.data.class.major
@@ -715,9 +701,6 @@ $(document).ready(function () {
                             : "-"
                     );
                     $("#viewStudentReligion").text(res.data.religion || "-");
-                    $("#viewStudentAdmissionYear").text(
-                        res.data.admission_year || "-"
-                    );
                     let statusLabel = "-";
                     switch (res.data.status) {
                         case "active":

@@ -10,8 +10,10 @@ use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\Task;
 use App\Models\Teacher;
+use App\Models\UKK;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -73,7 +75,9 @@ class HomeController extends Controller
             $countExams = 0;
             if ($request->user()->hasRole('teacher')) {
                 $countExams = Exam::filterByPermission($request->user())->whereHas('results', function ($query) {
-                    $query->whereNull('score');
+                    $query->whereHas('answers', function ($subQuery) {
+                        $subQuery->whereNull('score');
+                    });
                 })->count();
             } elseif ($request->user()->hasRole('student')) {
                 $countExams = Exam::filterByPermission($request->user())->whereDoesntHave('results', function ($query) use ($request) {
@@ -93,19 +97,23 @@ class HomeController extends Controller
 
             $data = SchoolClass::withCount('students')
                 ->with([
-                    'schedules:id,class_id',
-                    'schedules' => fn($q) => $q->withCount([
-                        // journal: meeting yang punya teaching_journal
-                        'meetings as present_count' => fn($query) => $query
-                            ->where('type', '!=', 'Holiday')
-                            ->whereDate('date', '<=', now())
-                            ->has('teaching_journal'),
+                    'schedules' => function ($q) {
+                        // Gabungkan select kolom dan withCount di satu tempat
+                        $q->select('id', 'class_id')
+                            ->withCount([
+                                // journal: meeting yang punya teaching_journal
+                                'meetings as present_count' => fn($query) => $query
+                                    ->where('type', '!=', 'Holiday')
+                                    ->whereDate('date', '<=', now())
+                                    ->has('teaching_journal'),
 
-                        // total meeting
-                        'meetings as meeting_count' => fn($query) => $query
-                            ->where('type', '!=', 'Holiday')
-                            ->whereDate('date', '<=', now())
-                    ]),
+                                // total meeting
+                                'meetings as meeting_count' => fn($query) => $query
+                                    ->where('type', '!=', 'Holiday')
+                                    ->whereDate('date', '<=', now())
+                            ]);
+                    },
+                    // Load relasi meetings di dalam schedules beserta attendance count-nya
                     'schedules.meetings' => fn($query) => $query
                         ->select(['id', 'schedule_id', 'type', 'date'])
                         ->where('type', '!=', 'Holiday')
@@ -175,6 +183,22 @@ class HomeController extends Controller
                 'attendannce_percentage',
                 'journal_percentage'
             ));
+        } elseif ($request->user()->hasRole('operator') && $request->user()->can('ukk.evaluation')) {
+            $countUKKTheory = \App\Models\UKKResultTheory::whereHas('ukk', function ($q) use ($request) {
+                $q->filterByPermission($request->user());
+            })->where('status', 'completed')->count();
+
+            $countUKKPractice = \App\Models\UKKResultPractice::whereHas('ukk', function ($q) use ($request) {
+                $q->filterByPermission($request->user());
+            })->count();
+
+            $ukks = UKK::filterByPermission($request->user())
+                ->with(['period'])
+                ->latest()
+                ->limit(5)
+                ->get();
+
+            return view('user.home', compact('countUKKTheory', 'countUKKPractice', 'ukks'));
         } else {
             return view('user.home');
         }

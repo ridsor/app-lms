@@ -23,7 +23,7 @@ class TeachingJournalController extends Controller
     public function store(TeachingJournalRequest $request, $meeting_id)
     {
         try {
-            $meeting = Meeting::findOrFail($meeting_id);
+            $meeting = Meeting::with('teaching_journal')->findOrFail($meeting_id);
             $this->authorize('update', $meeting);
 
             $today = Carbon::now();
@@ -54,6 +54,7 @@ class TeachingJournalController extends Controller
 
             return $this->sendResponse('Jurnal berhasil disimpan.', $meeting->teaching_journal, 201);
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -96,10 +97,10 @@ class TeachingJournalController extends Controller
                 'schedules' => function ($q) use ($activePeriod, $request) {
                     $q->select(['id', 'class_id'])->withCount([
                         'meetings as present_count' => function ($query) {
-                            $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now())->has('teaching_journal');
+                            $query->where('type', '!=', 'Holiday')->has('teaching_journal');
                         },
                         'meetings as meeting_count' => function ($query) {
-                            $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now());
+                            $query->where('type', '!=', 'Holiday');
                         }
                     ]);
                     if ($request->filled('periode')) {
@@ -249,10 +250,10 @@ class TeachingJournalController extends Controller
 
             $data = $data->withCount([
                 'meetings as present_count' => function ($query) {
-                    $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now())->has('teaching_journal');
+                    $query->where('type', '!=', 'Holiday')->has('teaching_journal');
                 },
                 'meetings as meeting_count' => function ($query) {
-                    $query->where('type', '!=', 'Holiday')->whereDate('date', '<=', now());
+                    $query->where('type', '!=', 'Holiday');
                 }
             ]);
 
@@ -351,7 +352,7 @@ class TeachingJournalController extends Controller
         return view('user.teaching_journal.meeting-by-schedule', compact('schedule'));
     }
 
-    public function export(Request $request, $code)
+    public function export(Request $request, $id)
     {
         if (!$request->user()->hasRole('teacher')) return abort(403);
 
@@ -362,15 +363,55 @@ class TeachingJournalController extends Controller
             'teacher:id,name,nip',
             'period:id,academic_year,semester',
             'meetings' => function ($q) {
-                $q->orderBy('date', 'asc');
+                $q->orderBy('date', 'asc')->where('type', '!=', 'Holiday');
             },
+            'class.students' => function ($query) use ($request) {
+                $query->select('id', 'name', 'nisn', 'user_id', 'class_id', 'parent_id');
+            },
+            'meetings.attendances:id,status,user_id,meeting_id',
             'meetings.teaching_journal',
             'meetings.materials:id,meeting_id,title,description',
             'meetings.tasks:id,meeting_id,title,description'
-        ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
+        ])->find($id);
         $this->authorize('view', $schedule);
 
-        $pdf = Pdf::loadView('pdf.journal', $schedule->toArray())->setPaper('A4', 'portrait');
+        $data = $schedule->toArray();
+
+        $meeting_summaries = [];
+        $students = $schedule->class->students ?? collect();
+        foreach ($schedule->meetings as $meeting) {
+            $totalAttendance = 0;
+            $totalSick = 0;
+            $totalPermission = 0;
+            $totalAbsence = 0;
+            foreach ($students as $student) {
+
+                $attendance = $meeting->attendances->firstWhere('user_id', $student->user_id);
+                $status = $attendance ? $attendance->status : null;
+                if ($status === 'H') {
+                    $totalAttendance++;
+                }
+                if ($status === 'S') {
+                    $totalSick++;
+                }
+                if ($status === 'I') {
+                    $totalPermission++;
+                }
+                if ($status === 'A') {
+                    $totalAbsence++;
+                }
+            }
+            $meeting_summaries[] = [
+                'total_attendance' => $totalAttendance,
+                'total_sick' => $totalSick,
+                'total_permission' => $totalPermission,
+                'total_absence' => $totalAbsence,
+            ];
+        }
+
+        $data['meeting_summaries'] = $meeting_summaries;
+
+        $pdf = Pdf::loadView('pdf.journal', $data)->setPaper('a4', 'landscape');
 
         $filename = "Jurnal Mengajar - "
             . ($schedule->period->semester == 'odd' ? 'Ganjil' : 'Genap')
@@ -381,28 +422,6 @@ class TeachingJournalController extends Controller
             . ".pdf";
 
 
-        return $pdf->download($filename);
-    }
-    public function exporttes(Request $request, $code)
-    {
-        if (!$request->user()->hasRole('teacher')) return abort(403);
-
-        $schedule = Schedule::with([
-            'subject:id,code,name',
-            'class:id,name,level,major_id',
-            'class.major:id,name',
-            'teacher:id,name,nip',
-            'period:id,academic_year,semester',
-            'meetings' => function ($q) {
-                $q->orderBy('date', 'asc');
-            },
-            'meetings.teaching_journal',
-            'meetings.materials:id,meeting_id,title,description',
-            'meetings.tasks:id,meeting_id,title,description'
-        ])->whereHas('subject', fn($query) => $query->where('code', $code))->firstOrFail();
-        $this->authorize('view', $schedule);
-
-
-        return view('pdf.journal', $schedule->toArray());
+        return $pdf->stream($filename);
     }
 }

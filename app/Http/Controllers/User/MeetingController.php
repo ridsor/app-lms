@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class MeetingController extends Controller
 {
-    public function update(MeetingRequest $request, $code, $meeting_id)
+    public function update(MeetingRequest $request, $id, $meeting_id)
     {
         try {
             $validated = $request->validated();

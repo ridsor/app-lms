@@ -43,6 +43,8 @@ function getContentIcon(value) {
         return "fa fa-file-powerpoint text-warning";
     if (["jpg", "jpeg", "png", "gif"].includes(ext))
         return "fa fa-file-image text-info";
+    if (["kml", "gpx", "geojson"].includes(ext))
+        return "fa fa-map-marker text-success";
     return "fa fa-file";
 }
 

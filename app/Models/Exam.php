@@ -19,9 +19,13 @@ class Exam extends Model
         'type',
         'start_time',
         'end_time',
-        'duration',
         'exam_mode',
         'is_shuffle_questions',
+    ];
+
+    protected $with = [
+        'multipleQuestions',
+        'essayQuestions',
     ];
 
     protected $casts = [
@@ -30,19 +34,61 @@ class Exam extends Model
         'end_time' => 'datetime',
     ];
 
+    protected $appends = ['duration'];
+
+    public function getDurationAttribute()
+    {
+        if (!$this->start_time || !$this->end_time) {
+            return 0;
+        }
+
+        return $this->start_time->diffInMinutes($this->end_time);
+    }
+
     public function schedule(): BelongsTo
     {
         return $this->belongsTo(Schedule::class);
     }
 
-    public function questions()
+    public function multipleQuestions()
     {
-        return $this->morphMany(Question::class, 'questionable');
+        return $this->morphMany(MultipleQuestion::class, 'questionable');
+    }
+
+    public function essayQuestions()
+    {
+        return $this->morphMany(EssayQuestion::class, 'questionable');
+    }
+
+    public function getQuestionsAttribute()
+    {
+        // 1. Ambil soal multiple dan sisipkan penanda tipe
+        $multiple = $this->multipleQuestions->map(function ($question) {
+            $question->setAttribute('question_type', 'multiple');
+            return $question;
+        });
+
+        // 2. Ambil soal essay dan sisipkan penanda tipe
+        $essay = $this->essayQuestions->map(function ($question) {
+            $question->setAttribute('question_type', 'essay');
+            return $question;
+        });
+
+        return $multiple->concat($essay)->sortBy('created_at')->values();
     }
 
     public function results(): HasMany
     {
         return $this->hasMany(ExamResult::class);
+    }
+
+    public function getRemainingSecondsAttribute()
+    {
+        $now = now();
+        if ($now->gt($this->end_time)) {
+            return 0;
+        }
+        return $now->diffInSeconds($this->end_time);
     }
 
     public function scopeFilter($query, array $filters)

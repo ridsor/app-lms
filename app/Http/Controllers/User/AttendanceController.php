@@ -15,6 +15,7 @@ use App\Models\Subject;
 use Yajra\DataTables\Facades\DataTables;
 use App\Models\Period;
 use App\Models\Teacher;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -234,7 +235,7 @@ class AttendanceController extends Controller
       'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
       'class.major' => fn($query) => $query->select('id', 'name'),
       'class.students' => function ($query) use ($request) {
-        $query->select('id', 'name', 'nis', 'user_id', 'class_id', 'parent_id');
+        $query->select('id', 'name', 'nisn', 'user_id', 'class_id', 'parent_id');
         if ($request->user()->hasRole('parent')) {
           $query->where('parent_id', $request->user()->id);
         } elseif ($request->user()->hasRole('student')) {
@@ -292,6 +293,96 @@ class AttendanceController extends Controller
     return view('user.attendance.show-attendance-recap', compact('schedule', 'attendances'));
   }
 
+  public function reportAttendancRecap(Request $request, $id)
+  {
+    $this->authorize('viewAny', Attendance::class);
+
+    $schedule = Schedule::with([
+      'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
+      'class.major' => fn($query) => $query->select('id', 'name'),
+      'class.students' => function ($query) use ($request) {
+        $query->select('id', 'name', 'nisn', 'user_id', 'class_id', 'parent_id');
+        if ($request->user()->hasRole('parent')) {
+          $query->where('parent_id', $request->user()->id);
+        } elseif ($request->user()->hasRole('student')) {
+          $query->where('user_id', $request->user()->id);
+        }
+      },
+      'class.students.user' => fn($query) => $query->select('id', 'name'),
+      'period' => fn($query) => $query->select('id', 'semester', 'academic_year'),
+      'subject' => fn($query) => $query->select('id', 'name'),
+      'teacher' => fn($query) => $query->select('id', 'name'),
+      'meetings' => function ($query) {
+        $query->select('id', 'schedule_id', 'started_at', 'schedule_time_id', 'date')->orderBy('date', 'asc');
+      },
+      'meetings.attendances:id,status,user_id,meeting_id',
+    ])
+      ->withCount('meetings')
+      ->filterByPermission($request->user())
+      ->findOrFail($id);
+
+    $meetings = $schedule->meetings;
+    $students = $schedule->class->students;
+    $attendances = [];
+
+    foreach ($students as $student) {
+      $studentAttendance = [];
+      $totalAttendance = 0;
+      $totalSick = 0;
+      $totalPermission = 0;
+      $totalAbsence = 0;
+      foreach ($meetings as $meeting) {
+        $attendance = $meeting->attendances->firstWhere('user_id', $student->user_id);
+        $status = $attendance ? $attendance->status : null;
+        $studentAttendance[] = $status;
+        if ($status === 'H') {
+          $totalAttendance++;
+        }
+        if ($status === 'S') {
+          $totalSick++;
+        }
+        if ($status === 'I') {
+          $totalPermission++;
+        }
+        if ($status === 'A') {
+          $totalAbsence++;
+        }
+      }
+      $attendances[] = [
+        'student' => $student,
+        'attendances' => $studentAttendance,
+        'total_attendance' => $totalAttendance,
+        'total_sick' => $totalSick,
+        'total_permission' => $totalPermission,
+        'total_absence' => $totalAbsence,
+      ];
+    }
+
+    $data = [
+      'subject' => $schedule->subject->name,
+      'class' => '' . $schedule->class->name . ' ' . $schedule->class->level . ' ' . ($schedule->class->major?->name ?? ''),
+      'teacher' => $schedule->teacher->name,
+      'period' => '' . Helper::getSemesterLabel($schedule->period->semester) . ' TA ' . $schedule->period->academic_year,
+      'attendances' => $attendances,
+      'total_meetings' => $schedule->meetings_count,
+    ];
+
+    $pdf = Pdf::loadView('pdf.attendance', $data)
+      ->setPaper('a4', 'landscape');
+
+    $filename = "Absensi - "
+      . (strtoupper($schedule->subject->name))
+      . " "
+      . ($schedule->period->semester == 'odd' ? 'Ganjil' : 'Genap')
+      . " TA "
+      . str_replace(['/', '\\'], '-', $schedule->period->academic_year)
+      . " "
+      . $schedule->subject->code
+      . ".pdf";
+
+    return $pdf->stream($filename);
+  }
+
   public function edit(Request $request, $schedule_id, $meeting_id)
   {
     $meeting = Meeting::select([
@@ -312,7 +403,7 @@ class AttendanceController extends Controller
         'schedule.subject:id,name',
         'schedule.class' => fn($query) => $query->select('id', 'name', 'level', 'major_id')->withCount('students'),
         'schedule.class.major:id,name',
-        'schedule.class.students:id,class_id,user_id,nis,name',
+        'schedule.class.students:id,class_id,user_id,nisn,name',
         'attendances:id,meeting_id,user_id,status,edit_by,updated_at',
         'attendances.editby:id,name',
         'schedule_time:id,schedule_id,day,meeting_method,start_time,end_time',
@@ -349,7 +440,7 @@ class AttendanceController extends Controller
     try {
       DB::beginTransaction();
 
-      $meeting = Meeting::findOrFail($meeting_id);
+      $meeting = Meeting::with('attendances')->findOrFail($meeting_id);
       $this->authorize('update', $meeting);
 
       $validated = $request->validated();
@@ -496,8 +587,7 @@ class AttendanceController extends Controller
 
         foreach ($class->schedules as $schedule) {
           $validMeetings = $schedule->meetings->filter(function ($meeting) {
-            return $meeting->type != "Holiday" &&
-              Carbon::parse($meeting->date)->lte(Carbon::today());
+            return $meeting->type != "Holiday";
           });
 
           if ($validMeetings->isEmpty()) {
@@ -626,7 +716,7 @@ class AttendanceController extends Controller
         $totalAttendancePercentage = 0.0;
         $totalMeetings = 0;
         foreach ($schedule->meetings as $meeting) {
-          if ($meeting->type != "Holiday" && Carbon::parse($meeting->date)->lte(Carbon::today())) {
+          if ($meeting->type != "Holiday") {
             $totalMeetings++;
             $attendancePercentage = 0.0;
             if ($totalStudents > 0) {
@@ -733,8 +823,7 @@ class AttendanceController extends Controller
     $schedule->load([
       'class.students',
       'meetings' => function ($query) {
-        $query->where('type', '!=', 'Holiday')
-          ->whereDate('date', '<=', now());
+        $query->where('type', '!=', 'Holiday');
       },
       'meetings.attendances' => function ($query) use ($request) {
         $query->where('status', 'H');

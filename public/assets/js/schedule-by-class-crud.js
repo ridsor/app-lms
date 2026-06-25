@@ -644,4 +644,46 @@ $(document).ready(function () {
             }
         });
     });
+
+    $("#sync-schedule-btn").on("click", function (e) {
+        e.preventDefault();
+        const syncBtn = $(this);
+        const originalHtml = syncBtn.html();
+
+        Swal.fire({
+            title: "Konfirmasi Sinkronisasi",
+            text: "Apakah Anda yakin ingin mensinkronisasi jadwal untuk semua siswa di kelas ini? Ini akan memperbarui daftar jadwal di akun masing-masing siswa.",
+            showDenyButton: true,
+            confirmButtonText: "Ya, Sinkronkan",
+            denyButtonText: "Batal",
+            confirmButtonColor: "#16C7F9",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                syncBtn.prop("disabled", true).html(
+                    '<span class="spinner-border spinner-border-sm spinner_loader" role="status" aria-hidden="true"></span> Sinkronisasi...'
+                );
+
+                $.ajax({
+                    url: `/jadwal/kelas/${classId}/sinkronisasi`,
+                    method: "POST",
+                    success: function (response) {
+                        const toast = new bootstrap.Toast($("#toast-success"));
+                        $("#toast-success #toast-text").text(response.message);
+                        toast.show();
+                    },
+                    error: function (xhr) {
+                        const toast = new bootstrap.Toast($("#toast-error"));
+                        $("#toast-error #toast-text").text(
+                            xhr.responseJSON?.message ||
+                                "Terjadi kesalahan saat sinkronisasi."
+                        );
+                        toast.show();
+                    },
+                    complete: function () {
+                        syncBtn.prop("disabled", false).html(originalHtml);
+                    },
+                });
+            }
+        });
+    });
 });

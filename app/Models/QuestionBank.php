@@ -9,9 +9,14 @@ class QuestionBank extends Model
     protected $fillable = ['title', 'subject_id', 'description'];
     public $table = "question_banks";
 
-    public function questions()
+    public function multipleQuestions()
     {
-        return $this->morphMany(Question::class, 'questionable');
+        return $this->morphMany(MultipleQuestion::class, 'questionable');
+    }
+
+    public function essayQuestions()
+    {
+        return $this->morphMany(EssayQuestion::class, 'questionable');
     }
 
     public function subject()

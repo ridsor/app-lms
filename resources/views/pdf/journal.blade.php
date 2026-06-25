@@ -12,32 +12,45 @@
     <style>
         body {
             font-family: DejaVu Sans, sans-serif;
+            font-size: 11px;
+            color: #333;
+        }
+
+        h2,
+        h4 {
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            margin: 2px 0;
             font-size: 12px;
         }
 
-        h2 {
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #555;
+            padding: 4px 6px;
             text-align: center;
-            margin-bottom: 10px;
         }
 
-        .info {
-            margin-bottom: 20px;
+        table th {
+            background: #f3f3f3;
         }
 
-        .pertemuan {
-            margin-bottom: 15px;
-        }
-
-        .pertemuan h3 {
-            margin: 5px 0;
-        }
-
-        ul {
-            margin: 5px 0;
-        }
-
-        .meeting-content {
-            margin-bottom: 10px;
+        .left {
+            text-align: left;
         }
     </style>
 </head>
@@ -55,84 +68,90 @@
             {{ $class['name'] }} -
             {{ $class['level'] }}
         </p>
-        <p>Guru : {{ $teacher['name'] }} ({{ $teacher['nip'] }})</p>
+        <p>Pengjar : {{ $teacher['name'] }} ({{ $teacher['nip'] }})</p>
     </div>
-
-    @foreach ($meetings as $index => $meeting)
-        <div class="pertemuan">
-            <h3>Pertemuan {{ $index + 1 }} - {{ Helper::getMeetingType($meeting['type']) }}</h3>
-            <div style='margin-left: 1rem'>
-                @if (!empty($meeting['formatted_started_at']))
-                    <div class="meeting-content">
-                        <b>Waktu Kelas Dimulai</b>
-                        <br />
-                        {{ $meeting['formatted_started_at'] }}
-                    </div>
-                    @if (!empty($meeting['teaching_journal']))
-                        <div class="meeting-content">
-                            <b>Pokok Pembahasan</b>
-                            <br />
-                            <div class="ql-editor text-wrap h-auto" style="padding:0; margin:0; white-space: wrap;">
-                                {!! $meeting['teaching_journal']['subject_matter'] !!}
-                            </div>
-                        </div>
-                        <div class="meeting-content">
-                            <b>Sub Pokok Pembahasan</b>
-                            <div class="ql-editor text-wrap h-auto" style="padding:0; margin:0; white-space: wrap;"
-                                style="padding:0; margin:0; white-space: wrap;">
-                                {!! $meeting['teaching_journal']['sub_subject_matter'] !!}
-                            </div>
-                        </div>
-                        @if (!empty($meeting['teaching_journal']['additional_note']))
+    <br/>
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">Tanggal</th>
+                <th rowspan="2">Pokok Pembahasan</th>
+                <th rowspan="2">Sub Pokok Pembahasan</th>
+                <th rowspan="2">Materi</th>
+                <th rowspan="2">Tugas</th>
+                <th colspan="4">Absensi</th>
+            </tr>
+            <tr>
+                <th>H</th>
+                <th>I</th>
+                <th>S</th>
+                <th>A</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($meetings as $index => $meeting)
+                <tr>
+                    <td style="text-align: center;">
+                        {{ $meeting['formatted_date'] }}
+                    </td>
+                    <td style="text-align: left; padding: 8px;">
+                        @if (!empty($meeting['teaching_journal']))
                             <div class="meeting-content">
-                                <b>Catatan Tambahan</b>
-                                <br />
                                 <div class="ql-editor text-wrap h-auto" style="padding:0; margin:0; white-space: wrap;">
-                                    {!! $meeting['teaching_journal']['additional_note'] !!}
+                                    {!! $meeting['teaching_journal']['subject_matter'] !!}
+                                </div>
+                            </div>
+                        @else
+                            <i>Tidak ada catatan mengajar untuk pertemuan ini.</i>
+                        @endif
+                    </td>
+                    <td style="text-align: left; padding: 8px;">
+                        @if (!empty($meeting['teaching_journal']))
+                            <div class="meeting-content">
+                                <div class="ql-editor text-wrap h-auto" style="padding:0; margin:0; white-space: wrap;">
+                                    {!! $meeting['teaching_journal']['sub_subject_matter'] !!}
                                 </div>
                             </div>
                         @endif
-                    @endif
-                    @if (count($meeting['materials']) > 0)
-                        <div class="meeting-content">
-                            <b>Materi</b>
-                            <ul>
-                                @foreach ($meeting['materials'] as $m)
-                                    <li>
-                                            <b>{{ $m['title'] }}</b>
-                                            <br />
-                                        <div class="ql-editor text-wrap h-auto"
-                                            style="padding:0; margin:0; white-space: wrap;">
-                                            {!! $m['description'] !!}
-                                        </div>
-                                    </li>
+                    </td>
+                    <td style="text-align: left; padding: 8px;">
+                        @if (!empty($meeting['materials']))
+                            <ul style="padding-left: 16px; margin: 0;">
+                                @foreach ($meeting['materials'] as $material)
+                                    <li>{{ $material['title'] }}</li>
                                 @endforeach
                             </ul>
-                        </div>
-                    @endif
-                    @if (count($meeting['tasks']) > 0)
-                        <div class="meeting-content">
-                            <b>Tugas</b>
-                            <ul>
+                        @else
+                            <i>Tidak ada materi untuk pertemuan ini.</i>
+                        @endif
+                    </td>
+                    <td style="text-align: left; padding: 8px;">
+                        @if (!empty($meeting['tasks']))
+                            <ul style="padding-left: 16px; margin: 0;">
                                 @foreach ($meeting['tasks'] as $task)
-                                    <li>
-                                            <b>{{ $task['title'] }}</b>
-                                            <br />
-                                        <div class="ql-editor text-wrap h-auto"
-                                            style="padding:0; margin:0; white-space: wrap;">
-                                            {!! $task['description'] !!}
-                                        </div>
-                                    </li>
+                                    <li>{{ $task['title'] }}</li>
                                 @endforeach
                             </ul>
-                        </div>
-                    @endif
-                @else
-                    <p><i>Tidak ada catatan mengajar untuk pertemuan ini.</i></p>
-                @endif
-            </div>
-        </div>
-    @endforeach
+                        @else
+                            <i>Tidak ada tugas untuk pertemuan ini.</i>
+                        @endif
+                    </td>
+                    <td style="text-align: center; padding: 10px;">
+                        <span>{{ $meeting_summaries[$index]['total_attendance'] ?? '-' }}</span>
+                    </td>
+                    <td style="text-align: center; padding: 10px;">
+                        <span>{{ $meeting_summaries[$index]['total_permission'] ?? '-' }}</span>
+                    </td>
+                    <td style="text-align: center; padding: 10px;">
+                        <span>{{ $meeting_summaries[$index]['total_sick'] ?? '-' }}</span>
+                    </td>
+                    <td style="text-align: center; padding: 10px;">
+                        <span>{{ $meeting_summaries[$index]['total_absence'] ?? '-' }}</span>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
 </body>
 
 </html>

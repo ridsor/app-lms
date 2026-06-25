@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\User\UKKOperatorController;
+use App\Http\Controllers\User\UKKController;
 use App\Http\Controllers\User\MaterialController;
 use App\Http\Controllers\User\HomeController;
 use App\Http\Controllers\User\RoomController;
@@ -20,9 +22,11 @@ use App\Http\Controllers\User\QuestionController;
 use App\Http\Controllers\User\TaskController;
 use App\Http\Controllers\User\TaskSubmissionController;
 use App\Http\Controllers\User\TeachingJournalController;
-use App\Http\Middleware\CheckExamTime;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/ukk/{id}/file', [UKKController::class, 'getFile'])->name('user.ukk.file.get');
+Route::get('/materi/{materi_id}/file', [MaterialController::class, 'getFile'])->name('user.material.file.get');
+Route::get('/ukk/praktik/file-jawaban/{result_id}/{filename}', [UKKController::class, 'getFileSubmission'])->name('user.ukk.praktik.file.get');
 Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"])->group(function () {
     Route::get('/beranda', [HomeController::class, 'index'])->name('user.home');
 
@@ -51,6 +55,10 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('guru/akun/export', [TeacherController::class, 'exportAccount'])->name('user.teacher.account.export');
     Route::resource('/guru', TeacherController::class)->except(['create'])->names('user.teacher');
 
+    Route::delete('operator-ukk/hapus', [UKKOperatorController::class, 'bulkDestroy'])->name('user.ukk-operator.bulkDestroy');
+    Route::get('operator-ukk/export', [UKKOperatorController::class, 'export'])->name('user.ukk-operator.export');
+    Route::resource('/operator-ukk', UKKOperatorController::class)->except(['create', 'show'])->names('user.ukk-operator');
+
     Route::post('/kurikulum/active/{id}', [CurriculumController::class, 'active'])->name('user.curriculum.active');
     Route::delete('/kurikulum/hapus', [CurriculumController::class, 'bulkDestroy'])->name('user.curriculum.bulk-destroy');
     Route::resource('/kurikulum', CurriculumController::class)->except(['create', 'show'])->names('user.curriculum');
@@ -65,12 +73,13 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::delete('jadwal/hapus', [ScheduleController::class, 'bulkDestroy'])->name('user.schedule.bulkDestroy');
     Route::get('/jadwal/kelas', [ScheduleController::class, 'classList'])->name('user.schedule.classlist');
     Route::get('/jadwal/kelas/{classId}', [ScheduleController::class, 'viewByClass'])->name('user.schedule.byclass');
-    Route::get('/jadwal/{code}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
-    Route::put('/jadwal/{code}/{schedule_time_id}', [ScheduleController::class, 'update'])->name('user.schedule.update');
+    Route::post('/jadwal/kelas/{classId}/sinkronisasi', [ScheduleController::class, 'syncByClass'])->name('user.schedule.syncByClass');
+    Route::get('/jadwal/{id}', [ScheduleController::class, 'showBySchedule'])->name('user.schedule.showBySchedule');
+    Route::put('/jadwal/{id}/{schedule_time_id}', [ScheduleController::class, 'update'])->name('user.schedule.update');
     Route::delete('/jadwal/{schedule_time_id}', [ScheduleController::class, 'destroy'])->name('user.schedule.destroy');
     Route::get('/jadwal/{id}/{schedule_time_id}/edit', [ScheduleController::class, 'edit'])->name('user.schedule.edit');
-    Route::get('/jadwal/{code}/pertemuan/{meeting_id}', [ScheduleController::class, 'showByMeeting'])->name('user.schedule.showByMeeting');
-    Route::put('/jadwal/{code}/pertemuan/{meeting_id}', [MeetingController::class, 'update'])->name('user.schedule.update');
+    Route::get('/jadwal/{id}/pertemuan/{meeting_id}', [ScheduleController::class, 'showByMeeting'])->name('user.schedule.showByMeeting');
+    Route::put('/jadwal/{id}/pertemuan/{meeting_id}', [MeetingController::class, 'update'])->name('user.schedule.update');
 
     Route::post('/jadwal/pertemuan/{meeting_id}/jurnal', [TeachingJournalController::class, 'store'])->name('user.teaching_journal.store');
     Route::patch('/jadwal/pertemuan/{meeting_id}/mulai-belajar', [MeetingController::class, 'startLearning'])->name('user.schedule.startLearning');
@@ -107,6 +116,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/kehadiran/kelas/{classId}', [AttendanceController::class, 'scheduleByKelas'])->name('user.attendance.schedulebyclass');
     Route::get('/kehadiran/jadwal/{schedule_id}/pertemuan', [AttendanceController::class, 'meetingBySchedule'])->name('user.attendance.meetingBySchedule');
     Route::get('/kehadiran/jadwal/{id}', [AttendanceController::class, 'showAttendancRecap'])->name('user.attendance.showAttendancRecap');
+    Route::get('/kehadiran/jadwal/{id}/report', [AttendanceController::class, 'reportAttendancRecap'])->name('user.attendance.reportAttendancRecap');
 
     Route::get('/tugas', [TaskController::class, 'index'])->name('user.task.index');
     Route::get('/tugas/{task_id}/file', [TaskController::class, 'getFile'])->name('user.task.file.get');
@@ -118,8 +128,7 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/jurnal-mengajar/pertemuan/{meeting_id}', [TeachingJournalController::class, 'showJournal'])->name('user.journal.showMeeting');
     Route::get('/jurnal-mengajar/kelas/{classId}', [TeachingJournalController::class, 'scheduleByKelas'])->name('user.journal.schedulebyclass');
     Route::get('/jurnal-mengajar/jadwal/{schedule_id}/pertemuan', [TeachingJournalController::class, 'meetingBySchedule'])->name('user.journal.meetingBySchedule');
-    Route::get('/jurnal-mengajar/{code}/export', [TeachingJournalController::class, 'export'])->name('user.journal.export');
-    // Route::get('/jurnal-mengajar/{code}/export/tes', [TeachingJournalController::class, 'exporttes'])->name('user.jurnal.export');
+    Route::get('/jurnal-mengajar/{id}/export', [TeachingJournalController::class, 'export'])->name('user.journal.export');
 
     Route::get('/bank-soal', [QuestionBankController::class, 'index'])->name('user.question-bank.index');
     Route::get('/bank-soal/copy', [QuestionBankController::class, 'copy'])->name('user.question-bank.copy');
@@ -130,10 +139,9 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::delete('/bank-soal/{id}', [QuestionBankController::class, 'destroy'])->name('user.question-bank.destroy');
 
     Route::get('/soal/{id}/edit', [QuestionController::class, 'edit'])->name('user.question.edit');
+    Route::post('/soal/{id}', [QuestionController::class, 'store'])->name('user.question.store');
     Route::put('/soal/{id}', [QuestionController::class, 'update'])->name('user.question.update');
     Route::delete('/soal/{id}', [QuestionController::class, 'destroy'])->name('user.question.destroy');
-    Route::post('/soal/{id}/bank-soal', [QuestionController::class, 'storeForQuestionBank'])->name('user.question.storeForQuestionBank');
-    Route::post('/soal/{id}/ujian', [QuestionController::class, 'storeForExam'])->name('user.question.storeForExam');
     Route::get('/soal/{id}/file', [QuestionController::class, 'getFile'])->name('user.question.file.get');
     Route::get('/soal/{id}/{option}/file', [QuestionController::class, 'getFileOption'])->name('user.question.option.file.get');
     Route::get('/soal/{id}/file/download', [QuestionController::class, 'downloadFile'])->name('user.question.file.download');
@@ -145,6 +153,8 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/ujian/{id}/edit', [ExamController::class, 'edit'])->name('user.exam.edit');
     Route::delete('/ujian/{id}', [ExamController::class, 'destroy'])->name('user.exam.destroy');
     Route::get('/ujian/{id}/soal', [ExamController::class, 'showQuestion'])->name('user.exam.question.show');
+    Route::get('/ujian/template-soal/download', [ExamController::class, 'downloadTemplate'])->name('user.exam.template.download');
+    Route::post('/ujian/{id}/import-soal', [ExamController::class, 'importQuestions'])->name('user.exam.importQuestions');
     Route::post('/ujian/{exam_id}/copy/{id}', [ExamController::class, 'copyQuestions'])->name('user.exam.copyQuestions');
     Route::get('/ujian/{id}/hasil', [ExamController::class, 'showResult'])->name('user.exam.result.show');
     Route::patch('/ujian/{id}/hasil/reset', [ExamController::class, 'resetResult'])->name('user.exam.result.reset');
@@ -152,11 +162,44 @@ Route::middleware(["auth", "role:vice-principal|teacher|student|parent|operator"
     Route::get('/ujian/{id}/hasil/export', [ExamController::class, 'exportResult'])->name('user.exam.result.export');
 
     Route::get('/ujian/{id}/info', [ExamController::class, 'info'])->name('user.exam.info');
-    Route::get('/ujian/{id}/pengerjaan', [ExamController::class, 'workmanship'])->middleware(CheckExamTime::class)->name('user.exam.workmanship');
+    Route::get('/ujian/{id}/pengerjaan', [ExamController::class, 'workmanship'])->middleware('exam_time')->name('user.exam.workmanship');
     Route::post('/ujian/{id}/pengerjaan/answer', [ExamController::class, 'setAnswerByExamResult'])->name('user.exam.workmanship.answer');
     Route::post('/ujian/{id}/pengerjaan', [ExamController::class, 'workmanshipSubmit'])->name('user.exam.workmanship.submit');
     Route::post('/ujian/{id}/mulai', [ExamController::class, 'examStart'])->name('user.exam.start');
     Route::get('/ujian/{id}/pengerjaan/hasil', [ExamController::class, 'workmanshipResult'])->name('user.exam.workmanship.result');
-
+    Route::get('/ujian/{exam_id}/evaluasi/{page?}', [ExamController::class, 'evaluation'])->name('user.exam.evaluation');
     Route::get('/ujian/{id}/pengerjaan/soal', [ExamController::class, 'getRandomQuestions'])->name('user.exam.workmanship.soal');
+    Route::post('/ujian/{id}/score/{answer_id}', [ExamController::class, 'updateAnswerScore'])->name('user.exam.update-answer-score');
+
+    Route::get('/ukk', [UKKController::class, 'index'])->name('user.ukk.index');
+    Route::post('/ukk', [UKKController::class, 'store'])->name('user.ukk.store');
+    Route::get('/ukk/{id}/edit', [UKKController::class, 'edit'])->name('user.ukk.edit');
+    Route::get('/ukk/{id}', [UKKController::class, 'show'])->name('user.ukk.show');
+    Route::put('/ukk/{id}', [UKKController::class, 'update'])->name('user.ukk.update');
+    Route::delete('/ukk/{id}', [UKKController::class, 'destroy'])->name('user.ukk.destroy');
+    Route::get('/ukk/{id}/soal', [UKKController::class, 'showQuestion'])->name('user.ukk.question.show');
+    Route::get('/ukk/template-soal/download', [UKKController::class, 'downloadTemplate'])->name('user.ukk.template.download');
+    Route::post('/ukk/{id}/import-soal', [UKKController::class, 'importQuestions'])->name('user.ukk.importQuestions');
+    Route::get('/ukk/{id}/hasil/teori', [UKKController::class, 'showResultTeori'])->name('user.ukk.result.teori');
+    Route::get('/ukk/{id}/hasil/teori/export', [UKKController::class, 'exportResultTeori'])->name('user.ukk.result.teori.export');
+    Route::get('/ukk/{id}/download', [UKKController::class, 'downloadFile'])->name('user.ukk.file.download');
+    Route::patch('/ukk/{id}/hasil/teori/reset', [UKKController::class, 'resetResult'])->name('user.ukk.result.teori.reset');
+    Route::patch('/ukk/{id}/hasil/teori/{ukk_result_id}/reset', [UKKController::class, 'resetResultById'])->name('user.ukk.result.teori.reset.byId');
+    Route::get('/ukk/{id}/hasil/praktik', [UKKController::class, 'showResultPraktik'])->name('user.ukk.result.praktik');
+    Route::get('/ukk/{id}/teori/info', [UKKController::class, 'theoryInfo'])->name('user.ukk.teori.info');
+    Route::post('/ukk/{id}/teori/mulai', [UKKController::class, 'theoryStart'])->name('user.ukk.teori.start');
+    Route::get('/ukk/{id}/teori/pengerjaan', [UKKController::class, 'theoryWorkmanship'])->middleware('ukk_time')->name('user.ukk.teori.workmanship');
+    Route::get('/ukk/{id}/teori/pengerjaan/soal', [UKKController::class, 'getRandomQuestions'])->name('user.ukk.teori.workmanship.soal');
+    Route::post('/ukk/{id}/teori/pengerjaan/answer', [UKKController::class, 'setAnswerByUKKResult'])->name('user.ukk.teori.workmanship.answer');
+    Route::post('/ukk/{id}/teori/pengerjaan', [UKKController::class, 'theorySubmit'])->name('user.ukk.teori.workmanship.submit');
+    Route::get('/ukk/{id}/teori/pengerjaan/hasil', [UKKController::class, 'theoryWorkmanshipResult'])->name('user.ukk.teori.workmanship.result');
+    Route::get('/ukk/{id}/teori/evaluasi/{page?}', [UKKController::class, 'evaluation'])->name('user.ukk.evaluation');
+    Route::post('/ukk/{id}/teori/score/{answer_id}', [UKKController::class, 'updateAnswerScore'])->name('user.ukk.updateAnswerScore');
+    Route::get('/ukk/{id}/praktik/info', [UKKController::class, 'practiceInfo'])->name('user.ukk.praktik.info');
+    Route::post('/ukk/{id}/praktik/submit', [UKKController::class, 'practiceSubmit'])->name('user.ukk.praktik.submit');
+    Route::get('/ukk/{id}/praktik/evaluasi/{page?}', [UKKController::class, 'evaluationPraktik'])->name('user.ukk.praktik.evaluation');
+    Route::post('/ukk/praktik/update-skor/{result_id}', [UKKController::class, 'updatePracticeScore'])->name('user.ukk.praktik.updateScore');
+    Route::get('/ukk/{id}/praktik/export', [UKKController::class, 'exportResultPraktik'])->name('user.ukk.result.praktik.export');
+    Route::get('/ukk/praktik/print/{result_id}', [UKKController::class, 'printResultPraktik'])->name('user.ukk.result.praktik.print');
+    Route::get('/ukk/{id}/praktik/print-student/{student_id}', [UKKController::class, 'printResultPraktikByStudent'])->name('user.ukk.result.praktik.printByStudent');
 });

@@ -7,11 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ExamAnswerRequest;
 use App\Http\Requests\ExamRequest;
 use App\Http\Requests\WorkmanshipRequest;
+use App\Models\EssayQuestion;
 use App\Models\Exam;
 use App\Models\ExamResult;
 use App\Models\Major;
 use App\Models\Period;
-use App\Models\Question;
+use App\Models\MultipleQuestion;
 use App\Models\Schedule;
 use App\Models\SchoolClass;
 use App\Models\Subject;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\Storage;
 use Rap2hpoutre\FastExcel\FastExcel;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ExamController extends Controller
 {
@@ -45,7 +47,10 @@ class ExamController extends Controller
                     $q->select(["id", "exam_id"])->where('student_id', $request->user()->parent->id);
                 }
             }
-        ])
+        ])->selectRaw('exams.*,(
+                SELECT COUNT(*) FROM exam_answers 
+                WHERE exam_answers.score IS NULL
+            ) as not_yet_rated')
             ->filter($request->all())
             ->filterByPermission($request->user())
             ->paginate(10);
@@ -96,10 +101,10 @@ class ExamController extends Controller
             'schedule.subject:id,name,code',
             'schedule.class:id,name,level,major_id',
             'schedule.class.major:id,name',
-        ])
-            ->withCount([
-                'questions'
-            ])
+        ])->selectRaw('exams.*,(
+                SELECT COUNT(*) FROM exam_answers 
+                WHERE exam_answers.score IS NULL
+            ) as not_yet_rated')
             ->findOrFail($id);
         $this->authorize('view', $exam);
 
@@ -160,7 +165,8 @@ class ExamController extends Controller
 
             DB::beginTransaction();
 
-            $exam->questions()->delete();
+            $exam->multipleQuestions()->delete();
+            $exam->essayQuestions()->delete();
 
             $exam->delete();
 
@@ -181,109 +187,343 @@ class ExamController extends Controller
         }
 
         $exam = Exam::select('id', 'schedule_id')
-            ->with('schedule:id,teacher_id')
-            ->withCount([
-                'questions'
-            ])
-            ->withSum('questions', 'question_points')
+            ->with('schedule:id,teacher_id', 'multipleQuestions', 'essayQuestions')
             ->findOrFail($id);
+
         $this->authorize('view', $exam);
 
-        $questionsQuery = $exam->questions();
+        $multipleQuery = $exam->multipleQuestions();
+        $essayQuery = $exam->essayQuestions();
 
         if ($request->filled('search')) {
             $search = $request->query('search');
-            $questionsQuery->where('question_text', 'like', "%{$search}%");
+            $multipleQuery->where('question_text', 'like', "%{$search}%");
+            $essayQuery->where('question_text', 'like', "%{$search}%");
         }
 
-        $questions = $questionsQuery->paginate(5);
+        $multipleQuestions = $multipleQuery->get();
+        $essayQuestions = $essayQuery->get();
 
-        $majors = Major::with(['classes' => function ($query) {
-            $query->select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
-        }])->select('id', 'name')->orderBy('name', 'asc')->get();
+        $questions = $multipleQuestions->concat($essayQuestions);
+
+        $perPage = 10;
+        $page = $request->input('page', 1);
+        $questions = new LengthAwarePaginator(
+            $questions->slice(($page - 1) * $perPage, $perPage)->values(),
+            $questions->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $subjects = Subject::select('id', 'name', 'curriculum_id')->with(['curriculum:id,name'])->get();
 
-        return view('user.exam.question.show', compact('exam', 'questions', 'majors', 'subjects'));
+        return view('user.exam.question.show', compact('exam', 'questions', 'subjects'));
+    }
+
+    public function downloadTemplate()
+    {
+        $data = collect([
+            [
+                'Jenis Soal (Pilihan Ganda/Essay)' => 'Pilihan Ganda',
+                'Poin' => 10,
+                'Teks Soal' => 'Siapakah tokoh pada gambar di bawah ini?',
+                'File Gambar Soal' => '',
+                'Opsi A' => 'Ir. Soekarno',
+                'File Gambar Opsi A' => 'soal1_opsi_a.png',
+                'Opsi B' => 'Moh. Hatta',
+                'File Gambar Opsi B' => 'soal1_opsi_b.png',
+                'Opsi C' => 'Sutan Syahrir',
+                'File Gambar Opsi C' => '',
+                'Opsi D' => 'Ki Hajar Dewantara',
+                'File Gambar Opsi D' => '',
+                'Opsi E' => 'Jenderal Sudirman',
+                'File Gambar Opsi E' => '',
+                'Kunci Jawaban (A/B/C/D/E)' => 'A',
+            ],
+            [
+                'Jenis Soal (Pilihan Ganda/Essay)' => 'Essay',
+                'Poin' => 20,
+                'Teks Soal' => 'Amati gambar tersebut dan jelaskan maknanya!',
+                'File Gambar Soal' => 'soal2_soal.png',
+                'Opsi A' => '',
+                'File Gambar Opsi A' => '',
+                'Opsi B' => '',
+                'File Gambar Opsi B' => '',
+                'Opsi C' => '',
+                'File Gambar Opsi C' => '',
+                'Opsi D' => '',
+                'File Gambar Opsi D' => '',
+                'Opsi E' => '',
+                'File Gambar Opsi E' => '',
+                'Kunci Jawaban (A/B/C/D/E)' => '',
+            ],
+        ]);
+
+        return (new FastExcel($data))->download('Template_Soal_Ujian.xlsx');
+    }
+
+    public function importQuestions(Request $request, $id)
+    {
+        try {
+            $exam = Exam::findOrFail($id);
+            $this->authorize('update', $exam);
+
+            $request->validate([
+                'import_file' => 'required|file',
+            ]);
+
+            $file = $request->file('import_file');
+            $extension = strtolower($file->getClientOriginalExtension());
+            $mimeType = $file->getMimeType();
+
+            $isZip = ($extension === 'zip' || in_array($mimeType, ['application/zip', 'application/x-zip-compressed', 'application/octet-stream']));
+
+            DB::beginTransaction();
+
+            if ($isZip) {
+                $zip = new \ZipArchive;
+                if ($zip->open($file->getRealPath()) === TRUE) {
+                    $extractPath = storage_path('app/temp_import_' . uniqid());
+                    $zip->extractTo($extractPath);
+                    $zip->close();
+
+                    Log::info("Import: ZIP extracted to {$extractPath}");
+
+                    // Find Excel file recursively
+                    $allFiles = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($extractPath));
+                    $excelPath = null;
+                    foreach ($allFiles as $f) {
+                        if (str_contains($f->getRealPath(), '__MACOSX')) continue;
+                        if (in_array(strtolower(pathinfo($f->getFilename(), PATHINFO_EXTENSION)), ['xls', 'xlsx'])) {
+                            $excelPath = $f->getRealPath();
+                            break;
+                        }
+                    }
+
+                    if (!$excelPath) {
+                        \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+                        throw new \Exception('File Excel tidak ditemukan di dalam ZIP.');
+                    }
+
+                    $collection = (new FastExcel)->import($excelPath);
+
+                    // Search for media folder
+                    $mediaPath = null;
+                    $directories = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($extractPath, \RecursiveDirectoryIterator::SKIP_DOTS),
+                        \RecursiveIteratorIterator::SELF_FIRST
+                    );
+                    foreach ($directories as $dir) {
+                        if (str_contains($dir->getRealPath(), '__MACOSX')) continue;
+                        if ($dir->isDir() && strtolower($dir->getFilename()) === 'media') {
+                            $mediaPath = $dir->getRealPath();
+                            break;
+                        }
+                    }
+
+                    foreach ($collection as $index => $row) {
+                        $this->processImportRow($exam, $row, $mediaPath, $index + 1, $extractPath);
+                    }
+
+                    \Illuminate\Support\Facades\File::deleteDirectory($extractPath);
+                } else {
+                    throw new \Exception('Gagal membuka file ZIP.');
+                }
+            } else {
+                $collection = (new FastExcel)->import($file);
+                foreach ($collection as $index => $row) {
+                    $this->processImportRow($exam, $row, null, $index + 1);
+                }
+            }
+
+            DB::commit();
+
+            return $this->sendResponse('Soal berhasil diimport.');
+        } catch (\Exception $e) {
+            if (DB::transactionLevel() > 0) DB::rollBack();
+            Log::error('Error importing questions: ' . $e->getMessage());
+            return $this->sendError('Gagal mengimpor file. ' . $e->getMessage(), [], 500);
+        }
+    }
+
+    private function processImportRow($exam, $row, $mediaPath = null, $rowNumber = 1, $basePath = null)
+    {
+        // 0. Robust Trim for Keys and Values
+        $cleanRow = [];
+        foreach ($row as $key => $value) {
+            $cleanRow[trim($key)] = is_string($value) ? trim($value) : $value;
+        }
+        $row = $cleanRow;
+
+        $jenis = strtolower($row['Jenis Soal (Pilihan Ganda/Essay)'] ?? '');
+        $poin = floatval($row['Poin'] ?? 0);
+        $teks = $row['Teks Soal'] ?? '';
+
+        if (empty($teks)) return;
+
+        $data = [
+            'questionable_id' => $exam->id,
+            'questionable_type' => Exam::class,
+            'question_text' => $teks,
+            'question_points' => $poin,
+        ];
+
+        // 1. Handle main question image
+        $mainFileName = $row['File Gambar Soal'] ?? '';
+        $imageFile = $this->findFileAnywhere($mainFileName, $mediaPath, $basePath);
+
+        // Auto-discovery fallback for main question
+        if (!$imageFile && $basePath) {
+            $imageFile = $this->findFileByConvention($rowNumber, 'soal', null, $mediaPath, $basePath);
+        }
+
+        if ($imageFile) {
+            $data['question_file'] = $this->saveImportedFile($imageFile);
+            Log::info("Import: Row {$rowNumber} - Found main image: " . basename($imageFile));
+        }
+
+        if ($jenis === 'pilihan ganda' || $jenis === 'multiple') {
+            $options = ['a', 'b', 'c', 'd', 'e'];
+            foreach ($options as $opt) {
+                $data["option_{$opt}"] = $row["Opsi " . strtoupper($opt)] ?? null;
+
+                // 2. Handle option images
+                $imgKey = "File Gambar Opsi " . strtoupper($opt);
+                $optFileName = $row[$imgKey] ?? '';
+                $optImageFile = $this->findFileAnywhere($optFileName, $mediaPath, $basePath);
+
+                // Auto-discovery fallback for options
+                if (!$optImageFile && $basePath) {
+                    $optImageFile = $this->findFileByConvention($rowNumber, 'opsi', $opt, $mediaPath, $basePath);
+                }
+
+                if ($optImageFile) {
+                    $data["option_{$opt}_image"] = $this->saveImportedFile($optImageFile);
+                    Log::info("Import: Row {$rowNumber} - Found option {$opt} image: " . basename($optImageFile));
+                }
+            }
+            $data['correct_answer'] = strtolower(trim($row['Kunci Jawaban (A/B/C/D/E)'] ?? ''));
+            MultipleQuestion::create($data);
+        } elseif ($jenis === 'essay' || $jenis === 'uraian') {
+            EssayQuestion::create($data);
+        }
+    }
+
+    private function findFileByConvention($rowNumber, $type, $option = null, $mediaPath = null, $basePath = null)
+    {
+        $extensions = ['png', 'jpg', 'jpeg', 'webp', 'gif'];
+
+        // Patterns to try
+        $patterns = [];
+        if ($type === 'soal') {
+            $patterns[] = "soal_{$rowNumber}_soal";
+            $patterns[] = "soal{$rowNumber}_soal";
+            $patterns[] = "soal_{$rowNumber}";
+            $patterns[] = "soal{$rowNumber}";
+            $patterns[] = "gambar_soal_{$rowNumber}";
+            $patterns[] = "gambar_soal_{$rowNumber}_soal";
+            $patterns[] = "gambar_{$rowNumber}";
+            $patterns[] = "gambar{$rowNumber}";
+            $patterns[] = "{$rowNumber}";
+        } else {
+            $patterns[] = "soal_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "soal{$rowNumber}_opsi_{$option}";
+            $patterns[] = "gambar_soal_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "gambar_{$rowNumber}_opsi_{$option}";
+            $patterns[] = "soal_{$rowNumber}_{$option}";
+            $patterns[] = "soal{$rowNumber}_{$option}";
+            $patterns[] = "{$rowNumber}_{$option}";
+        }
+
+        foreach ($patterns as $pattern) {
+            foreach ($extensions as $ext) {
+                $fileName = "{$pattern}.{$ext}";
+                $file = $this->findFileAnywhere($fileName, $mediaPath, $basePath);
+                if ($file) return $file;
+            }
+        }
+
+        return null;
+    }
+
+    private function findFileAnywhere($fileName, $mediaPath, $basePath)
+    {
+        if (empty($fileName)) return null;
+
+        // 1. Try in media path
+        if ($mediaPath) {
+            $file = $this->findFileInDir($mediaPath, $fileName);
+            if ($file) return $file;
+        }
+
+        // 2. Try in base path (recursively, skipping __MACOSX)
+        if ($basePath) {
+            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($basePath));
+            foreach ($iterator as $f) {
+                if ($f->isDir()) continue;
+                if (str_contains($f->getRealPath(), '__MACOSX')) continue;
+                if (strtolower($f->getFilename()) === strtolower($fileName)) {
+                    return $f->getRealPath();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private function findFileInDir($dir, $fileName)
+    {
+        $filePath = $dir . DIRECTORY_SEPARATOR . $fileName;
+        if (file_exists($filePath)) return $filePath;
+
+        $files = scandir($dir);
+        foreach ($files as $file) {
+            if (strtolower($file) === strtolower($fileName)) {
+                return $dir . DIRECTORY_SEPARATOR . $file;
+            }
+        }
+        return null;
+    }
+
+    private function saveImportedFile($fullPath)
+    {
+        $fileName = pathinfo($fullPath, PATHINFO_BASENAME);
+        $newPath = 'file/ujian/' . uniqid() . '_' . $fileName;
+        Storage::put($newPath, file_get_contents($fullPath));
+        Log::info("Import: Saved file to {$newPath}");
+        return $newPath;
     }
 
     public function copyQuestions(Request $request, $exam_id, $id)
     {
         try {
-            $exam = Exam::find($exam_id);
+            $targetExam = Exam::findOrFail($exam_id);
+            $sourceExam = Exam::findOrFail($id);
 
-            if (!$exam) {
-                return $this->sendError(
-                    'Ujian tidak ditemukan.',
-                    [],
-                    404
-                );
-            }
-
-            $this->authorize('create', $exam);
-
-            $questions = Question::where('questionable_id', $id)
-                ->where('questionable_type', QuestionBank::class)
-                ->get();
-
-            if ($questions->isEmpty()) {
-                return $this->sendError(
-                    'Tidak ada soal yang disalin.',
-                    [],
-                    404
-                );
-            }
+            $this->authorize('update', $targetExam);
 
             DB::beginTransaction();
 
-            foreach ($questions as $question) {
-                $fileFields = [
-                    'question_file',
-                    'option_a_image',
-                    'option_b_image',
-                    'option_c_image',
-                    'option_d_image',
-                    'option_e_image'
-                ];
+            foreach ($sourceExam->multipleQuestions as $question) {
+                $newQuestion = $question->replicate();
+                $newQuestion->questionable_id = $targetExam->id;
+                $newQuestion->save();
+            }
 
-                $newQuestionData = $question->toArray();
-
-                // Process each file field
-                foreach ($fileFields as $field) {
-                    if (!empty($question->$field) && Storage::exists($question->$field)) {
-                        $originalPath = $question->$field;
-                        $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
-                        $newFilename = 'file/ujian/' . Str::random(44) . '.' . $extension;
-
-                        if (Storage::copy($originalPath, $newFilename)) {
-                            $newQuestionData[$field] = $newFilename;
-                        } else {
-                            $newQuestionData[$field] = null;
-                        }
-                    } else {
-                        $newQuestionData[$field] = null;
-                    }
-                }
-
-                $exam->questions()->create($newQuestionData);
+            foreach ($sourceExam->essayQuestions as $question) {
+                $newQuestion = $question->replicate();
+                $newQuestion->questionable_id = $targetExam->id;
+                $newQuestion->save();
             }
 
             DB::commit();
 
-            return $this->sendResponse('Soal berhasil disalin.', $exam);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
-            return $this->sendError(
-                'Anda tidak memiliki izin untuk mengubah ujian ini.',
-                [],
-                403
-            );
+            return $this->sendResponse('Soal berhasil disalin.');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return $this->sendError(
-                'Terjadi kesalahan: ' . $e->getMessage(),
-                [],
-                500
-            );
+            Log::error('Error copying questions: ' . $e->getMessage());
+            return $this->sendError('Silakan coba lagi.', [], 500);
         }
     }
 
@@ -293,78 +533,230 @@ class ExamController extends Controller
             return abort(403);
         }
 
-        $exam = Exam::findOrFail($id);
+        $exam = Exam::with([
+            'results',
+            'results.student',
+            'schedule:id,subject_id,class_id,teacher_id,period_id',
+            'schedule.subject:id,code,name',
+            'schedule.period:id,academic_year,semester',
+            'schedule.class:id,name,level,major_id',
+            'schedule.class.major:id,name',
+            'schedule.teacher:id,name,nip',
+        ])->findOrFail($id);
 
         $this->authorize('view', $exam);
-        if (!$request->user()->hasRole('teacher') && !$request->user()->hasRole('operator')) {
-            return abort(403);
-        }
 
-        $exam = Exam::findOrFail($id);
-
-        $this->authorize('view', $exam);
-
-        if (request()->ajax()) {
-            $data = ExamResult::select([
-                'exam_results.*',
-                'students.name',
-                'students.nis',
-            ])
-                ->leftJoin('students', 'student_id', '=', 'students.id')
-                ->with('grader:id,name')
-                ->where('exam_id', $exam->id);
-
-            if ($request->filled('search') && !empty($request->search['value'])) {
-                $search = $request->search['value'];
-                $data->where(function ($q) use ($search) {
-                    $q->whereFullText('students.name', $search);
-                });
-            }
-
-            $data->get();
-
-            return Datatables::of($data)
-                ->addColumn('Nama', function ($row) {
-                    $html = '
-                    <div>
-                    <p class="f-light mb-0">
-                        ' . $row->name  . '</p>
-                    <p class="f-light mb-0">' . $row->nis  . '</p> 
-                    </div>
-                    ';
-                    return $html;
+        if ($request->ajax()) {
+            return DataTables::of($exam->results)
+                ->addIndexColumn()
+                ->addColumn('Nama', fn($row) => $row->student ? '<div class="product-names"><p>' . $row->student->name . '</p></div>' : '-')
+                ->addColumn('NISN', fn($row) => $row->student ? '<p class="f-light">' . $row->student->nisn . '</p>' : '-')
+                ->addColumn('Nilai', fn($row) => '<span class="badge badge-light-primary">' . ($row->formatted_score) . '</span>')
+                ->addColumn('Status', function ($row) {
+                    return Helper::getExamStatusLabel($row->status);
                 })
-                ->addColumn('Pengerjaan', function ($row) {
-                    $start = optional($row->start_time)->translatedFormat('j M Y H:i');
-                    $end   = optional($row->end_time)->translatedFormat('j M Y H:i');
-                    $html = '<p class="f-light">'
-                        . ($start ?? '-') . ' &middot; ' . ($end ?? '-') .
-                        '</p>';
-                    return $html;
+                ->addColumn('Pengerjaan', fn($row) => $row->status === 'completed' ? $row->updated_at->translatedFormat('d/m/Y H:i') : '-')
+                ->addColumn('action', function ($row) use ($exam) {
+                    $btn = '<div class="d-flex align-items-center gap-2">';
+                    $btn .= '<button class="btn d-flex align-items-center bg-20-danger border justify-content-center text-danger p-2"
+                              style="width: 32px; height: 32px;" onclick="handleResetResult(event, ' . $exam->id . ', ' . $row->id . ')">
+                              <i data-feather="refresh-cw" style="width: 16px; height: 16px"></i>
+                            </button>';
+                    $btn .= '</div>';
+                    return $btn;
                 })
-                ->addColumn('Nilai', function ($row) {
-                    $html = '
-                    <span class="badge badge-light-primary">' . ($row->formatted_score ?? '-') . '</span>
-                    ';
-                    return $html;
-                })
-                ->addColumn('', function ($row) {
-                    return '
-                        <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
-                            <a class="reset-result btn btn-danger btn-sm p-1 px-2 rounded-2" data-id="' . $row->id . '" data-exam-id="' . $row->exam_id . '" >
-                                <i class="fa-solid fa-rotate-right"></i>
-                            </a>
-                        </div>
-                    ';
-                })
-                ->rawColumns(['Nama', 'Pengerjaan', 'Nilai', ''])
+                ->rawColumns(['Nama', 'NISN', 'Nilai', 'Status', 'Pengerjaan', 'action'])
                 ->make(true);
         }
 
         return view('user.exam.result.show', compact('exam'));
     }
 
-    public function info(Request $request, $id, $page = 1)
+    public function resetResult(Request $request, $id)
+    {
+        try {
+            $exam = Exam::findOrFail($id);
+            $this->authorize('update', $exam);
+
+            DB::beginTransaction();
+
+            $exam->results()->delete();
+
+            activity()
+                ->useLog('Ujian')
+                ->performedOn($exam)
+                ->causedBy($request->user())
+                ->log('Pengguna ' . $request->user()->name . ' mereset hasil ujian untuk ujian ID: ' . $exam->id);
+
+            DB::commit();
+
+            return $this->sendResponse('Hasil ujian berhasil direset.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->sendError('Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function resetResultById(Request $request, $id, $exam_result_id)
+    {
+        try {
+            $exam = Exam::findOrFail($id);
+            $this->authorize('update', $exam);
+
+            DB::beginTransaction();
+
+            $exam_result = ExamResult::findOrFail($exam_result_id);
+            $exam_result->answers()->delete();
+            $exam_result->delete();
+
+            activity()
+                ->useLog('Ujian')
+                ->performedOn($exam)
+                ->causedBy($request->user())
+                ->log('Pengguna ' . $request->user()->name . ' mereset hasil ujian untuk ujian ID: ' . $exam->id . ', hasil ujian ID: ' . $exam_result_id);
+
+            DB::commit();
+
+            return $this->sendResponse('Hasil ujian berhasil direset.');
+        } catch (\Exception $e) {
+            DB::rollBack(); // Revert changes if anything fails
+
+            // Recommended: Log the actual error so you can debug it later
+            // \Log::error('Failed to reset exam result: ' . $e->getMessage());
+
+            return $this->sendError(
+                'Terjadi kesalahan server. Silakan coba lagi.',
+                [],
+                500
+            );
+        }
+    }
+
+    public function exportResult(Request $request, $id)
+    {
+        try {
+            if (!$request->user()->hasRole('teacher') && !$request->user()->hasRole('operator')) {
+                return abort(403);
+            }
+
+            $exam = Exam::with([
+                'results',
+                'results.student',
+                'schedule:id,subject_id,class_id,teacher_id,period_id',
+                'schedule.subject:id,code,name',
+                'schedule.period:id,academic_year,semester',
+                'schedule.class:id,name,level,major_id',
+                'schedule.class.major:id,name',
+                'schedule.teacher:id,name,nip',
+            ])->findOrFail($id);
+
+            $this->authorize('update', $exam);
+
+            $headerRows = [
+                ['HASIL UJIAN' => ''],
+                ['Periode', 'Periode' => $exam->schedule->period ? $exam->schedule->period->academic_year . ' ' . Helper::getSemesterLabel($exam->schedule->period->semester) : '-'],
+                ['Mata Pelajaran', 'Mata Pelajaran' => $exam->schedule->subject ? $exam->schedule->subject->code . ' - ' . strtoupper($exam->schedule->subject->name) : '-'],
+                ['Kelas', 'Kelas' => $exam->schedule->class ? $exam->schedule->class->name . $exam->schedule->class->level . ($exam->schedule->class->major ? ' ' . $exam->schedule->class->major->name : '') : '-'],
+                ['Guru', 'Guru' => $exam->schedule->teacher ? $exam->schedule->teacher->name . ' (' . $exam->schedule->teacher->nip . ')' : '-'],
+                ['Tipe Ujian', 'Tipe Ujian' => Helper::getExamTypeLabel($exam->type)],
+                ['Waktu Ujian', 'Waktu Ujian' => $exam->start_time && $exam->end_time ? $exam->start_time->translatedFormat('j F Y H:i') . ' - ' . $exam->end_time->translatedFormat('j F Y H:i') : '-'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN', 'Nilai' => 'Nilai'],
+            ];
+
+            $exportData = $exam->results->map(function ($result, $index) {
+                return [
+                    'No' => $index + 1,
+                    'Nama' => $result->student ? $result->student->name : '-',
+                    'NISN' => $result->student ? $result->student->nisn : '-',
+                    'Nilai' => $result->formatted_score ? $result->formatted_score : '-',
+                ];
+            })->toArray();
+
+            $filename = 'Nilai Ujian ' . now()->format('Y-m-d') . '.xlsx';
+
+            $exportData = array_merge($headerRows, $exportData);
+
+            return (new FastExcel($exportData))->download($filename);
+        } catch (\Exception $e) {
+            Log::info($e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
+        }
+    }
+
+    public function evaluation(Request $request, $exam_id, $page = 1)
+    {
+        $query = ExamResult::where('exam_id', $exam_id)
+            ->with(['student', 'exam', 'answers']);
+
+        $exam_results = $query->simplePaginate(1, ['*'], 'page', $page);
+        $exam_result = $query->simplePaginate(1, ['*'], 'page', $page)->first();
+
+        $exam = $exam_result->exam;
+        $this->authorize('update', $exam);
+
+        $multipleQuery = $exam->multipleQuestions();
+        $essayQuery = $exam->essayQuestions();
+
+        if ($request->filled('search')) {
+            $search = $request->query('search');
+            $multipleQuery->where('question_text', 'like', "%{$search}%");
+            $essayQuery->where('question_text', 'like', "%{$search}%");
+        }
+
+        $multipleQuestions = $multipleQuery->get()->map(function ($q) use ($exam_result) {
+            $q->q_type = 'App\Models\MultipleQuestion';
+            $q->student_answer = $exam_result->answers
+                ->where('questionable_id', $q->id)
+                ->where('questionable_type', 'App\Models\MultipleQuestion')
+                ->first();
+            return $q;
+        });
+
+        $essayQuestions = $essayQuery->get()->map(function ($q) use ($exam_result) {
+            $q->q_type = 'App\Models\EssayQuestion';
+            $q->student_answer = $exam_result->answers
+                ->where('questionable_id', $q->id)
+                ->where('questionable_type', 'App\Models\EssayQuestion')
+                ->first();
+            return $q;
+        });
+
+        $questions = $multipleQuestions->concat($essayQuestions);
+
+        $perPage = 10;
+        $qPage = $request->input('q_page', 1);
+        $questions = new LengthAwarePaginator(
+            $questions->slice(($qPage - 1) * $perPage, $perPage)->values(),
+            $questions->count(),
+            $perPage,
+            $qPage,
+            ['path' => $request->url(), 'query' => $request->query(), 'pageName' => 'q_page']
+        );
+
+        return view('user.exam.evaluation', compact('exam', 'exam_result', 'exam_results', 'questions', 'page'));
+    }
+
+    public function updateAnswerScore(Request $request, $id, $answer_id)
+    {
+        try {
+            $exam = Exam::findOrFail($id);
+            $this->authorize('update', $exam);
+
+            $answer = ExamAnswer::findOrFail($answer_id);
+            $answer->score = $request->score;
+            $answer->save();
+
+            $examResult = ExamResult::findOrFail($answer->exam_result_id);
+            app(ExamScoringService::class)->saveScore($examResult, $examResult->student_id);
+
+            return $this->sendResponse('Nilai berhasil diupdate.');
+        } catch (\Exception $e) {
+            Log::error('Error updating answer score: ' . $e->getMessage());
+            return $this->sendError('Silakan coba lagi.', [], 500);
+        }
+    }
+
+    public function info(Request $request, $id)
     {
         if (!$request->user()->hasRole('student') && !$request->user()->hasRole('parent')) {
             return abort(403);
@@ -376,10 +768,9 @@ class ExamController extends Controller
             'schedule.subject:id,name,code',
             'schedule.class:id,name,level,major_id',
             'schedule.class.major:id,name',
+            'multipleQuestions',
+            'essayQuestions'
         ])
-            ->withCount([
-                'questions'
-            ])
             ->findOrFail($id);
         $this->authorize('view', $exam);
 
@@ -404,16 +795,14 @@ class ExamController extends Controller
         }
 
         $exam = Exam::with([
-            'questions'
+            'multipleQuestions',
+            'essayQuestions',
         ])
-            ->withCount([
-                'questions'
-            ])
             ->findOrFail($id);
         $this->authorize('view', $exam);
 
         $now = now();
-        $examResult = ExamResult::with('answers:question_id,answer,exam_result_id')->where('exam_id', $exam->id)
+        $examResult = ExamResult::with('answers')->where('exam_id', $exam->id)
             ->where('student_id', auth()->user()->student->id)
             ->first();
 
@@ -426,7 +815,7 @@ class ExamController extends Controller
                 ->with('error', 'Anda sudah mengerjakan ujian ini.');
         }
 
-        if ($examResult->end_time && $now->gt($examResult->end_time)) {
+        if ($now->gt($exam->end_time)) {
             return redirect()->route('user.exam.workmanship.result', $exam->id)
                 ->with('error', 'Waktu ujian telah berakhir.');
         }
@@ -435,7 +824,7 @@ class ExamController extends Controller
 
         if (!$order) {
             if ($exam->is_shuffle_questions) {
-                $order = $exam->questions->shuffle()->toArray();
+                $order = Helper::fisherYatesShuffle($exam->questions->toArray());
             } else {
                 $order = $exam->questions->toArray();
             }
@@ -461,15 +850,18 @@ class ExamController extends Controller
             $exam_result = ExamResult::where('student_id', $student->id)->where('exam_id', $id)->firstOrFail();
             $exam_result->answers()->updateOrCreate(
                 [
-                    'question_id' => $validated['question_id'],
+                    'questionable_id' => $validated['question_id'],
+                    'questionable_type' => $validated['question_type'] === 'multiple' ? MultipleQuestion::class : EssayQuestion::class,
                 ],
                 [
                     'answer' => $validated['answer'],
+                    'answered_at' => now(),
                 ]
             );
 
             return $this->sendResponse('Jawab berhasil disimpan.');
         } catch (\Exception $e) {
+            Log::error('Error menyimpan jawaban: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -485,17 +877,15 @@ class ExamController extends Controller
                 return abort(403);
             }
 
-            $exam = Exam::with([
-                'questions'
-            ])
-                ->findOrFail($id);
+            $exam = Exam::findOrFail($id);
             $this->authorize('view', $exam);
 
             $order = session("exam_order_{$exam->id}");
 
             if (!$order) {
                 if ($exam->is_shuffle_questions) {
-                    $order = $exam->questions->shuffle()->toArray();
+                    // $order = $exam->questions->shuffle()->toArray();
+                    $order = Helper::fisherYatesShuffle($exam->questions->toArray());
                 } else {
                     $order = $exam->questions->toArray();
                 }
@@ -510,7 +900,15 @@ class ExamController extends Controller
                 return $this->sendError('Soal tidak ditemukan.', [], 404);
             }
 
-            $answer = ExamAnswer::where('question_id', $question['id'])->first();
+            $student = auth()->user()->student;
+            $examResult = ExamResult::where('exam_id', $exam->id)
+                ->where('student_id', $student->id)
+                ->first();
+
+            $answer = $examResult ? $examResult->answers()
+                ->where('questionable_id', $question['id'])
+                ->where('questionable_type', $question['question_type'] === 'multiple' ? MultipleQuestion::class : EssayQuestion::class)
+                ->first() : null;
 
             $response = [
                 'exam' => $exam,
@@ -538,7 +936,7 @@ class ExamController extends Controller
                 return abort(403);
             }
 
-            $exam = Exam::withCount('questions')->findOrFail($id);
+            $exam = Exam::findOrFail($id);
             $this->authorize('view', $exam);
 
             $student = auth()->user()->student;
@@ -549,34 +947,15 @@ class ExamController extends Controller
 
 
             $now = now();
-            if ($existingExamResult) {
-                if ($existingExamResult->status === 'completed') {
-                    return $this->sendError('Anda sudah memulai ujian ini.', [], 403);
-                }
-                if ($now->gt($existingExamResult->end_time)) {
-                    return $this->sendError('Waktu ujian telah berakhir.', [], 403);
-                }
 
-                return $this->sendResponse('Ujian dimulai!', $existingExamResult, 200);
-            }
-
-            if ($now->lt($exam->start_time)) {
-                return $this->sendError('Ujian belum dimulai.', [], 403);
-            }
-
-            if ($now->gt($exam->end_time)) {
-                return $this->sendError('Ujian telah berakhir.', [], 403);
-            }
-
-            if ($exam->questions_count <= 0) {
-                return $this->sendError('Pertanyan belum tersedia.', [], 403);
+            $availabilityResponse = $this->validateExamAvailability($exam, $existingExamResult, $now);
+            if ($availabilityResponse) {
+                return $availabilityResponse;
             }
 
             $examResult = ExamResult::create([
                 'exam_id' => $exam->id,
                 'student_id' => $student->id,
-                'start_time' => $now,
-                'end_time' => $exam->duration ? $now->copy()->addMinutes($exam->duration) : null,
                 'status' => 'in_progress',
             ]);
 
@@ -615,28 +994,35 @@ class ExamController extends Controller
 
             $validated = $request->validated();
 
-            $answersData = [];
-            if (isset($validated['answered'])) {
+            DB::beginTransaction();
+
+            if (isset($validated['answered']) && is_array($validated['answered'])) {
                 foreach ($validated['answered'] as $answer) {
-                    $answersData[] = [
-                        'question_id' => $answer['question_id'],
-                        'exam_result_id' => $examResult->id,
-                        'answer' => $answer['answer']
-                    ];
+                    $examResult->answers()->updateOrCreate(
+                        [
+                            'questionable_id' => $answer['question_id'],
+                            'questionable_type' => $answer['question_type'] === "multiple" ? MultipleQuestion::class : EssayQuestion::class,
+                        ],
+                        [
+                            'answer' => $answer['answer'],
+                            'answered_at' => now(),
+                        ]
+                    );
                 }
             }
 
-            $examResult->answers()->upsert(
-                $answersData,
-                ['question_id', 'exam_result_id'],
-                ['answer']
-            );
+            $examResult->update([
+                'status' => 'completed',
+            ]);
 
             app(ExamScoringService::class)->saveScore($examResult, $student->id);
 
+            DB::commit();
+
             return $this->sendResponse('Ujian selesai. Terima kasih!', $examResult);
         } catch (\Exception $e) {
-            Log::error('Error : ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Error submit ujian: ' . $e->getMessage());
             return $this->sendError(
                 'Silakan coba lagi.',
                 [],
@@ -651,7 +1037,7 @@ class ExamController extends Controller
             return abort(403);
         }
 
-        $exam = Exam::withCount('questions')->findOrFail($id);
+        $exam = Exam::findOrFail($id);
         $this->authorize('view', $exam);
 
         $student = null;
@@ -661,11 +1047,8 @@ class ExamController extends Controller
             $student = auth()->user()->parent;
         }
 
-        $examResult = ExamResult::withCount([
-            'answers as correct_answers_count' => fn($q) => $q->join('questions', 'exam_answers.question_id', '=', 'questions.id')
-                ->whereColumn('exam_answers.answer', 'questions.correct_answer')
-        ])->where('exam_id', $exam->id)
-            ->where('student_id', $student->id)
+        $examResult = ExamResult::with('answers')->where('exam_id', $exam->id)
+            ->where('student_id', $student->id ?? 0)
             ->first();
 
         if (!$examResult) {
@@ -673,115 +1056,44 @@ class ExamController extends Controller
                 ->with('error', 'Anda belum menyelesaikan ujian ini.');
         }
 
-        if (now()->gt($examResult->end_time) && $examResult->status !== 'completed') {
-            app(ExamScoringService::class)->saveScore($examResult, $student->id);
-            return $this->sendError('Waktu ujian telah berakhir.', [], 403);
-        }
+        $totalPoints = $exam->multipleQuestions->sum('question_points') + $exam->essayQuestions->sum('question_points');
+        $totalCorrectAnswers = $examResult->answers->sum('score');
+        $hasPendingScores = $examResult->answers()->whereNull('score')->exists();
 
-        if ($examResult->status !== 'completed') {
-            return redirect()->route('user.exam.info', $exam->id)
-                ->with('error', 'Anda belum menyelesaikan ujian ini.');
-        }
-
-        return view('user.exam.workmanship_result', compact('examResult', 'student', 'exam'));
+        return view('user.exam.workmanship_result', compact('exam', 'examResult', 'totalPoints', 'totalCorrectAnswers', 'hasPendingScores'));
     }
 
-    public function resetResult(Request $request, $id)
+    /**
+     * Memvalidasi ketersediaan ujian, batasan waktu, dan status pengerjaan sebelumnya.
+     *
+     * @return \Illuminate\Http\JsonResponse|null
+     */
+    protected function validateExamAvailability(Exam $exam, ?ExamResult $existingExamResult, $now)
     {
-        try {
-            if (!$request->user()->hasRole('teacher') && !$request->user()->hasRole('operator')) {
-                return abort(403);
+        if ($existingExamResult) {
+            if ($existingExamResult->status === 'completed') {
+                return $this->sendError('Anda sudah memulai ujian ini.', [], 403);
+            }
+            if ($now->gt($exam->end_time)) {
+                return $this->sendError('Waktu ujian telah berakhir.', [], 403);
             }
 
-            $exam = Exam::findOrFail($id);
-
-            $this->authorize('update', $exam);
-
-            $exam->results()->delete();
-
-            return $this->sendResponse('Hasil ujian berhasil direset.');
-        } catch (\Exception $e) {
-            return $this->sendError(
-                'Silakan coba lagi.',
-                [],
-                500
-            );
+            return $this->sendResponse('Ujian dimulai!', $existingExamResult, 200);
         }
-    }
 
-    public function resetResultById(Request $request, $id, $exam_result_id)
-    {
-        try {
-            if (!$request->user()->hasRole('teacher') && !$request->user()->hasRole('operator')) {
-                return abort(403);
-            }
-
-            $exam = Exam::findOrFail($id);
-
-            $this->authorize('update', $exam);
-
-            $exam->results()->where('id', $exam_result_id)->delete();
-
-            return $this->sendResponse('Hasil ujian berhasil direset.');
-        } catch (\Exception $e) {
-            return $this->sendError(
-                'Silakan coba lagi.',
-                [],
-                500
-            );
+        if ($now->lt($exam->start_time)) {
+            return $this->sendError('Ujian belum dimulai.', [], 403);
         }
-    }
 
-    public function exportResult(Request $request, $id)
-    {
-        try {
-            if (!$request->user()->hasRole('teacher') && !$request->user()->hasRole('operator')) {
-                return abort(403);
-            }
-
-            $exam = Exam::with([
-                'results',
-                'results.student',
-                'schedule:id,subject_id,class_id,teacher_id,period_id',
-                'schedule.subject:id,code,name',
-                'schedule.period:id,academic_year,semester',
-                'schedule.class:id,name,level,major_id',
-                'schedule.class.major:id,name',
-                'schedule.teacher:id,name,nip',
-            ])->findOrFail($id);
-
-            $this->authorize('update', $exam);
-
-            $headerRows = [
-                ['HASIL UJIAN' => ''],
-                ['Periode', 'Periode' => $exam->schedule->period ? $exam->schedule->period->academic_year . ' ' . Helper::getSemesterLabel($exam->schedule->period->semester) : '-'],
-                ['Mata Pelajaran', 'Mata Pelajaran' => $exam->schedule->subject ? $exam->schedule->subject->code . ' - ' . strtoupper($exam->schedule->subject->name) : '-'],
-                ['Kelas', 'Kelas' => $exam->schedule->class ? $exam->schedule->class->name . $exam->schedule->class->level . ($exam->schedule->class->major ? ' ' . $exam->schedule->class->major->name : '') : '-'],
-                ['Guru', 'Guru' => $exam->schedule->teacher ? $exam->schedule->teacher->name . ' (' . $exam->schedule->teacher->nip . ')' : '-'],
-                ['Jenis Ujian', 'Jenis Ujian' => Helper::getExamTypeLabel($exam->exam_type) ?: '-'],
-                ['Waktu Ujian', 'Waktu Ujian' => $exam->start_time && $exam->end_time ? $exam->start_time->translatedFormat('j F Y H:i') . ' - ' . $exam->end_time->translatedFormat('j F Y H:i') : '-'],
-                ['Durasi', 'Durasi' => $exam->duration ? $exam->duration . ' menit' : '-'],
-                [],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'Nilai' => 'Nilai'],
-            ];
-
-            $exportData = $exam->results->map(function ($result, $index) {
-                return [
-                    'No' => $index + 1,
-                    'Nama' => $result->student ? $result->student->name : '-',
-                    'NIS' => $result->student ? $result->student->nis : '-',
-                    'Nilai' => $result->formatted_score ? $result->formatted_score : '-',
-                ];
-            })->toArray();
-
-            $filename = 'Nilai Ujian ' . now()->format('Y-m-d') . '.xlsx';
-
-            $exportData = array_merge($headerRows, $exportData);
-
-            return (new FastExcel($exportData))->download($filename);
-        } catch (\Exception $e) {
-            Log::info($e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat export data: ' . $e->getMessage());
+        if ($now->gt($exam->end_time)) {
+            return $this->sendError('Ujian telah berakhir.', [], 403);
         }
+
+        $totalQuestions = $exam->multipleQuestions()->count() + $exam->essayQuestions()->count();
+        if ($totalQuestions <= 0) {
+            return $this->sendError('Pertanyan belum tersedia.', [], 403);
+        }
+
+        return null;
     }
 }

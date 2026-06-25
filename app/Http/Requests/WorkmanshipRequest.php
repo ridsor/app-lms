@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class WorkmanshipRequest extends FormRequest
@@ -24,8 +25,19 @@ class WorkmanshipRequest extends FormRequest
     {
         return [
             'answered' => 'array',
-            'answered.*.question_id' => 'required|exists:questions,id',
-            'answered.*.answer' => 'required|in:a,b,c,d,e'
+            'answered.*.question_id' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $existsInMultiple = DB::table('multiple_questions')->where('id', $value)->exists();
+                    $existsInEssay = DB::table('essay_questions')->where('id', $value)->exists();
+
+                    if (!$existsInMultiple && !$existsInEssay) {
+                        $fail('Soal tidak ditemukan di database.');
+                    }
+                },
+            ],
+            'answered.*.question_type' => 'required|in:multiple,essay',
+            'answered.*.answer' => 'required|string'
         ];
     }
 

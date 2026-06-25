@@ -47,13 +47,12 @@
                             <div class="col-12 col-md-6">
                                 <label class="form-label">Mata Pelajaran</label>
                                 <p class="c-o-light f-w-600">
-                                    strtoupper({{ $schedule->subject->name }})
+                                    {{ $schedule->subject->name }}
                                 </p>
                                 <label class="form-label">Kelas</label>
                                 <p class="c-o-light f-w-600">
-                                    {{ $schedule->class?->major ? $schedule->class?->major?->name . ' - ' : '' }}
-                                    {{ $schedule->class->name }} -
-                                    {{ $schedule->class->level }}
+                                    {{ $schedule->class->name }} {{ $schedule->class->level }}
+                                    {{ $schedule->class?->major ? $schedule->class?->major?->name : '' }}
                                 </p>
                             </div>
                             <div class="col-12 col-md-6">
@@ -66,6 +65,13 @@
                                     {{ $schedule->period->semester == 'odd' ? 'Ganjil' : 'Genap' }} TA
                                     {{ $schedule->period->academic_year }}
                                 </p>
+                            </div>
+                            <div class="col-12">
+                                <div class="d-flex justify-content-end">
+                                    <a href="{{ route('user.attendance.reportAttendancRecap', [$schedule->id]) }}"
+                                        class="btn text-nowrap btn-primary btn-sm"><i class="fa fa-file"></i>
+                                        Export</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -202,7 +208,8 @@
                                         <th rowspan="2"> <span class="c-o-light f-w-600">No</span></th>
                                         <th rowspan="2"> <span class="c-o-light f-w-600">Nama</span></th>
                                         @if (count($schedule->meetings->toArray()) > 0)
-                                            <th class="text-center" colspan="{{ count($schedule->meetings->toArray()) }}">
+                                            <th class="text-center"
+                                                colspan="{{ count($schedule->meetings->toArray()) }}">
                                                 <span class="c-o-light f-w-600">Pertemuan</span>
                                             </th>
                                         @endif
@@ -234,7 +241,7 @@
                                             <td>
                                                 <p class="f-light mb-0">
                                                     {{ $attendance['student']->name }}</p>
-                                                <p class="f-light mb-0">{{ $attendance['student']->nis }}</p>
+                                                <p class="f-light mb-0">{{ $attendance['student']->nisn }}</p>
                                             </td>
                                             @foreach ($attendance['attendances'] as $status)
                                                 <td class="text-center">

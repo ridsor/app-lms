@@ -33,7 +33,6 @@ class StudentController extends Controller
                 ->select([
                     'students.id',
                     'students.name',
-                    'students.nis',
                     'students.nisn',
                     'students.status',
                     'students.created_at',
@@ -65,12 +64,6 @@ class StudentController extends Controller
                     ';
                     return $html;
                 })
-                ->addColumn('NIS', function ($row) {
-                    $html = '
-                    <p class="f-light">' . $row->nis . '</p>
-                    ';
-                    return $html;
-                })
                 ->addColumn('NISN', function ($row) {
                     $html = '
                     <p class="f-light">' . $row->nisn . '</p>
@@ -85,13 +78,7 @@ class StudentController extends Controller
                 })
                 ->addColumn('Kelas', function ($row) {
                     $html = '
-                        <span class="badge badge-light-primary">' . ($row->class_name . $row->class_level) . '</span>
-                    ';
-                    return $html;
-                })
-                ->addColumn('Wali Kelas', function ($row) {
-                    $html = '
-                        <span class="badge badge-light-primary">' . ($row->homeroom_teacher_name ? $row->homeroom_teacher_name : '-') . '</span>
+                        <span class="badge badge-light-primary">' . ($row->class_name ? $row->class_name . ' ' . $row->class_level : '-') . '</span>
                     ';
                     return $html;
                 })
@@ -151,7 +138,7 @@ class StudentController extends Controller
                     }
                     return $html;
                 })
-                ->rawColumns(['id', 'Nama', 'NIS', 'NISN', 'Jurusan', 'Kelas', 'Wali Kelas', 'Status', 'Waktu', 'Aksi'])
+                ->rawColumns(['id', 'Nama', 'NISN', 'Jurusan', 'Kelas', 'Status', 'Waktu', 'Aksi'])
                 ->make(true);
         } else {
             $classes = SchoolClass::select('id', 'name', 'level', 'major_id')->orderBy('name', 'asc');
@@ -502,7 +489,7 @@ class StudentController extends Controller
             }
 
             $query = Student::query()
-                ->select('id', 'name', 'nis', 'nisn', 'class_id', 'user_id')
+                ->select('id', 'name', 'nisn', 'class_id', 'user_id')
                 ->with([
                     'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
                     'class.major' => fn($query) => $query->select('id', 'name'),
@@ -536,7 +523,7 @@ class StudentController extends Controller
                 ['Kelas', 'Kelas' => $request->filled('class') ? $request->class : 'Semua Kelas'],
                 ['Tingkat', 'Tingkat' => $request->filled('level') ? $request->level : 'Semua Tingkat'],
                 [],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'NISN' => 'NISN', 'Jurusan' => 'Jurusan', 'Kelas' => 'Kelas', 'Tingkat' => 'Tingkat', 'Username' => 'Username', 'Password' => 'Password'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN', 'Jurusan' => 'Jurusan', 'Kelas' => 'Kelas', 'Tingkat' => 'Tingkat', 'Username' => 'Username', 'Password' => 'Password'],
             ];
 
 
@@ -546,7 +533,6 @@ class StudentController extends Controller
                     return [
                         'No' => $index + 1,
                         'Nama' => $student->name,
-                        'NIS' => $student->nis,
                         'NISN' => $student->nisn,
                         'Jurusan' => $student->class && $student->class->major ? $student->class->major->name : '-',
                         'Kelas' => $student->class ? $student->class->name : '-',
@@ -560,7 +546,6 @@ class StudentController extends Controller
                     return [
                         'No' => $index + 1,
                         'Nama' => $student->name,
-                        'NIS' => $student->nis,
                         'NISN' => $student->nisn,
                         'Kelas' => $student->class ? $student->class->name : '-',
                         'Tingkat' => $student->class ? $student->class->level : '-',
@@ -601,7 +586,7 @@ class StudentController extends Controller
             }
 
             $query = Student::query()
-                ->select('id', 'name', 'nis', 'nisn', 'class_id', 'parent_id')
+                ->select('id', 'name', 'nisn', 'class_id', 'parent_id')
                 ->with([
                     'class' => fn($query) => $query->select('id', 'name', 'level', 'major_id'),
                     'class.major' => fn($query) => $query->select('id', 'name'),
@@ -635,7 +620,7 @@ class StudentController extends Controller
                 ['Kelas', 'Kelas' => $request->filled('class') ? $request->class : 'Semua Kelas'],
                 ['Tingkat', 'Tingkat' => $request->filled('level') ? $request->level : 'Semua Tingkat'],
                 [],
-                ['No' => 'No', 'Nama' => 'Nama', 'NIS' => 'NIS', 'NISN' => 'NISN', 'Jurusan' => 'Jurusan', 'Kelas' => 'Kelas', 'Username' => 'Username', 'Password' => 'Password'],
+                ['No' => 'No', 'Nama' => 'Nama', 'NISN' => 'NISN', 'Jurusan' => 'Jurusan', 'Kelas' => 'Kelas', 'Username' => 'Username', 'Password' => 'Password'],
             ];
 
             $exportData = [];
@@ -644,7 +629,6 @@ class StudentController extends Controller
                     return [
                         'No' => $index + 1,
                         'Nama' => $student->name,
-                        'NIS' => $student->nis,
                         'NISN' => $student->nisn,
                         'Kelas' => $student->class ? $student->class->name . $student->class->level . ($student->class->major ? ' ' . $student->class->major->name : '') : '-',
                         'Tingkat' => $student->class ? $student->class->level : '-',
@@ -657,7 +641,6 @@ class StudentController extends Controller
                     return [
                         'No' => $index + 1,
                         'Nama' => $student->name,
-                        'NIS' => $student->nis,
                         'NISN' => $student->nisn,
                         'Kelas' => $student->class ? $student->class->name . $student->class->level . ($student->class->major ? ' ' . $student->class->major->name : '') : '-',
                         'Tingkat' => $student->class ? $student->class->level : '-',

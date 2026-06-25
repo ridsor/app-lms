@@ -119,7 +119,7 @@
                                 @role('teacher')
                                     <div class="col-12 mt-4">
                                         <h6 class="mb-3">Jurnal Mengajar</h6>
-                                        <a href="{{ route('user.journal.export', ['code' => $schedule->subject->code]) }}"
+                                        <a href="{{ route('user.journal.export', ['id' => $schedule->id]) }}"
                                             class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2">
                                             <span class="icon d-inline-flex justify-content-center align-items-center">
                                                 <i data-feather="download" style="width:18px; height: 18px"></i>
@@ -173,7 +173,7 @@
                                                 <div class="d-flex flex-column">
                                                     <p class="mb-0 c-o-light fw-medium" id="teacher">{{ $student->name }}
                                                     </p>
-                                                    <p class="mb-0 c-o-light" id="teacher">{{ $student->nis }}</p>
+                                                    <p class="mb-0 c-o-light" id="teacher">{{ $student->nisn }}</p>
                                                 </div>
                                             </div>
                                         </div>

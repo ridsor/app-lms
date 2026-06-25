@@ -93,6 +93,16 @@ class Helper
             default => '<span style="font-size: 11px" class="px-2 badge badge-light-secondary">-</span>'
         };
     }
+    public static function getShortAttendanceLabel($value): string
+    {
+        return match ($value) {
+            'H' => '<span style="font-size: 11px" class="px-2 badge badge-light-success">H</span>',
+            'I' => '<span style="font-size: 11px" class="px-2 badge badge-light-info">I</span>',
+            'S' => '<span style="font-size: 11px" class="px-2 badge badge-light-warning">S</span>',
+            'A' => '<span style="font-size: 11px" class="px-2 badge badge-light-danger">A</span>',
+            default => '<span style="font-size: 11px" class="px-2 badge badge-light-secondary">-</span>'
+        };
+    }
 
     public static function getGenderLabel($gender): string
     {
@@ -221,6 +231,9 @@ class Helper
         if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif'])) {
             return "fa fa-file-image text-info";
         }
+        if (in_array($ext, ['kml', 'gpx', 'geojson'])) {
+            return "fa fa-map-marker text-success";
+        }
 
         return "fa fa-file";
     }
@@ -234,6 +247,7 @@ class Helper
         $audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a'];
         $documentExtensions = ['pdf', 'doc', 'docx', 'txt', 'rtf', 'xlsx', 'xls', 'ppt', 'pptx'];
         $archiveExtensions = ['zip', 'rar', '7z', 'tar', 'gz'];
+        $mapExtensions = ['kml', 'gpx', 'geojson'];
 
         if (in_array($extension, $imageExtensions)) {
             return 'image';
@@ -245,8 +259,52 @@ class Helper
             return 'document';
         } elseif (in_array($extension, $archiveExtensions)) {
             return 'archive';
+        } elseif (in_array($extension, $mapExtensions)) {
+            return 'map';
         } else {
             return 'other';
         }
+    }
+
+    public static function fisherYatesShuffle(array $array): array
+    {
+        $n = count($array);
+
+        for ($i = $n - 1; $i > 0; $i--) {
+            $j = rand(0, $i);
+
+            $temp = $array[$i];
+            $array[$i] = $array[$j];
+            $array[$j] = $temp;
+        }
+
+        return $array;
+    }
+
+    public static function isGooglePreviewable($filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $supported = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'];
+        return in_array($extension, $supported);
+    }
+
+    public static function isPreviewable($filename)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        $supported = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'kml', 'gpx', 'geojson'];
+        return in_array($extension, $supported);
+    }
+
+    public static function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $bytes /= pow(1024, $pow);
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }

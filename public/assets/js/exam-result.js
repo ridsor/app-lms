@@ -26,20 +26,49 @@ $(function () {
                 searchable: false,
             },
             {
-                data: "Pengerjaan",
-                name: "task_submissions.submitted_at",
+                data: "NISN",
+                name: "students.nisn",
                 searchable: false,
             },
             {
                 data: "Nilai",
-                name: "task_submissions.score",
+                name: "score",
                 searchable: false,
             },
             {
-                data: "",
+                data: "Status",
+                name: "status",
+                searchable: false
+            },
+            {
+                data: "Pengerjaan",
+                name: "end_time",
+                searchable: false,
+            },
+            {
+                data: null,
                 name: "",
                 orderable: false,
                 searchable: false,
+                render: function (data, type, row, meta) {
+                    const html = `
+                    <div class="common-align gap-2 justify-content-start" style="cursor: pointer;">
+                        <a class="reset-result btn btn-danger btn-sm p-1 px-2 rounded-2" data-id="${data.id}" data-exam-id="${data.exam_id}">
+                                <i class="fa-solid fa-rotate-right"></i>
+                        </a>
+                        <a class="square-white view rounded-2" href=${"/ujian/" +
+                        data.exam_id +
+                        "/evaluasi/" +
+                        (meta.row + meta.settings._iDisplayStart + 1)
+                        }>
+                            <i class="fa-solid fa-pen"></i>
+                        </a>
+                    </div>
+                    `;
+                    return html;
+                },
+                className: "text-center",
+                width: "40px",
             },
         ],
         language: {

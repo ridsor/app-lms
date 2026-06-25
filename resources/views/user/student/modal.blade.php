@@ -18,13 +18,6 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <label class="form-label" for="studentNis">NIS<span class="txt-danger">*</span>
-                </label>
-                <input class="form-control" id="studentNis" type="text" placeholder="Masukan NIS" name="nis">
-                <div class="invalid-feedback">
-                </div>
-              </div>
-              <div class="col-lg-6">
                 <label class="form-label" for="studentNisn">NISN<span class="txt-danger">*</span>
                 </label>
                 <input class="form-control" id="studentNisn" type="text" placeholder="Masukan NISN" name="nisn">
@@ -56,7 +49,7 @@
                 <div class="invalid-feedback">
                 </div>
               </div>
-              <div class="col-lg-6">
+              <div class="col-lg-6 d-none">
                 <label class="form-label" for="studentHomeroomTeacher">Wali Kelas</label>
                 <select class="selectpicker search-picker" data-live-search="true" id="studentHomeroomTeacher"
                   name="homeroom_teacher_id" @cannot('student.*') disabled @endcannot>
@@ -115,15 +108,6 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <label class="form-label" for="studentAdmissionYear">Tahun
-                  Masuk<span class="txt-danger">*</span>
-                </label>
-                <input class="form-control" id="studentAdmissionYear" type="number"
-                  placeholder="Masukan tahun masuk" name="admission_year" min="2000" max="{{ date('Y') + 1 }}">
-                <div class="invalid-feedback">
-                </div>
-              </div>
-              <div class="col-lg-6">
                 <label class="form-label" for="studentStatus">Status
                 </label>
                 <select class="form-select" id="studentStatus" name="status">
@@ -166,14 +150,6 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <label class="form-label" for="editStudentNis">NIS<span class="txt-danger">*</span>
-                </label>
-                <input class="form-control" id="editStudentNis" type="text" placeholder="Masukan NIS"
-                  name="nis">
-                <div class="invalid-feedback">
-                </div>
-              </div>
-              <div class="col-lg-6">
                 <label class="form-label" for="editStudentNisn">NISN<span class="txt-danger">*</span>
                 </label>
                 <input class="form-control" id="editStudentNisn" type="text" placeholder="Masukan NISN"
@@ -207,7 +183,7 @@
                 <div class="invalid-feedback">
                 </div>
               </div>
-              <div class="col-lg-6">
+              <div class="col-lg-6 d-none">
                 <label class="form-label" for="editStudentHomeroomTeacher">Wali Kelas</label>
                 <select class="selectpicker search-picker" data-live-search="true" id="editStudentHomeroomTeacher"
                   name="homeroom_teacher_id" @cannot('student.*') disabled @endcannot>
@@ -264,15 +240,6 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <label class="form-label" for="editStudentAdmissionYear">Tahun
-                  Masuk<span class="txt-danger">*</span>
-                </label>
-                <input class="form-control" id="editStudentAdmissionYear" type="number"
-                  placeholder="Masukan tahun masuk" name="admission_year" min="2000" max="{{ date('Y') + 1 }}">
-                <div class="invalid-feedback">
-                </div>
-              </div>
-              <div class="col-lg-6">
                 <label class="form-label" for="editStudentStatus">Status
                 </label>
                 <select class="form-select" id="editStudentStatus" name="status">
@@ -314,10 +281,6 @@
                 </div>
               </div>
               <div class="col-lg-6">
-                <label class="form-label">NIS</label>
-                <div class="form-control-plaintext" id="viewStudentNis"></div>
-              </div>
-              <div class="col-lg-6">
                 <label class="form-label">NISN</label>
                 <div class="form-control-plaintext" id="viewStudentNisn">
                 </div>
@@ -334,7 +297,7 @@
                 <div class="form-control-plaintext" id="viewStudentClass">
                 </div>
               </div>
-              <div class="col-lg-6">
+              <div class="col-lg-6 d-none">
                 <label class="form-label">Wali Kelas</label>
                 <div class="form-control-plaintext" id="viewStudentHomeroomTeacher">
                 </div>
@@ -356,10 +319,6 @@
                 <label class="form-label">Agama</label>
                 <div class="form-control-plaintext" id="viewStudentReligion">
                 </div>
-              </div>
-              <div class="col-lg-6">
-                <label class="form-label">Tahun Masuk</label>
-                <div class="form-control-plaintext" id="viewStudentAdmissionYear"></div>
               </div>
               <div class="col-lg-6">
                 <label class="form-label">Status</label>
@@ -401,7 +360,7 @@
             </div>
             <form class="row g-3" id="bulkEditStudentForm">
               @can('student.*')
-                <div class="col-12">
+                <div class="col-12 d-none">
                   <label class="form-label" for="bulkEditStudentHomeroomTeacher">Wali Kelas</label>
                   <select class="selectpicker search-picker" data-live-search="true"
                     id="bulkEditStudentHomeroomTeacher" name="homeroom_teacher_id">

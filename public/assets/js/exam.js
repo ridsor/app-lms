@@ -18,7 +18,7 @@ const formatTime = (date) => {
 const add_start_time = flatpickr("#addExamStartTime", {
     defaultDate: new Date(),
     minDate: "today",
-    minTime: formatTime(new Date()),
+    
     enableTime: true,
     static: true,
     dateFormat: "Y-m-d H:i",
@@ -38,7 +38,7 @@ const add_start_time = flatpickr("#addExamStartTime", {
 
 const add_end_time = flatpickr("#addExamEndTime", {
     defaultDate: new Date(),
-    minTime: formatTime(new Date()),
+    
     enableTime: true,
     static: true,
     dateFormat: "Y-m-d H:i",
@@ -51,7 +51,7 @@ const edit_start_time = flatpickr("#editExamStartTime", {
     static: true,
     dateFormat: "Y-m-d H:i",
     time_24hr: true,
-    minTime: formatTime(new Date()),
+    
     locale: flatpickrLocationID,
     onChange: function (selectedDates) {
         if (selectedDates.length > 0) {
@@ -74,20 +74,6 @@ const edit_end_time = flatpickr("#editExamEndTime", {
 });
 
 $(document).ready(function () {
-    $("[name='allow_duration']").on("change", function () {
-        const value = $(this).val();
-
-        const duration = $(this).closest("form").find("[name='duration']");
-        const duration_form_input = $(this).closest("form").find(".duration");
-        if (value == "1") {
-            duration.prop("disabled", false);
-            duration_form_input.show();
-        } else {
-            duration.prop("disabled", true);
-            duration_form_input.hide();
-        }
-    });
-
     $("#addExamForm").on("submit", function (e) {
         e.preventDefault();
 
@@ -301,22 +287,6 @@ function handleEditExam(e, id) {
                 $(
                     `#editExamForm [name='is_shuffle_questions'][value='${res.data.is_shuffle_questions}']`
                 ).prop("checked", true);
-
-                if (res.data.duration) {
-                    $(`#editExamForm [name='allow_duration'][value='1']`).prop(
-                        "checked",
-                        true
-                    );
-                    $("#editExamForm .duration").show();
-                    $("#editExamForm [name='duration']").val(res.data.duration);
-                } else {
-                    $(`#editExamForm [name='allow_duration'][value='0']`).prop(
-                        "checked",
-                        true
-                    );
-                    $("#editExamForm .duration").hide();
-                    $("#editExamForm [name='duration']").val("");
-                }
 
                 $("#editExamModal").modal("show");
                 $("#editExamModal .selectpicker").selectpicker("refresh");

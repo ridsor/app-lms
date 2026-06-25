@@ -38,6 +38,8 @@ class MaterialController extends Controller
                 $validated['file_path'] = $validated['material_link'];
             } else {
                 $filePath = $request->file('file_path')->store('file/materi');
+                $file = $request->file('file_path');
+                $filePath = $file->store('file/materi');
                 $validated['file_path'] = $filePath;
                 $file = $request->file('file_path');
                 $file_name = $file->getClientOriginalName();
@@ -105,6 +107,7 @@ class MaterialController extends Controller
             $this->authorize('delete', $material);
 
             if (!empty($task->file_path) && Storage::exists($material->file_path)) {
+            if (!empty($material->file_path) && Storage::exists($material->file_path)) {
                 Storage::delete($material->file_path);
             }
 
@@ -127,8 +130,10 @@ class MaterialController extends Controller
             return abort(404, 'File tidak ditemukan.');
         }
 
-        if (Storage::exists($material->file_path)) {
-            return response()->file(Storage::path($material->file_path));
+        if (!empty($material->file_path) && Storage::exists($material->file_path)) {
+            $file = Storage::get($material->file_path);
+            $type = Storage::mimeType($material->file_path);
+            return response($file)->header('Content-Type', $type);
         }
 
         return abort(404, 'File tidak ditemukan.');
