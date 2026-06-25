@@ -109,7 +109,7 @@ class Helper
         return match ($gender) {
             'M' => 'Laki-laki',
             'F' => 'Perempuan',
-            default => $gender
+            default => " - "
         };
     }
 
